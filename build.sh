@@ -7,10 +7,15 @@ echo "Poetry version: $(poetry --version)"
 
 # Configure poetry
 poetry config virtualenvs.create false
+poetry config virtualenvs.in-project false
+poetry config cache-dir /opt/render/.cache/pypoetry
+
+# Clean any existing virtualenv
+rm -rf .venv || true
 
 # Install dependencies with verbose output
 echo "Installing dependencies..."
-poetry install --only main --verbose
+poetry install --only main --verbose --no-interaction
 
 # Verify critical modules are installed
 echo "Verifying installations..."
