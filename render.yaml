@@ -3,8 +3,10 @@ services:
     name: indexforge
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      curl -sSL https://install.python-poetry.org | python3 -
+      poetry install --no-dev
+    startCommand: poetry run uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
@@ -12,3 +14,5 @@ services:
         value: 2
       - key: ENVIRONMENT
         value: production
+      - key: POETRY_VIRTUALENVS_CREATE
+        value: "false"
