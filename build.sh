@@ -21,6 +21,7 @@ poetry install --only main --verbose --no-interaction
 echo "Verifying installations..."
 python -c "import fastapi; print(f'FastAPI version: {fastapi.__version__}')"
 python -c "import uvicorn; print(f'Uvicorn version: {uvicorn.__version__}')"
+python -c "import weaviate; print(f'Weaviate client version: {weaviate.__version__}')"
 
 # Set up Python path
 echo "Setting up PYTHONPATH..."
