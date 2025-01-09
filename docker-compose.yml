@@ -1,9 +1,17 @@
 version: "3.4"
 services:
   weaviate:
-    image: semitechnologies/weaviate:1.19.6
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --scheme
+      - http
+    image: cr.weaviate.io/semitechnologies/weaviate:1.28.2
     ports:
       - "8080:8080"
+      - "50051:50051"
     environment:
       QUERY_DEFAULTS_LIMIT: 25
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
@@ -14,6 +22,8 @@ services:
       CLUSTER_HOSTNAME: "node1"
       TRANSFORMERS_INFERENCE_API_RETRY_AMOUNT: "20"
       TRANSFORMERS_INFERENCE_API_RETRY_TIME: "5s"
+      ENABLE_API_BASED_MODULES: "true"
+      LOG_LEVEL: "info"
     volumes:
       - weaviate_data:/var/lib/weaviate
     depends_on:
@@ -26,6 +36,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: on-failure:0
 
   t2v-transformers:
     image: semitechnologies/transformers-inference:sentence-transformers-all-MiniLM-L6-v2
@@ -47,6 +58,21 @@ services:
     networks:
       - weaviate_net
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory-policy noeviction
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - weaviate_net
+
 networks:
   weaviate_net:
     driver: bridge
@@ -54,3 +80,4 @@ networks:
 volumes:
   weaviate_data:
     driver: local
+  redis_data:

@@ -38,7 +38,7 @@ python-dotenv = "^1.0.1"
 requests = {version = "^2.32.3", extras = ["security"]}
 sentry-sdk = {version = "^2.19.2", extras = ["fastapi"]}
 tenacity = "^9.0.0"
-weaviate-client = "^3.24.2"
+weaviate-client = "3.24.1"
 
 # Core processing dependencies
 aiohttp = "^3.11.11"
