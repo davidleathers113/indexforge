@@ -1,18 +1,53 @@
 services:
+  # Redis Service
+  - type: redis
+    name: indexforge-redis
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+    plan: free
+    maxmemoryPolicy: noeviction
+
+  # Main Web Service
   - type: web
     name: indexforge
     runtime: python
     plan: free
-    buildCommand: |
-      curl -sSL https://install.python-poetry.org | python3 -
-      poetry install --no-dev
-    startCommand: poetry run uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: ./build.sh
+    startCommand: poetry run uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --workers 2
+    healthCheckPath: /health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - src/**
+        - pyproject.toml
+        - poetry.lock
+        - render.yaml
+        - build.sh
+      ignoredPaths:
+        - docs/**
+        - tests/**
+        - "*.md"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
-      - key: WEB_CONCURRENCY
-        value: 2
       - key: ENVIRONMENT
         value: production
       - key: POETRY_VIRTUALENVS_CREATE
         value: "false"
+      # Redis connection (automatically set by Render)
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: indexforge-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: indexforge-redis
+          property: port
+      # Other secure environment variables - to be set in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: WEAVIATE_URL
+        sync: false
