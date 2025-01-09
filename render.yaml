@@ -14,7 +14,7 @@ services:
     runtime: python
     plan: free
     buildCommand: ./build.sh
-    startCommand: poetry run uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --workers 2
+    startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --log-level info --timeout-keep-alive 75
     healthCheckPath: /health
     autoDeploy: true
     buildFilter:
@@ -28,13 +28,26 @@ services:
         - docs/**
         - tests/**
         - "*.md"
+        - .git/**
+        - .github/**
+        - .pytest_cache/**
+        - __pycache__/**
+        - "*.pyc"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
+      - key: POETRY_VERSION
+        value: 1.7.1
+      - key: PYTHONPATH
+        value: .
       - key: ENVIRONMENT
         value: production
       - key: POETRY_VIRTUALENVS_CREATE
         value: "false"
+      - key: PYTHONUNBUFFERED
+        value: "true"
+      - key: POETRY_CACHE_DIR
+        value: /opt/render/.cache/pypoetry
       # Redis connection (automatically set by Render)
       - key: REDIS_HOST
         fromService:
