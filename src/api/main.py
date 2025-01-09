@@ -4,6 +4,7 @@ import logging
 from typing import Dict
 
 import sentry_sdk
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -83,3 +84,14 @@ async def trigger_error():
 async def health_check() -> Dict[str, str]:
     """Health check endpoint."""
     return {"status": "healthy", "service": settings.PROJECT_NAME}
+
+
+if __name__ == "__main__":
+    # Run the application with uvicorn when in production
+    uvicorn.run(
+        "src.api.main:app",
+        host="0.0.0.0",
+        port=int(settings.PORT or 8000),
+        workers=int(settings.WEB_CONCURRENCY or 1),
+        reload=settings.ENVIRONMENT == "development",
+    )
