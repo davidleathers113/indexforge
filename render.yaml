@@ -2,41 +2,15 @@ services:
   # Main Web Service
   - type: web
     name: indexforge
-    runtime: python
+    runtime: docker
     plan: free
-    buildCommand: ./build.sh
-    startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --log-level info --timeout-keep-alive 75
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     autoDeploy: true
-    buildFilter:
-      paths:
-        - src/**
-        - pyproject.toml
-        - poetry.lock
-        - render.yaml
-        - build.sh
-      ignoredPaths:
-        - docs/**
-        - tests/**
-        - "*.md"
-        - .git/**
-        - .github/**
-        - .pytest_cache/**
-        - __pycache__/**
-        - "*.pyc"
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11
-      - key: PYTHONPATH
-        value: .
       - key: ENVIRONMENT
         value: production
-      - key: POETRY_VIRTUALENVS_CREATE
-        value: "false"
-      - key: PYTHONUNBUFFERED
-        value: "true"
-      - key: POETRY_CACHE_DIR
-        value: /opt/render/.cache/pypoetry
       # Redis connection (automatically set by Render)
       - key: REDIS_HOST
         fromService:
