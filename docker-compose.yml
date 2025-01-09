@@ -1,6 +1,65 @@
-version: "3.4"
+version: "3.8"
+
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WEAVIATE_URL=http://weaviate:8080
+      - WEAVIATE_PORT=8080
+      - WEAVIATE_GRPC_PORT=50051
+    depends_on:
+      redis:
+        condition: service_healthy
+      weaviate:
+        condition: service_healthy
+      t2v-transformers:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    networks:
+      - indexforge-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    networks:
+      - indexforge-network
+
   weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.28.2
     command:
       - --host
       - 0.0.0.0
@@ -8,7 +67,6 @@ services:
       - "8080"
       - --scheme
       - http
-    image: cr.weaviate.io/semitechnologies/weaviate:1.28.2
     ports:
       - "8080:8080"
       - "50051:50051"
@@ -19,24 +77,40 @@ services:
       DEFAULT_VECTORIZER_MODULE: "text2vec-transformers"
       ENABLE_MODULES: "text2vec-transformers"
       TRANSFORMERS_INFERENCE_API: "http://t2v-transformers:8080"
-      CLUSTER_HOSTNAME: "node1"
       TRANSFORMERS_INFERENCE_API_RETRY_AMOUNT: "20"
       TRANSFORMERS_INFERENCE_API_RETRY_TIME: "5s"
+      CLUSTER_HOSTNAME: "node1"
       ENABLE_API_BASED_MODULES: "true"
       LOG_LEVEL: "info"
     volumes:
-      - weaviate_data:/var/lib/weaviate
+      - weaviate-data:/var/lib/weaviate
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/v1/.well-known/ready",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
     depends_on:
       t2v-transformers:
         condition: service_healthy
     networks:
-      - weaviate_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/meta"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: on-failure:0
+      - indexforge-network
 
   t2v-transformers:
     image: semitechnologies/transformers-inference:sentence-transformers-all-MiniLM-L6-v2
@@ -55,29 +129,23 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
     networks:
-      - weaviate_net
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes --maxmemory-policy noeviction
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - weaviate_net
-
-networks:
-  weaviate_net:
-    driver: bridge
+      - indexforge-network
 
 volumes:
-  weaviate_data:
+  weaviate-data:
     driver: local
   redis_data:
+    driver: local
+
+networks:
+  indexforge-network:
+    driver: bridge

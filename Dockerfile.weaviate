@@ -1,26 +1,4 @@
 FROM cr.weaviate.io/semitechnologies/weaviate:1.28.2
 
-# Install curl for healthcheck
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-# Create directory for persistence
-RUN mkdir -p /var/lib/weaviate
-
-# Environment variables
-ENV QUERY_DEFAULTS_LIMIT=25 \
-    AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true \
-    PERSISTENCE_DATA_PATH=/var/lib/weaviate \
-    ENABLE_API_BASED_MODULES=true \
-    CLUSTER_HOSTNAME=node1 \
-    LOG_LEVEL=info
-
-# Expose ports for HTTP and gRPC
-EXPOSE 8080
-EXPOSE 50051
-
-# Health check
-HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
-    CMD curl -f http://localhost:8080/v1/meta || exit 1
-
 # Command to run
 CMD ["--host", "0.0.0.0", "--port", "8080", "--scheme", "http"]
