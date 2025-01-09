@@ -1,0 +1,1580 @@
+{
+    "tests": {
+      "unit": {
+        "utils": {
+          "cache": {
+            "basic_operations": {
+              "get": {
+                "test_cache_get_basic_retrieval.py": {
+                  "description": "Tests basic cache retrieval functionality",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify basic cache retrieval works correctly",
+                    "Ensure cache client returns expected values"
+                  ],
+                  "steps": [
+                    "Set up test cache with known value",
+                    "Retrieve value using cache client",
+                    "Verify returned value matches expected data"
+                  ]
+                },
+                "test_redis_get_call_for_existing_key.py": {
+                  "description": "Verifies Redis get operation behavior",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify Redis get is called with correct parameters",
+                    "Ensure Redis client interaction is correct"
+                  ],
+                  "steps": [
+                    "Set up Redis mock",
+                    "Execute cache get operation",
+                    "Verify Redis get was called with correct parameters"
+                  ]
+                },
+                "test_value_deserialization_with_pickle.py": {
+                  "description": "Tests value deserialization using pickle",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify cached values are properly deserialized",
+                    "Ensure pickle deserialization works correctly"
+                  ],
+                  "steps": [
+                    "Set up mock with serialized data",
+                    "Retrieve and deserialize value",
+                    "Verify deserialization was correct"
+                  ]
+                },
+                "test_key_formatting_with_namespace_on_get.py": {
+                  "description": "Validates key formatting with the namespace prefix during a get operation",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure namespace is correctly applied to keys",
+                    "Verify get operation respects the prefixed key"
+                  ],
+                  "steps": [
+                    "Store a value using a namespaced key in the cache",
+                    "Attempt to retrieve the value with the full namespaced key",
+                    "Verify the returned value matches the expected data"
+                  ]
+                },
+                "test_cache_get_with_complex_data_type.py": {
+                  "description": "Tests retrieval of complex (e.g. dict) data types from cache",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure complex data structures can be stored and retrieved",
+                    "Validate no data corruption occurs during caching"
+                  ],
+                  "steps": [
+                    "Store a complex object (dict) in the cache",
+                    "Retrieve the object from the cache",
+                    "Verify retrieved structure matches the original"
+                  ]
+                },
+                "test_cache_get_exact_value_match.py": {
+                  "description": "Ensures retrieved cache value matches exactly the stored one",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Confirm cache does not alter stored values",
+                    "Validate exact matching for retrieved data"
+                  ],
+                  "steps": [
+                    "Insert a known string or object in the cache",
+                    "Retrieve the same key",
+                    "Check the returned value is identical to the stored data"
+                  ]
+                },
+                "test_cache_get_missing_key.py": {
+                  "description": "Tests behavior when attempting to get a key that does not exist",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure cache properly handles non-existent keys",
+                    "Validate return value for missing key scenarios"
+                  ],
+                  "steps": [
+                    "Attempt to retrieve a key not in cache",
+                    "Verify the result indicates no value found",
+                    "Check no errors occur during the operation"
+                  ]
+                },
+                "test_redis_get_call_count_for_missing_key.py": {
+                  "description": "Verifies Redis get call count for missing keys",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Check the number of times Redis get is called on a missing key",
+                    "Ensure unnecessary repeated calls do not occur"
+                  ],
+                  "steps": [
+                    "Mock Redis get method",
+                    "Attempt to retrieve a missing key multiple times",
+                    "Confirm the get method call count is as expected"
+                  ]
+                },
+                "test_cache_get_returns_none_for_missing_key.py": {
+                  "description": "Ensures None is returned for a missing cache key",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify the default return value for absent keys",
+                    "Validate the cache does not throw errors for missing data"
+                  ],
+                  "steps": [
+                    "Set up a cache client without storing a key",
+                    "Call get on a non-existent key",
+                    "Check the returned value is None"
+                  ]
+                },
+                "test_key_formatting_for_missing_key.py": {
+                  "description": "Checks key formatting logic when the requested key is missing",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure key format remains consistent for missing keys",
+                    "Validate no format-related errors occur on missing data"
+                  ],
+                  "steps": [
+                    "Construct a namespaced key that doesn't exist",
+                    "Call get on the missing namespaced key",
+                    "Verify logs or messages reflect proper key formatting"
+                  ]
+                }
+              },
+              "set": {
+                "test_cache_set_with_default_ttl.py": {
+                  "description": "Tests storing a value in the cache with a default TTL",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify cache handling of default TTL",
+                    "Confirm values expire as expected"
+                  ],
+                  "steps": [
+                    "Configure cache client with default TTL",
+                    "Set a key-value pair",
+                    "Validate that the stored value respects the default expiration"
+                  ]
+                },
+                "test_value_serialization_on_set.py": {
+                  "description": "Verifies serialization logic when setting values",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure correct data serialization before storing",
+                    "Validate serialization does not corrupt the data"
+                  ],
+                  "steps": [
+                    "Mock serialization function",
+                    "Set a complex object in the cache",
+                    "Verify the data is properly serialized"
+                  ]
+                },
+                "test_cache_set_key_formatting_with_namespace.py": {
+                  "description": "Checks namespace handling when setting cache keys",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure namespace prefix is applied to keys on set",
+                    "Validate collisions do not occur between namespaces"
+                  ],
+                  "steps": [
+                    "Set a value with a specific namespace",
+                    "Retrieve the value using the fully qualified key",
+                    "Verify the correct namespaced key was used"
+                  ]
+                },
+                "test_redis_setex_call_parameters.py": {
+                  "description": "Ensures correct Redis SETEX call parameters on set",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify TTL and key-value parameters for SETEX",
+                    "Ensure Redis client receives correct arguments"
+                  ],
+                  "steps": [
+                    "Mock Redis SETEX",
+                    "Invoke cache set operation",
+                    "Check the call arguments match the expected TTL and value"
+                  ]
+                },
+                "test_cache_set_returns_success.py": {
+                  "description": "Validates the success status after setting a value",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure the cache operation returns success",
+                    "Verify no errors occur for normal set operations"
+                  ],
+                  "steps": [
+                    "Set a valid key-value pair",
+                    "Check the returned success indicator",
+                    "Confirm data is correctly stored"
+                  ]
+                },
+                "test_cache_set_with_complex_data_type.py": {
+                  "description": "Tests storing complex data types (dict, list) in the cache",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure the cache can handle complex structures",
+                    "Validate retrieval of the same structure"
+                  ],
+                  "steps": [
+                    "Create a complex object (e.g. nested dict)",
+                    "Set the object using cache set",
+                    "Retrieve it and confirm structure integrity"
+                  ]
+                },
+                "test_cache_set_with_custom_ttl.py": {
+                  "description": "Tests storing a value in cache with a custom TTL",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify cache honors user-defined TTL",
+                    "Confirm expiration matches custom settings"
+                  ],
+                  "steps": [
+                    "Configure a custom TTL",
+                    "Set a key-value with that TTL",
+                    "Check that expiration is as expected"
+                  ]
+                },
+                "test_value_serialization_on_set_with_ttl.py": {
+                  "description": "Verifies serialization when setting values with a custom TTL",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure serialization logic works with TTL-based sets",
+                    "Validate no data corruption occurs under timed caching"
+                  ],
+                  "steps": [
+                    "Mock serialization function",
+                    "Set a key-value with a specified TTL",
+                    "Retrieve to confirm serialization and TTL are correct"
+                  ]
+                },
+                "test_redis_setex_uses_correct_ttl.py": {
+                  "description": "Ensures Redis SETEX uses the specified TTL correctly",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Confirm Redis receives the correct TTL parameter",
+                    "Validate time-based expiry matches expectation"
+                  ],
+                  "steps": [
+                    "Mock Redis setex call",
+                    "Invoke cache set with TTL",
+                    "Verify the TTL parameter is passed accurately"
+                  ]
+                },
+                "test_cache_set_returns_success_with_ttl.py": {
+                  "description": "Checks success status is returned when setting values with TTL",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure the operation indicates success with TTL usage",
+                    "Verify correct handling of TTL-based set calls"
+                  ],
+                  "steps": [
+                    "Set a key-value with TTL",
+                    "Check success status from the operation",
+                    "Confirm value is stored and set to expire"
+                  ]
+                },
+                "test_redis_setex_call_parameters_with_ttl.py": {
+                  "description": "Validates Redis setex call parameters including TTL for set operations",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure the correct TTL and value are passed to setex",
+                    "Validate consistent argument formatting for TTL-based sets"
+                  ],
+                  "steps": [
+                    "Mock Redis setex",
+                    "Perform cache set with TTL",
+                    "Assert the call includes the correct TTL parameter"
+                  ]
+                },
+                "test_cache_set_namespace_handling_with_ttl.py": {
+                  "description": "Ensures namespace handling works properly when setting values with a custom TTL",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify namespace prefix remains consistent in TTL-based sets",
+                    "Validate no collision occurs with similarly named keys"
+                  ],
+                  "steps": [
+                    "Set a key with namespace and custom TTL",
+                    "Retrieve using the full namespaced key",
+                    "Check data is correct and will expire as configured"
+                  ]
+                }
+              },
+              "delete": {
+                "test_cache_delete_value.py": {
+                  "description": "Tests deletion of a stored value from the cache",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure a stored key-value can be removed",
+                    "Validate the cache no longer returns the deleted data"
+                  ],
+                  "steps": [
+                    "Store a test key-value",
+                    "Perform delete operation",
+                    "Verify subsequent retrieval returns nothing"
+                  ]
+                },
+                "test_redis_delete_call.py": {
+                  "description": "Verifies that Redis delete call is triggered correctly",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Check Redis delete is invoked with correct arguments",
+                    "Ensure no extraneous calls are made"
+                  ],
+                  "steps": [
+                    "Mock Redis delete method",
+                    "Invoke cache delete on a key",
+                    "Assert correct call arguments in the delete method"
+                  ]
+                },
+                "test_cache_delete_key_formatting_with_namespace.py": {
+                  "description": "Ensures key formatting with namespace is handled during delete",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Verify the cache uses the namespaced key on delete",
+                    "Confirm no collision with other namespaces"
+                  ],
+                  "steps": [
+                    "Store a namespaced key-value",
+                    "Delete the namespaced key",
+                    "Check the key is removed correctly without affecting others"
+                  ]
+                },
+                "test_cache_delete_returns_success.py": {
+                  "description": "Validates success return value when deleting a key",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure the delete operation indicates success",
+                    "Confirm that post-delete retrieval fails"
+                  ],
+                  "steps": [
+                    "Store a key-value pair",
+                    "Delete the key",
+                    "Check the returned status and verify retrieval fails"
+                  ]
+                },
+                "test_redis_delete_called_once.py": {
+                  "description": "Checks that Redis delete method is only called once per deletion",
+                  "test_type": "cache",
+                  "purpose": [
+                    "Ensure no redundant delete calls occur",
+                    "Validate efficient usage of Redis delete operation"
+                  ],
+                  "steps": [
+                    "Mock Redis delete",
+                    "Perform a single delete on a known key",
+                    "Confirm only one call to the delete method"
+                  ]
+                }
+              }
+            },
+            "error_handling": {
+              "get": {
+                "test_redis_connection_error_during_get.py": {
+                  "description": "Tests cache behavior when a Redis connection error occurs during get",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify error handling logic for get operation",
+                    "Ensure graceful fail or fallback behavior"
+                  ],
+                  "steps": [
+                    "Mock a Redis connection error on get",
+                    "Call cache get",
+                    "Confirm error is logged and fallback returned"
+                  ]
+                },
+                "test_error_logging_on_get_failure.py": {
+                  "description": "Verifies error logging when a get operation fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure errors are properly logged during get failures",
+                    "Validate log message content"
+                  ],
+                  "steps": [
+                    "Mock get operation to throw an error",
+                    "Call cache get",
+                    "Check logs for the correct error message"
+                  ]
+                },
+                "test_cache_get_returns_none_on_connection_error.py": {
+                  "description": "Ensures cache get returns None if connection fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Validate fallback behavior on connection failure",
+                    "Confirm no exceptions are thrown to caller"
+                  ],
+                  "steps": [
+                    "Force a connection error during get",
+                    "Confirm None is returned",
+                    "Check error logs are captured"
+                  ]
+                },
+                "test_error_message_logging_for_get_error.py": {
+                  "description": "Checks that an appropriate error message is logged on get failure",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure the log contains a clear error message",
+                    "Validate no extraneous data is leaked in logs"
+                  ],
+                  "steps": [
+                    "Mock get to raise an exception",
+                    "Capture logs from the operation",
+                    "Verify the log message includes error details"
+                  ]
+                },
+                "test_exception_handling_for_get_error.py": {
+                  "description": "Tests exception handling logic for get errors",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure get exceptions do not crash the application",
+                    "Validate the error is handled gracefully"
+                  ],
+                  "steps": [
+                    "Mock an exception thrown by Redis get",
+                    "Invoke cache get",
+                    "Confirm the exception is caught and properly managed"
+                  ]
+                },
+                "test_cache_get_handles_corrupted_data.py": {
+                  "description": "Tests handling of corrupted cache data",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify graceful handling of corrupted data",
+                    "Ensure appropriate error logging",
+                    "Validate None return value"
+                  ],
+                  "steps": [
+                    "Set up cache with corrupted data",
+                    "Attempt to retrieve corrupted value",
+                    "Verify None is returned",
+                    "Check error is properly logged"
+                  ]
+                },
+                "test_graceful_failure_for_invalid_json.py": {
+                  "description": "Ensures get operation fails gracefully if stored JSON is invalid",
+                  "test_type": "error",
+                  "purpose": [
+                    "Validate error handling for invalid JSON in cache",
+                    "Check logs for appropriate error messages"
+                  ],
+                  "steps": [
+                    "Insert invalid JSON data into the cache",
+                    "Perform get on the invalid data key",
+                    "Confirm None or fallback is returned and errors are logged"
+                  ]
+                },
+                "test_cache_get_returns_none_on_invalid_data.py": {
+                  "description": "Tests that None is returned when the data is invalid or unreadable",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify the cache doesn't raise exceptions for invalid data",
+                    "Ensure consistent fallback of returning None"
+                  ],
+                  "steps": [
+                    "Store a key with invalid or non-decodable data",
+                    "Call cache get on that key",
+                    "Verify the response is None and an error is logged"
+                  ]
+                },
+                "test_pickle_deserialization_error_handling.py": {
+                  "description": "Checks error handling for failed pickle deserialization on get",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure the system catches deserialization exceptions",
+                    "Validate an error log is generated"
+                  ],
+                  "steps": [
+                    "Store invalid pickle data in cache",
+                    "Attempt get operation triggering deserialization",
+                    "Confirm the error is caught and logged"
+                  ]
+                }
+              },
+              "set": {
+                "test_redis_write_failure_during_set.py": {
+                  "description": "Tests behavior when Redis write operation fails during a set",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure set operation handles Redis write failures gracefully",
+                    "Validate error logs are produced"
+                  ],
+                  "steps": [
+                    "Mock Redis to raise an error on set",
+                    "Attempt to store a key-value",
+                    "Confirm error logs and fallback behavior"
+                  ]
+                },
+                "test_error_logging_on_set_failure.py": {
+                  "description": "Verifies error logging when a set operation fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure errors are clearly logged for set failures",
+                    "Validate error message content for debugging"
+                  ],
+                  "steps": [
+                    "Force an error during set",
+                    "Check logs for the appropriate error information",
+                    "Confirm the system continues running"
+                  ]
+                },
+                "test_cache_set_returns_false_on_failure.py": {
+                  "description": "Ensures set operation returns false if an error occurs",
+                  "test_type": "error",
+                  "purpose": [
+                    "Confirm the operation signals failure correctly",
+                    "Validate no partial data is stored"
+                  ],
+                  "steps": [
+                    "Mock a write failure",
+                    "Perform cache set",
+                    "Check the returned status is false"
+                  ]
+                },
+                "test_error_message_content_on_set_error.py": {
+                  "description": "Checks the content of error messages when a set operation fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure error logs contain a concise and clear message",
+                    "Validate no sensitive data is leaked"
+                  ],
+                  "steps": [
+                    "Generate a set error with a known message",
+                    "Capture logs",
+                    "Verify the error message is correctly formatted"
+                  ]
+                },
+                "test_exception_propagation_on_set_error.py": {
+                  "description": "Tests how exceptions during set are propagated or handled",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify the system does not crash on set exceptions",
+                    "Ensure exceptions are logged or re-raised appropriately"
+                  ],
+                  "steps": [
+                    "Mock an unhandled exception in set",
+                    "Invoke cache set",
+                    "Check if the exception is properly caught/logged"
+                  ]
+                },
+                "test_unserializable_object_handling_on_set.py": {
+                  "description": "Ensures the system handles attempts to cache unserializable objects",
+                  "test_type": "error",
+                  "purpose": [
+                    "Prevent crashes on unserializable data",
+                    "Validate error logging for unsupported objects"
+                  ],
+                  "steps": [
+                    "Create an unserializable object",
+                    "Call cache set with that object",
+                    "Verify an error is raised and logged"
+                  ]
+                },
+                "test_error_logging_for_serialization_failure.py": {
+                  "description": "Verifies error logging when serialization fails during set",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure serialization failures are clearly logged",
+                    "Validate the system handles partial writes gracefully"
+                  ],
+                  "steps": [
+                    "Mock serialization to fail",
+                    "Attempt to set a value",
+                    "Check error logs for relevant info"
+                  ]
+                },
+                "test_cache_set_failure_on_serialization_error.py": {
+                  "description": "Checks the operation outcome when serialization fails on set",
+                  "test_type": "error",
+                  "purpose": [
+                    "Confirm set returns failure if serialization breaks",
+                    "Ensure no corrupted data is stored"
+                  ],
+                  "steps": [
+                    "Force a serialization error",
+                    "Invoke cache set",
+                    "Verify the operation reports failure"
+                  ]
+                },
+                "test_pickle_serialization_error_handling.py": {
+                  "description": "Tests how pickle serialization errors are handled on set",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure system catches pickle errors during set",
+                    "Validate logs and fallback behavior"
+                  ],
+                  "steps": [
+                    "Inject invalid data that triggers pickle error",
+                    "Call set operation",
+                    "Confirm error handling and logs"
+                  ]
+                },
+                "test_error_message_content_for_serialization_error.py": {
+                  "description": "Verifies the error message content for serialization errors",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure error messages are descriptive",
+                    "Validate no sensitive info is exposed in logs"
+                  ],
+                  "steps": [
+                    "Force a serialization failure with known details",
+                    "Capture error message logs",
+                    "Check that the logs contain the correct information"
+                  ]
+                }
+              },
+              "delete": {
+                "test_cache_delete_failure_scenario.py": {
+                  "description": "Tests behavior when cache delete operation fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure system handles delete errors without crashing",
+                    "Validate error logs are produced"
+                  ],
+                  "steps": [
+                    "Mock delete to raise an error",
+                    "Attempt to delete a known key",
+                    "Confirm logs capture the error"
+                  ]
+                },
+                "test_error_logging_on_delete_failure.py": {
+                  "description": "Verifies error logging when delete fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure errors for delete operations are clearly logged",
+                    "Validate message content for debugging"
+                  ],
+                  "steps": [
+                    "Simulate a delete failure",
+                    "Check logs for correct error info",
+                    "Confirm no partial changes remain"
+                  ]
+                },
+                "test_cache_delete_error_handling.py": {
+                  "description": "Checks how the system manages exceptions during delete",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure delete exceptions do not crash the system",
+                    "Validate fallback or recovery mechanisms"
+                  ],
+                  "steps": [
+                    "Mock an unhandled exception in delete",
+                    "Invoke cache delete",
+                    "Confirm the exception is caught and logged"
+                  ]
+                },
+                "test_cache_delete_returns_false_on_failure.py": {
+                  "description": "Ensures delete operation returns false when it fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Check the operation signals failure status",
+                    "Validate partial deletes do not persist"
+                  ],
+                  "steps": [
+                    "Trigger a delete error",
+                    "Invoke cache delete",
+                    "Confirm the return value is false"
+                  ]
+                },
+                "test_exception_handling_on_delete_error.py": {
+                  "description": "Tests the exception handling flow for delete errors",
+                  "test_type": "error",
+                  "purpose": [
+                    "Ensure exceptions during delete are properly managed",
+                    "Validate logs for error details"
+                  ],
+                  "steps": [
+                    "Mock delete to throw an exception",
+                    "Call cache delete",
+                    "Verify logs and graceful handling"
+                  ]
+                }
+              },
+              "connection": {
+                "test_cache_initialization_handles_connection_error.py": {
+                  "description": "Tests cache initialization behavior when Redis connection fails",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify cache client handles connection errors during initialization",
+                    "Ensure appropriate error logging",
+                    "Validate fallback behavior"
+                  ],
+                  "steps": [
+                    "Mock Redis client to raise connection error",
+                    "Initialize cache client",
+                    "Verify error is logged",
+                    "Confirm client is in degraded mode"
+                  ]
+                },
+                "test_initialization_behavior_on_connection_failure.py": {
+                  "description": "Tests specific behaviors during cache initialization failure",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify cache client state after connection failure",
+                    "Ensure retry attempts are properly counted",
+                    "Validate configuration is preserved"
+                  ],
+                  "steps": [
+                    "Configure mock Redis with connection failure",
+                    "Initialize cache with retry settings",
+                    "Verify retry attempts",
+                    "Check final client state"
+                  ]
+                },
+                "test_all_cache_operations_under_connection_failure.py": {
+                  "description": "Tests all cache operations behavior during connection failure",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify get/set/delete operations handle connection errors",
+                    "Ensure consistent error handling across operations",
+                    "Validate degraded mode behavior"
+                  ],
+                  "steps": [
+                    "Set up cache client in degraded mode",
+                    "Attempt get operation",
+                    "Attempt set operation",
+                    "Attempt delete operation",
+                    "Verify all operations handle failure gracefully"
+                  ]
+                },
+                "test_warning_logging_on_connection_failure.py": {
+                  "description": "Tests warning log messages during connection failures",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify appropriate warning messages are logged",
+                    "Ensure log levels are correct",
+                    "Validate warning message content"
+                  ],
+                  "steps": [
+                    "Configure logging capture",
+                    "Trigger connection failure",
+                    "Verify warning level used",
+                    "Check warning message content"
+                  ]
+                },
+                "test_redis_client_state_on_connection_error.py": {
+                  "description": "Tests Redis client internal state after connection error",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify Redis client internal state is consistent",
+                    "Ensure connection objects are cleaned up",
+                    "Validate reconnection behavior"
+                  ],
+                  "steps": [
+                    "Mock Redis connection objects",
+                    "Trigger connection failure",
+                    "Verify cleanup occurred",
+                    "Check reconnection attempt behavior"
+                  ]
+                },
+                "test_graceful_degradation_on_connection_error.py": {
+                  "description": "Tests cache degradation behavior on connection errors",
+                  "test_type": "error",
+                  "purpose": [
+                    "Verify cache enters degraded mode properly",
+                    "Ensure operations return appropriate defaults",
+                    "Validate recovery conditions"
+                  ],
+                  "steps": [
+                    "Force cache into degraded mode",
+                    "Verify operation defaults",
+                    "Test recovery triggers",
+                    "Confirm behavior after recovery"
+                  ]
+                }
+              }
+            },
+            "integration": {
+              "retry": {
+                "test_retry_mechanism_with_failures.py": {
+                  "description": "Tests cache retry mechanism when repeated failures occur",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure the system retries operations upon initial failure",
+                    "Validate correct backoff or retry intervals"
+                  ],
+                  "steps": [
+                    "Configure cache with mock failures",
+                    "Invoke operation that triggers retries",
+                    "Verify final attempt either succeeds or logs repeated failure"
+                  ]
+                },
+                "test_cache_usage_after_retry_success.py": {
+                  "description": "Verifies cache usage following a successful retry",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Confirm the system switches to normal operation after retry success",
+                    "Ensure cached data remains consistent"
+                  ],
+                  "steps": [
+                    "Trigger a retry scenario",
+                    "Simulate success on a later attempt",
+                    "Check that subsequent requests use the cache normally"
+                  ]
+                },
+                "test_failure_recovery_during_retry.py": {
+                  "description": "Tests how the system recovers from failures during retries",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure partial successes do not break the retry loop",
+                    "Validate post-retry state is stable"
+                  ],
+                  "steps": [
+                    "Configure repeated failures, then success",
+                    "Observe retry attempts",
+                    "Confirm final state is consistent post-recovery"
+                  ]
+                },
+                "test_retry_count_validation.py": {
+                  "description": "Ensures the retry count matches expected settings",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Verify configured retry limits are enforced",
+                    "Ensure no endless retry loops occur"
+                  ],
+                  "steps": [
+                    "Set a max retry count",
+                    "Force repeated operation failures",
+                    "Check retry stops at the configured limit"
+                  ]
+                },
+                "test_cache_interaction_during_retry.py": {
+                  "description": "Checks how cache interacts with ongoing retries",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Validate partial data usage in retry contexts",
+                    "Ensure consistency of cached items under repeated attempts"
+                  ],
+                  "steps": [
+                    "Start a failing operation that uses the cache",
+                    "Retry multiple times",
+                    "Observe how the cache is updated or read after each attempt"
+                  ]
+                },
+                "test_value_persistence_after_retry.py": {
+                  "description": "Tests if values persist correctly after a retry-based success",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Confirm that final stored data remains intact",
+                    "Ensure no data loss occurs despite failures"
+                  ],
+                  "steps": [
+                    "Simulate multiple operation failures and a success",
+                    "Check final stored values in cache",
+                    "Verify consistency once retries complete"
+                  ]
+                }
+              },
+              "workflow": {
+                "test_full_cache_operation_sequence.py": {
+                  "description": "Tests a complete cache workflow (set, get, delete) in sequence",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Verify end-to-end cache operations in a single flow",
+                    "Ensure no intermediate state corrupts the flow"
+                  ],
+                  "steps": [
+                    "Set a key-value",
+                    "Get the stored value",
+                    "Delete the key",
+                    "Verify none remains"
+                  ]
+                },
+                "test_cache_state_consistency_across_workflow.py": {
+                  "description": "Ensures cache state remains consistent throughout a multi-operation workflow",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Check no partial writes or inconsistent states occur",
+                    "Validate final cache content matches expectations"
+                  ],
+                  "steps": [
+                    "Perform multiple sets and gets",
+                    "Check intermediate states remain valid",
+                    "Confirm final state is correct"
+                  ]
+                },
+                "test_key_lifecycle_set_get_delete.py": {
+                  "description": "Validates the lifecycle of a key from creation to deletion",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure keys can be created, read, and removed in a single flow",
+                    "Verify transitions do not leak data"
+                  ],
+                  "steps": [
+                    "Set a new key-value",
+                    "Retrieve and confirm correctness",
+                    "Delete and verify it’s removed"
+                  ]
+                },
+                "test_value_persistence_across_operations.py": {
+                  "description": "Checks value persistence through multiple operations in a workflow",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure data remains intact through reads and updates",
+                    "Validate final result matches last known state"
+                  ],
+                  "steps": [
+                    "Set initial value",
+                    "Update value partially",
+                    "Perform get checks in between",
+                    "Confirm final value is correct"
+                  ]
+                },
+                "test_cache_cleanup_behavior_after_workflow.py": {
+                  "description": "Tests post-workflow cleanup behavior in the cache",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure no leftover entries remain after a test sequence",
+                    "Validate cleanup steps restore original state"
+                  ],
+                  "steps": [
+                    "Execute a full read/write/delete sequence",
+                    "Invoke cleanup routine",
+                    "Check no test keys remain in the cache"
+                  ]
+                },
+                "test_multiple_cache_operations.py": {
+                  "description": "Verifies handling of multiple diverse cache operations in sequence",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Check concurrency or rapid sequence of operations",
+                    "Ensure no partial updates break the cache"
+                  ],
+                  "steps": [
+                    "Perform set, get, delete in rapid succession",
+                    "Validate final data integrity",
+                    "Check logs for any concurrency errors"
+                  ]
+                },
+                "test_call_counts_for_multiple_operations.py": {
+                  "description": "Ensures the number of cache operation calls matches expectations in a multi-step workflow",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Verify operation calls are not duplicated",
+                    "Confirm each step is triggered exactly once"
+                  ],
+                  "steps": [
+                    "Mock cache methods to track call counts",
+                    "Run a set of operations (set/get/delete)",
+                    "Check mock counters for correct call totals"
+                  ]
+                },
+                "test_cache_state_transitions.py": {
+                  "description": "Tests state changes of the cache across a complex workflow",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure cache transitions from empty to populated to cleared states correctly",
+                    "Validate no leftover intermediate states"
+                  ],
+                  "steps": [
+                    "Initialize empty cache",
+                    "Add multiple keys",
+                    "Delete subsets of keys",
+                    "Confirm final state matches expected"
+                  ]
+                },
+                "test_handling_multiple_keys_in_cache.py": {
+                  "description": "Ensures correct behavior with multiple keys manipulated in one workflow",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Validate cache can handle multiple key updates simultaneously",
+                    "Check consistency across various key-value pairs"
+                  ],
+                  "steps": [
+                    "Store multiple keys at once",
+                    "Retrieve each key and verify correctness",
+                    "Delete some keys, confirm others remain unaffected"
+                  ]
+                },
+                "test_operation_ordering_in_cache.py": {
+                  "description": "Verifies the effect of operation ordering on final cache state",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure final state depends on the sequence of operations",
+                    "Validate no out-of-order writes or overwrites"
+                  ],
+                  "steps": [
+                    "Perform gets before sets, sets before deletes in varied orders",
+                    "Compare final results against expected outcomes",
+                    "Check logs or errors for sequence violations"
+                  ]
+                },
+                "test_cache_state_cleanup_after_multiple_ops.py": {
+                  "description": "Checks cleanup of cache state after multiple complex operations",
+                  "test_type": "integration",
+                  "purpose": [
+                    "Ensure leftover data is removed post-operations",
+                    "Validate consistency after a busy set of changes"
+                  ],
+                  "steps": [
+                    "Run a large number of set/get/delete commands",
+                    "Perform a cleanup routine",
+                    "Verify all intermediate data is removed"
+                  ]
+                }
+              }
+            },
+            "key_management": {
+              "generation": {
+                "test_namespace_handling_in_key_generation.py": {
+                  "description": "Verifies correct namespace usage during key generation",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Ensure namespaces are prefixed to keys as intended",
+                    "Validate collision avoidance with multiple namespaces"
+                  ],
+                  "steps": [
+                    "Create key with namespace prefix",
+                    "Check generated key format",
+                    "Verify no collisions occur with other keys"
+                  ]
+                },
+                "test_key_formatting_in_generation.py": {
+                  "description": "Ensures general key formatting rules are applied during generation",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Confirm standard key format is consistent",
+                    "Check special characters or underscores are handled"
+                  ],
+                  "steps": [
+                    "Generate keys with various input strings",
+                    "Verify the final key format meets naming conventions",
+                    "Ensure no disallowed characters are present"
+                  ]
+                },
+                "test_prefix_addition_in_key_generation.py": {
+                  "description": "Tests addition of a prefix to generated keys",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Ensure prefix is added where specified",
+                    "Validate uniqueness with prefix included"
+                  ],
+                  "steps": [
+                    "Define a prefix in the config",
+                    "Generate a key with the prefix",
+                    "Confirm final key includes prefix"
+                  ]
+                },
+                "test_special_character_handling_in_keys.py": {
+                  "description": "Verifies handling of special characters in key generation",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Ensure special characters do not break key creation",
+                    "Validate sanitized or escaped keys"
+                  ],
+                  "steps": [
+                    "Attempt generation with special chars (#, %, etc.)",
+                    "Check if the resulting key is valid",
+                    "Verify collisions do not occur with normal keys"
+                  ]
+                },
+                "test_key_consistency_for_same_input.py": {
+                  "description": "Ensures the same input yields the same key consistently",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Check deterministic key generation",
+                    "Validate repeated calls produce identical results"
+                  ],
+                  "steps": [
+                    "Generate a key from input string multiple times",
+                    "Compare all generated keys",
+                    "Confirm they match exactly"
+                  ]
+                }
+              },
+              "hashing": {
+                "test_hash_generation_for_strings_dicts_lists.py": {
+                  "description": "Tests hash generation for different data types (string, dict, list)",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Ensure hashing logic handles multiple types",
+                    "Validate consistent hash outputs"
+                  ],
+                  "steps": [
+                    "Provide sample strings, dicts, lists",
+                    "Generate hashes",
+                    "Verify each hash is unique and type-agnostic"
+                  ]
+                },
+                "test_sha256_hash_length.py": {
+                  "description": "Ensures generated SHA-256 hashes have the correct length",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Validate the hash length for all generated keys",
+                    "Confirm no truncation or padding issues"
+                  ],
+                  "steps": [
+                    "Generate a hash for a sample input",
+                    "Check the length matches 64 hex characters",
+                    "Repeat with multiple inputs to confirm consistency"
+                  ]
+                },
+                "test_hash_format_validation.py": {
+                  "description": "Checks that the hash output uses valid hexadecimal format",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Ensure no invalid characters appear in hash strings",
+                    "Validate hashing functions produce hex outputs only"
+                  ],
+                  "steps": [
+                    "Generate a hash from a known input",
+                    "Verify the result is strictly hexadecimal",
+                    "Confirm no uppercase or special chars are present"
+                  ]
+                },
+                "test_type_handling_in_hash_generation.py": {
+                  "description": "Verifies hash generation logic for different Python data types",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Check that each data type is hashed deterministically",
+                    "Ensure no crashes for unsupported types"
+                  ],
+                  "steps": [
+                    "Attempt hashing strings, ints, dicts, etc.",
+                    "Check consistent hashed outputs",
+                    "Ensure no exception is thrown for typical usage"
+                  ]
+                },
+                "test_hash_uniqueness_for_different_values.py": {
+                  "description": "Ensures distinct input values produce distinct hashes",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Verify minimal collision probability",
+                    "Confirm different values do not share the same hash"
+                  ],
+                  "steps": [
+                    "Hash multiple distinct inputs",
+                    "Compare the results",
+                    "Confirm no collisions are found"
+                  ]
+                },
+                "test_hash_reproducibility_for_same_value.py": {
+                  "description": "Checks that the same value hashed multiple times yields identical results",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Validate reproducible hashing for consistent inputs",
+                    "Ensure stable hashing algorithm usage"
+                  ],
+                  "steps": [
+                    "Use the same input to generate a hash repeatedly",
+                    "Compare all outputs",
+                    "Confirm they match exactly each time"
+                  ]
+                },
+                "test_value_stability_in_hash_generation.py": {
+                  "description": "Ensures that hashing the same value at different times yields the same hash",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Check long-term hash stability",
+                    "Validate no time-based changes in hashing"
+                  ],
+                  "steps": [
+                    "Hash a test input now",
+                    "Wait or run additional tasks",
+                    "Re-hash and confirm the result is identical"
+                  ]
+                },
+                "test_multiple_hash_generations_consistency.py": {
+                  "description": "Tests consistency of repeated hash generations across multiple inputs",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Ensure batch hashing remains consistent",
+                    "Validate no cross-contamination of results"
+                  ],
+                  "steps": [
+                    "Hash multiple distinct inputs in a loop",
+                    "Store each result",
+                    "Check all are consistent and distinct where expected"
+                  ]
+                },
+                "test_hash_consistency_across_instances.py": {
+                  "description": "Verifies that hashing remains consistent across different instances of the hasher",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Ensure multiple hasher objects produce identical results",
+                    "Validate no instance-specific state influences hashing"
+                  ],
+                  "steps": [
+                    "Create separate hasher instances",
+                    "Hash the same input in each instance",
+                    "Verify all results are identical"
+                  ]
+                },
+                "test_value_equality_in_hashing.py": {
+                  "description": "Checks that semantically equal values produce equal hashes",
+                  "test_type": "key_management",
+                  "purpose": [
+                    "Verify two objects with the same data yield the same hash",
+                    "Ensure structural equality maps to hashing equality"
+                  ],
+                  "steps": [
+                    "Create two identical data structures",
+                    "Hash each structure",
+                    "Compare the hashes for equality"
+                  ]
+                }
+              }
+            },
+            "decorators": {
+              "cache_decorator": {
+                "test_basic_cache_decorator_functionality.py": {
+                  "description": "Tests the basic functionality of the cache decorator (happy path)",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure the decorator caches function outputs",
+                    "Validate normal function calls under cache hits"
+                  ],
+                  "steps": [
+                    "Decorate a simple function with the cache",
+                    "Call the function multiple times",
+                    "Confirm subsequent calls use cached result"
+                  ]
+                },
+                "test_cache_decorator_hit_behavior.py": {
+                  "description": "Verifies behavior when the cache decorator hits a cached value",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure no repeated function execution on cache hits",
+                    "Validate correct return from cache"
+                  ],
+                  "steps": [
+                    "Mock the decorated function",
+                    "Call the function once to populate cache",
+                    "Call again and verify no new function call is made"
+                  ]
+                },
+                "test_cache_decorator_function_execution_on_miss.py": {
+                  "description": "Ensures function actually executes when there is a cache miss",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Confirm the decorator properly detects cache misses",
+                    "Validate the function is called to populate the cache"
+                  ],
+                  "steps": [
+                    "Decorate a function with the cache",
+                    "Clear any cached entry",
+                    "Invoke the function and check it runs once"
+                  ]
+                },
+                "test_return_value_validation_in_decorator.py": {
+                  "description": "Checks the return value of a decorated function is properly cached and returned",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure correct data is returned under caching",
+                    "Validate no data corruption from decorator"
+                  ],
+                  "steps": [
+                    "Decorate a function returning a specific value",
+                    "Call it multiple times",
+                    "Verify all returns match the original function"
+                  ]
+                },
+                "test_cache_interaction_with_decorator.py": {
+                  "description": "Tests direct interaction between the decorator and the cache system",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Check that the cache decorator sets and retrieves values properly",
+                    "Validate no conflict with underlying cache methods"
+                  ],
+                  "steps": [
+                    "Monitor cache set/get calls during a decorated function run",
+                    "Confirm values are written and read from cache",
+                    "Ensure no extraneous calls occur"
+                  ]
+                },
+                "test_argument_handling_in_cache_decorator.py": {
+                  "description": "Ensures the cache decorator handles various function arguments correctly",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Validate argument-based cache keys are generated",
+                    "Ensure multiple argument types do not break caching"
+                  ],
+                  "steps": [
+                    "Decorate a function with different parameter signatures",
+                    "Call with varied arguments",
+                    "Verify the correct cache entries are used"
+                  ]
+                },
+                "test_cache_key_generation_with_varied_args.py": {
+                  "description": "Tests unique cache keys for differing function arguments under the decorator",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure each unique argument set maps to a distinct cache entry",
+                    "Validate collisions do not occur across different inputs"
+                  ],
+                  "steps": [
+                    "Decorate a multi-argument function",
+                    "Call it with different argument combos",
+                    "Check each call is cached under a unique key"
+                  ]
+                },
+                "test_multiple_calls_with_different_args.py": {
+                  "description": "Verifies caching behavior for multiple sequential calls with different args",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure calls with new arguments execute the function",
+                    "Validate previously used arguments hit the cache"
+                  ],
+                  "steps": [
+                    "Decorate the function",
+                    "Call it with argument A, then argument B",
+                    "Re-call with argument A and confirm cached response"
+                  ]
+                },
+                "test_decorator_ensures_result_consistency_for_args.py": {
+                  "description": "Checks result consistency for the same arguments with the cache decorator",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure same arguments always produce the same cached output",
+                    "Validate the decorator doesn't alter result data"
+                  ],
+                  "steps": [
+                    "Decorate a function returning a stable result",
+                    "Invoke with the same args multiple times",
+                    "Confirm consistent responses from the cache"
+                  ]
+                },
+                "test_logging_behavior_in_cache_decorator.py": {
+                  "description": "Tests any logging side-effects when using the cache decorator",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Verify logs are generated as expected under caching",
+                    "Ensure no excessive logs on cache hits"
+                  ],
+                  "steps": [
+                    "Decorate a function with logging enabled",
+                    "Call it multiple times with hits and misses",
+                    "Inspect log messages for correct verbosity"
+                  ]
+                }
+              },
+              "retry_decorator": {
+                "test_retry_decorator_basic_retry_behavior.py": {
+                  "description": "Tests fundamental retry logic in the retry decorator",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure function is retried on initial failure",
+                    "Validate success scenario after a retry"
+                  ],
+                  "steps": [
+                    "Decorate a function that fails once",
+                    "Invoke the function and confirm second call success",
+                    "Check logs or counters for retry attempt"
+                  ]
+                },
+                "test_retry_decorator_attempt_count.py": {
+                  "description": "Ensures the retry decorator increments and respects the configured attempt count",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Verify each failure increments the retry count",
+                    "Confirm the function does not exceed the max attempts"
+                  ],
+                  "steps": [
+                    "Set a max attempts in the decorator",
+                    "Force repeated failures",
+                    "Confirm the decorator stops after the specified attempts"
+                  ]
+                },
+                "test_retry_decorator_success_after_failure.py": {
+                  "description": "Checks behavior when the function eventually succeeds within allowed retries",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Validate the decorator recovers once success is reached",
+                    "Ensure no further retries after success"
+                  ],
+                  "steps": [
+                    "Decorate a function that fails twice then succeeds",
+                    "Observe the successful attempt",
+                    "Check no more retries occur post-success"
+                  ]
+                },
+                "test_retry_decorator_logging.py": {
+                  "description": "Verifies log messages for each retry attempt",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure each retry is logged with correct detail",
+                    "Validate final log messages reflect outcome"
+                  ],
+                  "steps": [
+                    "Decorate a function with the retry decorator",
+                    "Trigger repeated failures",
+                    "Check logs for attempt count and final message"
+                  ]
+                },
+                "test_retry_decorator_final_result.py": {
+                  "description": "Ensures the final returned value after retries matches the successful attempt",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Check the decorator yields the correct final result",
+                    "Validate no leftover state from previous failures"
+                  ],
+                  "steps": [
+                    "Decorate a function that eventually succeeds",
+                    "Invoke repeatedly in a single call flow",
+                    "Confirm the function's success result is returned"
+                  ]
+                },
+                "test_retry_decorator_maximum_limit.py": {
+                  "description": "Tests that the decorator respects the maximum retry limit",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure no infinite loops occur when failures persist",
+                    "Validate final state after max attempts is reached"
+                  ],
+                  "steps": [
+                    "Set max retries to N",
+                    "Force all attempts to fail",
+                    "Confirm function stops after N tries and logs an error"
+                  ]
+                },
+                "test_retry_decorator_exception_handling.py": {
+                  "description": "Checks how exceptions are handled or propagated by the retry decorator",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Ensure certain exceptions trigger immediate stop",
+                    "Validate wrapped exceptions pass relevant info"
+                  ],
+                  "steps": [
+                    "Decorate a function that raises specific exceptions",
+                    "Confirm the decorator re-raises or stops as configured",
+                    "Check logs or error messages"
+                  ]
+                },
+                "test_retry_decorator_failure_scenarios.py": {
+                  "description": "Tests various failure patterns in the retry decorator",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Verify back-to-back failures handling",
+                    "Ensure partial successes do not break future attempts"
+                  ],
+                  "steps": [
+                    "Decorate a function with random failures",
+                    "Invoke multiple times in a row",
+                    "Observe final outcome and logs"
+                  ]
+                },
+                "test_retry_decorator_attempt_count_accuracy.py": {
+                  "description": "Ensures the retry count increments accurately during repeated failures",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Confirm the decorator tracks each failed attempt precisely",
+                    "Validate no off-by-one errors in attempt counting"
+                  ],
+                  "steps": [
+                    "Decorate a function with N possible retries",
+                    "Force multiple consecutive fails",
+                    "Compare final attempt count to expected N"
+                  ]
+                },
+                "test_retry_decorator_error_propagation.py": {
+                  "description": "Checks if the final error propagates if all retry attempts fail",
+                  "test_type": "decorator",
+                  "purpose": [
+                    "Validate a raised exception is seen by the caller after max retries",
+                    "Ensure no silent failures occur"
+                  ],
+                  "steps": [
+                    "Set a function to always fail",
+                    "Decorate with retry limits",
+                    "Confirm the final attempt re-raises the error"
+                  ]
+                }
+              }
+            }
+          },
+          "summarizer": {
+            "test_pipeline": {
+              "summarization": {
+                "test_basic_summarization": {
+                  "test_basic_summarization_functionality.py": {
+                    "description": "Tests basic summarization functionality",
+                    "test_type": "integration",
+                    "purpose": [
+                      "Verify summarization pipeline produces concise summary",
+                      "Ensure no errors occur on straightforward inputs"
+                    ],
+                    "steps": [
+                      "Feed basic text to summarizer",
+                      "Check generated summary length and content",
+                      "Confirm no exception is thrown"
+                    ]
+                  },
+                  "test_summarization_success_status.py": {
+                    "description": "Ensures summarization pipeline returns a success status",
+                    "test_type": "integration",
+                    "purpose": [
+                      "Validate pipeline sets the correct status on successful summarize",
+                      "Check logs for any warnings"
+                    ],
+                    "steps": [
+                      "Invoke summarizer with valid input",
+                      "Verify status indicates success",
+                      "Confirm summary is non-empty"
+                    ]
+                  },
+                  "test_summarization_output_type_and_length.py": {
+                    "description": "Checks the type (string) and length constraints of the summary output",
+                    "test_type": "integration",
+                    "purpose": [
+                      "Ensure summarizer returns a string",
+                      "Validate summary length falls within expected bounds"
+                    ],
+                    "steps": [
+                      "Provide input text to the summarizer",
+                      "Examine output type",
+                      "Check length is within allowed range"
+                    ]
+                  },
+                  "test_summarization_metadata_includes_original_length.py": {
+                    "description": "Verifies summarization metadata includes the original text length",
+                    "test_type": "integration",
+                    "purpose": [
+                      "Ensure pipeline outputs metadata about original text",
+                      "Validate completeness of summary info"
+                    ],
+                    "steps": [
+                      "Summarize sample text",
+                      "Check metadata for original length field",
+                      "Confirm field matches input size"
+                    ]
+                  },
+                  "test_summarization_metadata_includes_chunk_count.py": {
+                    "description": "Ensures summary metadata includes the number of chunks processed",
+                    "test_type": "integration",
+                    "purpose": [
+                      "Verify chunk count is tracked during summarization",
+                      "Validate pipeline accurately reports chunk usage"
+                    ],
+                    "steps": [
+                      "Split sample text into chunks for summarization",
+                      "Inspect metadata chunk count",
+                      "Confirm count matches expected number of chunks"
+                    ]
+                  },
+                  "test_single_chunk_for_short_text.py": {
+                    "description": "Checks that short text is processed as a single chunk",
+                    "test_type": "integration",
+                    "purpose": [
+                      "Ensure pipeline does not over-segment short input",
+                      "Validate consistent chunk handling logic"
+                    ],
+                    "steps": [
+                      "Use a short input below chunk threshold",
+                      "Run summarization pipeline",
+                      "Confirm only one chunk is created"
+                    ]
+                  },
+                  "test_model_interaction_during_summarization.py": {
+                    "description": "Verifies correct calls to the underlying model during summarization",
+                    "test_type": "integration",
+                    "purpose": [
+                      "Ensure the summarizer model is invoked with appropriate parameters",
+                      "Validate no redundant model calls"
+                    ],
+                    "steps": [
+                      "Mock the summarization model",
+                      "Run a summarization job",
+                      "Check invocation arguments and call count"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+}

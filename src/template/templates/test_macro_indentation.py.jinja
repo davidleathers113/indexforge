@@ -1,0 +1,102 @@
+{# Template for testing macro indentation #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestMacroIndentation:
+    """Test macro indentation in templates."""
+
+    def test_macro_indentation(self, env):
+        """Test that macro calls maintain proper indentation."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup with context -%}
+{%- from 'common/macros/assertions.py.jinja' import verify_mock_calls with context -%}
+def test_function():
+    # Set up mocks
+    {{ setup("test_mock", side_effect=[1, 2, 3]) | indent(4) }}
+
+    # Execute test
+    result = test_mock()
+
+    # Verify mock calls
+    {{ verify_mock_calls("test_mock", [
+        "call()",
+    ], ordered=True) | indent(4) }}"""
+
+        result = env.from_string(template_str).render()
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Set up mocks
+    test_mock = mocker.Mock()
+    test_mock.side_effect = [1, 2, 3]
+
+    # Execute test
+    result = test_mock()
+
+    # Verify mock calls
+    test_mock.assert_has_calls([
+        call(),
+    ], any_order=False)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_nested_macro_indentation(self, env):
+        """Test that nested macro calls maintain proper indentation."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup, setup_context_manager with context -%}
+def test_function():
+    # Set up mocks
+    {{ setup("outer_mock") | indent(4) }}
+    {{ setup_context_manager("outer_mock", enter_return="ctx") | indent(4) }}
+
+    with outer_mock() as ctx:
+        {{ setup("inner_mock", return_value=42) | indent(8) }}
+        result = inner_mock()
+
+    assert result == 42"""
+
+        result = env.from_string(template_str).render()
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Set up mocks
+    outer_mock = mocker.Mock()
+    outer_mock.__enter__ = mocker.Mock(return_value=ctx)
+    outer_mock.__exit__ = mocker.Mock(return_value=True)
+
+    with outer_mock() as ctx:
+        inner_mock = mocker.Mock()
+        inner_mock.return_value = 42
+        result = inner_mock()
+
+    assert result == 42"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

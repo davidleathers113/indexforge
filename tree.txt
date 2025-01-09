@@ -1,0 +1,558 @@
+.
+├── JINJA2_TEMPLATES.md
+├── README.md
+├── REQUIREMENTS.md
+├── codebase_structure.md
+├── communication_schema.json
+├── custom_logs
+│   └── pipeline.json
+├── docker-compose.yml
+├── fulltest_tree.json
+├── logs
+│   └── pipeline.json
+├── notion_project.egg-info
+│   ├── PKG-INFO
+│   ├── SOURCES.txt
+│   ├── dependency_links.txt
+│   ├── requires.txt
+│   └── top_level.txt
+├── pyproject.toml
+├── pytest.ini
+├── query_examples.md
+├── refactoring_proposal.md
+├── rendered_template.py
+├── requirements.txt
+├── run_pipeline.py
+├── setup.py
+├── src
+│   ├── __init__.py
+│   ├── configuration
+│   │   └── logger_setup.py
+│   ├── connectors
+│   │   └── notion_connector.py
+│   ├── embeddings
+│   │   └── embedding_generator.py
+│   ├── indexing
+│   │   ├── document
+│   │   │   ├── __init__.py
+│   │   │   ├── batch_manager.py
+│   │   │   ├── document_processor.py
+│   │   │   ├── document_storage.py
+│   │   │   └── operations
+│   │   │       ├── __init__.py
+│   │   │       ├── addition.py
+│   │   │       ├── deletion.py
+│   │   │       └── update.py
+│   │   ├── document_manager.py
+│   │   ├── index
+│   │   │   ├── __init__.py
+│   │   │   ├── index_config.py
+│   │   │   ├── index_operations.py
+│   │   │   └── vector_index.py
+│   │   ├── index.py
+│   │   ├── operations.py
+│   │   ├── schema
+│   │   │   ├── __init__.py
+│   │   │   ├── schema_definition.py
+│   │   │   ├── schema_migrator.py
+│   │   │   └── schema_validator.py
+│   │   ├── schema_manager.py
+│   │   ├── search
+│   │   │   ├── __init__.py
+│   │   │   ├── query_builder.py
+│   │   │   ├── search_executor.py
+│   │   │   └── search_result.py
+│   │   ├── search_manager.py
+│   │   └── vector_index.py
+│   ├── main.py
+│   ├── models
+│   │   ├── __init__.py
+│   │   └── settings.py
+│   ├── notion_project.egg-info
+│   │   ├── PKG-INFO
+│   │   ├── SOURCES.txt
+│   │   ├── dependency_links.txt
+│   │   ├── requires.txt
+│   │   └── top_level.txt
+│   ├── pipeline
+│   │   ├── __init__.py
+│   │   ├── components
+│   │   │   └── topic_clusterer.py
+│   │   ├── context.py
+│   │   ├── core.py
+│   │   ├── document_ops.py
+│   │   ├── errors.py
+│   │   ├── parameters.py
+│   │   ├── search.py
+│   │   └── steps.py
+│   ├── template
+│   │   ├── __init__.py
+│   │   ├── contexts
+│   │   ├── core
+│   │   │   ├── __init__.py
+│   │   │   └── facade.py
+│   │   ├── environment.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   └── settings.py
+│   │   ├── services
+│   │   │   ├── __init__.py
+│   │   │   ├── context.py
+│   │   │   └── environment.py
+│   │   ├── templates
+│   │   │   ├── base_template.py.jinja
+│   │   │   ├── common
+│   │   │   │   └── macros
+│   │   │   │       ├── assertions.py.jinja
+│   │   │   │       └── mocks.py.jinja
+│   │   │   ├── test_context_manager_indentation.py.jinja
+│   │   │   ├── test_decorator_basic_formatting.py.jinja
+│   │   │   ├── test_decorator_templates.py.jinja
+│   │   │   ├── test_macro_indentation.py.jinja
+│   │   │   ├── test_mixed_loop_conditional_indentation.py.jinja
+│   │   │   ├── test_mock_verification_formatting.py.jinja
+│   │   │   ├── test_multiline_assertion_indentation.py.jinja
+│   │   │   ├── test_multiline_function_args_indentation.py.jinja
+│   │   │   ├── test_nested_block_formatting.py.jinja
+│   │   │   ├── test_nested_conditional_indentation.py.jinja
+│   │   │   ├── test_template_rendering.py.jinja
+│   │   │   ├── test_try_except_indentation.py.jinja
+│   │   │   └── test_verification_block_formatting.py.jinja
+│   │   └── utils
+│   │       ├── __init__.py
+│   │       ├── cleanup.py
+│   │       ├── config.py
+│   │       ├── file_io.py
+│   │       ├── formatters
+│   │       │   ├── __init__.py
+│   │       │   ├── base_formatter.py
+│   │       │   ├── black_formatter.py
+│   │       │   ├── import_sorter.py
+│   │       │   ├── indentation_fixer.py
+│   │       │   ├── multiple_statement_splitter.py
+│   │       │   └── whitespace_stripper.py
+│   │       ├── formatters.py
+│   │       ├── logging_config.py
+│   │       └── processors.py
+│   └── utils
+│       ├── __init__.py
+│       ├── cache_manager.py
+│       ├── document_processing.py
+│       ├── monitoring.py
+│       ├── pii_detector.py
+│       ├── summarizer
+│       │   ├── __init__.py
+│       │   ├── caching
+│       │   │   ├── __init__.py
+│       │   │   └── decorators.py
+│       │   ├── config
+│       │   │   ├── __init__.py
+│       │   │   └── settings.py
+│       │   ├── core
+│       │   │   ├── __init__.py
+│       │   │   └── processor.py
+│       │   └── pipeline
+│       │       ├── __init__.py
+│       │       └── summarizer.py
+│       ├── summarizer.py
+│       ├── text_processing.py
+│       └── topic_clustering.py
+├── templates
+│   └── common
+│       └── macros
+│           ├── assertions.py.jinja
+│           └── mocks.py.jinja
+├── tests
+│   ├── README.md
+│   ├── REQUIREMENTS.md
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── data
+│   │   └── sample_documents.json
+│   ├── fixtures
+│   │   ├── __init__.py
+│   │   ├── constants.py
+│   │   ├── core
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── errors.py
+│   │   │   └── logger.py
+│   │   ├── data
+│   │   │   ├── __init__.py
+│   │   │   ├── cache.py
+│   │   │   ├── embedding.py
+│   │   │   ├── redis.py
+│   │   │   └── vector.py
+│   │   ├── documents
+│   │   │   ├── __init__.py
+│   │   │   ├── fixtures.py
+│   │   │   ├── processor.py
+│   │   │   └── state.py
+│   │   ├── documents.py
+│   │   ├── fixture_responsibilities.md
+│   │   ├── mock_fixtures.md
+│   │   ├── processing
+│   │   │   ├── __init__.py
+│   │   │   ├── kmeans.py
+│   │   │   ├── pii.py
+│   │   │   └── topic.py
+│   │   ├── processing.py
+│   │   ├── schema
+│   │   │   ├── __init__.py
+│   │   │   ├── migrator.py
+│   │   │   └── validator.py
+│   │   ├── schema.py
+│   │   ├── search
+│   │   │   ├── __init__.py
+│   │   │   ├── components.py
+│   │   │   └── executor.py
+│   │   ├── summarizer.py
+│   │   ├── system
+│   │   │   ├── __init__.py
+│   │   │   ├── cli.py
+│   │   │   ├── components.py
+│   │   │   ├── monitoring.py
+│   │   │   └── pipeline.py
+│   │   └── text
+│   │       ├── __init__.py
+│   │       ├── processor.py
+│   │       └── summarizer.py
+│   ├── unit
+│   │   ├── configuration
+│   │   │   ├── test_basic_logger.py
+│   │   │   ├── test_contextual_logging.py
+│   │   │   ├── test_json_logger.py
+│   │   │   ├── test_logger_performance.py
+│   │   │   ├── test_logger_rotation.py
+│   │   │   └── test_logger_setup.py
+│   │   ├── connectors
+│   │   │   └── test_notion_connector.py
+│   │   ├── embeddings
+│   │   │   └── test_embedding_generator.py
+│   │   ├── indexing
+│   │   │   ├── schema
+│   │   │   │   ├── test_schema_creation.py
+│   │   │   │   ├── test_schema_errors.py
+│   │   │   │   ├── test_schema_migration.py
+│   │   │   │   └── test_schema_validation.py
+│   │   │   ├── test_configuration.py
+│   │   │   ├── test_document_operations.py
+│   │   │   ├── test_hybrid_search.py
+│   │   │   ├── test_relationship_search.py
+│   │   │   ├── test_schema_management.py
+│   │   │   ├── test_search_operations.py
+│   │   │   ├── test_time_range_search.py
+│   │   │   └── test_vector_index.py
+│   │   ├── main
+│   │   │   ├── __init__.py
+│   │   │   ├── test_error_handling.py
+│   │   │   ├── test_execution.py
+│   │   │   ├── test_parameters.py
+│   │   │   └── test_validation.py
+│   │   ├── pipeline
+│   │   │   ├── test_core.py
+│   │   │   ├── test_document_ops.py
+│   │   │   ├── test_search.py
+│   │   │   └── test_steps.py
+│   │   ├── template
+│   │   │   ├── conftest.py
+│   │   │   ├── test_code_formatting.py
+│   │   │   ├── test_context_manager_indentation.py
+│   │   │   ├── test_decorator_basic_formatting.py
+│   │   │   ├── test_decorator_formatting.py
+│   │   │   ├── test_decorator_templates.py
+│   │   │   ├── test_docstring_indentation.py
+│   │   │   ├── test_macro_indentation.py
+│   │   │   ├── test_mixed_loop_conditional_indentation.py
+│   │   │   ├── test_mock_verification_formatting.py
+│   │   │   ├── test_multiline_assertion_indentation.py
+│   │   │   ├── test_multiline_function_args_indentation.py
+│   │   │   ├── test_nested_block_formatting.py
+│   │   │   ├── test_nested_conditional_indentation.py
+│   │   │   ├── test_template_formatting.py
+│   │   │   ├── test_template_rendering.py
+│   │   │   ├── test_try_except_indentation.py
+│   │   │   └── test_verification_block_formatting.py
+│   │   ├── test_main.py
+│   │   ├── test_run_pipeline.py
+│   │   └── utils
+│   │       ├── README.md
+│   │       ├── cache
+│   │       │   ├── basic_operations
+│   │       │   │   ├── delete
+│   │       │   │   │   ├── test_cache_delete_key_formatting_with_namespace.py
+│   │       │   │   │   ├── test_cache_delete_returns_success.py
+│   │       │   │   │   ├── test_cache_delete_value.py
+│   │       │   │   │   ├── test_redis_delete_call.py
+│   │       │   │   │   └── test_redis_delete_called_once.py
+│   │       │   │   ├── get
+│   │       │   │   │   ├── test_cache_get_basic_retrieval.py
+│   │       │   │   │   ├── test_cache_get_exact_value_match.py
+│   │       │   │   │   ├── test_cache_get_missing_key.py
+│   │       │   │   │   ├── test_cache_get_returns_none_for_missing_key.py
+│   │       │   │   │   ├── test_cache_get_with_complex_data_type.py
+│   │       │   │   │   ├── test_key_formatting_for_missing_key.py
+│   │       │   │   │   ├── test_key_formatting_with_namespace_on_get.py
+│   │       │   │   │   ├── test_redis_get_call_count_for_missing_key.py
+│   │       │   │   │   ├── test_redis_get_call_for_existing_key.py
+│   │       │   │   │   └── test_value_deserialization_with_pickle.py
+│   │       │   │   └── set
+│   │       │   │       ├── test_cache_set_key_formatting_with_namespace.py
+│   │       │   │       ├── test_cache_set_namespace_handling_with_ttl.py
+│   │       │   │       ├── test_cache_set_returns_success.py
+│   │       │   │       ├── test_cache_set_returns_success_with_ttl.py
+│   │       │   │       ├── test_cache_set_with_complex_data_type.py
+│   │       │   │       ├── test_cache_set_with_custom_ttl.py
+│   │       │   │       ├── test_cache_set_with_default_ttl.py
+│   │       │   │       ├── test_redis_setex_call_parameters.py
+│   │       │   │       ├── test_redis_setex_call_parameters_with_ttl.py
+│   │       │   │       ├── test_redis_setex_uses_correct_ttl.py
+│   │       │   │       ├── test_value_serialization_on_set.py
+│   │       │   │       └── test_value_serialization_on_set_with_ttl.py
+│   │       │   ├── decorators
+│   │       │   │   ├── cache_decorator
+│   │       │   │   │   ├── test_argument_handling_in_cache_decorator.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_basic_cache_decorator_functionality.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_cache_decorator_function_execution_on_miss.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_cache_decorator_hit_behavior.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_cache_interaction_with_decorator.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_cache_key_generation_with_varied_args.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_decorator_ensures_result_consistency_for_args.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_logging_behavior_in_cache_decorator.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   ├── test_multiple_calls_with_different_args.py
+│   │       │   │   │   │   ├── decorator_args
+│   │       │   │   │   │   ├── expected_behavior
+│   │       │   │   │   │   └── mock_setup
+│   │       │   │   │   └── test_return_value_validation_in_decorator.py
+│   │       │   │   │       ├── decorator_args
+│   │       │   │   │       ├── expected_behavior
+│   │       │   │   │       └── mock_setup
+│   │       │   │   └── retry_decorator
+│   │       │   │       ├── test_retry_decorator_attempt_count.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_attempt_count_accuracy.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_basic_retry_behavior.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_error_propagation.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_exception_handling.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_failure_scenarios.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_final_result.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_logging.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       ├── test_retry_decorator_maximum_limit.py
+│   │       │   │       │   ├── decorator_args
+│   │       │   │       │   ├── expected_behavior
+│   │       │   │       │   └── mock_setup
+│   │       │   │       └── test_retry_decorator_success_after_failure.py
+│   │       │   │           ├── decorator_args
+│   │       │   │           ├── expected_behavior
+│   │       │   │           └── mock_setup
+│   │       │   ├── error_handling
+│   │       │   │   ├── connection
+│   │       │   │   │   ├── test_all_cache_operations_under_connection_failure.py
+│   │       │   │   │   ├── test_cache_initialization_handles_connection_error.py
+│   │       │   │   │   ├── test_graceful_degradation_on_connection_error.py
+│   │       │   │   │   ├── test_initialization_behavior_on_connection_failure.py
+│   │       │   │   │   ├── test_redis_client_state_on_connection_error.py
+│   │       │   │   │   └── test_warning_logging_on_connection_failure.py
+│   │       │   │   ├── delete
+│   │       │   │   │   ├── test_cache_delete_error_handling.py
+│   │       │   │   │   ├── test_cache_delete_failure_scenario.py
+│   │       │   │   │   ├── test_cache_delete_returns_false_on_failure.py
+│   │       │   │   │   ├── test_error_logging_on_delete_failure.py
+│   │       │   │   │   └── test_exception_handling_on_delete_error.py
+│   │       │   │   ├── get
+│   │       │   │   │   ├── test_cache_get_handles_corrupted_data.py
+│   │       │   │   │   ├── test_cache_get_returns_none_on_connection_error.py
+│   │       │   │   │   ├── test_cache_get_returns_none_on_invalid_data.py
+│   │       │   │   │   ├── test_error_logging_on_get_failure.py
+│   │       │   │   │   ├── test_error_message_logging_for_get_error.py
+│   │       │   │   │   ├── test_exception_handling_for_get_error.py
+│   │       │   │   │   ├── test_graceful_failure_for_invalid_json.py
+│   │       │   │   │   ├── test_pickle_deserialization_error_handling.py
+│   │       │   │   │   └── test_redis_connection_error_during_get.py
+│   │       │   │   │       └── expected_attributes
+│   │       │   │   └── set
+│   │       │   │       ├── test_cache_set_failure_on_serialization_error.py
+│   │       │   │       ├── test_cache_set_returns_false_on_failure.py
+│   │       │   │       ├── test_error_logging_for_serialization_failure.py
+│   │       │   │       ├── test_error_logging_on_set_failure.py
+│   │       │   │       ├── test_error_message_content_for_serialization_error.py
+│   │       │   │       ├── test_error_message_content_on_set_error.py
+│   │       │   │       ├── test_exception_propagation_on_set_error.py
+│   │       │   │       ├── test_pickle_serialization_error_handling.py
+│   │       │   │       ├── test_redis_write_failure_during_set.py
+│   │       │   │       └── test_unserializable_object_handling_on_set.py
+│   │       │   ├── integration
+│   │       │   │   ├── retry
+│   │       │   │   │   ├── test_cache_interaction_during_retry.py
+│   │       │   │   │   ├── test_cache_usage_after_retry_success.py
+│   │       │   │   │   ├── test_failure_recovery_during_retry.py
+│   │       │   │   │   ├── test_retry_count_validation.py
+│   │       │   │   │   ├── test_retry_mechanism_with_failures.py
+│   │       │   │   │   └── test_value_persistence_after_retry.py
+│   │       │   │   └── workflow
+│   │       │   │       ├── test_cache_cleanup_behavior_after_workflow.py
+│   │       │   │       ├── test_cache_state_cleanup_after_multiple_ops.py
+│   │       │   │       ├── test_cache_state_consistency_across_workflow.py
+│   │       │   │       ├── test_cache_state_transitions.py
+│   │       │   │       ├── test_call_counts_for_multiple_operations.py
+│   │       │   │       ├── test_full_cache_operation_sequence.py
+│   │       │   │       ├── test_handling_multiple_keys_in_cache.py
+│   │       │   │       ├── test_key_lifecycle_set_get_delete.py
+│   │       │   │       ├── test_multiple_cache_operations.py
+│   │       │   │       ├── test_operation_ordering_in_cache.py
+│   │       │   │       └── test_value_persistence_across_operations.py
+│   │       │   └── key_management
+│   │       │       ├── generation
+│   │       │       │   ├── test_key_consistency_for_same_input.py
+│   │       │       │   ├── test_key_formatting_in_generation.py
+│   │       │       │   ├── test_namespace_handling_in_key_generation.py
+│   │       │       │   ├── test_prefix_addition_in_key_generation.py
+│   │       │       │   └── test_special_character_handling_in_keys.py
+│   │       │       └── hashing
+│   │       │           ├── test_hash_consistency_across_instances.py
+│   │       │           ├── test_hash_format_validation.py
+│   │       │           ├── test_hash_generation_for_strings_dicts_lists.py
+│   │       │           ├── test_hash_reproducibility_for_same_value.py
+│   │       │           ├── test_hash_uniqueness_for_different_values.py
+│   │       │           ├── test_multiple_hash_generations_consistency.py
+│   │       │           ├── test_sha256_hash_length.py
+│   │       │           ├── test_type_handling_in_hash_generation.py
+│   │       │           ├── test_value_equality_in_hashing.py
+│   │       │           └── test_value_stability_in_hash_generation.py
+│   │       ├── document
+│   │       │   ├── __init__.py
+│   │       │   ├── test_basic_operations.py
+│   │       │   ├── test_batch_operations.py
+│   │       │   ├── test_chunking.py
+│   │       │   ├── test_content_processing.py
+│   │       │   └── test_validation.py
+│   │       ├── monitoring
+│   │       │   ├── __init__.py
+│   │       │   ├── test_error_handling.py
+│   │       │   ├── test_export.py
+│   │       │   ├── test_operation_tracking.py
+│   │       │   ├── test_prometheus.py
+│   │       │   ├── test_summary.py
+│   │       │   └── test_system_metrics.py
+│   │       ├── pii
+│   │       │   ├── __init__.py
+│   │       │   ├── test_ner.py
+│   │       │   ├── test_pattern_matching.py
+│   │       │   └── test_redaction.py
+│   │       ├── summarizer
+│   │       │   ├── __init__.py
+│   │       │   ├── test_cache_integration.py
+│   │       │   ├── test_chunk_processing.py
+│   │       │   ├── test_configuration.py
+│   │       │   ├── test_document_processing.py
+│   │       │   ├── test_error_cases.py
+│   │       │   ├── test_multi_chunk.py
+│   │       │   ├── test_pipeline
+│   │       │   │   ├── caching
+│   │       │   │   ├── cleanup
+│   │       │   │   │   ├── test_deletes_summarizer.py
+│   │       │   │   │   └── test_handles_missing_summarizer.py
+│   │       │   │   ├── conftest.py
+│   │       │   │   ├── error_handling
+│   │       │   │   │   ├── test_empty_text.py
+│   │       │   │   │   ├── test_initialization_error.py
+│   │       │   │   │   ├── test_invalid_device.py
+│   │       │   │   │   ├── test_invalid_model.py
+│   │       │   │   │   ├── test_invalid_parameters.py
+│   │       │   │   │   ├── test_invalid_text_type.py
+│   │       │   │   │   └── test_summarization_error.py
+│   │       │   │   ├── initialization
+│   │       │   │   ├── summarization
+│   │       │   │   │   ├── test_basic_summarization
+│   │       │   │   │   │   ├── test_basic_summarization_functionality.py
+│   │       │   │   │   │   ├── test_model_interaction_during_summarization.py
+│   │       │   │   │   │   ├── test_single_chunk_for_short_text.py
+│   │       │   │   │   │   ├── test_summarization_metadata_includes_chunk_count.py
+│   │       │   │   │   │   ├── test_summarization_metadata_includes_original_length.py
+│   │       │   │   │   │   ├── test_summarization_output_type_and_length.py
+│   │       │   │   │   │   └── test_summarization_success_status.py
+│   │       │   │   │   ├── test_basic_summarization.py
+│   │       │   │   │   ├── test_chunk_combining.py
+│   │       │   │   │   ├── test_custom_config.py
+│   │       │   │   │   └── test_long_text_chunking.py
+│   │       │   │   ├── test_pipeline_caching.py
+│   │       │   │   ├── test_pipeline_initialization.py
+│   │       │   │   └── test_pipeline_summarization.py
+│   │       │   └── test_pipeline.py
+│   │       ├── test_summary_config.py
+│   │       ├── text
+│   │       │   ├── __init__.py
+│   │       │   ├── test_chunking.py
+│   │       │   ├── test_error_handling.py
+│   │       │   ├── test_token_management.py
+│   │       │   └── test_truncation.py
+│   │       ├── topic
+│   │       │   ├── __init__.py
+│   │       │   ├── test_cache_integration.py
+│   │       │   ├── test_caching.py
+│   │       │   ├── test_clustering.py
+│   │       │   ├── test_config.py
+│   │       │   ├── test_document_processing.py
+│   │       │   ├── test_error_handling.py
+│   │       │   ├── test_keywords.py
+│   │       │   ├── test_similar_topics.py
+│   │       │   └── test_special_cases.py
+│   │       └── utlls_responsibility_report.md
+│   ├── utils
+│   │   ├── __init__.py
+│   │   ├── assertions.py
+│   │   ├── constants.py
+│   │   ├── helpers.py
+│   │   ├── mocks.py
+│   │   └── test_utils.py
+│   └── utils.py
+└── tree.txt
+
+268 directories, 288 files

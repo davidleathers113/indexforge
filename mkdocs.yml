@@ -1,0 +1,70 @@
+site_name: IndexForge
+site_description: Universal file indexing and processing system
+site_author: Your Name
+site_url: https://indexforge.app
+repo_url: https://github.com/yourusername/indexforge
+repo_name: indexforge
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+  - swagger-ui-tag
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - footnotes
+
+nav:
+  - Home: index.md
+  - API Reference:
+    - FastAPI Endpoints: api/endpoints.md
+    - Models: api/models.md
+    - Configuration: api/config.md
+  - User Guide:
+    - Getting Started: guide/getting-started.md
+    - Installation: guide/installation.md
+    - Configuration: guide/configuration.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Testing: development/testing.md
+    - Documentation: development/documentation.md

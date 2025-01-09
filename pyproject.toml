@@ -1,0 +1,272 @@
+[tool.poetry]
+name = "indexforge"
+version = "0.1.0"
+description = "Universal file indexing and processing system"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://indexforge.app"
+repository = "https://github.com/yourusername/indexforge"
+documentation = "https://indexforge.app/docs"
+keywords = ["index", "search", "files", "documents", "processing", "ml", "nlp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Text Processing :: Linguistic",
+    "Framework :: FastAPI",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+    "Framework :: Pytest",
+    "Natural Language :: English",
+    "Environment :: Web Environment",
+    "Intended Audience :: Science/Research"
+]
+packages = [
+    { include = "src", from = "." }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+fastapi = "^0.115.6"
+uvicorn = {version = "^0.34.0", extras = ["standard"]}
+python-multipart = "^0.0.20"
+pydantic = {version = "^2.10.4", extras = ["email"]}
+pydantic-settings = "^2.7.1"
+python-dotenv = "^1.0.1"
+requests = {version = "^2.32.3", extras = ["security"]}
+sentry-sdk = {version = "^2.19.2", extras = ["fastapi"]}
+tenacity = "^9.0.0"
+
+# Core processing dependencies
+aiohttp = "^3.11.11"
+asyncio = ">=3.4.3,<4.0.0"
+structlog = ">=24.4.0,<25.0.0"
+
+# Storage dependencies
+redis = {version = "^5.2.1", extras = ["hiredis"]}
+minio = "^7.2.14"
+sqlalchemy = {version = "^2.0.36", extras = ["asyncio"], allow-prereleases = false}
+greenlet = "^3.1.1"
+alembic = "^1.14.0"
+asyncpg = "^0.30.0"
+
+# Monitoring dependencies
+prometheus-client = "^0.21.1"
+opentelemetry-api = "^1.29.0"
+opentelemetry-sdk = "^1.29.0"
+opentelemetry-instrumentation-fastapi = "^0.50b0"
+statsd = "^4.0.1"
+
+# Parsing dependencies
+python-docx = "^1.1.2"
+beautifulsoup4 = {version = "^4.12.3", extras = ["lxml"]}
+html5lib = "^1.1"
+jinja2 = "^3.1.5"
+openpyxl = "^3.1.5"
+"pdfminer.six" = "^20240706"
+python-magic = "^0.4.27"
+huggingface-hub = "0.27.1"
+accelerate = "1.2.1"
+transformers = "4.47.1"
+
+[tool.poetry.group.storage]
+optional = true
+
+[tool.poetry.group.storage.dependencies]
+redis = {version = "^5.2.1", extras = ["hiredis"]}
+minio = "^7.2.14"
+sqlalchemy = {version = "^2.0.36", extras = ["asyncio"]}
+alembic = "^1.14.0"
+asyncpg = "^0.30.0"
+
+[tool.poetry.group.monitoring]
+optional = true
+
+[tool.poetry.group.monitoring.dependencies]
+prometheus-client = "^0.21.1"
+opentelemetry-api = "^1.29.0"
+opentelemetry-sdk = "^1.29.0"
+opentelemetry-instrumentation-fastapi = "^0.50b0"
+statsd = "^4.0.1"
+
+[tool.poetry.group.ml]
+optional = true
+
+[tool.poetry.group.ml.dependencies]
+numpy = {version = "^2.2.1", allow-prereleases = false}
+pandas = {version = "^2.2.3", extras = ["computation"]}
+scikit-learn = {version = "^1.4.0", extras = ["full"]}
+torch = {version = "^2.1.2", extras = ["cpu"]}
+tiktoken = "^0.5.2"
+tqdm = "^4.67.1"
+spacy = "^3.7.2"
+sentence-transformers = "^2.3.1"
+faiss-cpu = "^1.7.4"
+
+[tool.poetry.group.parsing]
+optional = true
+
+[tool.poetry.group.parsing.dependencies]
+beautifulsoup4 = {version = "^4.12.3", extras = ["lxml"]}
+html5lib = "^1.1"
+jinja2 = "^3.1.5"
+openpyxl = "^3.1.5"
+"pdfminer.six" = "^20240706"
+python-magic = "^0.4.27"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^9.4.0"
+mkdocstrings = {extras = ["python"], version = "0.24.0"}
+mkdocs-swagger-ui-tag = "0.6.7"
+mkdocs-jupyter = "0.24.6"
+mkdocs-git-revision-date-plugin = "0.3.2"
+mkdocs-minify-plugin = "0.7.1"
+
+[tool.poetry.group.ci]
+optional = true
+
+[tool.poetry.group.ci.dependencies]
+tox = "^4.12.1"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "^0.23.5"
+pytest-benchmark = {version = "^4.0.0", extras = ["histogram"]}
+pytest-timeout = "^2.2.0"
+pytest-xdist = {version = "^3.5.0", extras = ["psutil"]}
+pytest-sugar = "^1.0.0"
+pytest-clarity = "^1.0.1"
+pytest-randomly = "^3.15.0"
+pytest-datadir = "^1.5.0"
+httpx = "^0.28.1"
+docker = "^7.0.0"
+locust = "^2.21.0"
+
+[tool.poetry.group.dev.dependencies]
+# Linting and formatting
+black = {version = "^24.10.0", extras = ["jupyter", "d"]}
+ruff = {version = "^0.8.6", extras = ["all"]}
+mypy = {version = "^1.14.1", extras = ["reports"]}
+djlint = "^1.36.4"
+pylint = "^3.3.3"
+
+# Testing
+pytest = {version = "^8.3.4", extras = ["testing"]}
+hypothesis = {version = "^6.123.9", extras = ["numpy", "pandas", "dateutil"]}
+faker = {version = "^33.3.0", extras = ["all"]}
+coverage = {extras = ["toml"], version = "^7.6.10"}
+decoy = "^2.1.1"
+
+# Development tools
+pre-commit = "^4.0.1"
+commitizen = "^4.1.0"
+python-dateutil = "^2.9.0.post0"
+memory-profiler = "^0.61.0"
+ipython = "^8.31.0"
+ipdb = "^0.13.13"
+rich = {version = "^13.9.4", extras = ["jupyter"]}
+
+# API development
+openai = {version = "^1.59.5", extras = ["datalib"]}
+httpie = {version = "^3.2.4", extras = ["all"]}
+pytest-xdist = "^3.6.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+api = "src.api.main:app"
+cli = "src.cli.main:main"
+benchmark = "src.benchmark.main:main"
+docs = "src.docs.build:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = """
+    -v
+    --tb=short
+    --import-mode=importlib
+"""
+pythonpath = ["src"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+    "ignore::RuntimeWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "@overload"
+]
+ignore_errors = true
+omit = [
+    "tests/*",
+    "setup.py",
+    "src/*/migrations/*",
+    "src/*/tests/*",
+    "src/*/conftest.py",
+    "src/*/examples/*",
+    "src/*/scripts/*"
+]
+fail_under = 85
+
+[tool.coverage.html]
+directory = "coverage_html"
+show_contexts = true
+skip_covered = false
+skip_empty = true
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.coverage.json]
+output = "coverage.json"
+
+[tool.pylint.main]
+jobs = 0
+ignore-patterns = ["test_.*?py", "conftest.py"]
+recursive = true
+suggestion-mode = true
+unsafe-load-any-extension = false
+
+[tool.pylint.messages_control]
+max-line-length = 100
+disable = [
+    "C0111",
+    "C0103",
+    "C0330",
+    "C0326",
+    "W0511",
+    "R0903",
+    "R0913",
+    "R0914",
+]
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "supplemental"

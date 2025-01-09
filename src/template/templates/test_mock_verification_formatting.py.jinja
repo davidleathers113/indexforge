@@ -1,0 +1,256 @@
+{# Template for testing mock verification formatting #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestMockVerificationFormatting:
+    """Test formatting of mock verifications."""
+
+    def test_basic_mock_verification_formatting(self, env):
+        """Test that basic mock verifications maintain proper formatting."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup, verify_mock_calls, verify_called_once with context -%}
+def test_function():
+    # Setup mocks
+    {{ setup("processor_mock") | indent(4) }}
+    {{ setup("logger_mock") | indent(4) }}
+
+    # Execute test
+    result = process_data(
+        processor=processor_mock,
+        logger=logger_mock
+    )
+
+    # Verify mock interactions
+    {{ verify_called_once("processor_mock") | indent(4) }}
+    {{ verify_mock_calls("logger_mock", [
+        "call.info('Processing started')",
+        "call.debug('Processing completed')",
+    ]) | indent(4) }}"""
+
+        result = env.from_string(template_str).render()
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Setup mocks
+    processor_mock = mocker.Mock()
+    logger_mock = mocker.Mock()
+
+    # Execute test
+    result = process_data(
+        processor=processor_mock,
+        logger=logger_mock
+    )
+
+    # Verify mock interactions
+    processor_mock.assert_called_once()
+    logger_mock.assert_has_calls([
+        call.info('Processing started'),
+        call.debug('Processing completed'),
+    ], any_order=False)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+
+    def test_complex_mock_verification_formatting(self, env):
+        """Test that complex mock verifications maintain proper formatting."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup, setup_context_manager, verify_mock_calls with context -%}
+def test_function():
+    # Setup mocks
+    {{ setup("processor_mock", return_value="processed") | indent(4) }}
+    {{ setup("resource_mock") | indent(4) }}
+    {{ setup_context_manager("resource_mock", enter_return="resource_ctx") | indent(4) }}
+
+    # Execute test
+    with resource_mock() as resource:
+        result = processor_mock(
+            resource,
+            mode={{ mode|tojson }},
+            options=[
+                {%- for option in options %}
+                {{ option|tojson }},
+                {%- endfor %}
+            ]
+        )
+
+    # Verify mock interactions
+    {{ verify_mock_calls("resource_mock", [
+        "call.__enter__()",
+        "call.__exit__(None, None, None)",
+    ]) | indent(4) }}
+
+    {{ verify_mock_calls("processor_mock", [
+        "call(" + [
+            "resource_ctx",
+            "mode=" + mode|tojson,
+            "options=[" + options|join(", ") + "]"
+        ]|join(", ") + ")"
+    ]) | indent(4) }}"""
+
+        context = {
+            "mode": "test",
+            "options": ["opt1", "opt2", "opt3"],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Setup mocks
+    processor_mock = mocker.Mock(return_value="processed")
+    resource_mock = mocker.Mock()
+    resource_mock.__enter__ = mocker.Mock(return_value=resource_ctx)
+    resource_mock.__exit__ = mocker.Mock(return_value=True)
+
+    # Execute test
+    with resource_mock() as resource:
+        result = processor_mock(
+            resource,
+            mode="test",
+            options=[
+                "opt1",
+                "opt2",
+                "opt3",
+            ]
+        )
+
+    # Verify mock interactions
+    resource_mock.assert_has_calls([
+        call.__enter__(),
+        call.__exit__(None, None, None),
+    ], any_order=False)
+
+    processor_mock.assert_has_calls([
+        call(resource_ctx, mode="test", options=["opt1", "opt2", "opt3"])
+    ], any_order=False)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+
+    def test_mock_verification_with_retry_formatting(self, env):
+        """Test that mock verifications with retry logic maintain proper formatting."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup, setup_retry_mocks, verify_mock_calls with context -%}
+def test_function():
+    # Setup mocks
+    {{ setup("processor_mock") | indent(4) }}
+    {{ setup_retry_mocks({
+        "success_on": retry_config.success_on,
+        "error_type": retry_config.error_type,
+        "error_message": retry_config.error_message,
+    }) | indent(4) }}
+
+    # Execute test
+    try:
+        result = process_with_retry(
+            processor=processor_mock,
+            retry_func=retry_mock,
+            max_attempts={{ max_attempts }}
+        )
+    except {{ retry_config.error_type }} as e:
+        assert str(e) == {{ retry_config.error_message|tojson }}
+        return
+
+    # Verify retry behavior
+    {{ verify_mock_calls("retry_mock", [
+        "call(attempt=1)",
+        "call(attempt=2)",
+        "call(attempt=3)",
+    ]) | indent(4) }}
+
+    # Verify processor calls
+    {{ verify_mock_calls("processor_mock", [
+        "call(retry_count=1)",
+        "call(retry_count=2)",
+        "call(retry_count=3)",
+    ]) | indent(4) }}"""
+
+        context = {
+            "retry_config": {
+                "success_on": 3,
+                "error_type": "ValueError",
+                "error_message": "Retry failed",
+            },
+            "max_attempts": 3,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Setup mocks
+    processor_mock = mocker.Mock()
+    retry_mock = mocker.Mock()
+    attempts = [0]  # Mutable counter
+
+    def retry_side_effect(*args, **kwargs):
+        attempts[0] += 1
+        if attempts[0] >= 3:
+            return True
+        raise ValueError("Retry failed")
+
+    retry_mock.side_effect = retry_side_effect
+
+    # Execute test
+    try:
+        result = process_with_retry(
+            processor=processor_mock,
+            retry_func=retry_mock,
+            max_attempts=3
+        )
+    except ValueError as e:
+        assert str(e) == "Retry failed"
+        return
+
+    # Verify retry behavior
+    retry_mock.assert_has_calls([
+        call(attempt=1),
+        call(attempt=2),
+        call(attempt=3),
+    ], any_order=False)
+
+    # Verify processor calls
+    processor_mock.assert_has_calls([
+        call(retry_count=1),
+        call(retry_count=2),
+        call(retry_count=3),
+    ], any_order=False)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+{%- endblock %}

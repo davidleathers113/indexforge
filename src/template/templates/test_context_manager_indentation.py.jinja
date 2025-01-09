@@ -1,0 +1,263 @@
+{# Template for testing context manager indentation #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestContextManagerIndentation:
+    """Test indentation of context manager blocks."""
+
+    def test_basic_context_manager_indentation(self, env):
+        """Test that basic context manager blocks maintain proper indentation."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup, setup_context_manager with context -%}
+def test_function():
+    {{ setup("context_mock") | indent(4) }}
+    {{ setup_context_manager("context_mock", enter_return="context") | indent(4) }}
+
+    with context_mock() as context:
+        result = process_context(
+            context,
+            param={{ param_value }}
+        )
+
+    assert result == {{ expected_result }}"""
+
+        context = {
+            "param_value": 42,
+            "expected_result": "processed",
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    context_mock = mocker.Mock()
+    context_mock.__enter__ = mocker.Mock(return_value=context)
+    context_mock.__exit__ = mocker.Mock(return_value=True)
+
+    with context_mock() as context:
+        result = process_context(
+            context,
+            param=42
+        )
+
+    assert result == "processed\""""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_nested_context_manager_indentation(self, env):
+        """Test that nested context manager blocks maintain proper indentation."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup, setup_context_manager with context -%}
+def test_function():
+    {{ setup("outer_mock") | indent(4) }}
+    {{ setup_context_manager("outer_mock", enter_return="outer_ctx") | indent(4) }}
+    {{ setup("inner_mock") | indent(4) }}
+    {{ setup_context_manager("inner_mock", enter_return="inner_ctx") | indent(4) }}
+
+    with outer_mock() as outer_ctx:
+        # Process outer context
+        outer_result = process_outer(
+            outer_ctx,
+            param={{ outer_param }}
+        )
+
+        with inner_mock() as inner_ctx:
+            # Process inner context
+            inner_result = process_inner(
+                inner_ctx,
+                outer_result=outer_result,
+                param={{ inner_param }}
+            )
+
+        # Verify inner result
+        assert inner_result == {{ expected_inner }}
+
+    # Verify outer result
+    assert outer_result == {{ expected_outer }}"""
+
+        context = {
+            "outer_param": 1,
+            "inner_param": 2,
+            "expected_inner": "inner",
+            "expected_outer": "outer",
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    outer_mock = mocker.Mock()
+    outer_mock.__enter__ = mocker.Mock(return_value=outer_ctx)
+    outer_mock.__exit__ = mocker.Mock(return_value=True)
+    inner_mock = mocker.Mock()
+    inner_mock.__enter__ = mocker.Mock(return_value=inner_ctx)
+    inner_mock.__exit__ = mocker.Mock(return_value=True)
+
+    with outer_mock() as outer_ctx:
+        # Process outer context
+        outer_result = process_outer(
+            outer_ctx,
+            param=1
+        )
+
+        with inner_mock() as inner_ctx:
+            # Process inner context
+            inner_result = process_inner(
+                inner_ctx,
+                outer_result=outer_result,
+                param=2
+            )
+
+        # Verify inner result
+        assert inner_result == "inner"
+
+    # Verify outer result
+    assert outer_result == "outer\""""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_context_manager_with_complex_body(self, env):
+        """Test that context managers with complex bodies maintain proper indentation."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup, setup_context_manager with context -%}
+def test_function():
+    {{ setup("resource_mock") | indent(4) }}
+    {{ setup_context_manager("resource_mock", enter_return="resource") | indent(4) }}
+
+    with resource_mock() as resource:
+        # Initialize processing
+        processor = ResourceProcessor(
+            config={
+                "mode": {{ config.mode|tojson }},
+                "options": [
+                    {{ config.options[0]|tojson }},
+                    {{ config.options[1]|tojson }},
+                ]
+            }
+        )
+
+        # Process in multiple steps
+        {%- for step in steps %}
+        result_{{ loop.index }} = processor.process(
+            resource,
+            step_name={{ step.name|tojson }},
+            step_value={{ step.value }}
+        )
+        assert result_{{ loop.index }} == {{ step.expected }}
+        {%- endfor %}
+
+        # Finalize processing
+        final_result = processor.finalize(
+            results=[
+                {%- for step in steps %}
+                result_{{ loop.index }},
+                {%- endfor %}
+            ]
+        )
+
+    assert final_result == {{ final_expected }}"""
+
+        context = {
+            "config": {
+                "mode": "test",
+                "options": ["opt1", "opt2"],
+            },
+            "steps": [
+                {"name": "first", "value": 1, "expected": 10},
+                {"name": "second", "value": 2, "expected": 20},
+                {"name": "third", "value": 3, "expected": 30},
+            ],
+            "final_expected": 60,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    resource_mock = mocker.Mock()
+    resource_mock.__enter__ = mocker.Mock(return_value=resource)
+    resource_mock.__exit__ = mocker.Mock(return_value=True)
+
+    with resource_mock() as resource:
+        # Initialize processing
+        processor = ResourceProcessor(
+            config={
+                "mode": "test",
+                "options": [
+                    "opt1",
+                    "opt2",
+                ]
+            }
+        )
+
+        # Process in multiple steps
+        result_1 = processor.process(
+            resource,
+            step_name="first",
+            step_value=1
+        )
+        assert result_1 == 10
+        result_2 = processor.process(
+            resource,
+            step_name="second",
+            step_value=2
+        )
+        assert result_2 == 20
+        result_3 = processor.process(
+            resource,
+            step_name="third",
+            step_value=3
+        )
+        assert result_3 == 30
+
+        # Finalize processing
+        final_result = processor.finalize(
+            results=[
+                result_1,
+                result_2,
+                result_3,
+            ]
+        )
+
+    assert final_result == 60"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

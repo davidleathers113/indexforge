@@ -1,0 +1,96 @@
+{
+    "projectType": "python",
+    "language": {
+        "python": {
+            "version": "3.11",
+            "style": {
+                "formatter": "black",
+                "lineLength": 100,
+                "sortImports": "isort",
+                "linters": ["ruff", "mypy"],
+                "docstringFormat": "google"
+            }
+        }
+    },
+    "framework": {
+        "fastapi": {
+            "autoImports": true,
+            "routeConventions": {
+                "prefix": "/api/v1",
+                "paramCase": true
+            },
+            "responseValidation": true,
+            "openApiGeneration": true
+        }
+    },
+    "testing": {
+        "framework": "pytest",
+        "conventions": {
+            "testFilePattern": "test_*.py",
+            "testLocation": "tests/",
+            "coverageThreshold": 80
+        },
+        "features": {
+            "generateTests": true,
+            "asyncSupport": true,
+            "parallelExecution": true
+        }
+    },
+    "documentation": {
+        "generator": "mkdocs",
+        "theme": "material",
+        "features": {
+            "autoGenerateApiDocs": true,
+            "includeTypes": true,
+            "validateDocstrings": true,
+            "swaggerUi": true
+        }
+    },
+    "ml": {
+        "frameworks": ["torch", "transformers"],
+        "dataProcessing": ["pandas", "numpy"],
+        "features": {
+            "vectorization": true,
+            "gpuAcceleration": true,
+            "batchProcessing": true
+        }
+    },
+    "codeGeneration": {
+        "imports": {
+            "autoImport": true,
+            "organizeImports": true,
+            "removeUnused": true
+        },
+        "typing": {
+            "strict": true,
+            "generateAnnotations": true,
+            "validateTypes": true
+        },
+        "errorHandling": {
+            "generateTryCatch": true,
+            "customExceptions": true
+        },
+        "logging": {
+            "suggestLogging": true,
+            "structuredLogs": true
+        }
+    },
+    "security": {
+        "secretDetection": true,
+        "envVariables": true,
+        "inputValidation": true,
+        "dependencyAuditing": true
+    },
+    "performance": {
+        "suggestOptimizations": true,
+        "asyncAwaitUsage": true,
+        "memoryManagement": true
+    },
+    "ide": {
+        "formatOnSave": true,
+        "lintOnSave": true,
+        "showInlineErrors": true,
+        "autoComplete": true,
+        "snippets": true
+    }
+}

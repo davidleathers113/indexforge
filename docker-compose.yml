@@ -1,0 +1,56 @@
+version: "3.4"
+services:
+  weaviate:
+    image: semitechnologies/weaviate:1.19.6
+    ports:
+      - "8080:8080"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "text2vec-transformers"
+      ENABLE_MODULES: "text2vec-transformers"
+      TRANSFORMERS_INFERENCE_API: "http://t2v-transformers:8080"
+      CLUSTER_HOSTNAME: "node1"
+      TRANSFORMERS_INFERENCE_API_RETRY_AMOUNT: "20"
+      TRANSFORMERS_INFERENCE_API_RETRY_TIME: "5s"
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    depends_on:
+      t2v-transformers:
+        condition: service_healthy
+    networks:
+      - weaviate_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/meta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  t2v-transformers:
+    image: semitechnologies/transformers-inference:sentence-transformers-all-MiniLM-L6-v2
+    environment:
+      ENABLE_CUDA: "0"
+      WORKERS_PER_MODEL: "2"
+      BATCHING_ENABLED: "true"
+      BATCHING_WAIT_TIME: "100ms"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import requests; requests.get(''http://localhost:8080/docs'')"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - weaviate_net
+
+networks:
+  weaviate_net:
+    driver: bridge
+
+volumes:
+  weaviate_data:
+    driver: local

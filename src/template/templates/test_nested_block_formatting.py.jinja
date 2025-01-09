@@ -1,0 +1,181 @@
+{# Template for testing nested block formatting #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestNestedBlockFormatting:
+    """Test formatting of nested conditional blocks in templates."""
+
+    def test_nested_conditional_indentation(self, env):
+        """Test that nested conditional blocks maintain proper indentation."""
+        template_str = """\
+def test_function():
+    {%- if outer_condition %}
+    # Outer block
+    outer_var = {{ outer_value }}
+    {%- if inner_condition %}
+    # Inner block
+    inner_var = {{ inner_value }}
+    {%- if deepest_condition %}
+    # Deepest block
+    deepest_var = {{ deepest_value }}
+    {%- endif %}
+    {%- endif %}
+    {%- endif %}"""
+
+        context = {
+            "outer_condition": True,
+            "outer_value": 1,
+            "inner_condition": True,
+            "inner_value": 2,
+            "deepest_condition": True,
+            "deepest_value": 3,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Outer block
+    outer_var = 1
+    # Inner block
+    inner_var = 2
+    # Deepest block
+    deepest_var = 3"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_nested_loop_indentation(self, env):
+        """Test that nested loops maintain proper indentation."""
+        template_str = """\
+def test_function():
+    {%- for outer_item in outer_items %}
+    # Process outer item {{ outer_item.name }}
+    {%- for inner_item in outer_item.items %}
+    # Process inner item {{ inner_item }}
+    {%- if inner_item.condition %}
+    process_item({{ inner_item.value }})
+    {%- endif %}
+    {%- endfor %}
+    {%- endfor %}"""
+
+        context = {
+            "outer_items": [
+                {
+                    "name": "first",
+                    "items": [
+                        {"condition": True, "value": 1},
+                        {"condition": False, "value": 2},
+                    ],
+                },
+                {
+                    "name": "second",
+                    "items": [
+                        {"condition": True, "value": 3},
+                    ],
+                },
+            ],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Process outer item first
+    # Process inner item {'condition': True, 'value': 1}
+    process_item(1)
+    # Process inner item {'condition': False, 'value': 2}
+    # Process outer item second
+    # Process inner item {'condition': True, 'value': 3}
+    process_item(3)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_mixed_block_indentation(self, env):
+        """Test that mixed blocks (loops, conditionals, functions) maintain proper indentation."""
+        template_str = """\
+def test_function():
+    {%- for item in items %}
+    {%- if item.condition %}
+    @{{ item.decorator }}
+    def inner_function_{{ loop.index }}():
+        # Function body
+        {%- for step in item.steps %}
+        step_{{ loop.index }} = {{ step }}
+        {%- endfor %}
+        return True
+    {%- endif %}
+    {%- endfor %}"""
+
+        context = {
+            "items": [
+                {
+                    "condition": True,
+                    "decorator": "decorator_one",
+                    "steps": [1, 2],
+                },
+                {
+                    "condition": True,
+                    "decorator": "decorator_two",
+                    "steps": [3, 4, 5],
+                },
+            ],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    @decorator_one
+    def inner_function_1():
+        # Function body
+        step_1 = 1
+        step_2 = 2
+        return True
+    @decorator_two
+    def inner_function_2():
+        # Function body
+        step_1 = 3
+        step_2 = 4
+        step_3 = 5
+        return True"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

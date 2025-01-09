@@ -1,0 +1,146 @@
+{# Template for testing decorator basic formatting #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestDecoratorBasicFormatting:
+    """Test basic formatting of decorator test templates."""
+
+    def test_basic_test_structure_formatting(self, env):
+        """Test that basic test structure maintains correct indentation and spacing."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup with context -%}
+{%- from 'common/macros/assertions.py.jinja' import verify_result with context -%}
+
+def test_{{ test_name|default('decorator') }}(mocker, caplog):
+    """
+    Test: {{ title }}
+    Purpose: {{ purpose }}
+    Steps:
+    {%- for step in steps %}
+    {{ loop.index }}. {{ step }}
+    {%- endfor %}
+    """
+    caplog.set_level(logging.DEBUG)
+
+    # Set up mocks
+    {{- setup }}
+
+    # Execute
+    {{- execute }}
+
+    # Verify
+    {{- verify }}"""
+
+        context = {
+            "test_name": "cache_decorator",
+            "title": "Test Title",
+            "purpose": "Test Purpose",
+            "steps": ["Step 1", "Step 2"],
+            "setup": "\n    mock = mocker.Mock()",
+            "execute": "\n    result = mock()",
+            "verify": "\n    assert result is not None",
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_cache_decorator(mocker, caplog):
+    """
+    Test: Test Title
+    Purpose: Test Purpose
+    Steps:
+    1. Step 1
+    2. Step 2
+    """
+    caplog.set_level(logging.DEBUG)
+
+    # Set up mocks
+    mock = mocker.Mock()
+
+    # Execute
+    result = mock()
+
+    # Verify
+    assert result is not None"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_decorator_with_arguments(self, env):
+        """Test that decorators with arguments maintain proper formatting."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup with context -%}
+@{{ decorator_name }}(
+    {%- for key, value in decorator_args.items() %}
+    {{ key }}={{ value }},
+    {%- endfor %}
+)
+def test_{{ test_name|default('function') }}(mocker):
+    """{{ docstring }}"""
+    # Set up mocks
+    {{ setup("test_mock") | indent(4) }}
+
+    # Execute test
+    result = test_mock()
+
+    # Verify
+    assert result is not None"""
+
+        context = {
+            "decorator_name": "cache",
+            "decorator_args": {
+                "ttl": 300,
+                "key_prefix": "'test'",
+                "max_size": 100,
+            },
+            "test_name": "caching",
+            "docstring": "Test caching functionality",
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+@cache(
+    ttl=300,
+    key_prefix='test',
+    max_size=100,
+)
+def test_caching(mocker):
+    """Test caching functionality"""
+    # Set up mocks
+    test_mock = mocker.Mock()
+
+    # Execute test
+    result = test_mock()
+
+    # Verify
+    assert result is not None"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

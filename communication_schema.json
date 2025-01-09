@@ -1,0 +1,381 @@
+{
+    "communication_sources": {
+      "email": {
+        "metadata": {
+          "thread_id": "string",
+          "subject": "string",
+          "from_address": "string",
+          "to_addresses": ["string"],
+          "cc_addresses": ["string"],
+          "timestamp_utc": "datetime",
+          "time_zone": "string",
+          "last_accessed": "datetime",
+          "content_version": "string",
+          "has_attachments": "boolean",
+          "participants": [
+            {
+              "user_id": "string",
+              "role": ["sender", "recipient", "cc", "bcc"]
+            }
+          ],
+          "content_classification": {
+            "auto_tags": ["string"],
+            "sentiment": ["positive", "negative", "neutral"],
+            "topic_label": "string"
+          },
+          "quality_metrics": {
+            "completeness_score": "float",
+            "accuracy_score": "float",
+            "freshness_score": "float"
+          }
+        },
+        "content": {
+          "body": "text",
+          "body_format": ["plain", "html"],
+          "quoted_text": "text",
+          "signature": "text"
+        },
+        "relationships": {
+          "thread": {
+            "thread_parent": "email_id",
+            "in_reply_to": "email_id"
+          },
+          "attachments": ["file_reference"],
+          "mentioned_documents": ["document_reference"]
+        },
+        "embeddings": {
+          "subject": "vector[1536]",
+          "body": "vector[1536]",
+          "context": "vector[1536]",
+          "embedding_version": "string"
+        }
+      },
+
+      "chat": {
+        "metadata": {
+          "platform": [
+            "slack",
+            "teams",
+            "discord",
+            "facebook_messenger",
+            "skype"
+          ],
+          "channel_id": "string",
+          "channel_type": ["direct", "group", "public"],
+          "timestamp_utc": "datetime",
+          "time_zone": "string",
+          "last_accessed": "datetime",
+          "content_version": "string",
+          "has_attachments": "boolean",
+          "participants": [
+            {
+              "user_id": "string",
+              "role": ["owner", "member", "guest"]
+            }
+          ],
+          "content_classification": {
+            "auto_tags": ["string"],
+            "sentiment": ["positive", "negative", "neutral"],
+            "topic_label": "string"
+          },
+          "quality_metrics": {
+            "completeness_score": "float",
+            "accuracy_score": "float",
+            "freshness_score": "float"
+          }
+        },
+        "platform_data": {
+          "facebook_messenger": {
+            "conversation_id": "string",
+            "conversation_type": ["one_to_one", "group"],
+            "participants": ["fb_user_id"],
+            "is_archived": "boolean",
+            "nickname": "string"
+          },
+          "skype": {
+            "conversation_id": "string",
+            "conversation_type": ["one_to_one", "group", "conference"],
+            "participants": ["skype_id"],
+            "chat_topic": "string",
+            "is_bookmarked": "boolean",
+            "call_history": {
+              "duration": "number",
+              "type": ["audio", "video"],
+              "participants": ["skype_id"],
+              "recording_available": "boolean"
+            }
+          }
+        },
+        "content": {
+          "message": "text",
+          "message_type": [
+            "text",
+            "system",
+            "action",
+            "media",
+            "sticker",
+            "gif",
+            "voice_message"
+          ],
+          "reactions": {
+            "generic": ["emoji"],
+            "facebook_messenger": [
+              "like",
+              "love",
+              "haha",
+              "wow",
+              "sad",
+              "angry"
+            ],
+            "skype": [
+              "like",
+              "heart",
+              "laugh",
+              "surprised",
+              "sad",
+              "angry"
+            ]
+          },
+          "mentions": ["user_reference"],
+          "rich_content": {
+            "stickers": {
+              "id": "string",
+              "pack_id": "string",
+              "platform": "string"
+            },
+            "gifs": {
+              "url": "string",
+              "preview_url": "string",
+              "source": "string"
+            },
+            "voice_messages": {
+              "duration": "number",
+              "url": "string",
+              "transcription": "text"
+            }
+          }
+        },
+        "relationships": {
+          "thread": {
+            "thread_parent": "message_id",
+            "replied_to": "message_id"
+          },
+          "attachments": ["file_reference"],
+          "linked_documents": ["document_reference"],
+          "shared_media": {
+            "images": ["media_reference"],
+            "videos": ["media_reference"],
+            "files": ["file_reference"],
+            "links": ["url_reference"]
+          }
+        },
+        "embeddings": {
+          "message": "vector[1536]",
+          "thread_context": "vector[1536]",
+          "media_context": "vector[1536]",
+          "voice_transcription": "vector[1536]",
+          "embedding_version": "string"
+        }
+      },
+
+      "document_references": {
+        "metadata": {
+          "platform": ["notion", "google_docs", "email_attachment"],
+          "doc_id": "string",
+          "title": "string",
+          "created_at": "datetime",
+          "last_modified": "datetime",
+          "last_accessed": "datetime",
+          "content_version": "string",
+          "content_classification": {
+            "auto_tags": ["string"],
+            "sentiment": ["positive", "negative", "neutral"],
+            "topic_label": "string"
+          },
+          "quality_metrics": {
+            "completeness_score": "float",
+            "accuracy_score": "float",
+            "freshness_score": "float"
+          }
+        },
+        "relationships": {
+          "parent_container": "container_id",
+          "mentioned_in_communications": ["communication_id"],
+          "related_docs": ["document_reference"]
+        }
+      }
+    },
+
+    "analysis_settings": {
+      "threading": {
+        "max_thread_depth": 50,
+        "thread_time_window": "30d",
+        "cross_platform_linking": true,
+        "platform_specific": {
+          "facebook_messenger": {
+            "reaction_weight": 0.5,
+            "media_context_weight": 1.2,
+            "conversation_history_window": "90d"
+          },
+          "skype": {
+            "call_context_weight": 1.5,
+            "chat_context_weight": 1.0,
+            "conversation_history_window": "90d"
+          }
+        }
+      },
+      "vectorization": {
+        "model": "text-embedding-ada-002",
+        "chunk_size": 512,
+        "overlap": 50,
+        "include_metadata": true,
+        "media_processing": {
+          "voice_to_text": true,
+          "image_context": true,
+          "gif_context": true
+        },
+        "embedding_caching": {
+          "cache_policy": ["lru", "lfu", "none"],
+          "cache_size_limit": "10gb",
+          "update_frequency": "adaptive"
+        },
+        "partial_embedding_allowed": true
+      },
+      "indexing_strategy": {
+        "vector_indexes": {
+          "hnsw_config": {
+            "m": 16,
+            "ef_construction": 200,
+            "ef_search": 100,
+            "space_type": "cosine"
+          },
+          "quantization": {
+            "enabled": true,
+            "bits": 8,
+            "type": "scalar"
+          }
+        },
+        "compound_indexes": [
+          {
+            "name": "content_search",
+            "fields": [
+              "content_classification.topic_label",
+              "content_classification.auto_tags",
+              "embeddings.body"
+            ],
+            "index_type": "vector_hybrid"
+          },
+          {
+            "name": "temporal_context",
+            "fields": [
+              "metadata.timestamp_utc",
+              "metadata.content_version",
+              "relationships.thread.thread_parent"
+            ],
+            "index_type": "btree"
+          },
+          {
+            "name": "relationship_graph",
+            "fields": [
+              "relationships.mentioned_documents",
+              "relationships.linked_documents",
+              "metadata.platform"
+            ],
+            "index_type": "graph"
+          }
+        ],
+        "materialized_views": [
+          {
+            "name": "topic_clusters",
+            "source_fields": [
+              "content_classification.topic_label",
+              "content_classification.auto_tags",
+              "embeddings.body"
+            ],
+            "aggregations": [
+              {
+                "type": "vector_centroid",
+                "field": "embeddings.body",
+                "group_by": "content_classification.topic_label"
+              }
+            ],
+            "refresh_policy": "daily"
+          },
+          {
+            "name": "document_relationships",
+            "source_fields": [
+              "relationships.mentioned_documents",
+              "relationships.linked_documents",
+              "metadata.title",
+              "metadata.platform"
+            ],
+            "aggregations": [
+              {
+                "type": "graph_connectivity",
+                "weight_field": "embeddings.context"
+              }
+            ],
+            "refresh_policy": "on_change"
+          }
+        ],
+        "specialized_indexes": {
+          "temporal": {
+            "type": "time_series",
+            "timestamp_field": "metadata.timestamp_utc",
+            "partition_interval": "1d",
+            "retention_period": "90d"
+          },
+          "full_text": {
+            "type": "inverted",
+            "fields": [
+              "content.body",
+              "content.quoted_text",
+              "metadata.title"
+            ],
+            "analyzer": "standard",
+            "enable_ngrams": true
+          }
+        }
+      },
+      "privacy": {
+        "pii_detection": true,
+        "excluded_domains": ["personal", "sensitive"],
+        "retention_policy": "90d",
+        "platform_specific": {
+          "facebook_messenger": {
+            "excluded_conversation_types": ["personal"],
+            "media_retention": "30d"
+          },
+          "skype": {
+            "call_recording_retention": "7d",
+            "personal_chat_exclusion": true
+          }
+        }
+      }
+    },
+
+    "integration_mappings": {
+      "notion_links": {
+        "email_reference": "url_pattern",
+        "chat_reference": "url_pattern",
+        "document_reference": "url_pattern",
+        "facebook_messenger": "message_url_pattern",
+        "skype": "chat_url_pattern"
+      },
+      "google_workspace": {
+        "email_thread": "gmail_thread_id",
+        "document_link": "gdoc_url_pattern",
+        "calendar_reference": "gcal_event_id"
+      },
+      "facebook_messenger": {
+        "conversation_link": "fb_conversation_pattern",
+        "message_link": "fb_message_pattern",
+        "media_link": "fb_media_pattern"
+      },
+      "skype": {
+        "chat_link": "skype_chat_pattern",
+        "call_link": "skype_call_pattern",
+        "media_link": "skype_media_pattern"
+      }
+    }
+  }

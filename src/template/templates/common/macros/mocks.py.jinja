@@ -1,0 +1,90 @@
+{# Common macros for mock setup and verification #}
+
+{%- macro setup(mock_name, return_value=None, side_effect=None) -%}
+    {# Setup a basic mock with optional return value and side effect #}
+    {{ mock_name }} = mocker.Mock()
+    {%- if return_value is not none %}
+    {{ mock_name }}.return_value = {{ return_value }}
+    {%- endif %}
+    {%- if side_effect is not none %}
+    {{ mock_name }}.side_effect = {{ side_effect }}
+    {%- endif %}
+{%- endmacro %}
+
+{%- macro setup_context_manager(mock_name, enter_return=None, exit_return=True) -%}
+    {# Setup a context manager mock with enter/exit behavior #}
+    {%- if enter_return is not none -%}
+        {{ mock_name }}.__enter__ = mocker.Mock(return_value={{ enter_return }})
+    {% else -%}
+        {{ mock_name }}.__enter__ = mocker.Mock()
+    {% endif -%}
+    {{ mock_name }}.__exit__ = mocker.Mock(return_value={{ exit_return }})
+{%- endmacro %}
+
+{%- macro setup_cache_mock(config=None) -%}
+    {%- if not config %}{% set config = {} %}{% endif %}
+    {%- set method = config.get('method', 'get') %}
+    {%- set return_value = config.get('return_value', None) %}
+    cache_mock = mocker.Mock()
+    cache_mock.{{ method }} = mocker.Mock()
+    {%- if return_value is not none %}
+    cache_mock.{{ method }}.return_value = {{ return_value }}
+    {%- endif %}
+{%- endmacro %}
+
+{%- macro setup_serialization(config=None) -%}
+    {%- if not config %}{% set config = {} %}{% endif %}
+    {%- set dumps_return = config.get('dumps_return', b'serialized') %}
+    {%- set loads_return = config.get('loads_return', 'deserialized') %}
+    serializer_mock = mocker.Mock()
+    serializer_mock.dumps = mocker.Mock(return_value={{ dumps_return }})
+    serializer_mock.loads = mocker.Mock(return_value={{ loads_return }})
+{%- endmacro %}
+
+{%- macro setup_retry_mocks(config=None) -%}
+    {%- if not config %}{% set config = {} %}{% endif %}
+    {%- set success_on = config.get('success_on', 2) %}
+    {%- set error_type = config.get('error_type', 'ValueError') %}
+    {%- set error_message = config.get('error_message', 'Retry failed') %}
+    retry_mock = mocker.Mock()
+    attempts = [0]  # Mutable counter
+
+    def retry_side_effect(*args, **kwargs):
+        attempts[0] += 1
+        if attempts[0] >= {{ success_on }}:
+            return True
+        raise {{ error_type }}({{ error_message|tojson }})
+
+    retry_mock.side_effect = retry_side_effect
+{%- endmacro %}
+
+{%- macro verify_mock_calls(mock_name, calls, ordered=True) -%}
+    {{ mock_name }}.assert_has_calls([
+        {%- for call in calls %}
+        {{ call }},
+        {%- endfor %}
+    ], any_order={% if not ordered %}True{% else %}False{% endif %})
+{%- endmacro %}
+
+{%- macro verify_call_count(mock_name, count) -%}
+    assert {{ mock_name }}.call_count == {{ count }}
+{%- endmacro %}
+
+{%- macro verify_called_once(mock_name) -%}
+    {{ mock_name }}.assert_called_once()
+{%- endmacro %}
+
+{%- macro verify_not_called(mock_name) -%}
+    {{ mock_name }}.assert_not_called()
+{%- endmacro %}
+
+{%- macro verify_called_with(mock_name, args=[], kwargs={}) -%}
+    {{ mock_name }}.assert_called_with(
+        {%- for arg in args %}
+        {{ arg }},
+        {%- endfor %}
+        {%- for key, value in kwargs.items() %}
+        {{ key }}={{ value }},
+        {%- endfor %}
+    )
+{%- endmacro %}

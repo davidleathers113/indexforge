@@ -1,0 +1,227 @@
+{# Template for testing verification block formatting #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestVerificationBlockFormatting:
+    """Test formatting of verification blocks in templates."""
+
+    def test_basic_verification_block_formatting(self, env):
+        """Test that basic verification blocks maintain proper formatting."""
+        template_str = """\
+{%- from 'common/macros/assertions.py.jinja' import verify_result, verify_mock_calls with context -%}
+def test_function():
+    # Execute test
+    result = process_data()
+
+    # Verify results
+    {{ verify_result("result.status", "expected_status") | indent(4) }}
+    {{ verify_result("result.value", "expected_value") | indent(4) }}
+
+    # Verify mock calls
+    {{ verify_mock_calls("mock_processor", [
+        "call(arg1, arg2)",
+        "call(arg3, arg4)",
+    ]) | indent(4) }}"""
+
+        result = env.from_string(template_str).render()
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Execute test
+    result = process_data()
+
+    # Verify results
+    assert result.status == expected_status
+    assert result.value == expected_value
+
+    # Verify mock calls
+    mock_processor.assert_has_calls([
+        call(arg1, arg2),
+        call(arg3, arg4),
+    ], any_order=False)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_complex_verification_block_formatting(self, env):
+        """Test that complex verification blocks maintain proper formatting."""
+        template_str = """\
+{%- from 'common/macros/assertions.py.jinja' import verify_result, verify_mock_calls, verify_sequence_equality with context -%}
+def test_function():
+    # Execute test
+    result = process_complex_data()
+
+    # Verify result structure
+    {{ verify_result("result", {
+        "status": "success",
+        "items": [
+            {"id": 1, "value": "first"},
+            {"id": 2, "value": "second"},
+        ],
+        "metadata": {
+            "processed": True,
+            "timestamp": "2024-01-01T00:00:00",
+        }
+    }) | indent(4) }}
+
+    # Verify sequence ordering
+    {{ verify_sequence_equality(
+        "result.ordered_items",
+        "[1, 2, 3, 4, 5]",
+        '"Items are not in expected order"'
+    ) | indent(4) }}
+
+    # Verify mock interactions
+    {{ verify_mock_calls("data_processor", [
+        "call.process_item(1)",
+        "call.process_item(2)",
+        "call.finalize()",
+    ]) | indent(4) }}
+
+    {{ verify_mock_calls("event_logger", [
+        "call.log_event('start', timestamp='2024-01-01T00:00:00')",
+        "call.log_event('complete', status='success')",
+    ], ordered=True) | indent(4) }}"""
+
+        result = env.from_string(template_str).render()
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Execute test
+    result = process_complex_data()
+
+    # Verify result structure
+    assert result == {
+        "status": "success",
+        "items": [
+            {"id": 1, "value": "first"},
+            {"id": 2, "value": "second"},
+        ],
+        "metadata": {
+            "processed": True,
+            "timestamp": "2024-01-01T00:00:00",
+        }
+    }
+
+    # Verify sequence ordering
+    assert len(result.ordered_items) == len([1, 2, 3, 4, 5]), "Sequence lengths do not match"
+    for idx, (a, e) in enumerate(zip(result.ordered_items, [1, 2, 3, 4, 5])):
+        assert a == e, f"Mismatch at index {idx}: {a} != {e}"
+    , "Items are not in expected order"
+
+    # Verify mock interactions
+    data_processor.assert_has_calls([
+        call.process_item(1),
+        call.process_item(2),
+        call.finalize(),
+    ], any_order=False)
+
+    event_logger.assert_has_calls([
+        call.log_event('start', timestamp='2024-01-01T00:00:00'),
+        call.log_event('complete', status='success'),
+    ], any_order=False)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_nested_verification_block_formatting(self, env):
+        """Test that nested verification blocks maintain proper formatting."""
+        template_str = """\
+{%- from 'common/macros/assertions.py.jinja' import verify_result, verify_mock_calls, verify_multiple_conditions with context -%}
+def test_function():
+    # Execute test with nested verifications
+    with context_manager() as ctx:
+        result = process_with_context(ctx)
+
+        # Verify context state
+        {{ verify_multiple_conditions([
+            "ctx.is_active()",
+            "ctx.mode == 'test'",
+            "ctx.status == 'running'",
+        ]) | indent(8) }}
+
+        # Process nested items
+        for item in result.items:
+            {{ verify_result("item.status", "'processed'") | indent(12) }}
+            {{ verify_mock_calls("item.processor", [
+                "call.validate()",
+                "call.process()",
+                "call.cleanup()",
+            ]) | indent(12) }}
+
+    # Verify final state
+    {{ verify_result("result.final_status", "'completed'") | indent(4) }}
+    {{ verify_mock_calls("context_manager", [
+        "call.__enter__()",
+        "call.__exit__(None, None, None)",
+    ]) | indent(4) }}"""
+
+        result = env.from_string(template_str).render()
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Execute test with nested verifications
+    with context_manager() as ctx:
+        result = process_with_context(ctx)
+
+        # Verify context state
+        assert all(
+            ctx.is_active() and
+            ctx.mode == 'test' and
+            ctx.status == 'running'
+        )
+
+        # Process nested items
+        for item in result.items:
+            assert item.status == 'processed'
+            item.processor.assert_has_calls([
+                call.validate(),
+                call.process(),
+                call.cleanup(),
+            ], any_order=False)
+
+    # Verify final state
+    assert result.final_status == 'completed'
+    context_manager.assert_has_calls([
+        call.__enter__(),
+        call.__exit__(None, None, None),
+    ], any_order=False)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

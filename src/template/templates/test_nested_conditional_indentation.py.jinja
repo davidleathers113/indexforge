@@ -1,0 +1,168 @@
+{# Template for testing nested conditional indentation #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestNestedConditionalIndentation:
+    """Test indentation of nested conditional blocks."""
+
+    def test_nested_if_else_indentation(self, env):
+        """Test that nested if-else blocks maintain proper indentation."""
+        template_str = """\
+def test_function():
+    {%- if outer_condition %}
+    # Outer if block
+    {%- if inner_condition %}
+    # Inner if block
+    result = True
+    {%- else %}
+    # Inner else block
+    result = False
+    {%- endif %}
+    {%- else %}
+    # Outer else block
+    result = None
+    {%- endif %}
+    return result"""
+
+        context = {
+            "outer_condition": True,
+            "inner_condition": False,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Outer if block
+    # Inner else block
+    result = False
+    return result"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_nested_elif_indentation(self, env):
+        """Test that nested if-elif-else blocks maintain proper indentation."""
+        template_str = """\
+def test_function():
+    {%- if outer_condition == 1 %}
+    # First condition
+    {%- if inner_condition %}
+    result = "first-true"
+    {%- else %}
+    result = "first-false"
+    {%- endif %}
+    {%- elif outer_condition == 2 %}
+    # Second condition
+    {%- if inner_condition %}
+    result = "second-true"
+    {%- else %}
+    result = "second-false"
+    {%- endif %}
+    {%- else %}
+    # Default case
+    result = "default"
+    {%- endif %}
+    return result"""
+
+        context = {
+            "outer_condition": 2,
+            "inner_condition": True,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Second condition
+    result = "second-true"
+    return result"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_conditional_with_multiline_content(self, env):
+        """Test that conditionals with multiline content maintain proper indentation."""
+        template_str = """\
+def test_function():
+    {%- if condition %}
+    # Complex operation
+    result = (
+        first_value
+        + second_value
+        + (
+            third_value
+            if nested_condition
+            else fourth_value
+        )
+    )
+    {%- else %}
+    # Simple operation
+    result = default_value
+    {%- endif %}
+    return result"""
+
+        context = {
+            "condition": True,
+            "first_value": 1,
+            "second_value": 2,
+            "third_value": 3,
+            "fourth_value": 4,
+            "nested_condition": True,
+            "default_value": 0,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    # Complex operation
+    result = (
+        1
+        + 2
+        + (
+            3
+            if True
+            else 4
+        )
+    )
+    return result"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}
