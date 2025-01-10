@@ -1,8 +1,43 @@
 """Request models for the API."""
 
+from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
+
+
+class OAuthProvider(str, Enum):
+    """OAuth provider enum."""
+
+    GOOGLE = "google"
+    GITHUB = "github"
+
+
+class OAuthRequest(BaseModel):
+    """OAuth request model."""
+
+    provider: OAuthProvider = Field(..., description="OAuth provider")
+    redirect_to: Optional[HttpUrl] = Field(
+        None, description="URL to redirect to after authentication"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {"provider": "google", "redirect_to": "http://localhost:3000/dashboard"}
+        }
+
+
+class OAuthCallback(BaseModel):
+    """OAuth callback model."""
+
+    code: str = Field(..., description="OAuth authorization code")
+    state: Optional[str] = Field(None, description="State parameter for CSRF protection")
+    provider: OAuthProvider = Field(..., description="OAuth provider")
+
+    class Config:
+        json_schema_extra = {
+            "example": {"code": "4/0AeaYSHDM...", "state": "xyz123", "provider": "google"}
+        }
 
 
 class SearchQuery(BaseModel):
@@ -48,3 +83,39 @@ class DocumentUploadResponse(BaseModel):
                 "document_id": "1234-5678",
             }
         }
+
+
+class SignUpRequest(BaseModel):
+    """Sign up request model."""
+
+    email: EmailStr = Field(..., description="User's email address")
+    password: str = Field(..., min_length=8, description="User's password")
+    name: Optional[str] = Field(None, description="User's full name")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "password": "SecurePass123!",
+                "name": "John Doe",
+            }
+        }
+
+
+class SignInRequest(BaseModel):
+    """Sign in request model."""
+
+    email: EmailStr = Field(..., description="User's email address")
+    password: str = Field(..., description="User's password")
+
+    class Config:
+        json_schema_extra = {"example": {"email": "user@example.com", "password": "SecurePass123!"}}
+
+
+class PasswordResetRequest(BaseModel):
+    """Password reset request model."""
+
+    email: EmailStr = Field(..., description="User's email address")
+
+    class Config:
+        json_schema_extra = {"example": {"email": "user@example.com"}}

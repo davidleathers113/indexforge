@@ -1,0 +1,78 @@
+# Python cache files
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*/*/*/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Test and cache directories
+.benchmarks/
+.hypothesis/
+.pytest_cache/
+.ruff_cache/
+.tox/
+tests/
+coverage_html/
+.coverage
+coverage.xml
+
+# Environment and IDE
+.env*
+!.env.example
+.venv/
+venv/
+ENV/
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Project specific directories
+logs/
+custom_logs/
+google-workspace-export/
+notion-workspace-export/
+src/notion_project.egg-info/
+tools/
+
+# Project specific files
+*.log
+dump.rdb
+indexing.log
+tree.txt
+fulltest_tree.json
+rendered_template.py
+update_imports.py
+run_pipeline.py
+
+# Documentation and config files
+docs/
+*.md
+!README.md
+!CONTRIBUTING.md
+mkdocs.yml
+.cursorrules
+.djlintrc
+.flake8
+.ide_instructions
+.pre-commit-config.yaml
+TEST_OUTCOMES.md
+tox.ini
+pytest_migration.*
+
+# Git
+.git/
+.gitignore
+
+# Keep essential files
+!requirements.txt
+!pyproject.toml
+!setup.py
+!src/
+!docker-compose.yml
+!Dockerfile
+!Dockerfile.weaviate
+!render.yaml

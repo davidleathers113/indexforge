@@ -1,8 +1,8 @@
 """Response models for the API."""
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class DocumentMetadata(BaseModel):
@@ -70,5 +70,46 @@ class Stats(BaseModel):
                 "document_count": 1000,
                 "file_types": {"pdf": 500, "docx": 300, "xlsx": 200},
                 "status": "active",
+            }
+        }
+
+
+class AuthResponse(BaseModel):
+    """Authentication response model."""
+
+    access_token: str = Field(..., description="JWT access token")
+    token_type: str = Field("bearer", description="Token type")
+    user: Dict[str, Any] = Field(..., description="User data from Supabase")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "token_type": "bearer",
+                "user": {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "email": "user@example.com",
+                    "name": "John Doe",
+                    "created_at": "2024-01-10T00:00:00Z",
+                },
+            }
+        }
+
+
+class UserProfile(BaseModel):
+    """User profile response model."""
+
+    id: str = Field(..., description="User's unique identifier")
+    email: EmailStr = Field(..., description="User's email address")
+    name: Optional[str] = Field(None, description="User's full name")
+    created_at: str = Field(..., description="Account creation timestamp")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "email": "user@example.com",
+                "name": "John Doe",
+                "created_at": "2024-01-10T00:00:00Z",
             }
         }

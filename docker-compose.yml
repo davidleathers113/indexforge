@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   app:
+    image: davidleathers/indexforge:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,12 +15,16 @@ services:
       - WEAVIATE_URL=http://weaviate:8080
       - WEAVIATE_PORT=8080
       - WEAVIATE_GRPC_PORT=50051
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - ML_SERVICE_URL=http://ml-service:8001
     depends_on:
       redis:
         condition: service_healthy
       weaviate:
         condition: service_healthy
-      t2v-transformers:
+      ml-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -35,6 +40,37 @@ services:
         reservations:
           cpus: "0.25"
           memory: 512M
+    networks:
+      - indexforge-network
+
+  ml-service:
+    image: davidleathers/indexforge-ml:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.ml
+    ports:
+      - "8001:8001"
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 2G
     networks:
       - indexforge-network
 
@@ -113,7 +149,7 @@ services:
       - indexforge-network
 
   t2v-transformers:
-    image: semitechnologies/transformers-inference:sentence-transformers-all-MiniLM-L6-v2
+    image: semitechnologies/transformers-inference:sentence-transformers-multi-qa-MiniLM-L6-cos-v1
     environment:
       ENABLE_CUDA: "0"
       WORKERS_PER_MODEL: "2"

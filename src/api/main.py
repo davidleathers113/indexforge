@@ -1,41 +1,30 @@
 """FastAPI application entry point."""
 
 import logging
-from typing import Dict
 
-import sentry_sdk
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk import configure_scope
 
+from src.api.config.sentry import init_sentry
 from src.api.config.settings import settings
 from src.api.routers import search_router
+from src.api.routers.auth import router as auth_router
 from src.api.routers.document import router as document_router
-
-# Initialize Sentry
-sentry_sdk.init(
-    dsn=settings.SENTRY_DSN,
-    traces_sample_rate=1.0,
-    environment=settings.ENVIRONMENT,
-    _experiments={
-        "continuous_profiling_auto_start": True,
-    },
-    integrations=[
-        FastApiIntegration(transaction_style="endpoint"),
-    ],
-)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Initialize Sentry with our comprehensive configuration
+init_sentry()
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="API for document operations",
-    version="1.0.0",
+    version=settings.VERSION,
     docs_url=f"{settings.API_V1_STR}/docs",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
@@ -49,49 +38,60 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def add_sentry_context(request: Request, call_next):
+    """Add user and context information to Sentry events."""
+    with configure_scope() as scope:
+        # Add request context
+        scope.set_tag("endpoint", request.url.path)
+        scope.set_tag("method", request.method)
+
+        # Add user context if available
+        if hasattr(request.state, "user"):
+            scope.set_user(
+                {
+                    "id": request.state.user.id,
+                    "email": request.state.user.email,
+                    "tenant_id": request.state.user.tenant_id,
+                }
+            )
+
+        # Add additional context
+        scope.set_context(
+            "request_info",
+            {
+                "client_host": request.client.host if request.client else None,
+                "path_params": dict(request.path_params),
+                "query_params": dict(request.query_params),
+            },
+        )
+
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as e:
+        with configure_scope() as scope:
+            scope.set_tag("error_type", type(e).__name__)
+        raise
+
+
 # Include routers
-app.include_router(search_router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(document_router, prefix=settings.API_V1_STR)
-
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(_, exc: HTTPException) -> JSONResponse:
-    """Handle HTTP exceptions."""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-    )
-
-
-@app.exception_handler(Exception)
-async def general_exception_handler(_, exc: Exception) -> JSONResponse:
-    """Handle general exceptions."""
-    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error"},
-    )
-
-
-@app.get("/sentry-debug")
-async def trigger_error():
-    """Test endpoint to verify Sentry integration."""
-    division_by_zero = 1 / 0
-    return division_by_zero  # This line will never be reached
+app.include_router(search_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health")
-async def health_check() -> Dict[str, str]:
+async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "service": settings.PROJECT_NAME}
+    return {"status": "healthy", "version": settings.VERSION}
 
 
 if __name__ == "__main__":
-    # Run the application with uvicorn when in production
     uvicorn.run(
         "src.api.main:app",
-        host="0.0.0.0",
-        port=int(settings.PORT or 8000),
-        workers=int(settings.WEB_CONCURRENCY or 1),
-        reload=settings.ENVIRONMENT == "development",
+        host=settings.API_HOST,
+        port=settings.API_PORT,
+        reload=settings.DEBUG,
     )

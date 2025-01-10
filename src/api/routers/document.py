@@ -3,6 +3,7 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, UploadFile
+from fastapi.responses import StreamingResponse
 
 from src.api.dependencies.weaviate import get_weaviate_client
 from src.api.models.requests import DocumentFilter, DocumentUploadResponse
@@ -145,5 +146,27 @@ async def get_document_stats(
     """
     try:
         return await service.get_stats()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{document_id}/download")
+async def download_document(
+    document_id: str = Path(..., description="The ID of the document to download"),
+    service: DocumentService = Depends(get_document_service),
+) -> StreamingResponse:
+    """Download a specific document.
+
+    Args:
+        document_id: Document identifier
+        service: Injected document service
+
+    Returns:
+        Streaming response for secure file download
+    """
+    try:
+        return await service.download_document(document_id)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
