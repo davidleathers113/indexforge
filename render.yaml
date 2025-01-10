@@ -4,8 +4,7 @@ services:
     name: indexforge
     runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    image: davidleathers/indexforge:latest
     healthCheckPath: /health
     autoDeploy: true
     envVars:
