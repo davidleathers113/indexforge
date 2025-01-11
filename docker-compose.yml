@@ -1,16 +1,86 @@
 version: "3.8"
 
+name: indexforge
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+
 services:
+  kong:
+    image: kong:3.4
+    container_name: kong
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+      KONG_PROXY_ACCESS_LOG: /usr/local/kong/logs/access.log
+      KONG_PROXY_ERROR_LOG: /usr/local/kong/logs/error.log
+      KONG_ADMIN_ACCESS_LOG: /usr/local/kong/logs/admin_access.log
+      KONG_ADMIN_ERROR_LOG: /usr/local/kong/logs/admin_error.log
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+      KONG_PROXY_LISTEN: "0.0.0.0:8000"
+      KONG_PLUGINS: bundled,correlation-id,jwt,response-transformer,request-size-limiting,bot-detection
+      KONG_SSL: ${KONG_SSL_ENABLED:-off}
+      KONG_JWT_SECRET: ${KONG_JWT_SECRET}
+      KONG_REAL_IP_HEADER: X-Real-IP
+      KONG_TRUSTED_IPS: ${ALLOWED_IPS:-0.0.0.0/0,::/0}
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: ${KONG_NGINX_PROXY_PROXY_BUFFER_SIZE:-160k}
+      KONG_NGINX_PROXY_PROXY_BUFFERS: ${KONG_NGINX_PROXY_PROXY_BUFFERS:-64 160k}
+      KONG_CACHE_MEMORY_SIZE: ${KONG_CACHE_MEMORY_SIZE:-128m}
+      KONG_DB_CACHE_SIZE: ${KONG_DB_CACHE_SIZE:-128m}
+      KONG_ML_CACHE_SIZE: ${KONG_ML_CACHE_SIZE:-256m}
+      KONG_STATUS_LISTEN: "0.0.0.0:8100"
+      KONG_PROMETHEUS_METRICS: "on"
+      KONG_PROMETHEUS_METRICS_PORT: "8101"
+    ports:
+      - "8000:8000"
+      - "8101:8101"
+    expose:
+      - "8001"
+      - "8100"
+    volumes:
+      - ./kong/config:/usr/local/kong/declarative
+      - kong_logs:/usr/local/kong/logs
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging: *default-logging
+    networks:
+      - indexforge-network
+
   app:
-    image: davidleathers/indexforge:latest
+    image: ${DOCKER_REGISTRY:-davidleathers}/indexforge:${SERVICE_VERSION:-latest}
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
+        BUILD_ENV: ${ENVIRONMENT:-production}
+        SERVICE_VERSION: ${SERVICE_VERSION:-1.0.0}
+        MAX_REQUEST_SIZE_MB: ${MAX_REQUEST_SIZE_MB:-2}
+        MAX_CONTENT_LENGTH: ${MAX_CONTENT_LENGTH:-1048576}
+    expose:
+      - "8000"
     environment:
-      - ENVIRONMENT=production
-      - REDIS_HOST=redis
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - REDIS_HOST=app-redis
       - REDIS_PORT=6379
       - WEAVIATE_URL=http://weaviate:8080
       - WEAVIATE_PORT=8080
@@ -19,19 +89,19 @@ services:
       - SUPABASE_KEY=${SUPABASE_KEY}
       - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
       - ML_SERVICE_URL=http://ml-service:8001
+      - APP_CONNECT_TIMEOUT=${APP_CONNECT_TIMEOUT:-3000}
+      - APP_WRITE_TIMEOUT=${APP_WRITE_TIMEOUT:-5000}
+      - APP_READ_TIMEOUT=${APP_READ_TIMEOUT:-60000}
     depends_on:
-      redis:
+      app-redis:
         condition: service_healthy
       weaviate:
         condition: service_healthy
       ml-service:
         condition: service_healthy
     healthcheck:
+      <<: *default-healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     deploy:
       resources:
         limits:
@@ -40,29 +110,33 @@ services:
         reservations:
           cpus: "0.25"
           memory: 512M
+    logging: *default-logging
     networks:
       - indexforge-network
 
   ml-service:
-    image: davidleathers/indexforge-ml:latest
+    image: ${DOCKER_REGISTRY:-davidleathers}/indexforge-ml:${SERVICE_VERSION:-latest}
     build:
       context: .
       dockerfile: Dockerfile.ml
-    ports:
-      - "8001:8001"
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
+        BUILD_ENV: ${ENVIRONMENT:-production}
+    expose:
+      - "8001"
     environment:
-      - ENVIRONMENT=production
-      - REDIS_HOST=redis
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - REDIS_HOST=ml-redis
       - REDIS_PORT=6379
+      - ML_CONNECT_TIMEOUT=${ML_CONNECT_TIMEOUT:-5000}
+      - ML_WRITE_TIMEOUT=${ML_WRITE_TIMEOUT:-10000}
+      - ML_READ_TIMEOUT=${ML_READ_TIMEOUT:-120000}
     depends_on:
-      redis:
+      ml-redis:
         condition: service_healthy
     healthcheck:
+      <<: *default-healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     deploy:
       resources:
         limits:
@@ -71,26 +145,67 @@ services:
         reservations:
           cpus: "1"
           memory: 2G
+    logging: *default-logging
     networks:
       - indexforge-network
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction
+    container_name: app-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory ${REDIS_MAX_MEMORY:-512mb}
+      --maxmemory-policy ${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+      --save 900 1
+      --save 300 10
+      --save 60 10000
     volumes:
-      - redis_data:/data
+      - app_redis_data:/data
     healthcheck:
+      <<: *default-healthcheck
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
-      retries: 3
     deploy:
       resources:
         limits:
           cpus: "0.5"
           memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging: *default-logging
+    networks:
+      - indexforge-network
+
+  ml-redis:
+    image: redis:7-alpine
+    container_name: ml-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory ${ML_REDIS_MAX_MEMORY:-1gb}
+      --maxmemory-policy ${ML_REDIS_MAXMEMORY_POLICY:-volatile-lru}
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - ml_redis_data:/data
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1.5G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    logging: *default-logging
     networks:
       - indexforge-network
 
@@ -107,20 +222,21 @@ services:
       - "8080:8080"
       - "50051:50051"
     environment:
-      QUERY_DEFAULTS_LIMIT: 25
+      QUERY_DEFAULTS_LIMIT: ${WEAVIATE_QUERY_LIMIT:-25}
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
       PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
       DEFAULT_VECTORIZER_MODULE: "text2vec-transformers"
       ENABLE_MODULES: "text2vec-transformers"
       TRANSFORMERS_INFERENCE_API: "http://t2v-transformers:8080"
-      TRANSFORMERS_INFERENCE_API_RETRY_AMOUNT: "20"
-      TRANSFORMERS_INFERENCE_API_RETRY_TIME: "5s"
+      TRANSFORMERS_INFERENCE_API_RETRY_AMOUNT: ${TRANSFORMERS_RETRY_AMOUNT:-20}
+      TRANSFORMERS_INFERENCE_API_RETRY_TIME: ${TRANSFORMERS_RETRY_TIME:-5s}
       CLUSTER_HOSTNAME: "node1"
       ENABLE_API_BASED_MODULES: "true"
-      LOG_LEVEL: "info"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
-      - weaviate-data:/var/lib/weaviate
+      - weaviate_data:/var/lib/weaviate
     healthcheck:
+      <<: *default-healthcheck
       test:
         [
           "CMD",
@@ -132,7 +248,6 @@ services:
         ]
       interval: 10s
       timeout: 5s
-      retries: 5
       start_period: 45s
     deploy:
       resources:
@@ -142,6 +257,7 @@ services:
         reservations:
           cpus: "0.5"
           memory: 1G
+    logging: *default-logging
     depends_on:
       t2v-transformers:
         condition: service_healthy
@@ -152,18 +268,16 @@ services:
     image: semitechnologies/transformers-inference:sentence-transformers-multi-qa-MiniLM-L6-cos-v1
     environment:
       ENABLE_CUDA: "0"
-      WORKERS_PER_MODEL: "2"
+      WORKERS_PER_MODEL: ${WORKERS_PER_MODEL:-2}
       BATCHING_ENABLED: "true"
-      BATCHING_WAIT_TIME: "100ms"
+      BATCHING_WAIT_TIME: ${BATCHING_WAIT_TIME:-100ms}
     healthcheck:
+      <<: *default-healthcheck
       test:
         [
           "CMD-SHELL",
           'python -c "import requests; requests.get(''http://localhost:8080/docs'')"',
         ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
       start_period: 30s
     deploy:
       resources:
@@ -173,15 +287,148 @@ services:
         reservations:
           cpus: "0.5"
           memory: 1G
+    logging: *default-logging
     networks:
       - indexforge-network
 
-volumes:
-  weaviate-data:
-    driver: local
-  redis_data:
-    driver: local
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=${PROMETHEUS_RETENTION_TIME:-15d}"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    ports:
+      - "9090:9090"
+    healthcheck:
+      <<: *default-healthcheck
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9090/-/healthy",
+        ]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    logging: *default-logging
+    networks:
+      - indexforge-network
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: grafana
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=localhost
+      - GF_SMTP_ENABLED=false
+    ports:
+      - "3000:3000"
+    healthcheck:
+      <<: *default-healthcheck
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1",
+        ]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    logging: *default-logging
+    depends_on:
+      - prometheus
+    networks:
+      - indexforge-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:2.2
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - METRICS_STORAGE_TYPE=prometheus
+      - PROMETHEUS_SERVER_URL=http://prometheus:9090
+    ports:
+      - "16686:16686" # Web UI
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "9411:9411" # Zipkin
+    networks:
+      - indexforge-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:16686"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # Message Queue
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: indexforge-rabbitmq
+    hostname: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-admin_password}
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit disk_free_limit "2GB"
+    ports:
+      - "5672:5672" # AMQP protocol
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          memory: 1G
+    networks:
+      - indexforge-network
 
 networks:
   indexforge-network:
+    name: indexforge-network
     driver: bridge
+
+volumes:
+  kong_logs:
+  app_redis_data:
+  ml_redis_data:
+  weaviate_data:
+  prometheus_data:
+  grafana_data:
+  rabbitmq_data:
+    driver: local

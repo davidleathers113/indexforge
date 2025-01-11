@@ -59,7 +59,8 @@ class Settings(BaseSettings):
     ENABLE_METRICS: bool = True
     METRICS_PORT: int = 9090
     ENABLE_TRACING: bool = True
-    OTEL_EXPORTER_OTLP_ENDPOINT: str = "http://localhost:4317"
+    OTEL_EXPORTER_OTLP_ENDPOINT: str = "http://jaeger:4317"
+    OTEL_EXPORTER_OTLP_INSECURE: bool = True
 
     # Performance Thresholds
     PERFORMANCE_THRESHOLDS: Dict[str, float] = {

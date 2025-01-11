@@ -29,6 +29,24 @@ WEAVIATE_URL=your_weaviate_instance_url  # Default: http://localhost:8080
 
 3. Place your Notion workspace export in the `notion-workspace-export` directory.
 
+## Docker Builds
+
+To build and push the Docker image using Docker Cloud Build:
+
+```bash
+# Build and push the main application image
+docker buildx build --push --tag davidleathers/indexforge:latest .
+
+# Build and push the ML service image (if needed)
+docker buildx build --push --tag davidleathers/indexforge-ml:latest -f Dockerfile.ml .
+```
+
+This will:
+
+1. Build the image using Docker Cloud Build
+2. Push the image to Docker Hub automatically
+3. Use the appropriate Dockerfile for each service
+
 ## Usage
 
 Run the main script to process your Notion export:

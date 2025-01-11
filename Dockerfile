@@ -1,81 +1,129 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.4
 
-# Builder stage for dependencies
-FROM --platform=$BUILDPLATFORM python:3.11-slim AS builder
+# Build arguments for better flexibility and caching
+ARG PYTHON_VERSION=3.11
+ARG POETRY_VERSION=2.0.0
+ARG BUILD_ENV=production
+ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+ARG SERVICE_VERSION=1.0.0
+ARG MAX_REQUEST_SIZE_MB=2
+ARG MAX_CONTENT_LENGTH=1048576
 
-# Set build-time environment variables
+# Poetry installation stage
+FROM --platform=$BUILDPLATFORM python:${PYTHON_VERSION}-slim AS poetry
+ENV POETRY_HOME=/opt/poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# Builder stage
+FROM --platform=$BUILDPLATFORM python:${PYTHON_VERSION}-slim AS builder
+COPY --from=poetry /opt/poetry /opt/poetry
+COPY --from=poetry /usr/local/bin/poetry /usr/local/bin/poetry
+
 ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_VERSION=2.0.0 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_CACHE_DIR='/var/cache/pypoetry' \
-    POETRY_HOME='/usr/local' \
     PYTHONPATH="/app"
 
-# Install system dependencies and Poetry
-RUN apt-get update && \
+WORKDIR /app
+
+# Install build dependencies with improved caching
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     libgomp1 \
     git && \
-    rm -rf /var/lib/apt/lists/* && \
-    curl -sSL https://install.python-poetry.org | python3 -
+    rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Copy dependency files only
+# Install Python dependencies with improved caching
 COPY pyproject.toml poetry.lock ./
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    --mount=type=cache,target=/root/.cache/poetry,sharing=locked \
+    poetry install --only main,storage,parsing,monitoring --no-root
 
-# Install dependencies (excluding ML)
-RUN poetry install --only main --no-root && \
-    poetry install --only storage --no-root && \
-    poetry install --only parsing --no-root && \
-    poetry install --only monitoring --no-root
-
-# Clean up
-RUN rm -rf /var/cache/apk/* /root/.cache/pip /var/cache/pypoetry
+# Security scanning stage
+FROM aquasec/trivy:latest AS security-scan
+COPY --from=builder /app /app
+RUN trivy filesystem --no-progress --ignore-unfixed --severity HIGH,CRITICAL /app
 
 # Final stage
-FROM --platform=$TARGETPLATFORM python:3.11-slim AS final
+FROM --platform=$TARGETPLATFORM python:${PYTHON_VERSION}-slim AS final
 
-# Set runtime environment variables
+LABEL org.opencontainers.image.vendor="IndexForge" \
+    org.opencontainers.image.title="IndexForge API" \
+    org.opencontainers.image.description="Universal file indexing and processing system" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.version=${SERVICE_VERSION} \
+    org.opencontainers.image.revision=${GIT_COMMIT}
+
+# Application configuration
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH="/app" \
-    PATH="/usr/local/bin:$PATH"
+    PORT=8000 \
+    API_PORT=8000 \
+    ENVIRONMENT=production \
+    MAX_REQUEST_SIZE_MB=${MAX_REQUEST_SIZE_MB} \
+    MAX_CONTENT_LENGTH=${MAX_CONTENT_LENGTH} \
+    ERROR_LOG_LEVEL=notice \
+    ERROR_TEMPLATES_PATH=/usr/local/kong/templates
+
+# Service timeouts
+ENV APP_CONNECT_TIMEOUT=3000 \
+    APP_WRITE_TIMEOUT=5000 \
+    APP_READ_TIMEOUT=60000 \
+    ML_CONNECT_TIMEOUT=5000 \
+    ML_WRITE_TIMEOUT=10000 \
+    ML_READ_TIMEOUT=120000
+
+# Health check configuration
+ENV HEALTH_CHECK_ACTIVE_ENABLED=true \
+    HEALTH_CHECK_PASSIVE_ENABLED=true \
+    HEALTH_CHECK_THRESHOLD=0.5 \
+    HEALTH_CHECK_LOG_PATH=/usr/local/kong/logs/healthcheck.log \
+    HEALTH_CHECK_LOG_LEVEL=notice \
+    HEALTHY_SUCCESS_COUNT=2 \
+    UNHEALTHY_FAILURE_COUNT=3
+
+# Memory and performance settings
+ENV MALLOC_ARENA_MAX=2 \
+    MAX_UPSTREAM_LATENCY=5000 \
+    MAX_TOTAL_LATENCY=10000 \
+    LATENCY_WARNING_THRESHOLD=2000
 
 WORKDIR /app
 
-# Install only runtime dependencies
-RUN apt-get update && \
+# Install runtime dependencies with improved caching
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
     libgomp1 \
     curl && \
     rm -rf /var/lib/apt/lists/* && \
-    useradd -m -u 1000 appuser
+    groupadd -r appgroup && \
+    useradd -r -g appgroup appuser && \
+    mkdir -p /app/data /usr/local/kong/logs /usr/local/kong/templates && \
+    chown -R appuser:appgroup /app /usr/local/kong/logs /usr/local/kong/templates
 
-# Copy Python packages and dependencies
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin/* /usr/local/bin/
+# Copy Python packages and application code
+COPY --from=builder /usr/local/lib/python${PYTHON_VERSION}/site-packages /usr/local/lib/python${PYTHON_VERSION}/site-packages
+COPY --chown=appuser:appgroup src ./src
 
-# Copy application code
-COPY src ./src
+# Set resource constraints and security options
+USER appuser:appgroup
+EXPOSE $PORT
 
-# Set ownership and switch to non-root user
-RUN chown -R appuser:appuser /app
-USER appuser
+# Add resource limits
+STOPSIGNAL SIGTERM
 
-# Expose port
-EXPOSE 8000
-
-# Health check
+# Enhanced health check with timeout
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run the application
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use exec form with explicit Python path
+CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

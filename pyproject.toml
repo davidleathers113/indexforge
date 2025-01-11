@@ -43,6 +43,10 @@ supabase = "2.11.0"
 httpx = {version = "0.27.0", extras = ["http2"]}
 slowapi = "^0.1.9"
 
+# Message Queue dependencies
+aio-pika = "^9.4.0"
+aiormq = "^6.8.1"
+
 # Core processing dependencies
 aiohttp = "^3.11.11"
 asyncio = ">=3.4.3,<4.0.0"
@@ -100,7 +104,6 @@ optional = true
 
 [tool.poetry.group.ml.dependencies]
 numpy = {version = "^2.2.1", allow-prereleases = false}
-pandas = {version = "^2.2.3", extras = ["computation"]}
 scikit-learn = {version = "^1.4.0", extras = ["full"]}
 torch = {version = "^2.1.2", extras = ["cpu"]}
 tiktoken = "^0.5.2"
@@ -119,6 +122,7 @@ jinja2 = "^3.1.5"
 openpyxl = "^3.1.5"
 "pdfminer.six" = "^20240706"
 python-magic = "^0.4.27"
+pandas = {version = "^2.2.3", extras = ["computation"]}
 
 [tool.poetry.group.docs]
 optional = true
@@ -159,6 +163,7 @@ pylint = "^3.3.3"
 
 # Testing
 pytest = {version = "^8.3.4", extras = ["testing"]}
+pytest-asyncio = "^0.23.5"
 hypothesis = {version = "^6.123.9", extras = ["numpy", "pandas", "dateutil"]}
 faker = {version = "^33.3.0", extras = ["all"]}
 coverage = {extras = ["toml"], version = "^7.6.10"}
@@ -274,3 +279,31 @@ priority = "primary"
 name = "pytorch"
 url = "https://download.pytorch.org/whl/cpu"
 priority = "supplemental"
+
+[tool.poetry.group.docker]
+optional = true
+
+[tool.poetry.group.docker.dependencies]
+pytest-asyncio = "^0.23.5"
+aiohttp = "^3.11.11"
+psutil = "^5.9.6"
+types-psutil = "^5.9.5.17"
+
+# Note: docker is already in ci group
+# Note: pytest and other testing dependencies are already in dev group
+
+[tool.poetry.group.render]
+optional = true
+
+[tool.poetry.group.render.dependencies]
+k6-py = "^0.0.3"
+locust = "^2.21.0"
+pyyaml = "^6.0.1"
+jsonschema = "^4.21.1"
+python-dotenv = "^1.0.1"
+requests = {version = "^2.31.0", extras = ["security"]}
+pytest-timeout = "^2.2.0"
+pytest-rerunfailures = "^13.0"
+opentelemetry-api = "^1.21.0"
+opentelemetry-sdk = "^1.21.0"
+opentelemetry-instrumentation = "^0.43b0"

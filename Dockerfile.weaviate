@@ -1,4 +1,37 @@
-FROM cr.weaviate.io/semitechnologies/weaviate:1.28.2
+# syntax=docker/dockerfile:1.4
+ARG WEAVIATE_VERSION=1.28.2
+
+FROM cr.weaviate.io/semitechnologies/weaviate:${WEAVIATE_VERSION} AS base
+
+# Add metadata labels
+LABEL org.opencontainers.image.title="IndexForge Weaviate"
+LABEL org.opencontainers.image.description="Weaviate vector database for IndexForge"
+LABEL org.opencontainers.image.version=${WEAVIATE_VERSION}
+
+# Set environment variables
+ENV QUERY_DEFAULTS_LIMIT=25 \
+    AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true \
+    PERSISTENCE_DATA_PATH=/var/lib/weaviate \
+    DEFAULT_VECTORIZER_MODULE=text2vec-transformers \
+    ENABLE_MODULES=text2vec-transformers \
+    CLUSTER_HOSTNAME=node1 \
+    ENABLE_API_BASED_MODULES=true \
+    LOG_LEVEL=info
+
+# Create non-root user
+RUN addgroup --system --gid 1001 weaviate \
+    && adduser --system --uid 1001 --gid 1001 weaviate \
+    && mkdir -p /var/lib/weaviate \
+    && chown -R weaviate:weaviate /var/lib/weaviate
+
+USER weaviate
+
+# Expose ports
+EXPOSE 8080 50051
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/v1/.well-known/ready || exit 1
 
 # Command to run
 CMD ["--host", "0.0.0.0", "--port", "8080", "--scheme", "http"]
