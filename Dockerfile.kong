@@ -1,0 +1,44 @@
+# syntax=docker/dockerfile:1.12
+FROM kong:3.4
+
+# Build arguments
+ARG BUILD_DATE
+ARG GIT_COMMIT
+ARG VERSION=1.0.0
+
+LABEL org.opencontainers.image.title="IndexForge API Gateway" \
+    org.opencontainers.image.description="Custom Kong gateway for IndexForge" \
+    org.opencontainers.image.version="${VERSION}" \
+    org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.revision="${GIT_COMMIT}" \
+    org.opencontainers.image.licenses="MIT"
+
+# Install additional packages if needed
+USER root
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    jq && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /usr/local/kong/logs /usr/local/kong/templates && \
+    chown -R kong:kong /usr/local/kong
+
+# Copy custom configuration and templates with --link for better caching
+COPY --link --chown=kong:kong kong/config /usr/local/kong/declarative/
+COPY --link --chown=kong:kong kong/templates /usr/local/kong/templates/
+
+# Custom error templates and configurations
+COPY --link --chown=kong:kong kong/error_templates/ /usr/local/kong/templates/
+
+USER kong:kong
+
+# Enhanced health check with start interval
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 --start-interval=5s \
+    CMD kong health || exit 1
+
+# Use exec form for better signal handling
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["kong", "docker-start"]

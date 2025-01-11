@@ -1,0 +1,68 @@
+# syntax=docker/dockerfile:1.12
+FROM python:3.11-slim AS builder
+
+# Build arguments with explicit versions for reproducibility
+ARG POETRY_VERSION=2.0.0
+ARG BUILD_ENV=production
+ARG PYTHON_DEPS="build-essential curl libgomp1"
+
+LABEL org.opencontainers.image.title="IndexForge ML Inference" \
+    org.opencontainers.image.description="Optimized ML inference service" \
+    org.opencontainers.image.source="https://github.com/yourusername/indexforge"
+
+WORKDIR /app
+
+# Install system dependencies with better caching
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends ${PYTHON_DEPS} && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install poetry with pip caching
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir poetry==${POETRY_VERSION}
+
+# Copy only dependency files first for better caching
+COPY --link pyproject.toml poetry.lock ./
+RUN --mount=type=cache,target=/root/.cache/poetry \
+    poetry config virtualenvs.create false && \
+    poetry install --only ml-inference,main --no-root
+
+# Final stage
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends libgomp1 curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy Python packages from builder with --link for better caching
+COPY --from=builder --link /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --link src/ml/inference ./src/ml/inference
+
+# Create non-root user with explicit UID/GID
+RUN groupadd -r -g 1000 mlgroup && \
+    useradd -r -g mlgroup -u 1000 mluser && \
+    mkdir -p /app/model_cache && \
+    chown -R mluser:mlgroup /app
+
+# ML-specific environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    MODEL_CACHE_DIR=/app/model_cache \
+    INFERENCE_THREADS=4 \
+    MAX_BATCH_SIZE=32 \
+    MODEL_LOADING_TIMEOUT=120
+
+USER mluser:mlgroup
+
+EXPOSE 8001
+
+# Enhanced health check with start interval
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 --start-interval=5s \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+CMD ["python", "-m", "uvicorn", "src.ml.inference.service:app", "--host", "0.0.0.0", "--port", "8001"]

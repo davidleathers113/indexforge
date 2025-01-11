@@ -27,7 +27,7 @@ RUN rm -rf /var/lib/apt/lists/* && \
     which poetry
 
 # Builder stage
-FROM --platform=$BUILDPLATFORM python:${PYTHON_VERSION}-slim AS builder
+FROM --platform=$TARGETPLATFORM python:${PYTHON_VERSION}-slim AS builder
 COPY --from=poetry /opt/poetry /opt/poetry
 COPY --from=poetry /usr/local/bin/poetry /usr/local/bin/poetry
 
@@ -36,7 +36,8 @@ ENV PYTHONFAULTHANDLER=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=false \
-    PYTHONPATH="/app"
+    PYTHONPATH="/app" \
+    PATH="/opt/poetry/bin:$PATH"
 
 WORKDIR /app
 

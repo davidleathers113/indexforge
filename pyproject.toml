@@ -79,6 +79,10 @@ huggingface-hub = "0.27.1"
 accelerate = "1.2.1"
 transformers = "4.47.1"
 
+# Additional dependencies
+hvac = "^1.2.1"
+loguru = "^0.7.2"
+
 [tool.poetry.group.storage]
 optional = true
 
@@ -152,6 +156,8 @@ pytest-datadir = "^1.5.0"
 httpx = {version = "0.27.0", extras = ["http2"]}
 docker = "^7.0.0"
 locust = "^2.21.0"
+kubernetes = "^29.0.0"
+pytest-kubernetes = "^0.3.0"
 
 [tool.poetry.group.dev.dependencies]
 # Linting and formatting
