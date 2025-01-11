@@ -1,13 +1,9 @@
-import tracemalloc
 'Integration tests for the complete logging system.\n\nThis module contains integration tests that verify different logging components\nwork together correctly, including:\n- Basic and JSON logging\n- Log rotation\n- Contextual logging\n- Performance under load\n'
 import json
 import logging
 import os
 import threading
-from pathlib import Path
-import pytest
-from src.configuration.logger_setup import JsonFormatter, log_with_context, setup_json_logger, setup_logger
-from tests.fixtures.core.logger import cleanup_logger, temp_log_file
+from src.configuration.logger_setup import log_with_context, setup_json_logger, setup_logger
 
 def test_complete_logging_workflow(temp_log_file, cleanup_logger):
     """Test the complete logging workflow including different formats and rotation"""

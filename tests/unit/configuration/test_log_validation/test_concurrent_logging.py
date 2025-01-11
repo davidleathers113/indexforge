@@ -1,11 +1,10 @@
-import tracemalloc
 'Test concurrent logging operations.\n\nTests:\n- Multi-threaded logging\n- Race conditions\n- Thread ID tracking\n- Log ordering\n- Thread safety of validation\n'
 import logging
 import threading
 import time
-from typing import Any, Dict, List, Set
+from typing import Any
 import pytest
-from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry, verify_log_structure
+from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry
 from tests.unit.configuration.test_logger_validation import LogTypeError, validate_log_file
 
 def test_concurrent_logging(json_logger: logging.Logger, temp_log_file: str) -> None:

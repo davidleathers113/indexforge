@@ -1,6 +1,5 @@
 """Tests for the document processor component."""
 import logging
-from typing import List
 from unittest.mock import MagicMock, patch
 import pytest
 from src.models import ClusteringConfig

@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from typing import Any, Dict
 import pytest
 from src.connectors.direct_documentation_indexing.source_tracking import SourceTracker, TenantSourceTracker

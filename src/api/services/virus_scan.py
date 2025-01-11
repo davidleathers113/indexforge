@@ -1,6 +1,5 @@
 """Virus scanning service using ClamAV."""
 
-import asyncio
 import logging
 from typing import Union
 

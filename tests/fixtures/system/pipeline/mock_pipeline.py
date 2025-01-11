@@ -5,8 +5,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from .logger import logger
-from .pipeline_state import pipeline_state
 
 
 @pytest.fixture(scope="function")

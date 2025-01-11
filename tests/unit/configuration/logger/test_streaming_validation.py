@@ -10,7 +10,6 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from src.configuration.logger_setup import log_with_context, setup_json_logger
-from tests.fixtures.core.logger import cleanup_logger, temp_log_file
 from tests.unit.configuration.test_logger_validation import (
     LogValidationError,
     validate_log_file,

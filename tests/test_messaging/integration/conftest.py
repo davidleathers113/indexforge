@@ -1,10 +1,8 @@
 """Fixtures for RabbitMQ integration tests."""
 
 import asyncio
-import os
 import socket
 from typing import AsyncGenerator, Dict
-from urllib.parse import urlparse
 
 import docker
 import pytest

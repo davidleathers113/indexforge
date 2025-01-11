@@ -3,7 +3,6 @@ import logging
 from unittest.mock import patch
 import pytest
 from src.indexing.vector_index import VectorIndex
-from tests.fixtures import mock_cache_manager, mock_schema_validator, mock_weaviate_client
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 

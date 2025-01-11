@@ -1,6 +1,4 @@
 """Tests for text processing error handling."""
-from unittest.mock import Mock, patch
-import pytest
 from src.utils.text_processing import clean_text
 
 def test_clean_text():

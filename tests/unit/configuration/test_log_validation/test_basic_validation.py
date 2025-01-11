@@ -6,9 +6,8 @@ Tests:
 - Basic JSON structure
 - Simple valid cases
 """
-import json
 import logging
-from typing import Any, Dict, Set
+from typing import Any
 import pytest
 from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry, verify_log_structure
 from tests.unit.configuration.test_logger_validation import LogFieldError, LogTypeError, validate_log_entry, validate_log_file

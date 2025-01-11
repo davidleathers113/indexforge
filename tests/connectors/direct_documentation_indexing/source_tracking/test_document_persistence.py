@@ -2,7 +2,6 @@
 
 from datetime import datetime, timedelta, timezone
 
-import pytest
 
 from src.connectors.direct_documentation_indexing.source_tracking import add_document
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage

@@ -1,6 +1,6 @@
 """Validation utilities for logger tests."""
 import json
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any, Dict, List, Optional, Set, Type
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st

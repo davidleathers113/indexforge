@@ -1,5 +1,5 @@
 import logging
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 import pytest
 from src.pipeline.document_ops import DocumentOperations
 from src.utils.document_processing import DocumentMetadata

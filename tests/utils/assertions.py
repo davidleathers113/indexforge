@@ -1,6 +1,6 @@
 """Common test assertions."""
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 __all__ = [
     "assert_dict_subset",

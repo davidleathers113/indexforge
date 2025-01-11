@@ -9,6 +9,18 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
+      },
+      {
+        "name": "SLA Thresholds",
+        "datasource": "Prometheus",
+        "enable": true,
+        "iconColor": "#F2495C",
+        "target": {
+          "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket[5m])) by (le)) > 500",
+          "refId": "A"
+        },
+        "tags": ["sla-breach"],
+        "type": "tags"
       }
     ]
   },
@@ -64,7 +76,7 @@
         {
           "expr": "sum(rate(istio_requests_total{reporter=\"destination\"}[5m])) by (destination_service)",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{destination_service}}",
           "refId": "A"
         }
       ],
@@ -94,28 +106,9 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
+            "spanNulls": true
+          }
+        }
       },
       "gridPos": {
         "h": 8,
@@ -126,15 +119,14 @@
       "id": 4,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
           "placement": "bottom"
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "multi"
         }
       },
-      "pluginVersion": "7",
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{reporter=\"destination\"}[5m])) by (le, destination_service))",
@@ -145,6 +137,481 @@
       ],
       "title": "P95 Latency by Service",
       "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisLabel": "Error Rate (%)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total{reporter=\"destination\", response_code=~\"5.*\"}[5m])) by (destination_service) / sum(rate(istio_requests_total{reporter=\"destination\"}[5m])) by (destination_service) * 100",
+          "legendFormat": "{{destination_service}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Error Rate by Service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisLabel": "Requests/sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total{reporter=\"destination\"}[5m])) by (source_workload, destination_service)",
+          "legendFormat": "{{source_workload}} -> {{destination_service}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Traffic Flow Between Services",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "text": {}
+      },
+      "pluginVersion": "7",
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container=~\"discovery|istio-proxy|istio-ingressgateway\"}[5m])) by (container) / sum(container_spec_cpu_quota{container=~\"discovery|istio-proxy|istio-ingressgateway\"}/container_spec_cpu_period{container=~\"discovery|istio-proxy|istio-ingressgateway\"}) by (container) * 100",
+          "legendFormat": "{{container}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Istio Components CPU Usage",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "text": {}
+      },
+      "pluginVersion": "7",
+      "targets": [
+        {
+          "expr": "sum(container_memory_usage_bytes{container=~\"discovery|istio-proxy|istio-ingressgateway\"}) by (container) / sum(container_spec_memory_limit_bytes{container=~\"discovery|istio-proxy|istio-ingressgateway\"}) by (container) * 100",
+          "legendFormat": "{{container}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Istio Components Memory Usage",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Latency distribution heatmap",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 9,
+      "options": {
+        "calculate": true,
+        "calculation": {
+          "xBuckets": {
+            "mode": "size",
+            "value": "10"
+          }
+        },
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "RdYlBu",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-9
+        },
+        "tooltip": {
+          "show": true,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "decimals": 0,
+          "unit": "ms"
+        }
+      },
+      "pluginVersion": "7",
+      "targets": [
+        {
+          "expr": "sum(increase(istio_request_duration_milliseconds_bucket{reporter=\"destination\"}[5m])) by (le)",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Request Latency Distribution",
+      "type": "heatmap"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Circuit breaker events by service",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisLabel": "Events",
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": ["sum", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "expr": "increase(istio_circuit_breakers_total[5m])",
+          "legendFormat": "{{destination_service}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Circuit Breaker Events (5m)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "mTLS Connection Percentage",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 11,
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "sum(istio_requests_total{connection_security_policy=\"mutual_tls\"}) / sum(istio_requests_total) * 100",
+          "legendFormat": "mTLS %",
+          "refId": "A"
+        }
+      ],
+      "title": "mTLS Connection Percentage",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "External Dependencies Status",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 12,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Request Rate"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total{destination_service=~\"external-service.*\"}[5m])) by (destination_service)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "Request Rate",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(istio_requests_total{destination_service=~\"external-service.*\", response_code=~\"5.*\"}[5m])) by (destination_service) / sum(rate(istio_requests_total{destination_service=~\"external-service.*\"}[5m])) by (destination_service) * 100",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "Error Rate",
+          "refId": "B"
+        }
+      ],
+      "title": "External Dependencies",
+      "type": "table"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Gateway Traffic Overview",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisLabel": "Requests/sec",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "spanNulls": false
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total{reporter=\"source\", source_workload=\"istio-ingressgateway\"}[5m])) by (destination_service)",
+          "legendFormat": "Ingress → {{destination_service}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(istio_requests_total{reporter=\"destination\", destination_workload=\"istio-egressgateway\"}[5m])) by (source_service)",
+          "legendFormat": "{{source_service}} → Egress",
+          "refId": "B"
+        }
+      ],
+      "title": "Gateway Traffic",
+      "type": "timeseries"
     }
   ],
   "refresh": "5s",
@@ -152,7 +619,64 @@
   "style": "dark",
   "tags": ["istio", "service-mesh"],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(istio_requests_total, destination_service)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service",
+        "multi": true,
+        "name": "service",
+        "options": [],
+        "query": "label_values(istio_requests_total, destination_service)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(istio_requests_total, namespace)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Namespace",
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": "label_values(istio_requests_total, namespace)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(istio_requests_total{namespace=~\"$namespace\"}, workload)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workload",
+        "multi": true,
+        "name": "workload",
+        "options": [],
+        "query": "label_values(istio_requests_total{namespace=~\"$namespace\"}, workload)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",

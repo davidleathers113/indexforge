@@ -7,13 +7,10 @@ Tests:
 - Size limits
 - Partial line handling
 """
-import json
-import logging
-from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
+from typing import Any, Callable, Dict, List, Optional
 import pytest
 from src.configuration.log_validation import LogValidationError, validate_log_file_with_streaming
-from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry, verify_log_structure
-from tests.unit.configuration.test_logger_validation import LogFieldError, LogTypeError
+from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry
 
 def create_test_log_entry(message: str, thread_id: int, sequence: int, data: Optional[str]=None) -> Dict[str, Any]:
     """Create a test log entry with all required fields.

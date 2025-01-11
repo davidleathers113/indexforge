@@ -1,7 +1,6 @@
 import os
 import pytest
 from src.configuration.logger_setup import setup_logger
-from tests.fixtures.core.logger import cleanup_logger, temp_log_file
 
 def test_log_rotation(temp_log_file, cleanup_logger):
     """Test log file rotation"""

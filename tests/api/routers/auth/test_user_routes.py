@@ -5,7 +5,6 @@ from unittest.mock import patch
 import pytest
 from fastapi import status
 
-from src.api.middleware.csrf import generate_csrf_token
 
 
 @pytest.mark.asyncio

@@ -1,9 +1,8 @@
 import time
 from pathlib import Path
-from typing import Any, Dict, Generator
+from typing import Dict, Generator
 
 import docker
-import psutil
 import pytest
 from docker.models.containers import Container
 

@@ -1,7 +1,6 @@
 """Test configuration and shared fixtures for RabbitMQ tests."""
 
 import asyncio
-from typing import AsyncGenerator
 from unittest.mock import AsyncMock, patch
 
 import pytest

@@ -1,12 +1,6 @@
 """Tests for core topic clustering functionality."""
-from unittest.mock import Mock, patch
-import numpy as np
 import pytest
 from src.utils.topic_clustering import ClusteringConfig, TopicClusterer
-from tests.fixtures.data.cache import mock_cache_manager, cache_state
-from tests.fixtures.documents import sample_documents, doc_state
-from tests.fixtures.processing.topic import TopicState, mock_topic_clusterer
-from tests.fixtures.processing.kmeans import mock_kmeans, kmeans_state
 
 @pytest.fixture
 def clusterer(mock_cache_manager, cache_state):

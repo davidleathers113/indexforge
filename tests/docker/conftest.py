@@ -1,7 +1,7 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Generator
+from typing import Dict, Generator
 
 import docker
 import pytest

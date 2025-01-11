@@ -1,5 +1,5 @@
 """Tests for summarizer chunk processing."""
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 import pytest
 from src.utils.summarizer import DocumentSummarizer, SummarizerConfig
 from src.utils.summarizer.pipeline.summarizer import SummarizationError

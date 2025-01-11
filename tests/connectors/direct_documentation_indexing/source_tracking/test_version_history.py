@@ -1,10 +1,9 @@
 """Tests for version history tracking functionality."""
 import json
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from typing import Any, Dict
 import pytest
-from src.connectors.direct_documentation_indexing.source_tracking.version_history import Change, ChangeType, VersionHistory, VersionTag
+from src.connectors.direct_documentation_indexing.source_tracking.version_history import ChangeType, VersionHistory
 
 @pytest.fixture
 def temp_history_dir(tmp_path):

@@ -1,6 +1,5 @@
 """Integration tests for basic RabbitMQ connectivity."""
 
-import asyncio
 from typing import Dict
 
 import pytest

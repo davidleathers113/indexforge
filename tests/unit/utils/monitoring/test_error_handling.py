@@ -1,4 +1,3 @@
-import tracemalloc
 'Tests for error handling in monitoring.'
 import logging
 from unittest.mock import Mock, patch

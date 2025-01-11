@@ -1,13 +1,11 @@
 """Tests for lineage operations functionality."""
 
-from datetime import datetime, timezone
 
 import pytest
 
 from src.connectors.direct_documentation_indexing.source_tracking.document_operations import (
     add_document,
 )
-from src.connectors.direct_documentation_indexing.source_tracking.enums import ProcessingStatus
 from src.connectors.direct_documentation_indexing.source_tracking.lineage_operations import (
     get_derivation_chain,
     validate_lineage_relationships,

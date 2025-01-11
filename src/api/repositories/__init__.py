@@ -1,5 +1,10 @@
-"""Repositories package."""
+"""Repository modules."""
 
-from .weaviate_repo import WeaviateRepository
+from .weaviate import BaseWeaviateRepository, BatchMetrics, BatchPerformanceTracker, BatchRepository
 
-__all__ = ["WeaviateRepository"]
+__all__ = [
+    "BaseWeaviateRepository",
+    "BatchRepository",
+    "BatchMetrics",
+    "BatchPerformanceTracker",
+]

@@ -5,8 +5,6 @@ from Document Processing Schema to Core Schema System.
 """
 from copy import deepcopy
 from datetime import datetime, timezone
-from typing import Any, Dict
-import pytest
 from src.connectors.direct_documentation_indexing.processors import BaseProcessor
 from src.indexing.schema import SchemaValidator
 

@@ -1,8 +1,7 @@
-import os
 from unittest.mock import Mock, patch
 import pandas as pd
 import pytest
-from src.pipeline.core import DocumentSummarizer, EmbeddingGenerator, Pipeline, TopicClusterer, VectorIndex
+from src.pipeline.core import Pipeline
 from src.pipeline.steps import PipelineStep
 
 @pytest.fixture

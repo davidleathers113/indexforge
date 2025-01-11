@@ -1,0 +1,58 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: indexforge-api-auth
+  namespace: indexforge
+spec:
+  selector:
+    matchLabels:
+      app: indexforge
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/indexforge/sa/api-service"]
+            namespaces: ["indexforge"]
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE"]
+            paths: ["/api/v1/*"]
+    - from:
+        - source:
+            principals: ["cluster.local/ns/indexforge/sa/ml-service"]
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/api/v1/ml/*"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: metrics-auth
+  namespace: indexforge
+spec:
+  selector:
+    matchLabels:
+      app: indexforge
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/istio-system/sa/prometheus"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/stats/prometheus"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: health-check-auth
+  namespace: indexforge
+spec:
+  selector:
+    matchLabels:
+      app: indexforge
+  rules:
+    - to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/health", "/ready"]

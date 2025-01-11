@@ -1,6 +1,5 @@
 """Common test constants."""
 
-from typing import Dict, List
 
 __all__ = [
     "SAMPLE_CACHE_KEY",

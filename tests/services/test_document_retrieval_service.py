@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi import HTTPException
 
-from src.api.exceptions import DocumentContentNotFoundError, DocumentNotFoundError
 from src.api.services.document_retrieval_service import DocumentRetrievalService
 
 

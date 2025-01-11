@@ -3,10 +3,7 @@
 This module contains tests that verify the handling of edge cases
 and unusual inputs in search queries.
 """
-from copy import deepcopy
-from typing import Any, Dict, List
 import pytest
-from src.indexing.schema import SchemaValidator
 from src.utils.text_processing import generate_embeddings
 
 def test_empty_query_handling(base_schema):

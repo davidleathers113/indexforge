@@ -1,8 +1,8 @@
 """KMeans clustering fixtures."""
 
 import logging
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
+from typing import Optional
 from unittest.mock import MagicMock
 
 import numpy as np

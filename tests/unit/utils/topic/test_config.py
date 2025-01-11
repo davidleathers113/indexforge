@@ -1,5 +1,4 @@
 """Tests for topic clustering configuration."""
-import pytest
 from src.utils.topic_clustering import ClusteringConfig
 
 def test_clustering_config_defaults():

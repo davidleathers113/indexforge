@@ -6,9 +6,6 @@ Document Processing Schema.
 """
 from copy import deepcopy
 from typing import Any, Dict, List
-import numpy as np
-import pytest
-from src.indexing.schema import SchemaValidator
 from src.utils.text_processing import generate_embeddings
 
 def create_test_documents() -> List[Dict[str, Any]]:

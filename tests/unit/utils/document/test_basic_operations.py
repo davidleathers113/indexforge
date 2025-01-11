@@ -1,7 +1,6 @@
 """Tests for basic document processing operations."""
 import pytest
 from src.utils.document_processing import DocumentProcessor
-from tests.fixtures.documents import DocumentState, mock_doc_processor, sample_document
 
 def test_process_document(mock_doc_processor, sample_document):
     """Test basic document processing."""

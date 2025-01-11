@@ -7,14 +7,12 @@ import pytest
 
 from src.connectors.direct_documentation_indexing.source_tracking import (
     add_processing_step,
-    log_error_or_warning,
 )
 from src.connectors.direct_documentation_indexing.source_tracking.alert_manager import AlertConfig
 from src.connectors.direct_documentation_indexing.source_tracking.document_operations import (
     add_document,
 )
 from src.connectors.direct_documentation_indexing.source_tracking.enums import (
-    LogLevel,
     ProcessingStatus,
 )
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage

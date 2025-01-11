@@ -6,12 +6,10 @@ Tests:
 - Invalid field types
 - Error message formatting
 """
-import json
-import logging
-from typing import Any, Dict
+from typing import Any
 import pytest
-from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry, verify_log_structure
-from tests.unit.configuration.test_logger_validation import LogFieldError, LogFormatError, LogTypeError, LogValidationError, validate_log_file
+from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry
+from tests.unit.configuration.test_logger_validation import LogFieldError, LogFormatError, LogTypeError, validate_log_file
 
 def test_malformed_json(write_test_logs: Any, temp_log_file: str) -> None:
     """Test handling of malformed JSON.

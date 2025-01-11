@@ -1,7 +1,6 @@
 """Tests for document validation functionality."""
 import pytest
 from src.utils.document_processing import DocumentProcessor, DocumentValidationError
-from tests.fixtures import mock_doc_processor
 
 def test_validates_valid_document(mock_doc_processor):
     """Test that a valid document passes validation."""

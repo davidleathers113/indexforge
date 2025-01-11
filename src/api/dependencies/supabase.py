@@ -2,7 +2,6 @@
 
 from typing import AsyncGenerator
 
-from fastapi import Depends
 from supabase.client import AsyncClient, create_client
 
 from src.api.config.settings import settings

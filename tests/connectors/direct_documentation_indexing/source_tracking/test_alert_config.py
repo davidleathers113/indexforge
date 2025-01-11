@@ -1,7 +1,6 @@
 """Tests for alert configuration loading and validation."""
 
 import json
-from pathlib import Path
 
 import pytest
 

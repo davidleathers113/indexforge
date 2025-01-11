@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 import pytest
 from src.indexing.schema import SchemaValidator
-from src.utils.text_processing import generate_embeddings
 
 def create_valid_document() -> Dict[str, Any]:
     """Create a valid test document."""

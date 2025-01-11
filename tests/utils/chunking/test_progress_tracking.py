@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass
 from typing import Optional
 import pytest
-from src.utils.chunking.progress_tracking import BatchMetrics, OperationType, ProgressMetrics, ProgressTracker, track_batch_operation
+from src.utils.chunking.progress_tracking import OperationType, ProgressTracker, track_batch_operation
 
 @pytest.fixture
 def progress_tracker():

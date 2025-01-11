@@ -5,10 +5,6 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from src.connectors.direct_documentation_indexing.source_tracking.enums import LogLevel
-from src.connectors.direct_documentation_indexing.source_tracking.error_logging import (
-    DocumentErrorLogger,
-    LogEntry,
-)
 
 
 @pytest.fixture

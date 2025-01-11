@@ -3,7 +3,6 @@
 These tests verify the functionality of reference classification, including
 direct, indirect, and structural references.
 """
-from uuid import uuid4
 import pytest
 from src.utils.chunking.citation_detector import CitationType
 from src.utils.chunking.reference_classifier import ReferenceCategory, ReferenceClassifier

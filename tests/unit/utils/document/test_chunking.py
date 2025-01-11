@@ -1,7 +1,5 @@
 """Tests for document chunking functionality."""
-import pytest
 from src.utils.document_processing import DocumentProcessor
-from tests.fixtures import mock_doc_processor
 
 def test_document_chunking(mock_doc_processor):
     """Test document content chunking."""

@@ -1,10 +1,8 @@
 """Test container resource usage and limits."""
 
-import time
-from typing import Any, Dict
+from typing import Any
 
 import docker
-import pytest
 
 from ..config.test_config import PERFORMANCE_THRESHOLDS, RESOURCE_LIMITS
 from ..utils.docker_test_utils import DockerTestUtils

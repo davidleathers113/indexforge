@@ -5,10 +5,9 @@ error handling, and metrics collection.
 """
 import logging
 import time
-from typing import List, Optional
 from unittest.mock import MagicMock
 import pytest
-from src.utils.chunking.batch_retry import BatchItem, BatchRetryManager, RetryConfig, RetryMetrics, RetryStrategy
+from src.utils.chunking.batch_retry import BatchItem, BatchRetryManager, RetryConfig, RetryStrategy
 from src.utils.chunking.progress_tracking import OperationType, ProgressTracker
 
 @pytest.fixture

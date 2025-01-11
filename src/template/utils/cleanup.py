@@ -6,7 +6,7 @@ This module provides utilities for cleaning up Python code files.
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Union
 
 from .config import Config
 from .file_io import FileIO

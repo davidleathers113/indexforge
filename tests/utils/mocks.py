@@ -1,7 +1,6 @@
 """Common test mock utility functions."""
 
 from typing import Any, Dict, Optional
-from unittest.mock import Mock
 
 __all__ = [
     "MockResponse",

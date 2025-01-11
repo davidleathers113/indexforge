@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Optional, Set
 import pytest
 
 from src.configuration.logger_setup import setup_json_logger
-from tests.fixtures.core.logger import cleanup_logger, temp_log_file  # Re-export fixtures
 
 
 def create_test_log_entry(

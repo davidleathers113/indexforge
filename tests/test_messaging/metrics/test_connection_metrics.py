@@ -4,9 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.api.messaging import rabbitmq_settings
 from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionError
-from src.api.monitoring.metrics import record_error
 
 
 @pytest.mark.asyncio

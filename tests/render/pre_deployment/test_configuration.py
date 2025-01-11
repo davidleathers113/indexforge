@@ -1,10 +1,8 @@
-import os
 from pathlib import Path
 from typing import Any, Dict
 
 import jsonschema
 import pytest
-import yaml
 
 # Schema for render.yaml validation
 RENDER_YAML_SCHEMA = {

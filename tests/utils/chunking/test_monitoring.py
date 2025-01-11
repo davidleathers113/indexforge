@@ -5,7 +5,6 @@ performance, and cache metrics.
 """
 import logging
 import time
-from unittest.mock import MagicMock, patch
 import pytest
 from src.utils.chunking.monitoring import ReferenceMonitor, time_operation
 from src.utils.chunking.reference_cache import ReferenceCache

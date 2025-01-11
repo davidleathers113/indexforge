@@ -1,12 +1,11 @@
 """Test container health check functionality."""
 
 import time
-from typing import Any, Dict
+from typing import Any
 
-import docker
 import pytest
 
-from ..config.test_config import PERFORMANCE_THRESHOLDS, TEST_TIMEOUTS
+from ..config.test_config import TEST_TIMEOUTS
 from ..utils.docker_test_utils import DockerTestUtils
 
 

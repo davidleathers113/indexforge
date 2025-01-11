@@ -1,5 +1,7 @@
 """Config package."""
 
-from .settings import Settings, get_settings, settings
+from .settings import get_settings
 
-__all__ = ["Settings", "settings", "get_settings"]
+settings = get_settings()
+
+__all__ = ["settings", "get_settings"]

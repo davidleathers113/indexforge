@@ -1,8 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, mock_open
 import pandas as pd
-from pathlib import Path
-from bs4 import BeautifulSoup
 from src.connectors.notion_connector import NotionConnector
 
 @pytest.fixture

@@ -1,13 +1,9 @@
 """Tests for health check functionality."""
-import json
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from unittest.mock import patch
 import pytest
-from src.connectors.direct_documentation_indexing.source_tracking import add_processing_step, calculate_health_status, get_real_time_status, log_error_or_warning
+from src.connectors.direct_documentation_indexing.source_tracking import add_processing_step, calculate_health_status, log_error_or_warning
 from src.connectors.direct_documentation_indexing.source_tracking.document_operations import add_document
 from src.connectors.direct_documentation_indexing.source_tracking.enums import HealthStatus, LogLevel, ProcessingStatus
-from src.connectors.direct_documentation_indexing.source_tracking.models import DocumentLineage, HealthCheckResult
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
 
 @pytest.fixture

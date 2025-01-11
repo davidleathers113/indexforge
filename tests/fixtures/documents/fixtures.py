@@ -1,12 +1,10 @@
 """Document fixtures for testing."""
 
 import logging
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 import pytest
 
-from .state import DocumentState, doc_state
+from .state import DocumentState
 
 logger = logging.getLogger(__name__)
 

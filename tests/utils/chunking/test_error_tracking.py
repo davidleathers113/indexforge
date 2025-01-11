@@ -4,7 +4,6 @@ These tests verify the functionality of error tracking, including error recordin
 statistics calculation, and trend analysis.
 """
 import time
-from typing import Dict
 import pytest
 from src.utils.chunking.error_tracking import ErrorCategory, ErrorTracker, track_errors
 

@@ -1,8 +1,6 @@
 """Tests for aggregated metrics functionality."""
 
-import json
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -20,7 +18,6 @@ from src.connectors.direct_documentation_indexing.source_tracking.enums import (
     LogLevel,
     ProcessingStatus,
 )
-from src.connectors.direct_documentation_indexing.source_tracking.models import DocumentLineage
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
 
 

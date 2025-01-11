@@ -1,12 +1,9 @@
 """Tests for RabbitMQ memory leak prevention scenarios."""
 
-import asyncio
 import gc
 import weakref
-from unittest.mock import patch
 
 import pytest
-from aio_pika.exceptions import ChannelInvalidStateError
 
 from src.api.messaging import rabbitmq_settings
 from src.api.messaging.rabbitmq_connection_manager import (

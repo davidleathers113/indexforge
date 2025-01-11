@@ -1,7 +1,5 @@
 import logging
-import pytest
 from src.configuration.logger_setup import setup_logger
-from tests.fixtures.core.logger import cleanup_logger, temp_log_file
 
 def test_setup_logger_basic(temp_log_file, cleanup_logger):
     """Test basic logger setup with default parameters"""

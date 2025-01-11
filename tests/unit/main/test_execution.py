@@ -7,12 +7,10 @@ Other aspects are tested in:
 - test_run_pipeline.py - Tests CLI functionality
 """
 from pathlib import Path
-from unittest.mock import ANY, Mock
+from unittest.mock import ANY
 import pytest
 from src.main import run_pipeline
-from src.pipeline.core import Pipeline
 from src.pipeline.errors import PipelineError
-from src.utils.topic_clustering import TopicClusterer
 
 def test_pipeline_execution(pipeline_with_mocks):
     """Test that pipeline executes document processing."""

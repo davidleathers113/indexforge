@@ -1,7 +1,5 @@
 """Tests for summarizer error cases."""
-import pytest
 from src.utils.summarizer import DocumentSummarizer, SummarizerConfig
-from tests.fixtures import large_document, mock_cache_manager, sample_document
 
 def test_generate_summary_empty_text(mock_cache_manager):
     """Test summary generation with empty text."""

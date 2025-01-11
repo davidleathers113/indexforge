@@ -1,11 +1,10 @@
 """Test volume cleanup and lifecycle management."""
 
-from typing import Any, Dict
+from typing import Any
 
 import docker
 import pytest
 
-from ...utils.docker_test_utils import DockerTestUtils
 
 
 def test_anonymous_volume_cleanup(docker_client: Any) -> None:

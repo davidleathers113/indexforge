@@ -1,13 +1,12 @@
 """Test fixtures for authentication tests."""
 
 import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 from src.api.app import app
-from src.api.middleware.csrf import generate_csrf_token
 
 
 def pytest_configure(config):

@@ -1,12 +1,10 @@
 import asyncio
 import time
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Dict, Generator
 
 import aiohttp
 import docker
-import psutil
 import pytest
 from docker.models.containers import Container
 

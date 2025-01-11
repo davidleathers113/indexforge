@@ -6,7 +6,6 @@ import pytest
 
 from src.connectors.direct_documentation_indexing.source_tracking import (
     add_document,
-    get_error_logs,
     log_error_or_warning,
 )
 from src.connectors.direct_documentation_indexing.source_tracking.enums import LogLevel

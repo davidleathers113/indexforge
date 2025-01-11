@@ -1,14 +1,10 @@
 """Tests for vector index document operations."""
 import logging
-import time
 import uuid
-from datetime import datetime
 from unittest.mock import MagicMock, patch
 import pytest
-import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
 from src.indexing.vector_index import VectorIndex
-from tests.fixtures import mock_cache_manager, mock_weaviate_client, sample_document
 from tests.fixtures.constants import TEST_UUID
 logger = logging.getLogger(__name__)
 

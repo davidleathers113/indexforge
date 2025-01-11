@@ -28,19 +28,19 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.13"
+python = ">=3.11.7,<3.13"
 fastapi = "^0.115.6"
 uvicorn = {version = "^0.34.0", extras = ["standard"]}
 python-multipart = "^0.0.20"
-pydantic = {version = "^2.10.4", extras = ["email"]}
+pydantic = "^2.10.5"
 pydantic-settings = "^2.7.1"
 python-dotenv = "^1.0.1"
 requests = {version = "^2.32.3", extras = ["security"]}
 sentry-sdk = {version = "^2.19.2", extras = ["fastapi"]}
 tenacity = "^9.0.0"
-weaviate-client = "3.24.1"
-supabase = "2.11.0"
-httpx = {version = "0.27.0", extras = ["http2"]}
+weaviate-client = "^4.10.2"
+supabase = "^2.11.0"
+httpx = {version = ">=0.26,<0.28", extras = ["http2"]}
 slowapi = "^0.1.9"
 
 # Message Queue dependencies
@@ -75,9 +75,9 @@ jinja2 = "^3.1.5"
 openpyxl = "^3.1.5"
 "pdfminer.six" = "^20240706"
 python-magic = "^0.4.27"
-huggingface-hub = "0.27.1"
-accelerate = "1.2.1"
-transformers = "4.47.1"
+huggingface-hub = "^0.27.1"
+accelerate = "^1.2.1"
+transformers = "^4.48.0"
 
 # Additional dependencies
 hvac = "^1.2.1"
@@ -109,10 +109,10 @@ optional = true
 [tool.poetry.group.ml.dependencies]
 numpy = {version = "^2.2.1", allow-prereleases = false}
 scikit-learn = {version = "^1.4.0", extras = ["full"]}
-torch = {version = "^2.1.2", extras = ["cpu"]}
+torch = {version = "^2.5.1", extras = ["cpu"]}
 tiktoken = "^0.5.2"
 tqdm = "^4.67.1"
-spacy = "^3.7.2"
+spacy = "^3.8.3"
 sentence-transformers = "^2.3.1"
 faiss-cpu = "^1.7.4"
 
@@ -133,11 +133,11 @@ optional = true
 
 [tool.poetry.group.docs.dependencies]
 mkdocs-material = "^9.4.0"
-mkdocstrings = {extras = ["python"], version = "0.24.0"}
-mkdocs-swagger-ui-tag = "0.6.7"
-mkdocs-jupyter = "0.24.6"
-mkdocs-git-revision-date-plugin = "0.3.2"
-mkdocs-minify-plugin = "0.7.1"
+mkdocstrings = {extras = ["python"], version = "^0.24.0"}
+mkdocs-swagger-ui-tag = "^0.6.7"
+mkdocs-jupyter = "^0.24.6"
+mkdocs-git-revision-date-plugin = "^0.3.2"
+mkdocs-minify-plugin = "^0.7.1"
 
 [tool.poetry.group.ci]
 optional = true
@@ -153,16 +153,16 @@ pytest-sugar = "^1.0.0"
 pytest-clarity = "^1.0.1"
 pytest-randomly = "^3.15.0"
 pytest-datadir = "^1.5.0"
-httpx = {version = "0.27.0", extras = ["http2"]}
+httpx = {version = ">=0.26,<0.28", extras = ["http2"]}
 docker = "^7.0.0"
 locust = "^2.21.0"
 kubernetes = "^29.0.0"
-pytest-kubernetes = "^0.3.0"
+pytest-kubernetes = ">=0.3.0,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 # Linting and formatting
 black = {version = "^24.10.0", extras = ["jupyter", "d"]}
-ruff = {version = "^0.8.6", extras = ["all"]}
+ruff = "^0.9.1"
 mypy = {version = "^1.14.1", extras = ["reports"]}
 djlint = "^1.36.4"
 pylint = "^3.3.3"

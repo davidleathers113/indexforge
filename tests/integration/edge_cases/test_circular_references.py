@@ -3,11 +3,9 @@
 This module contains tests that verify the handling of circular references
 between documents, including self-references and cyclic dependencies.
 """
-from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict
 from uuid import uuid4
 import pytest
-from src.connectors.direct_documentation_indexing.source_tracking import SourceTracker
 from src.indexing.schema import SchemaValidator
 
 def create_document_with_id(doc_id: str) -> Dict[str, Any]:

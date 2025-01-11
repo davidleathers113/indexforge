@@ -1,8 +1,7 @@
 """Tests for source reliability tracking functionality."""
 import json
 import time
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from datetime import datetime, timezone
 from typing import Any, Dict
 from unittest.mock import Mock
 import pytest

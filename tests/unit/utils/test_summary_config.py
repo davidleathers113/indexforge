@@ -1,5 +1,4 @@
 """Tests for SummarizerConfig data class."""
-import pytest
 from src.utils.summarizer import SummarizerConfig
 
 class TestSummarizerConfig:

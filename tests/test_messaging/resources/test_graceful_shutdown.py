@@ -1,11 +1,9 @@
 """Tests for RabbitMQ graceful shutdown scenarios."""
 
 import asyncio
-from unittest.mock import patch
 
 import pytest
 
-from src.api.messaging import rabbitmq_settings
 
 
 @pytest.mark.asyncio

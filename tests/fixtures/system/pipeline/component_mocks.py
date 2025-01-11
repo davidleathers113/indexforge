@@ -1,12 +1,10 @@
 """Pipeline component mock fixtures."""
 
-from typing import Dict, List
 from unittest.mock import DEFAULT, MagicMock, patch
 
 import pytest
 
 from .logger import logger
-from .pipeline_state import pipeline_state
 
 
 def create_pii_detector_mock():

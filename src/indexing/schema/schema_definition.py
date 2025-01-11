@@ -12,18 +12,45 @@ Key features of the schema:
 - HNSW vector index configuration for fast similarity search
 - Support for document relationships (parent-child)
 - Versioned schema design
+- Quantization support for efficient storage
+- Compound indexes for optimized queries
+- Materialized views for aggregations
 
 Example:
     ```python
     import weaviate
+    from weaviate.collections import Collection
 
     client = weaviate.Client("http://localhost:8080")
     schema = SchemaDefinition.get_schema("Document")
-    client.schema.create_class(schema)
+    collection = Collection.create(client, schema)
     ```
 """
 
-from typing import Dict
+from typing import Dict, List
+
+from src.indexing.schema.configurations import (
+    CHUNK_IDS_PROPERTY,
+    CONTENT_BODY_PROPERTY,
+    CONTENT_SUMMARY_PROPERTY,
+    CONTENT_TITLE_PROPERTY,
+    CURRENT_SCHEMA_VERSION,
+    EMBEDDING_PROPERTY,
+    INVERTED_INDEX_CONFIG,
+    MULTI_TENANCY_CONFIG,
+    PARENT_ID_PROPERTY,
+    REPLICATION_CONFIG,
+    SCHEMA_VERSION_PROPERTY,
+    SHARDING_CONFIG,
+    TIMESTAMP_PROPERTY,
+    VECTOR_INDEX_CONFIG,
+    VECTORIZER_CONFIG,
+)
+from src.indexing.schema.validators import (
+    validate_class_name,
+    validate_configuration,
+    validate_properties,
+)
 
 
 class SchemaDefinition:
@@ -37,6 +64,8 @@ class SchemaDefinition:
     - Relationship fields (parent_id, chunk_ids)
     - HNSW vector index configuration for similarity search
     - BM25 text index configuration for hybrid search
+    - Quantization settings for efficient storage
+    - Compound indexes for optimized queries
 
     The schema is versioned to support future updates while maintaining
     backward compatibility with existing documents.
@@ -48,146 +77,99 @@ class SchemaDefinition:
         ```python
         schema = SchemaDefinition.get_schema("Document")
         print(f"Schema version: {SchemaDefinition.SCHEMA_VERSION}")
-        print(f"Class name: {schema['class']}")
+        print(f"Collection name: {schema['class']}")
         print(f"Properties: {len(schema['properties'])}")
         ```
     """
 
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = CURRENT_SCHEMA_VERSION
+
+    @staticmethod
+    def get_properties() -> List[Dict]:
+        """
+        Get the list of schema properties.
+
+        Returns:
+            List[Dict]: List of property definitions
+
+        Example:
+            ```python
+            properties = SchemaDefinition.get_properties()
+            for prop in properties:
+                print(f"Property: {prop['name']}, Type: {prop['dataType']}")
+            ```
+        """
+        return [
+            SCHEMA_VERSION_PROPERTY,
+            CONTENT_BODY_PROPERTY,
+            CONTENT_SUMMARY_PROPERTY,
+            CONTENT_TITLE_PROPERTY,
+            EMBEDDING_PROPERTY,
+            TIMESTAMP_PROPERTY,
+            PARENT_ID_PROPERTY,
+            CHUNK_IDS_PROPERTY,
+        ]
+
+    @staticmethod
+    def get_configurations() -> Dict:
+        """
+        Get the schema configurations.
+
+        Returns:
+            Dict: Dictionary of configuration sections
+
+        Example:
+            ```python
+            configs = SchemaDefinition.get_configurations()
+            print(f"Vectorizer: {configs['vectorizer']}")
+            print(f"Vector Index: {configs['vectorIndexConfig']}")
+            ```
+        """
+        return {
+            **VECTORIZER_CONFIG,
+            "invertedIndexConfig": INVERTED_INDEX_CONFIG,
+            "vectorIndexConfig": VECTOR_INDEX_CONFIG,
+            "replicationConfig": REPLICATION_CONFIG,
+            "multiTenancyConfig": MULTI_TENANCY_CONFIG,
+            "shardingConfig": SHARDING_CONFIG,
+        }
 
     @classmethod
     def get_schema(cls, class_name: str) -> Dict:
         """
-        Get the complete schema definition for a document class.
-
-        This method returns a dictionary containing the full schema definition
-        including all properties, vectorizer configuration, and index settings.
-        The schema is optimized for both vector and text-based search.
+        Get the complete schema definition for a given class name.
 
         Args:
-            class_name: Name to use for the document class in Weaviate
+            class_name (str): Name of the class/collection to create
 
         Returns:
-            Dict: Complete schema definition ready for Weaviate import with:
-                - class: The specified class name
-                - vectorizer: text2vec-transformers configuration
-                - properties: List of all property definitions
-                - vectorIndexConfig: HNSW index settings
-                - invertedIndexConfig: BM25 settings
+            Dict: Complete schema definition including all configurations
+
+        Raises:
+            ClassNameError: If the class name is invalid
+            PropertyValidationError: If any property is invalid
+            ConfigurationError: If any configuration is invalid
+            SchemaValidationError: If the overall schema is invalid
 
         Example:
             ```python
             schema = SchemaDefinition.get_schema("Document")
-
-            # Access specific configurations
-            vectorizer = schema["moduleConfig"]["text2vec-transformers"]
-            vector_index = schema["vectorIndexConfig"]
-            properties = schema["properties"]
-
-            # Print key settings
-            print(f"Model: {vectorizer['model']}")
-            print(f"Distance metric: {vector_index['distance']}")
-            print(f"Number of properties: {len(properties)}")
+            collection = Collection.create(client, schema)
             ```
         """
+        validate_class_name(class_name)
+
+        properties = cls.get_properties()
+        validate_properties(properties)
+
+        configurations = cls.get_configurations()
+        validate_configuration(configurations, "vectorizer")
+        validate_configuration(configurations["invertedIndexConfig"], "invertedIndexConfig")
+        validate_configuration(configurations["vectorIndexConfig"], "vectorIndexConfig")
+
         return {
             "class": class_name,
             "description": "A document with vector embeddings",
-            "vectorizer": "text2vec-transformers",
-            "moduleConfig": {
-                "text2vec-transformers": {
-                    "vectorizeClassName": False,
-                    "model": "sentence-transformers-all-MiniLM-L6-v2",
-                    "poolingStrategy": "mean",
-                    "maxTokens": 512,
-                }
-            },
-            "invertedIndexConfig": {
-                "bm25": {"b": 0.75, "k1": 1.2},
-                "cleanupIntervalSeconds": 60,
-                "stopwords": {"preset": "en"},
-            },
-            "vectorIndexConfig": {
-                "skip": False,
-                "cleanupIntervalSeconds": 300,
-                "maxConnections": 32,
-                "efConstruction": 128,
-                "ef": -1,
-                "dynamicEfMin": 100,
-                "dynamicEfMax": 500,
-                "dynamicEfFactor": 8,
-                "vectorCacheMaxObjects": 1000000,
-                "flatSearchCutoff": 40000,
-                "distance": "cosine",
-            },
-            "properties": [
-                # Schema version property
-                {
-                    "name": "schema_version",
-                    "dataType": ["int"],
-                    "description": "Schema version number",
-                },
-                # Content properties
-                {
-                    "name": "content_body",
-                    "dataType": ["text"],
-                    "description": "Main document content",
-                    "moduleConfig": {
-                        "text2vec-transformers": {
-                            "skip": False,
-                            "vectorizePropertyName": False,
-                            "poolingStrategy": "mean",
-                            "maxTokens": 512,
-                        }
-                    },
-                },
-                {
-                    "name": "content_summary",
-                    "dataType": ["text"],
-                    "description": "Document summary",
-                    "moduleConfig": {
-                        "text2vec-transformers": {"skip": True, "vectorizePropertyName": False}
-                    },
-                },
-                {
-                    "name": "content_title",
-                    "dataType": ["text"],
-                    "description": "Document title",
-                    "moduleConfig": {
-                        "text2vec-transformers": {"skip": True, "vectorizePropertyName": False}
-                    },
-                },
-                # Embedding properties
-                {
-                    "name": "embedding",
-                    "dataType": ["number[]"],
-                    "description": "Content embedding",
-                    "moduleConfig": {"text2vec-transformers": {"skip": True}},
-                    "vectorIndexType": "hnsw",
-                    "vectorIndexConfig": {
-                        "distance": "cosine",
-                        "ef": 100,
-                        "efConstruction": 128,
-                        "maxConnections": 64,
-                        "vectorCacheMaxObjects": 500000,
-                    },
-                },
-                # Metadata properties
-                {
-                    "name": "timestamp_utc",
-                    "dataType": ["date"],
-                    "description": "Document timestamp",
-                },
-                # Relationship properties
-                {
-                    "name": "parent_id",
-                    "dataType": ["string"],
-                    "description": "Parent document ID",
-                },
-                {
-                    "name": "chunk_ids",
-                    "dataType": ["string[]"],
-                    "description": "Child chunk IDs",
-                },
-            ],
+            **configurations,
+            "properties": properties,
         }

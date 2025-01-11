@@ -3,13 +3,16 @@
 import json
 import logging
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
-import weaviate
+import weaviate.classes as wvc
+from weaviate.classes.query import Filter
+from weaviate.types import Include
 from weaviate.util import generate_uuid5
 
+from src.api.errors.weaviate_error_handling import with_weaviate_error_handling
 from src.api.models.requests import DocumentFilter, SearchQuery
-from src.api.models.responses import SearchResponse, SearchResult, Stats
+from src.api.models.responses import SearchResponse, SearchResult
 
 logger = logging.getLogger(__name__)
 
@@ -17,193 +20,215 @@ logger = logging.getLogger(__name__)
 class WeaviateRepository:
     """Repository for Weaviate operations."""
 
-    def __init__(self, client: weaviate.Client):
-        """Initialize repository with Weaviate client.
+    def __init__(self, client: wvc.WeaviateClient, collection: str):
+        """Initialize repository.
 
         Args:
-            client: Configured Weaviate client
+            client: Weaviate client instance
+            collection: Collection name to operate on
         """
         self.client = client
-        self.collection = "Document"
+        self.collection = collection
 
-    async def search(self, query: SearchQuery) -> SearchResponse:
-        """Perform semantic search.
+    @with_weaviate_error_handling
+    async def search(
+        self,
+        query: SearchQuery,
+        cursor: Optional[str] = None,
+        vector: Optional[List[float]] = None,
+        bm25_config: Optional[Dict[str, float]] = None,
+    ) -> Tuple[SearchResponse, Optional[str]]:
+        """Perform semantic search with advanced features.
 
         Args:
             query: Search parameters
+            cursor: Optional cursor for pagination
+            vector: Optional vector for pure vector search
+            bm25_config: Optional BM25 configuration (b and k1 parameters)
 
         Returns:
-            SearchResponse containing results and metadata
+            Tuple of SearchResponse and next cursor (if available)
         """
         start_time = time.time()
 
         try:
-            result = (
-                self.client.query.get(
-                    self.collection, ["title", "content", "file_path", "file_type", "metadata_json"]
-                )
-                .with_near_text({"concepts": [query.query]})
-                .with_limit(query.limit)
-                .with_offset(query.offset)
-                .with_additional(["id", "score"])
-                .do()
+            # Get collection reference
+            collection = self.client.collections.get(self.collection)
+
+            # Build query
+            query_builder = collection.query.fetch_objects(
+                properties=["title", "content", "file_path", "file_type", "metadata_json"],
+                return_properties=Include.ALL,  # Include all metadata
             )
 
-            documents = result.get("data", {}).get("Get", {}).get("Document", [])
+            # Configure search type based on inputs
+            if vector is not None:
+                # Pure vector search
+                query_builder = query_builder.with_near_vector(
+                    {
+                        "vector": vector,
+                        "certainty": 0.7,  # Configurable threshold
+                    }
+                )
+            elif query.query:
+                # Hybrid search with configurable parameters
+                query_builder = query_builder.with_hybrid(
+                    query=query.query,
+                    alpha=0.5,  # Balance between vector and keyword search
+                    properties=["title^2", "content"],  # Boost title matches
+                    fusion_type="relative_score",  # Use relative scoring
+                )
+
+                # Add BM25 configuration if provided
+                if bm25_config:
+                    query_builder = query_builder.with_bm25(
+                        b=bm25_config.get("b", 0.75),
+                        k1=bm25_config.get("k1", 1.2),
+                    )
+
+            # Add pagination
+            if cursor:
+                query_builder = query_builder.with_after(cursor)
+            else:
+                query_builder = query_builder.with_limit(query.limit)
+
+            # Execute query
+            result = query_builder.do()
 
             # Format results
             search_results = []
-            for doc in documents:
-                metadata = json.loads(doc.get("metadata_json", "{}"))
+            for obj in result.objects:
+                metadata = json.loads(obj.properties.get("metadata_json", "{}"))
                 search_results.append(
                     SearchResult(
-                        id=doc.get("_additional", {}).get("id", ""),
-                        title=doc.get("title", ""),
-                        content=doc.get("content", ""),
-                        file_path=doc.get("file_path", ""),
-                        file_type=doc.get("file_type", ""),
+                        id=obj.id,
+                        title=obj.properties.get("title", ""),
+                        content=obj.properties.get("content", ""),
+                        file_path=obj.properties.get("file_path", ""),
+                        file_type=obj.properties.get("file_type", ""),
                         metadata=metadata,
-                        score=doc.get("_additional", {}).get("score", 0.0),
+                        score=obj.score,
+                        vector=obj.vector if hasattr(obj, "vector") else None,
+                        certainty=obj.certainty if hasattr(obj, "certainty") else None,
+                        distance=obj.distance if hasattr(obj, "distance") else None,
                     )
                 )
 
-            # Get total count
+            # Get total count efficiently using aggregation
             total = (
-                self.client.query.aggregate(self.collection)
+                collection.aggregate.over_all()
                 .with_meta_count()
-                .with_near_text({"concepts": [query.query]})
+                .with_where(query_builder._where if hasattr(query_builder, "_where") else None)
                 .do()
             )
-            total_count = (
-                total.get("data", {})
-                .get("Aggregate", {})
-                .get("Document", [{}])[0]
-                .get("meta", {})
-                .get("count", 0)
-            )
 
-            return SearchResponse(
-                results=search_results,
-                total=total_count,
-                took=(time.time() - start_time) * 1000,
+            # Get next cursor if there are more results
+            next_cursor = result.after if len(search_results) == query.limit else None
+
+            return (
+                SearchResponse(
+                    results=search_results,
+                    total=total.total_count,
+                    took=(time.time() - start_time) * 1000,
+                ),
+                next_cursor,
             )
 
         except Exception as e:
             logger.error(f"Search failed: {str(e)}")
             raise
 
-    async def get_stats(self) -> Stats:
-        """Get collection statistics.
-
-        Returns:
-            Stats containing document counts and status
-        """
-        try:
-            # Get total count
-            result = self.client.query.aggregate(self.collection).with_meta_count().do()
-            total_count = (
-                result.get("data", {})
-                .get("Aggregate", {})
-                .get("Document", [{}])[0]
-                .get("meta", {})
-                .get("count", 0)
-            )
-
-            # Get counts by file type
-            type_counts = (
-                self.client.query.aggregate(self.collection)
-                .with_group_by_filter("file_type")
-                .with_fields("groupedBy { value count }")
-                .do()
-            )
-
-            file_types = {}
-            for group in type_counts.get("data", {}).get("Aggregate", {}).get("Document", []):
-                file_type = group.get("groupedBy", {}).get("value")
-                count = group.get("count", 0)
-                if file_type:
-                    file_types[file_type] = count
-
-            return Stats(
-                document_count=total_count,
-                file_types=file_types,
-                status="active" if total_count > 0 else "empty",
-            )
-
-        except Exception as e:
-            logger.error(f"Failed to get stats: {str(e)}")
-            raise
-
+    @with_weaviate_error_handling
     async def filter_documents(
-        self, filter_params: DocumentFilter, limit: int = 10, offset: int = 0
-    ) -> SearchResponse:
-        """Filter documents by parameters.
+        self,
+        filter_params: DocumentFilter,
+        limit: int = 10,
+        cursor: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        sort_order: str = "desc",
+    ) -> Tuple[SearchResponse, Optional[str]]:
+        """Filter documents with advanced options.
 
         Args:
             filter_params: Filter criteria
             limit: Maximum number of results
-            offset: Number of results to skip
+            cursor: Optional cursor for pagination
+            sort_by: Optional field to sort by
+            sort_order: Sort order ("asc" or "desc")
 
         Returns:
-            SearchResponse containing filtered results
+            Tuple of SearchResponse and next cursor (if available)
         """
         start_time = time.time()
 
         try:
-            # Build where filter
-            where_filter = {}
+            # Get collection reference
+            collection = self.client.collections.get(self.collection)
+
+            # Build filters
+            filters = []
             if filter_params.file_type:
-                where_filter = {
-                    "operator": "Equal",
-                    "path": ["file_type"],
-                    "valueString": filter_params.file_type,
-                }
+                filters.append(Filter.by_property("file_type").equal(filter_params.file_type))
+
+            if filter_params.date_from:
+                filters.append(
+                    Filter.by_property("metadata_json.modified_at").greater_than(
+                        filter_params.date_from.isoformat()
+                    )
+                )
+
+            if filter_params.date_to:
+                filters.append(
+                    Filter.by_property("metadata_json.modified_at").less_than(
+                        filter_params.date_to.isoformat()
+                    )
+                )
+
+            # Build query
+            query_builder = collection.query.fetch_objects(
+                properties=["title", "content", "file_path", "file_type", "metadata_json"],
+                return_properties=Include.ALL,
+            ).with_where(Filter.and_(filters) if filters else None)
+
+            # Add sorting if specified
+            if sort_by:
+                query_builder = query_builder.with_sort({sort_by: sort_order})
+
+            # Add pagination
+            if cursor:
+                query_builder = query_builder.with_after(cursor)
+            else:
+                query_builder = query_builder.with_limit(limit)
 
             # Execute query
-            base_query = self.client.query.get(
-                self.collection, ["title", "content", "file_path", "file_type", "metadata_json"]
-            )
-
-            # Add filter if specified
-            query = base_query.with_where(where_filter) if where_filter else base_query
-
-            # Add pagination and execute
-            result = query.with_limit(limit).with_offset(offset).with_additional(["id"]).do()
-
-            documents = result.get("data", {}).get("Get", {}).get("Document", [])
+            result = query_builder.do()
 
             # Format results
             search_results = []
-            for doc in documents:
-                metadata = json.loads(doc.get("metadata_json", "{}"))
-
-                # Apply date filters if specified
-                if filter_params.date_from or filter_params.date_to:
-                    doc_date = metadata.get("modified_at") or metadata.get("created_at")
-                    if not doc_date:
-                        continue
-
-                    if filter_params.date_from and doc_date < filter_params.date_from:
-                        continue
-                    if filter_params.date_to and doc_date > filter_params.date_to:
-                        continue
-
+            for obj in result.objects:
+                metadata = json.loads(obj.properties.get("metadata_json", "{}"))
                 search_results.append(
                     SearchResult(
-                        id=doc.get("_additional", {}).get("id", ""),
-                        title=doc.get("title", ""),
-                        content=doc.get("content", ""),
-                        file_path=doc.get("file_path", ""),
-                        file_type=doc.get("file_type", ""),
+                        id=obj.id,
+                        title=obj.properties.get("title", ""),
+                        content=obj.properties.get("content", ""),
+                        file_path=obj.properties.get("file_path", ""),
+                        file_type=obj.properties.get("file_type", ""),
                         metadata=metadata,
                         score=1.0,  # No relevance score for filtered results
                     )
                 )
 
-            return SearchResponse(
-                results=search_results,
-                total=len(search_results),  # For filtered results, we'll use the actual count
-                took=(time.time() - start_time) * 1000,
+            # Get next cursor if there are more results
+            next_cursor = result.after if len(search_results) == limit else None
+
+            return (
+                SearchResponse(
+                    results=search_results,
+                    total=len(search_results),
+                    took=(time.time() - start_time) * 1000,
+                ),
+                next_cursor,
             )
 
         except Exception as e:
@@ -211,6 +236,7 @@ class WeaviateRepository:
             raise
 
     # New document operations
+    @with_weaviate_error_handling
     async def index_single_document(self, document: Dict) -> str:
         """Index a single document.
 
@@ -220,22 +246,19 @@ class WeaviateRepository:
         Returns:
             Document ID
         """
-        try:
-            # Generate deterministic UUID based on file path
-            doc_id = generate_uuid5(document["file_path"])
+        # Generate deterministic UUID based on file path
+        doc_id = generate_uuid5(document["file_path"])
 
-            # Index document
-            self.client.data_object.create(
-                data_object=document,
-                class_name=self.collection,
-                uuid=doc_id,
-            )
+        # Index document
+        self.client.data_object.create(
+            data_object=document,
+            class_name=self.collection,
+            uuid=doc_id,
+        )
 
-            return str(doc_id)
-        except Exception as e:
-            logger.error(f"Failed to index document: {str(e)}")
-            raise
+        return str(doc_id)
 
+    @with_weaviate_error_handling
     async def list_documents(
         self, file_type: Optional[str] = None, limit: int = 10, offset: int = 0
     ) -> List[Dict]:
@@ -249,31 +272,28 @@ class WeaviateRepository:
         Returns:
             List of document metadata
         """
-        try:
-            # Build query
-            query = self.client.query.get(
-                self.collection, ["title", "file_path", "file_type", "metadata"]
+        # Build query
+        query = self.client.query.get(
+            self.collection, ["title", "file_path", "file_type", "metadata"]
+        )
+
+        # Add file type filter if specified
+        if file_type:
+            query = query.with_where(
+                {"path": ["file_type"], "operator": "Equal", "valueString": file_type.lower()}
             )
 
-            # Add file type filter if specified
-            if file_type:
-                query = query.with_where(
-                    {"path": ["file_type"], "operator": "Equal", "valueString": file_type.lower()}
-                )
+        # Add pagination
+        query = query.with_limit(limit).with_offset(offset)
 
-            # Add pagination
-            query = query.with_limit(limit).with_offset(offset)
+        # Execute query
+        result = query.do()
 
-            # Execute query
-            result = query.do()
+        # Extract documents
+        documents = result.get("data", {}).get("Get", {}).get(self.collection, [])
+        return documents
 
-            # Extract documents
-            documents = result.get("data", {}).get("Get", {}).get(self.collection, [])
-            return documents
-        except Exception as e:
-            logger.error(f"Failed to list documents: {str(e)}")
-            raise
-
+    @with_weaviate_error_handling
     async def get_document(self, document_id: str) -> Optional[Dict]:
         """Get a specific document by ID.
 
@@ -283,24 +303,21 @@ class WeaviateRepository:
         Returns:
             Document metadata and content if found, None otherwise
         """
-        try:
-            # Query document by ID
-            result = (
-                self.client.query.get(
-                    self.collection, ["title", "content", "file_path", "file_type", "metadata"]
-                )
-                .with_where({"path": ["id"], "operator": "Equal", "valueString": document_id})
-                .with_limit(1)
-                .do()
+        # Query document by ID
+        result = (
+            self.client.query.get(
+                self.collection, ["title", "content", "file_path", "file_type", "metadata"]
             )
+            .with_where({"path": ["id"], "operator": "Equal", "valueString": document_id})
+            .with_limit(1)
+            .do()
+        )
 
-            # Extract document
-            documents = result.get("data", {}).get("Get", {}).get(self.collection, [])
-            return documents[0] if documents else None
-        except Exception as e:
-            logger.error(f"Failed to get document {document_id}: {str(e)}")
-            raise
+        # Extract document
+        documents = result.get("data", {}).get("Get", {}).get(self.collection, [])
+        return documents[0] if documents else None
 
+    @with_weaviate_error_handling
     async def delete_document(self, document_id: str) -> bool:
         """Delete a specific document.
 
@@ -310,17 +327,13 @@ class WeaviateRepository:
         Returns:
             True if document was deleted, False if not found
         """
-        try:
-            # Check if document exists
-            if not await self.get_document(document_id):
-                return False
+        # Check if document exists
+        if not await self.get_document(document_id):
+            return False
 
-            # Delete document
-            self.client.data_object.delete(
-                uuid=document_id,
-                class_name=self.collection,
-            )
-            return True
-        except Exception as e:
-            logger.error(f"Failed to delete document {document_id}: {str(e)}")
-            raise
+        # Delete document
+        self.client.data_object.delete(
+            uuid=document_id,
+            class_name=self.collection,
+        )
+        return True

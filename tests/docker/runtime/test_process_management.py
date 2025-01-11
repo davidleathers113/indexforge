@@ -1,9 +1,8 @@
 """Test container process management."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import docker
-import pytest
 
 from ..config.test_config import REQUIRED_PROCESSES, SECURITY_REQUIREMENTS
 from ..utils.docker_test_utils import DockerTestUtils

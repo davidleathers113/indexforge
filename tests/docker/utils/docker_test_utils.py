@@ -1,7 +1,7 @@
 """Utility functions for Docker testing."""
 
 import time
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import docker
 import psutil

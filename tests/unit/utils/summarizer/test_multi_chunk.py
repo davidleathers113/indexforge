@@ -1,7 +1,5 @@
 """Tests for summarizer multi-chunk processing."""
-import pytest
 from src.utils.summarizer import DocumentSummarizer, SummarizerConfig
-from tests.fixtures import mock_cache_manager
 
 def test_combine_summaries(mock_cache_manager):
     """Test combining multiple chunk summaries."""

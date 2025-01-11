@@ -4,13 +4,10 @@ These tests evaluate the system's performance with large-scale data,
 measuring execution time, memory usage, and scalability.
 """
 import time
-from typing import List, Set
+from typing import Set
 from uuid import UUID
-import numpy as np
 import pytest
 from memory_profiler import profile
-from src.utils.chunking.references import ReferenceManager
-from src.utils.chunking.semantic import SemanticConfig, SemanticProcessor
 
 @pytest.fixture
 def large_chunk_set(semantic_processor) -> Set[UUID]:

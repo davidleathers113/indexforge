@@ -1,8 +1,7 @@
 """Test container port mapping and exposure."""
 
 import socket
-import time
-from typing import Any, Dict
+from typing import Any
 
 import docker
 import pytest

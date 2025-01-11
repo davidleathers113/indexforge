@@ -1,5 +1,4 @@
 """Tests for summarizer configuration."""
-import pytest
 from src.utils.summarizer import SummarizerConfig
 
 def test_summarizer_config_defaults():

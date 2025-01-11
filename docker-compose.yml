@@ -231,8 +231,8 @@ services:
       - "8080:8080"
       - "50051:50051"
     environment:
-      QUERY_DEFAULTS_LIMIT: ${WEAVIATE_QUERY_LIMIT:-25}
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      QUERY_DEFAULTS_LIMIT: ${WEAVIATE_QUERY_DEFAULTS_LIMIT:-25}
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "false"
       PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
       DEFAULT_VECTORIZER_MODULE: "text2vec-transformers"
       ENABLE_MODULES: "text2vec-transformers"
@@ -242,6 +242,16 @@ services:
       CLUSTER_HOSTNAME: "node1"
       ENABLE_API_BASED_MODULES: "true"
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      GRPC_PORT: ${WEAVIATE_GRPC_PORT:-50051}
+      ENABLE_GRPC: ${WEAVIATE_ENABLE_GRPC:-true}
+      CONNECTION_TIMEOUT: ${WEAVIATE_CONNECTION_TIMEOUT:-10}
+      QUERY_TIMEOUT: ${WEAVIATE_TIMEOUT:-30}
+      QUERY_MAXIMUM_RESULTS: 10000
+      AUTHENTICATION_APIKEY_ENABLED: "true"
+      AUTHENTICATION_APIKEY_ALLOWED_KEYS: ${WEAVIATE_API_KEY:-default-dev-key}
+      AUTHENTICATION_APIKEY_USERS: "document-api:admin"
+      BATCH_SIZE: ${WEAVIATE_BATCH_SIZE:-100}
+      BATCH_TIMEOUT: "60s"
     volumes:
       - weaviate_data:/var/lib/weaviate
     healthcheck:

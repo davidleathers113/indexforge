@@ -1,5 +1,4 @@
 """Tests for the EmbeddingGenerator class."""
-import logging
 import numpy as np
 import pytest
 from openai.types.create_embedding_response import CreateEmbeddingResponse

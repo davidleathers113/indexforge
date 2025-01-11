@@ -2,7 +2,6 @@ import json
 import logging
 import sys
 from src.configuration.logger_setup import JsonFormatter, setup_json_logger
-from tests.fixtures.core.logger import cleanup_logger, temp_log_file
 
 def test_setup_json_logger(temp_log_file, cleanup_logger):
     """Test JSON logger setup"""

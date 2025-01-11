@@ -2,13 +2,11 @@
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from ..core.base import BaseState
-from .validator import mock_schema_validator
 from ..data.vector import mock_weaviate_client
 
 logger = logging.getLogger(__name__)

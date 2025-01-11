@@ -3,9 +3,7 @@
 import uuid
 from typing import Any, Dict
 
-import pytest
 
-from ...utils.docker_test_utils import DockerTestUtils
 
 
 def test_data_persistence(docker_client: Any, test_volume: Dict[str, Any]) -> None:

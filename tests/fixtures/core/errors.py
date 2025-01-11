@@ -1,8 +1,8 @@
 """Error fixtures for testing."""
 
 import logging
-from dataclasses import dataclass, field
-from typing import Dict, Optional, Set
+from dataclasses import dataclass
+from typing import Dict
 from unittest.mock import MagicMock
 
 import pytest

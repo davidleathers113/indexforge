@@ -2,7 +2,6 @@
 
 from typing import Any, Dict, Generator
 
-import docker
 import pytest
 
 from ...utils.docker_test_utils import DockerTestUtils

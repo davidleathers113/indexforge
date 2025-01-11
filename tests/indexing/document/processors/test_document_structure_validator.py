@@ -4,7 +4,7 @@ This module contains tests for the DocumentStructureValidator class,
 covering validation logic, metrics collection, and tracing integration.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 

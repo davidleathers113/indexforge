@@ -1,6 +1,6 @@
 import time
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Dict, Generator, List
 
 import docker
 import pytest

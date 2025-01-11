@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from src.cross_reference import CrossReferenceManager, ReferenceType
+from src.cross_reference import CrossReferenceManager
 
 
 @pytest.fixture

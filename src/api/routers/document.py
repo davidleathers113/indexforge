@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, Upload
 from fastapi.responses import StreamingResponse
 
 from src.api.dependencies.weaviate import get_weaviate_client
-from src.api.models.requests import DocumentFilter, DocumentUploadResponse
+from src.api.models.requests import DocumentUploadResponse
 from src.api.repositories.weaviate_repo import WeaviateRepository
 from src.api.services.document import DocumentService
 

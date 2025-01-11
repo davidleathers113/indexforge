@@ -1,7 +1,6 @@
 """Unit tests for vector index operations."""
 import uuid
-from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import pytest
 from src.indexing.vector_index import VectorIndex
 
