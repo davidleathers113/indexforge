@@ -4,8 +4,6 @@
 ARG PYTHON_VERSION=3.11
 ARG POETRY_VERSION=2.0.0
 ARG BUILD_ENV=production
-ARG BUILDPLATFORM
-ARG TARGETPLATFORM
 ARG SERVICE_VERSION=1.0.0
 ARG MAX_REQUEST_SIZE_MB=2
 ARG MAX_CONTENT_LENGTH=1048576
@@ -13,7 +11,20 @@ ARG MAX_CONTENT_LENGTH=1048576
 # Poetry installation stage
 FROM --platform=$BUILDPLATFORM python:${PYTHON_VERSION}-slim AS poetry
 ENV POETRY_HOME=/opt/poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV POETRY_VERSION=${POETRY_VERSION}
+ENV PATH="/opt/poetry/bin:$PATH"
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
+    apt-get update -o Acquire::CompressionTypes::Order::=gz && \
+    apt-get install -y --no-install-recommends curl && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    cd /usr/local/bin && \
+    ln -s /opt/poetry/bin/poetry poetry && \
+    poetry --version && \
+    ls -la /opt/poetry && \
+    ls -la /opt/poetry/bin && \
+    ls -la /usr/local/bin && \
+    which poetry
 
 # Builder stage
 FROM --platform=$BUILDPLATFORM python:${PYTHON_VERSION}-slim AS builder

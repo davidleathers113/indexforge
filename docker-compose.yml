@@ -149,7 +149,7 @@ services:
     networks:
       - indexforge-network
 
-  redis:
+  app-redis:
     image: redis:7-alpine
     container_name: app-redis
     command: >
