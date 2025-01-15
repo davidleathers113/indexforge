@@ -63,8 +63,8 @@ Error Handling:
 """
 
 import argparse
-import sys
 from pathlib import Path
+import sys
 from typing import Optional, Union
 
 from pipeline.context import managed_pipeline

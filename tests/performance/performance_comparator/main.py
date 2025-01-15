@@ -4,7 +4,6 @@ import argparse
 from typing import Dict, Optional
 
 from loguru import logger
-
 from tests.performance.performance_comparator.data_loader import find_latest_results, load_results
 from tests.performance.performance_comparator.metrics_comparator import compare_metrics
 from tests.performance.performance_comparator.report_generator import generate_report

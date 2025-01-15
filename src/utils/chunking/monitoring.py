@@ -4,9 +4,9 @@ This module provides tools for monitoring cache performance, reference health,
 and system metrics.
 """
 
+from dataclasses import dataclass
 import logging
 import time
-from dataclasses import dataclass
 from typing import Dict, Optional, Set
 from uuid import UUID
 

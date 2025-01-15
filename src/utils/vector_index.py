@@ -16,8 +16,8 @@ Example:
 
 from typing import List, Optional, Tuple, Union
 
-import numpy as np
 from faiss import IndexFlatL2
+import numpy as np
 
 
 class VectorIndex:

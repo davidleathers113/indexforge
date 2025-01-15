@@ -2,8 +2,8 @@
 Handles error and warning logging for document processing.
 """
 
-import logging
 from datetime import datetime, timezone
+import logging
 from typing import Dict, List, Optional, Union
 
 from .enums import LogLevel

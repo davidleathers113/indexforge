@@ -1,6 +1,6 @@
 import os
-import subprocess
 from pathlib import Path
+import subprocess
 from typing import Dict, Generator
 
 import docker

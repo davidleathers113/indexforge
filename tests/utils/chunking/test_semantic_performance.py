@@ -6,8 +6,10 @@ measuring execution time, memory usage, and scalability.
 import time
 from typing import Set
 from uuid import UUID
-import pytest
+
 from memory_profiler import profile
+import pytest
+
 
 @pytest.fixture
 def large_chunk_set(semantic_processor) -> Set[UUID]:

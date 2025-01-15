@@ -1,7 +1,10 @@
 """Tests for schema validation operations."""
 from unittest.mock import patch
+
 import pytest
+
 from src.indexing.vector_index import VectorIndex
+
 
 @pytest.fixture
 def vector_index(mock_weaviate_client, mock_cache_manager):

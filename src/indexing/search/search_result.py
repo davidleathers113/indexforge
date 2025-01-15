@@ -22,8 +22,8 @@ Example:
     ```
 """
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)

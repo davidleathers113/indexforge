@@ -4,10 +4,10 @@ import asyncio
 import json
 from typing import Dict, List
 
-import pytest
 from aio_pika import Message
 from aio_pika.abc import AbstractIncomingMessage
 from docker.models.containers import Container
+import pytest
 
 from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionManager
 

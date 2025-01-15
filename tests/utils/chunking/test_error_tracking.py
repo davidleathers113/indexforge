@@ -4,8 +4,11 @@ These tests verify the functionality of error tracking, including error recordin
 statistics calculation, and trend analysis.
 """
 import time
+
 import pytest
+
 from src.utils.chunking.error_tracking import ErrorCategory, ErrorTracker, track_errors
+
 
 @pytest.fixture
 def error_tracker():

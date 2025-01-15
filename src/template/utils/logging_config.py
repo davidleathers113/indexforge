@@ -1,12 +1,12 @@
 """Logging configuration for code cleanup utility."""
 
+from dataclasses import dataclass, field
+from enum import Enum
 import logging
 import logging.handlers
 import os
-import sys
-from dataclasses import dataclass, field
-from enum import Enum
 from pathlib import Path
+import sys
 from typing import Dict, Optional, Union
 
 

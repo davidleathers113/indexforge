@@ -1,6 +1,7 @@
 """Tests for topic clustering configuration."""
 from src.utils.topic_clustering import ClusteringConfig
 
+
 def test_clustering_config_defaults():
     """Test ClusteringConfig default values"""
     config = ClusteringConfig()

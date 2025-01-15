@@ -1,11 +1,14 @@
 """Tests for metrics export functionality."""
+from datetime import datetime
 import json
 import logging
-from datetime import datetime
 from unittest.mock import Mock, mock_open, patch
-import pytest
+
 from prometheus_client import REGISTRY
+import pytest
+
 from src.utils.monitoring import PerformanceMetrics, SystemMonitor
+
 
 @pytest.fixture(autouse=True)
 def clear_prometheus_registry():

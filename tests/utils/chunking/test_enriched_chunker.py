@@ -4,9 +4,11 @@ These tests verify the integration of paragraph-based chunking with
 semantic analysis and topic clustering.
 """
 import pytest
+
 from src.utils.chunking.base import ChunkingConfig
 from src.utils.chunking.enriched_chunker import EnrichedChunker, EnrichedChunkingConfig
 from src.utils.chunking.semantic import SemanticConfig
+
 
 @pytest.fixture
 def enriched_chunker():

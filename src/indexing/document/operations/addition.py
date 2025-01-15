@@ -6,8 +6,8 @@ the complete lifecycle of document addition from validation to storage.
 """
 
 import logging
-import uuid
 from typing import Dict, List, Optional, Set
+import uuid
 
 import weaviate
 

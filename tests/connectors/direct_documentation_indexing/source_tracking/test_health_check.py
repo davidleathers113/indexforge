@@ -1,10 +1,23 @@
 """Tests for health check functionality."""
 from unittest.mock import patch
+
 import pytest
-from src.connectors.direct_documentation_indexing.source_tracking import add_processing_step, calculate_health_status, log_error_or_warning
-from src.connectors.direct_documentation_indexing.source_tracking.document_operations import add_document
-from src.connectors.direct_documentation_indexing.source_tracking.enums import HealthStatus, LogLevel, ProcessingStatus
+
+from src.connectors.direct_documentation_indexing.source_tracking import (
+    add_processing_step,
+    calculate_health_status,
+    log_error_or_warning,
+)
+from src.connectors.direct_documentation_indexing.source_tracking.document_operations import (
+    add_document,
+)
+from src.connectors.direct_documentation_indexing.source_tracking.enums import (
+    HealthStatus,
+    LogLevel,
+    ProcessingStatus,
+)
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
+
 
 @pytest.fixture
 def temp_lineage_dir(tmp_path):

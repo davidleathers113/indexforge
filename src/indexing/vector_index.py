@@ -46,9 +46,9 @@ Note:
     - Handles errors gracefully
 """
 
+from datetime import datetime
 import json
 import logging
-from datetime import datetime
 from typing import Any, Dict, List
 
 import weaviate

@@ -1,12 +1,12 @@
 import asyncio
-import time
 from pathlib import Path
+import time
 from typing import Dict, Generator
 
 import aiohttp
 import docker
-import pytest
 from docker.models.containers import Container
+import pytest
 
 
 @pytest.fixture(scope="function")

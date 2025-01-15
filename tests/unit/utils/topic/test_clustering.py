@@ -1,6 +1,8 @@
 """Tests for core topic clustering functionality."""
 import pytest
+
 from src.utils.topic_clustering import ClusteringConfig, TopicClusterer
+
 
 @pytest.fixture
 def clusterer(mock_cache_manager, cache_state):

@@ -1,8 +1,8 @@
 """Utility functions for Render testing."""
 
 import json
-import time
 from pathlib import Path
+import time
 from typing import Any, Dict, List, Optional
 
 import requests

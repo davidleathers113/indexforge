@@ -4,9 +4,12 @@ These tests verify the caching of references, including cache hits/misses,
 invalidation, and performance monitoring.
 """
 from uuid import uuid4
+
 import pytest
+
 from src.utils.chunking.reference_cache import ReferenceCache
 from src.utils.chunking.references import ReferenceManager, ReferenceType
+
 
 @pytest.fixture
 def ref_manager():

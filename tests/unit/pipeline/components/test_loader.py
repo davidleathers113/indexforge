@@ -1,9 +1,12 @@
 """Tests for the document loader component."""
-import uuid
 from unittest.mock import patch
+import uuid
+
 import pytest
+
 from src.pipeline.components.loader import DocumentLoader
 from src.pipeline.config.settings import PipelineConfig
+
 
 @pytest.fixture
 def config():

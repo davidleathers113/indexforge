@@ -10,9 +10,9 @@ This module provides a robust connection manager for RabbitMQ with features incl
 """
 
 import asyncio
+from contextlib import asynccontextmanager
 import logging
 import time
-from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict, Optional
 from uuid import uuid4
 

@@ -53,16 +53,16 @@ Note:
     - Low overhead monitoring
 """
 
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 import json
 import logging
 import time
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
 import numpy as np
-import psutil
 from prometheus_client import Counter, Gauge, Histogram
+import psutil
 
 logger = logging.getLogger(__name__)
 

@@ -4,9 +4,9 @@ This module provides functionality for identifying and classifying citations
 within and across chunks, supporting both explicit and implicit citations.
 """
 
-import re
 from dataclasses import dataclass
 from enum import Enum
+import re
 from typing import Dict, List, Optional, Tuple
 from uuid import UUID
 

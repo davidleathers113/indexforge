@@ -6,8 +6,11 @@ System with Document Processing Schema.
 """
 from copy import deepcopy
 from uuid import uuid4
+
 import pytest
+
 from src.indexing.schema import SchemaValidator
+
 
 def test_parent_id_format(valid_document):
     """Test that parent_id must be None or a valid string ID."""

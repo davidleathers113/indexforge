@@ -1,13 +1,12 @@
 """Script to run and compare performance tests between Weaviate v3 and v4."""
 
+from datetime import datetime
 import json
 import os
-from datetime import datetime
 from typing import Dict
 
-import pandas as pd
 from loguru import logger
-
+import pandas as pd
 
 
 def load_results(filename: str) -> Dict:

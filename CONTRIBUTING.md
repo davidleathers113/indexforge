@@ -8,6 +8,39 @@ We love your input! We want to make contributing to this project as easy and tra
 - Proposing new features
 - Becoming a maintainer
 
+## Development Setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yourusername/indexforge.git
+   cd indexforge
+   ```
+
+2. Create a virtual environment:
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   ```
+
+3. Install the package in development mode:
+
+   ```bash
+   pip install -e .
+   ```
+
+4. Install development dependencies:
+
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+
+5. Set up pre-commit hooks:
+   ```bash
+   pre-commit install
+   ```
+
 ## Development Process
 
 We use GitHub to host code, to track issues and feature requests, as well as accept pull requests.
@@ -18,6 +51,26 @@ We use GitHub to host code, to track issues and feature requests, as well as acc
 4. Ensure the test suite passes.
 5. Make sure your code lints.
 6. Issue that pull request!
+
+## Code Quality Standards
+
+1. **Testing**
+
+   - Write unit tests for new functionality
+   - Maintain test coverage above 80%
+   - Run tests with `pytest`
+
+2. **Code Style**
+
+   - Use Black for Python code formatting
+   - Use isort for import sorting
+   - Follow PEP 8 guidelines
+   - Run pre-commit hooks before committing
+
+3. **Documentation**
+   - Add docstrings to all public functions and classes
+   - Keep API documentation up to date
+   - Include examples in docstrings when helpful
 
 ## Pull Request Process
 
@@ -44,13 +97,6 @@ We use GitHub issues to track public bugs. Report a bug by [opening a new issue]
 - What you expected would happen
 - What actually happens
 - Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
-
-## Use a Consistent Coding Style
-
-- Use Black for Python code formatting
-- Use isort for import sorting
-- Follow PEP 8 guidelines
-- Run pre-commit hooks before committing
 
 ## License
 

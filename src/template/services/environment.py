@@ -7,8 +7,8 @@ This module is responsible for:
 """
 
 import logging
-import textwrap
 from pathlib import Path
+import textwrap
 from typing import Union
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader

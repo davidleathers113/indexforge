@@ -1,6 +1,8 @@
-import pytest
 import pandas as pd
+import pytest
+
 from src.connectors.notion_connector import NotionConnector
+
 
 @pytest.fixture
 def mock_csv_data():

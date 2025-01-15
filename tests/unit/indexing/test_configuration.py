@@ -1,6 +1,8 @@
 """Tests for vector index configuration."""
 import pytest
+
 from src.indexing.vector_index import VectorIndex
+
 
 def test_custom_class_name(mock_weaviate_client):
     """Test initialization with custom class name"""

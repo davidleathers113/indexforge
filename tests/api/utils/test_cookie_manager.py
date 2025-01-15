@@ -1,8 +1,8 @@
 """Tests for cookie management utilities."""
 
-import pytest
 from fastapi import Response
 from pydantic import HttpUrl
+import pytest
 
 from src.api.utils.cookie_manager import (
     clear_auth_cookies,

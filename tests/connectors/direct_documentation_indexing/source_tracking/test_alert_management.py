@@ -3,7 +3,6 @@
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-
 from src.connectors.direct_documentation_indexing.source_tracking.alert_manager import (
     Alert,
     AlertSeverity,

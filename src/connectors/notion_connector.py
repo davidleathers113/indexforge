@@ -5,12 +5,12 @@ including CSV, HTML, and Markdown files. It handles data extraction, normalizati
 and conversion into a standardized document format suitable for further processing.
 """
 
-import sys
 from pathlib import Path
+import sys
 from typing import Dict, List
 
-import pandas as pd
 from bs4 import BeautifulSoup
+import pandas as pd
 
 
 class NotionConnector:

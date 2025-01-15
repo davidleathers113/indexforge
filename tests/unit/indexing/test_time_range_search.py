@@ -1,9 +1,12 @@
 """Tests for time range search operations."""
 from datetime import datetime
 from unittest.mock import MagicMock
+
 import pytest
+
 from src.indexing.search.search_result import SearchResult
 from src.indexing.vector_index import VectorIndex
+
 
 @pytest.fixture
 def search_mock():

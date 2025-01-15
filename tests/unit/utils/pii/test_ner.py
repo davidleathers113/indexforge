@@ -1,7 +1,10 @@
 """Tests for PII NER (Named Entity Recognition) functionality."""
 from unittest.mock import Mock, patch
+
 import pytest
+
 from src.utils.pii_detector import PIIDetector
+
 
 @pytest.fixture
 def mock_spacy_model():

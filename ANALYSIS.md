@@ -81,6 +81,34 @@ src/
    from src.pipeline.parameters import Parameter
    ```
 
+### Successful Import Patterns
+
+1. Using TYPE_CHECKING for settings imports:
+
+   ```python
+   from typing import TYPE_CHECKING
+   if TYPE_CHECKING:
+       from src.core.settings import Settings
+   ```
+
+2. Centralized core exports:
+
+   ```python
+   from src.core import (
+       BaseService,
+       ServiceStateError,
+       TextProcessor,
+   )
+   ```
+
+3. Local type definitions for service states:
+   ```python
+   class ServiceState(Enum):
+       CREATED = "created"
+       INITIALIZING = "initializing"
+       # ...
+   ```
+
 ## Recommended Directory Structure
 
 ```
@@ -188,3 +216,19 @@ src/
    - Reduced import time
    - Improved startup time
    - Better memory usage
+
+## Progress Update
+
+### Completed Items
+
+- Fixed circular imports in ML modules:
+  - Resolved settings imports using TYPE_CHECKING
+  - Implemented proper service state management
+  - Centralized error class definitions
+  - Fixed NLTK dependency handling
+
+### In Progress
+
+- Remaining ML module imports (search.py)
+- Service layer implementation
+- Container dependency injection

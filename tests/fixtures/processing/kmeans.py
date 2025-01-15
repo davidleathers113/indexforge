@@ -1,7 +1,7 @@
 """KMeans clustering fixtures."""
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Optional
 from unittest.mock import MagicMock
 

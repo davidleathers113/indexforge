@@ -1,9 +1,9 @@
 """Command-line interface fixtures."""
 
-import logging
-import sys
 from argparse import Namespace
 from dataclasses import dataclass, field
+import logging
+import sys
 from typing import List, Optional
 from unittest.mock import MagicMock, patch
 

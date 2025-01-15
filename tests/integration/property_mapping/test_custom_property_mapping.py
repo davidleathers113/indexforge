@@ -5,8 +5,10 @@ from Document Processing Schema to Core Schema System.
 """
 from copy import deepcopy
 from datetime import datetime, timezone
+
 from src.connectors.direct_documentation_indexing.processors import BaseProcessor
 from src.indexing.schema import SchemaValidator
+
 
 def test_source_metadata_mapping(mock_processor, valid_document):
     """Test mapping of source-specific metadata to core schema properties."""

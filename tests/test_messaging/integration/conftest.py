@@ -5,9 +5,9 @@ import socket
 from typing import AsyncGenerator, Dict
 
 import docker
+from docker.models.containers import Container
 import pytest
 import pytest_asyncio
-from docker.models.containers import Container
 
 from src.api.messaging.rabbitmq_config import rabbitmq_settings
 

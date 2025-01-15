@@ -2,9 +2,8 @@
 
 from unittest.mock import patch
 
-import pytest
 from fastapi import status
-
+import pytest
 
 
 @pytest.mark.asyncio

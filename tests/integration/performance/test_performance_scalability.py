@@ -3,11 +3,14 @@
 This module contains tests that verify the performance characteristics
 of schema operations under various load conditions.
 """
-import time
 from copy import deepcopy
+import time
 from typing import Any, Dict, List
+
 import pytest
+
 from src.indexing.schema import SchemaDefinition, SchemaValidator
+
 
 def generate_large_document_set(count: int) -> List[Dict[str, Any]]:
     """Generate a large set of test documents."""
@@ -72,6 +75,7 @@ def test_index_construction_performance():
 def test_memory_usage_under_load():
     """Test memory usage with large document sets."""
     import os
+
     import psutil
     process = psutil.Process(os.getpid())
     initial_memory = process.memory_info().rss

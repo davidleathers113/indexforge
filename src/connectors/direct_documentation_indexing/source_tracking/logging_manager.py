@@ -49,8 +49,8 @@ Example:
     ```
 """
 
-import logging
 from datetime import datetime, timezone
+import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .enums import LogLevel, ProcessingStatus

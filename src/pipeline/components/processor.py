@@ -34,10 +34,10 @@ from src.utils.document_processing import DocumentProcessor as BaseDocProcessor
 from src.utils.pii_detector import PIIDetector
 from src.utils.summarizer.config.settings import SummarizerConfig
 from src.utils.summarizer.core.processor import DocumentSummarizer
+from src.utils.topic_clustering import TopicClusterer
 
 # Re-export for test mocking
 SummarizerProcessor = DocumentSummarizer
-from src.utils.topic_clustering import TopicClusterer
 
 
 class DocumentProcessor(PipelineComponent):

@@ -38,14 +38,14 @@ Example:
     ```
 """
 
-import json
-import logging
-import smtplib
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from email.mime.text import MIMEText
 from enum import Enum
+import json
+import logging
 from pathlib import Path
+import smtplib
 from typing import Any, Dict, List, Optional
 
 import requests

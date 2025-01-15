@@ -57,8 +57,8 @@ Note:
     - Handles large documents
 """
 
-import logging
 from functools import wraps
+import logging
 from typing import Dict, List
 
 from transformers import pipeline
@@ -284,6 +284,6 @@ class DocumentSummarizer:
             # Clean up summarizer pipeline
             if hasattr(self, "summarizer"):
                 del self.summarizer
-        except Exception as e:
+        except Exception:
             logger.error("Error cleaning up summarizer", exc_info=True)
             raise

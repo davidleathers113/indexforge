@@ -10,8 +10,8 @@ The chunking strategy follows these principles:
 4. Support variable chunk sizes within configured bounds
 """
 
-import re
 from dataclasses import dataclass
+import re
 from typing import List, Tuple
 
 from .base import ChunkingConfig

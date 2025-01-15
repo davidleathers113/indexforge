@@ -1,9 +1,10 @@
 """Validation utilities for logger tests."""
 import json
 from typing import Any, Dict, List, Optional, Set, Type
+
+from hypothesis import given, strategies as st
 import pytest
-from hypothesis import given
-from hypothesis import strategies as st
+
 
 class LogValidationError(Exception):
     """Base class for log validation errors."""

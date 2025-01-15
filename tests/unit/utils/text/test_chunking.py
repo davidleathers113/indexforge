@@ -1,7 +1,10 @@
 """Tests for text chunking functionality."""
 from unittest.mock import Mock, patch
+
 import pytest
+
 from src.utils.text_processing import chunk_text_by_chars, chunk_text_by_words
+
 
 @pytest.fixture
 def mock_encoding():

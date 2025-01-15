@@ -2,8 +2,8 @@
 
 from typing import Dict
 
-import pytest
 from aio_pika.abc import AbstractChannel, AbstractConnection
+import pytest
 
 from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionManager
 

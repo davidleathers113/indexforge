@@ -1,12 +1,12 @@
 """Performance testing script for Weaviate migration."""
 
+from datetime import datetime
 import json
 import time
-from datetime import datetime
 from typing import Dict, List
 
-import weaviate
 from loguru import logger
+import weaviate
 
 from tests.data.weaviate_test_dataset import generate_test_documents, load_test_dataset
 

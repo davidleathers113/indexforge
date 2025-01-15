@@ -1,7 +1,7 @@
 """Logger fixtures for testing."""
 
-import logging
 from dataclasses import dataclass, field
+import logging
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock
 

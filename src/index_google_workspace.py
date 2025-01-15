@@ -6,8 +6,8 @@ using the direct documentation indexing connector and indexes them in Weaviate.
 
 import json
 import logging
-import sys
 from pathlib import Path
+import sys
 from typing import Dict, List
 
 import weaviate

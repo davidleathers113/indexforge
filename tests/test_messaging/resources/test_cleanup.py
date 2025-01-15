@@ -4,7 +4,6 @@
 import pytest
 
 
-
 @pytest.mark.asyncio
 async def test_connection_cleanup_after_context(connection_manager, mock_rabbitmq):
     """Test connection cleanup after context manager exit.

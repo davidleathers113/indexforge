@@ -49,7 +49,7 @@ async def refresh_token(
             "csrf_token", new_csrf_token, httponly=True, secure=True, samesite="strict"
         )
         return response
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token refresh failed")
 
 
@@ -103,7 +103,7 @@ async def signin(
             token_type="bearer",
             user=auth_response.user.model_dump(),
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
 
@@ -145,7 +145,7 @@ async def get_current_user(
             name=user.user.user_metadata.get("name"),
             created_at=user.user.created_at,
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
 

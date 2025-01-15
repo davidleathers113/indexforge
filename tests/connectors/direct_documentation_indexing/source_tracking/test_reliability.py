@@ -1,11 +1,17 @@
 """Tests for source reliability tracking functionality."""
+from datetime import datetime, timezone
 import json
 import time
-from datetime import datetime, timezone
 from typing import Any, Dict
 from unittest.mock import Mock
+
 import pytest
-from src.connectors.direct_documentation_indexing.source_tracking.reliability import ReliabilityMetrics, SourceReliability
+
+from src.connectors.direct_documentation_indexing.source_tracking.reliability import (
+    ReliabilityMetrics,
+    SourceReliability,
+)
+
 
 @pytest.fixture
 def temp_metrics_dir(tmp_path):

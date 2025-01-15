@@ -1,6 +1,7 @@
 """Tests for summarizer configuration."""
 from src.utils.summarizer import SummarizerConfig
 
+
 def test_summarizer_config_defaults():
     """Test SummarizerConfig default values."""
     config = SummarizerConfig()

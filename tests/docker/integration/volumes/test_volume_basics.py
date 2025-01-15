@@ -1,10 +1,9 @@
 """Test basic volume operations."""
 
-import uuid
 from typing import Any, Dict, Generator
+import uuid
 
 import pytest
-
 
 
 @pytest.fixture

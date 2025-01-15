@@ -1,7 +1,10 @@
 """Tests for error handling in topic clustering."""
 from unittest.mock import Mock, patch
+
 import pytest
+
 from src.utils.topic_clustering import TopicClusterer
+
 
 @pytest.fixture
 def mock_kmeans():

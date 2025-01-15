@@ -1,6 +1,7 @@
 """Tests for document chunking functionality."""
 from src.utils.document_processing import DocumentProcessor
 
+
 def test_document_chunking(mock_doc_processor):
     """Test document content chunking."""
     processor = DocumentProcessor()

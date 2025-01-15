@@ -1,7 +1,7 @@
 """Metrics collection and aggregation for document processing."""
 
-import logging
 from datetime import datetime, timezone
+import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from .enums import LogLevel, ProcessingStatus

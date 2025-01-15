@@ -41,9 +41,9 @@ Note:
     - Handles nested resources
 """
 
+from contextlib import contextmanager
 import logging
 import traceback
-from contextlib import contextmanager
 from typing import Generator
 
 from .errors import ResourceError

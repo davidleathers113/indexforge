@@ -1,13 +1,13 @@
 """Script to run performance tests for both Weaviate versions."""
 
+from datetime import datetime
 import os
 import subprocess
 import time
-from datetime import datetime
 
 import docker
-import weaviate
 from loguru import logger
+import weaviate
 
 from tests.performance.weaviate_performance_test import WeaviatePerformanceTest
 

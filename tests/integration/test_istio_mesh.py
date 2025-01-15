@@ -1,6 +1,6 @@
+from kubernetes import client, config
 import pytest
 import requests
-from kubernetes import client, config
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 

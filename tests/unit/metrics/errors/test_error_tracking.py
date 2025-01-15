@@ -1,7 +1,7 @@
 """Test error type tracking functionality."""
 
-import threading
 from concurrent.futures import ThreadPoolExecutor
+import threading
 
 import pytest
 

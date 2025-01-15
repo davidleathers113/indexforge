@@ -1,6 +1,8 @@
 """Tests for PII redaction functionality."""
 import pytest
+
 from src.utils.pii_detector import PIIDetector, PIIMatch
+
 
 @pytest.fixture
 def pii_detector():

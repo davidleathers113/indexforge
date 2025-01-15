@@ -8,8 +8,8 @@ Main Components:
     - PipelineComponent: Abstract base class for all pipeline components
 """
 
-import logging
 from abc import ABC, abstractmethod
+import logging
 from typing import Dict, List, Optional
 
 from src.pipeline.config.settings import PipelineConfig

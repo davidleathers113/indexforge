@@ -4,8 +4,11 @@ This module contains tests that verify the handling of documents that exceed
 normal size limits, including large content bodies and embeddings.
 """
 from typing import Any, Dict
+
 import pytest
+
 from src.indexing.schema import SchemaValidator
+
 
 def create_base_document() -> Dict[str, Any]:
     """Create a base test document."""

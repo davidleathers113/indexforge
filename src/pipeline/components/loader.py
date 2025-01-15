@@ -14,8 +14,8 @@ Main Components:
     - DocumentLoader: Core class for loading and standardizing documents
 """
 
-import uuid
 from typing import Dict, List, Optional
+import uuid
 
 from src.connectors.notion_connector import NotionConnector
 from src.pipeline.components.base import PipelineComponent

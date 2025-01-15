@@ -1,7 +1,7 @@
 """Base classes for batch operations."""
 
-import logging
 from abc import ABC, abstractmethod
+import logging
 from typing import Dict, List, Optional, Protocol
 
 from weaviate.collections import Collection

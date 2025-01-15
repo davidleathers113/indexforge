@@ -5,9 +5,8 @@ import logging
 import time
 from typing import Any, Dict, List
 
+from hypothesis import given, settings, strategies as st
 import pytest
-from hypothesis import given, settings
-from hypothesis import strategies as st
 
 from src.configuration.logger_setup import log_with_context, setup_json_logger
 from tests.unit.configuration.test_logger_validation import (

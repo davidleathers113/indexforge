@@ -1,8 +1,11 @@
 """Tests for the document indexer component."""
 from unittest.mock import patch
+
 import pytest
+
 from src.pipeline.components.indexer import DocumentIndexer
 from src.pipeline.config.settings import PipelineConfig
+
 
 @pytest.fixture
 def config():

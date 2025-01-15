@@ -4,8 +4,8 @@ This module contains integration tests focusing on complex error recovery scenar
 ensuring system resilience and data consistency during various failure modes.
 """
 
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 from unittest.mock import Mock, patch
 
 import pytest

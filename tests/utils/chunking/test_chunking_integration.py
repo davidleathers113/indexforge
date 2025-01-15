@@ -4,7 +4,15 @@ These tests verify that the chunking system works correctly as a whole,
 including configuration, chunking strategies, and special content handling.
 """
 import pytest
-from src.utils.chunking import ChunkingConfig, ParagraphChunker, chunk_text_by_chars, chunk_text_by_tokens, chunk_text_by_words
+
+from src.utils.chunking import (
+    ChunkingConfig,
+    ParagraphChunker,
+    chunk_text_by_chars,
+    chunk_text_by_tokens,
+    chunk_text_by_words,
+)
+
 
 def load_test_document(name: str) -> str:
     """Load a test document from the test data directory."""

@@ -2,8 +2,8 @@
 
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from fastapi import UploadFile
+import pytest
 
 from src.api.services.file_upload_service import FileUploadService
 

@@ -4,8 +4,8 @@ This module provides database-specific monitoring, including connection pool sta
 query performance tracking, and integration with OpenTelemetry for distributed tracing.
 """
 
-import logging
 from contextlib import contextmanager
+import logging
 
 from sqlalchemy.engine import Engine
 

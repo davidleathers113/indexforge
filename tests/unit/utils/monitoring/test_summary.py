@@ -1,10 +1,13 @@
 """Tests for performance summary functionality."""
-import logging
 from datetime import datetime, timedelta
+import logging
 from unittest.mock import Mock, patch
-import pytest
+
 from prometheus_client import REGISTRY
+import pytest
+
 from src.utils.monitoring import PerformanceMetrics, SystemMonitor
+
 
 @pytest.fixture(autouse=True)
 def clear_prometheus_registry():

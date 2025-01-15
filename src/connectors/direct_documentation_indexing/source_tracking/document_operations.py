@@ -5,8 +5,8 @@ This module provides core document management functionality like adding new docu
 and managing their basic metadata.
 """
 
-import logging
 from datetime import datetime, timezone
+import logging
 from typing import Dict, List, Optional
 
 from .lineage_operations import _would_create_circular_reference

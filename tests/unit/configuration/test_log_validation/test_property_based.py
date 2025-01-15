@@ -9,10 +9,21 @@ Tests:
 """
 import json
 from typing import Any, Dict, List
-from hypothesis import given, settings
-from hypothesis import strategies as st
-from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry, verify_log_structure
-from tests.unit.configuration.test_logger_validation import LogFieldError, LogFormatError, LogTypeError, validate_log_entry, validate_log_file
+
+from hypothesis import given, settings, strategies as st
+
+from tests.unit.configuration.test_log_validation.conftest import (
+    create_test_log_entry,
+    verify_log_structure,
+)
+from tests.unit.configuration.test_logger_validation import (
+    LogFieldError,
+    LogFormatError,
+    LogTypeError,
+    validate_log_entry,
+    validate_log_file,
+)
+
 
 @given(message=st.text(min_size=1), thread_id=st.integers(), extra_fields=st.dictionaries(keys=st.text(min_size=1), values=st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()), max_size=5))
 def test_property_valid_entries(message: str, thread_id: int, extra_fields: Dict[str, Any]) -> None:

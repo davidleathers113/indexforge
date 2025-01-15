@@ -8,9 +8,20 @@ Tests:
 """
 import logging
 from typing import Any
+
 import pytest
-from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry, verify_log_structure
-from tests.unit.configuration.test_logger_validation import LogFieldError, LogTypeError, validate_log_entry, validate_log_file
+
+from tests.unit.configuration.test_log_validation.conftest import (
+    create_test_log_entry,
+    verify_log_structure,
+)
+from tests.unit.configuration.test_logger_validation import (
+    LogFieldError,
+    LogTypeError,
+    validate_log_entry,
+    validate_log_file,
+)
+
 
 def test_valid_log_entry(json_logger: logging.Logger, temp_log_file: str) -> None:
     """Test validation of a valid log entry.

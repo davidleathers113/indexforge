@@ -4,8 +4,11 @@ This module contains tests that verify the migration process between
 different schema versions, including rollback scenarios and partial updates.
 """
 from typing import Any, Dict
+
 import pytest
+
 from src.indexing.schema import SchemaMigrator
+
 
 def create_v1_document() -> Dict[str, Any]:
     """Create a document using schema version 1 format."""

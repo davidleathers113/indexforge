@@ -1,8 +1,11 @@
 """Unit tests for vector index operations."""
-import uuid
 from unittest.mock import patch
+import uuid
+
 import pytest
+
 from src.indexing.vector_index import VectorIndex
+
 
 @pytest.fixture
 def vector_index():

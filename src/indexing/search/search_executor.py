@@ -22,8 +22,8 @@ Example:
     ```
 """
 
-import logging
 from datetime import datetime
+import logging
 from typing import Dict, List, Optional
 
 import weaviate

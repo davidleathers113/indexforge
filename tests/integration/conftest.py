@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import tracemalloc
 from typing import Any, Dict
 
 import pytest
@@ -10,7 +11,7 @@ from src.indexing.schema import SchemaDefinition
 @pytest.fixture
 def base_schema():
     """Fixture providing the base schema configuration."""
-    return SchemaDefinition.get_schema()
+    return SchemaDefinition.get_schema(class_name="Document")
 
 
 @pytest.fixture
@@ -48,11 +49,11 @@ def mock_processor(mocker):
     }
     return processor
 
-import tracemalloc
 
 def pytest_configure(config):
     """Configure pytest with enhanced exception handling."""
     tracemalloc.start()
+
 
 def pytest_unconfigure(config):
     """Cleanup pytest configuration."""

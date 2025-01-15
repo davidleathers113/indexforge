@@ -3,8 +3,8 @@
 import asyncio
 from unittest.mock import patch
 
-import pytest
 from aio_pika.exceptions import AMQPConnectionError
+import pytest
 
 from src.api.messaging import rabbitmq_settings
 from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionError

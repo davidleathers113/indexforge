@@ -1,7 +1,7 @@
 """Weaviate cache providers."""
 
-import json
 from abc import ABC, abstractmethod
+import json
 from typing import Any, Optional
 
 import aioredis

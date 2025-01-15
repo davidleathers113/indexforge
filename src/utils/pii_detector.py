@@ -61,10 +61,10 @@ Note:
     - Customizable redaction patterns
 """
 
-import logging
-import re
 from dataclasses import dataclass
 from datetime import datetime
+import logging
+import re
 from typing import Dict, List
 
 import spacy

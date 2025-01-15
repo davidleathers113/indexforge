@@ -56,8 +56,8 @@ Note:
     - Provides detailed error tracking
 """
 
-import logging
 from contextlib import contextmanager
+import logging
 from typing import Any, Dict, Iterator, List, Optional
 
 from transformers import pipeline

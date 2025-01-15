@@ -1,7 +1,9 @@
 """Tests for search operations module."""
 import json
 from pathlib import Path
+
 from src.pipeline.search import SearchOperations
+
 
 def load_sample_documents():
     """Load sample documents from JSON file."""

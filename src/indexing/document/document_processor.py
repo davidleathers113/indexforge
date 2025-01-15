@@ -5,8 +5,8 @@ operations including preparation for indexing, validation of document structure,
 merging updates, and computing document hashes for deduplication.
 """
 
-import logging
 from datetime import datetime
+import logging
 from typing import Dict, List, Tuple
 
 

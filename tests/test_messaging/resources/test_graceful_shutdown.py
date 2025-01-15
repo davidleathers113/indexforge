@@ -5,7 +5,6 @@ import asyncio
 import pytest
 
 
-
 @pytest.mark.asyncio
 async def test_manager_shutdown(connection_manager, mock_rabbitmq):
     """Test graceful shutdown of connection manager.

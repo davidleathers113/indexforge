@@ -4,9 +4,12 @@ These tests verify the functionality of citation detection, including
 different citation types and reference creation.
 """
 from uuid import uuid4
+
 import pytest
+
 from src.utils.chunking.citation_detector import CitationDetector, CitationType
 from src.utils.chunking.references import ReferenceManager, ReferenceType
+
 
 @pytest.fixture
 def ref_manager():

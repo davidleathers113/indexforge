@@ -1,7 +1,10 @@
 """Tests for topic keyword extraction functionality."""
 from unittest.mock import patch
+
 import pytest
+
 from src.utils.topic_clustering import TopicClusterer
+
 
 @pytest.fixture
 def mock_cache_manager():

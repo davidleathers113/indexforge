@@ -5,12 +5,12 @@ application, including standard logging and JSON-formatted logging with rotation
 and context support. It includes utilities for both file and console logging.
 """
 
+from datetime import datetime
 import json
 import logging
 import logging.handlers
 import os
 import threading
-from datetime import datetime
 from typing import Dict, Optional
 
 

@@ -3,10 +3,10 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Generator
 
+from dotenv import load_dotenv
 import pytest
 import requests
 import yaml
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()

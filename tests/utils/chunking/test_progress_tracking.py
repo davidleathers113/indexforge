@@ -3,11 +3,18 @@
 These tests verify the functionality of progress tracking, including batch metrics,
 ETA calculation, and the decorator.
 """
-import time
 from dataclasses import dataclass
+import time
 from typing import Optional
+
 import pytest
-from src.utils.chunking.progress_tracking import OperationType, ProgressTracker, track_batch_operation
+
+from src.utils.chunking.progress_tracking import (
+    OperationType,
+    ProgressTracker,
+    track_batch_operation,
+)
+
 
 @pytest.fixture
 def progress_tracker():

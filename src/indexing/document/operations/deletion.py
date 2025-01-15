@@ -6,8 +6,8 @@ single and batch document deletions with detailed logging and status reporting.
 """
 
 import logging
-import uuid
 from typing import List, Optional
+import uuid
 
 import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException

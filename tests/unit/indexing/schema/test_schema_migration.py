@@ -1,6 +1,8 @@
 """Tests for schema migration operations."""
 from unittest.mock import patch
+
 from src.indexing.schema.schema_migrator import SchemaMigrator
+
 
 def test_migrator_deletes_old_schema_when_version_mismatch(mock_weaviate_client, mock_schema_validator):
     """Test that migrator deletes old schema when version doesn't match."""

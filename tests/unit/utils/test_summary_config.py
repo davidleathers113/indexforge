@@ -1,6 +1,7 @@
 """Tests for SummarizerConfig data class."""
 from src.utils.summarizer import SummarizerConfig
 
+
 class TestSummarizerConfig:
     """Tests for SummarizerConfig data class."""
 

@@ -1,6 +1,7 @@
 """Tests for summarizer cache integration."""
 from src.utils.summarizer import DocumentSummarizer, SummarizerConfig
 
+
 def test_cache_hit(mock_cache_manager, sample_document):
     """Test cache hit when generating summary."""
     summarizer = DocumentSummarizer(model_name='facebook/bart-large-cnn', device=-1, batch_size=4, cache_manager=mock_cache_manager)

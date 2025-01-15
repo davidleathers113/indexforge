@@ -4,8 +4,8 @@ from functools import lru_cache
 from typing import Optional
 from urllib.parse import urlparse
 
-import weaviate.classes as wvc
 from weaviate.auth import AuthApiKey
+import weaviate.classes as wvc
 from weaviate.config import AdditionalConfig, Headers, Proxies
 from weaviate.exceptions import WeaviateConnectionError
 

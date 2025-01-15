@@ -1,12 +1,12 @@
-import time
 from pathlib import Path
+import time
 from typing import Dict, Generator, List
 
 import docker
-import pytest
-import requests
 from docker.models.containers import Container
 from docker.models.networks import Network
+import pytest
+import requests
 
 
 @pytest.fixture(scope="function")

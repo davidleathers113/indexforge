@@ -1,7 +1,7 @@
 """Mock schema validator fixture."""
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Dict, Optional
 from unittest.mock import MagicMock
 

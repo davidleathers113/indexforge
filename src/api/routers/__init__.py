@@ -1,5 +1,8 @@
-"""Routers package."""
+"""API routers package initialization.
 
-from .search import router as search_router
+This package contains FastAPI routers for different API endpoints.
+"""
 
-__all__ = ["search_router"]
+from src.api.routers.health import router as health_router
+
+__all__ = ["health_router"]

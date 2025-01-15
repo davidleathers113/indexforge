@@ -1,6 +1,8 @@
 """Tests for schema initialization."""
 import pytest
+
 from src.indexing.vector_index import VectorIndex
+
 
 @pytest.fixture
 def index():

@@ -1,3 +1,14 @@
-"""ML service package for IndexForge."""
+"""Machine Learning package.
 
-__version__ = "0.1.0"
+This package provides ML-related functionality including:
+- Embedding generation
+- Text processing
+- Topic clustering
+- Semantic search
+"""
+
+from .embeddings import EmbeddingGenerator
+from .processing import TextProcessor
+from .search import SemanticSearch
+
+__all__ = ["EmbeddingGenerator", "TextProcessor", "SemanticSearch"]

@@ -4,8 +4,11 @@ These tests verify the functionality of the reference management system,
 including reference types, bi-directional relationships, and validation.
 """
 from uuid import UUID, uuid4
+
 import pytest
+
 from src.utils.chunking.references import ReferenceManager, ReferenceType
+
 
 @pytest.fixture
 def ref_manager():

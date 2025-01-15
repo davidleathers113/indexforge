@@ -1,8 +1,11 @@
 'Tests for error handling in monitoring.'
 import logging
 from unittest.mock import Mock, patch
+
 import pytest
+
 from src.utils.monitoring import SystemMonitor
+
 
 @pytest.fixture
 def mock_process():

@@ -1,9 +1,7 @@
 """Test volume data persistence."""
 
-import uuid
 from typing import Any, Dict
-
-
+import uuid
 
 
 def test_data_persistence(docker_client: Any, test_volume: Dict[str, Any]) -> None:

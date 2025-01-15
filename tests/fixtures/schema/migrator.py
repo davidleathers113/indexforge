@@ -1,7 +1,7 @@
 """Mock schema migrator fixture."""
 
-import logging
 from dataclasses import dataclass
+import logging
 from unittest.mock import MagicMock, patch
 
 import pytest

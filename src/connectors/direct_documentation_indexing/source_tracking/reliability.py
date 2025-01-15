@@ -41,10 +41,10 @@ Example:
     ```
 """
 
-import json
-import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 

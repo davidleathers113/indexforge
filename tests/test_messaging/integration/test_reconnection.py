@@ -3,8 +3,8 @@
 import asyncio
 from typing import Dict
 
-import pytest
 from docker.models.containers import Container
+import pytest
 
 from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionManager
 

@@ -5,11 +5,14 @@ performance, and cache metrics.
 """
 import logging
 import time
+
 import pytest
+
 from src.utils.chunking.monitoring import ReferenceMonitor, time_operation
 from src.utils.chunking.reference_cache import ReferenceCache
 from src.utils.chunking.reference_classifier import ReferenceClassifier
 from src.utils.chunking.references import ReferenceManager, ReferenceType
+
 
 @pytest.fixture
 def ref_manager():

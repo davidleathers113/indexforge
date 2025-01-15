@@ -5,8 +5,11 @@ between documents, including self-references and cyclic dependencies.
 """
 from typing import Any, Dict
 from uuid import uuid4
+
 import pytest
+
 from src.indexing.schema import SchemaValidator
+
 
 def create_document_with_id(doc_id: str) -> Dict[str, Any]:
     """Create a test document with a specific ID."""

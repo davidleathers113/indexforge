@@ -4,9 +4,11 @@ These tests verify the functionality of reference classification, including
 direct, indirect, and structural references.
 """
 import pytest
+
 from src.utils.chunking.citation_detector import CitationType
 from src.utils.chunking.reference_classifier import ReferenceCategory, ReferenceClassifier
 from src.utils.chunking.references import ReferenceManager, ReferenceType
+
 
 @pytest.fixture
 def ref_manager():

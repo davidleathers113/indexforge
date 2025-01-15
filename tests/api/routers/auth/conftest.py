@@ -3,9 +3,9 @@
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
+import pytest
 
 from src.api.config import Settings
 from src.api.dependencies.supabase import get_supabase_client

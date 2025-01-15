@@ -4,9 +4,9 @@ This module provides Redis-specific monitoring, including operation timing,
 connection pool statistics, and cache hit/miss tracking.
 """
 
+from contextlib import contextmanager
 import logging
 import time
-from contextlib import contextmanager
 
 from opentelemetry import trace
 from redis import Redis

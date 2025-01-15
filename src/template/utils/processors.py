@@ -1,8 +1,8 @@
 """Processor classes for code cleanup utility."""
 
 import ast
-import logging
 from dataclasses import dataclass
+import logging
 from pathlib import Path
 from typing import Dict, Optional
 

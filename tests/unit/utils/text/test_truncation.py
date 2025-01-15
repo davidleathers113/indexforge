@@ -1,7 +1,10 @@
 """Tests for text truncation functionality."""
 from unittest.mock import Mock, patch
+
 import pytest
+
 from src.utils.text_processing import truncate_text
+
 
 @pytest.fixture
 def mock_encoding():

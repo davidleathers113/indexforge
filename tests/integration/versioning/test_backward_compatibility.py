@@ -6,8 +6,11 @@ Document Processing Schema.
 """
 from copy import deepcopy
 from datetime import datetime, timezone
+
 import pytest
+
 from src.indexing.schema import SchemaValidator
+
 
 def test_old_schema_version_acceptance(valid_document, base_schema):
     """Test that documents with older schema versions are accepted."""

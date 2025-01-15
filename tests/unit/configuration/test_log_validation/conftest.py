@@ -93,6 +93,7 @@ def write_test_logs(temp_log_file: str) -> None:
 
 import tracemalloc
 
+
 def pytest_configure(config):
     """Configure pytest with enhanced exception handling."""
     tracemalloc.start()

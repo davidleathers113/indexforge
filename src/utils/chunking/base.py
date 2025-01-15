@@ -38,8 +38,8 @@ References:
     - Token Counting: https://weaviate.io/developers/weaviate/config-refs/tokenization
 """
 
-import logging
 from dataclasses import dataclass, field
+import logging
 from typing import Dict, List, Optional
 from uuid import UUID, uuid4
 

@@ -1,6 +1,7 @@
 """Tests for summarizer error cases."""
 from src.utils.summarizer import DocumentSummarizer, SummarizerConfig
 
+
 def test_generate_summary_empty_text(mock_cache_manager):
     """Test summary generation with empty text."""
     summarizer = DocumentSummarizer(model_name='facebook/bart-large-cnn', device=-1, batch_size=4, cache_manager=mock_cache_manager)

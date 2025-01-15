@@ -1,11 +1,14 @@
 """Tests for the document processor component."""
 import logging
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from src.models import ClusteringConfig
 from src.pipeline.components.processor import DocumentProcessor
 from src.pipeline.config.settings import PipelineConfig
 from src.utils.summarizer.config.settings import SummarizerConfig
+
 
 @pytest.fixture
 def config():

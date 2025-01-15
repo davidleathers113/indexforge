@@ -2,9 +2,12 @@
 import logging
 from typing import Dict, List
 from unittest.mock import MagicMock
+
 import pytest
+
 from src.pipeline.components.base import PipelineComponent
 from src.pipeline.config.settings import PipelineConfig
+
 
 class TestComponent(PipelineComponent):
     """Test implementation of PipelineComponent."""

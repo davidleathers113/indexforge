@@ -63,12 +63,12 @@ Note:
     - Extensible processing pipeline
 """
 
-import hashlib
-import logging
-import uuid
 from dataclasses import dataclass
 from datetime import datetime
+import hashlib
+import logging
 from typing import Dict, List, Optional
+import uuid
 
 
 class DocumentProcessingError(Exception):

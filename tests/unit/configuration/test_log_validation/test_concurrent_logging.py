@@ -3,9 +3,12 @@ import logging
 import threading
 import time
 from typing import Any
+
 import pytest
+
 from tests.unit.configuration.test_log_validation.conftest import create_test_log_entry
 from tests.unit.configuration.test_logger_validation import LogTypeError, validate_log_file
+
 
 def test_concurrent_logging(json_logger: logging.Logger, temp_log_file: str) -> None:
     """Test logging from multiple threads.

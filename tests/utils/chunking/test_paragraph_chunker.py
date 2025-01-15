@@ -1,6 +1,8 @@
 """Unit tests for the paragraph-based chunking system."""
 import pytest
+
 from src.utils.chunking import ChunkingConfig, ParagraphChunker
+
 
 @pytest.fixture
 def default_config():

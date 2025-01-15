@@ -4,11 +4,11 @@ This module provides tools for tracking, analyzing, and reporting errors
 across the reference system operations.
 """
 
-import logging
-import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
+import logging
+import time
 from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)

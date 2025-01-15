@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 import pytest
 
 
-
 @pytest.fixture(scope="function")
 def mock_pipeline(pipeline_state):
     """Mock pipeline with state management."""

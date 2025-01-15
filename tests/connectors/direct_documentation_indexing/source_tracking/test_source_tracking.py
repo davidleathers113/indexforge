@@ -1,7 +1,13 @@
 import json
 from typing import Any, Dict
+
 import pytest
-from src.connectors.direct_documentation_indexing.source_tracking import SourceTracker, TenantSourceTracker
+
+from src.connectors.direct_documentation_indexing.source_tracking import (
+    SourceTracker,
+    TenantSourceTracker,
+)
+
 
 @pytest.fixture
 def temp_config_dir(tmp_path):

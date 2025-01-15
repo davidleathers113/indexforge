@@ -1,8 +1,11 @@
 """Integration tests for schema management flow."""
 import logging
 from unittest.mock import patch
+
 import pytest
+
 from src.indexing.vector_index import VectorIndex
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 

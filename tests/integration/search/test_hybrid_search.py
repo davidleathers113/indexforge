@@ -6,7 +6,9 @@ Document Processing Schema.
 """
 from copy import deepcopy
 from typing import Any, Dict, List
+
 from src.utils.text_processing import generate_embeddings
+
 
 def create_test_documents() -> List[Dict[str, Any]]:
     """Helper function to create a set of test documents with varied content."""

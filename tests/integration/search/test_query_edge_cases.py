@@ -4,7 +4,9 @@ This module contains tests that verify the handling of edge cases
 and unusual inputs in search queries.
 """
 import pytest
+
 from src.utils.text_processing import generate_embeddings
+
 
 def test_empty_query_handling(base_schema):
     """Test handling of empty search queries."""

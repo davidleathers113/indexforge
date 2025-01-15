@@ -1,7 +1,7 @@
 """Component collection fixtures."""
 
-import logging
 from dataclasses import dataclass, field
+import logging
 from typing import Dict, Optional
 from unittest.mock import MagicMock
 

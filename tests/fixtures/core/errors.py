@@ -1,7 +1,7 @@
 """Error fixtures for testing."""
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Dict
 from unittest.mock import MagicMock
 

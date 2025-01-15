@@ -5,10 +5,13 @@ configuration, embeddings, and relationship detection.
 """
 from unittest.mock import Mock, patch
 from uuid import uuid4
+
 import numpy as np
 import pytest
+
 from src.utils.chunking.references import ReferenceManager, ReferenceType
 from src.utils.chunking.semantic import SemanticConfig, SemanticProcessor
+
 
 @pytest.fixture
 def mock_embeddings():

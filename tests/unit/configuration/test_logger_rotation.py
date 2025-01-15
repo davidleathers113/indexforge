@@ -1,6 +1,9 @@
 import os
+
 import pytest
+
 from src.configuration.logger_setup import setup_logger
+
 
 def test_log_rotation(temp_log_file, cleanup_logger):
     """Test log file rotation"""

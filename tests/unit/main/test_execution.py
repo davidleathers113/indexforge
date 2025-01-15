@@ -8,9 +8,12 @@ Other aspects are tested in:
 """
 from pathlib import Path
 from unittest.mock import ANY
+
 import pytest
+
 from src.main import run_pipeline
 from src.pipeline.errors import PipelineError
+
 
 def test_pipeline_execution(pipeline_with_mocks):
     """Test that pipeline executes document processing."""

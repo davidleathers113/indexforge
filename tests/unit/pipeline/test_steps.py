@@ -1,5 +1,6 @@
 from src.pipeline.steps import PipelineStep
 
+
 def test_pipeline_steps_uniqueness():
     """Test that all pipeline steps have unique values"""
     values = [step.value for step in PipelineStep]

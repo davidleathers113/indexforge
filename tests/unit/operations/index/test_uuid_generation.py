@@ -1,7 +1,7 @@
 """Test UUID generation functionality of IndexOperation."""
 
-import uuid
 from unittest.mock import Mock
+import uuid
 
 import pytest
 

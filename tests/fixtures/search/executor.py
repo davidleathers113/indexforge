@@ -1,7 +1,7 @@
 """Fixtures for search tests."""
 
-import logging
 from dataclasses import dataclass, field
+import logging
 from typing import Dict, List
 from unittest.mock import MagicMock
 

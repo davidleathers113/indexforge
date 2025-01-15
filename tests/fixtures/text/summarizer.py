@@ -1,7 +1,7 @@
 """Fixtures for utility tests."""
 
-import logging
 from dataclasses import dataclass, field
+import logging
 from typing import Dict, List, Optional
 
 import pytest

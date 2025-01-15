@@ -2,10 +2,10 @@
 
 import logging
 
-import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sentry_sdk import configure_scope
+import uvicorn
 
 from src.api.config.sentry import init_sentry
 from src.api.config.settings import settings

@@ -1,6 +1,8 @@
 import json
 import logging
+
 from src.configuration.logger_setup import log_with_context, setup_json_logger
+
 
 def test_log_with_context(temp_log_file, cleanup_logger):
     """Test logging with additional context"""

@@ -1,7 +1,7 @@
 """Batch operation metrics tracking."""
 
-import logging
 from collections import Counter
+import logging
 from typing import Dict
 
 from .base import BaseMetrics, MetricCollector

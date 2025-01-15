@@ -6,9 +6,9 @@ This module is responsible for:
 3. Supporting test code generation
 """
 
-import logging
 from dataclasses import dataclass
 from enum import Enum, auto
+import logging
 from typing import Any, Dict, List, Optional
 
 # Configure logging

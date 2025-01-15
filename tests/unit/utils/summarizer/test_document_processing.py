@@ -1,7 +1,10 @@
 """Tests for summarizer document processing."""
 from unittest.mock import Mock
+
 import pytest
+
 from src.utils.summarizer import DocumentSummarizer
+
 
 @pytest.fixture
 def mock_pipeline():

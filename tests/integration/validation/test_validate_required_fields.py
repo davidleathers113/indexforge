@@ -4,8 +4,11 @@ This module contains tests that verify the validation of required fields
 when integrating the Core Schema System with Document Processing Schema.
 """
 from copy import deepcopy
+
 import pytest
+
 from src.indexing.schema import SchemaValidator
+
 
 def test_content_body_required(valid_document):
     """Test that content_body is a required field and cannot be None or empty."""

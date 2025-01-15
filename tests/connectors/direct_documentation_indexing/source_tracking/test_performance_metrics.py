@@ -1,10 +1,19 @@
 """Tests for performance metrics functionality."""
 from datetime import datetime, timedelta, timezone
+
 import pytest
-from src.connectors.direct_documentation_indexing.source_tracking import add_processing_step, get_aggregated_metrics, get_real_time_status
-from src.connectors.direct_documentation_indexing.source_tracking.document_operations import add_document
+
+from src.connectors.direct_documentation_indexing.source_tracking import (
+    add_processing_step,
+    get_aggregated_metrics,
+    get_real_time_status,
+)
+from src.connectors.direct_documentation_indexing.source_tracking.document_operations import (
+    add_document,
+)
 from src.connectors.direct_documentation_indexing.source_tracking.enums import ProcessingStatus
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
+
 
 @pytest.fixture
 def temp_lineage_dir(tmp_path):

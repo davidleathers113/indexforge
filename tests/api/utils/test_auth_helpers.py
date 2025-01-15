@@ -3,8 +3,8 @@
 import secrets
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from fastapi import HTTPException
+import pytest
 
 from src.api.config import Settings
 from src.api.utils.auth_helpers import get_oauth_settings, refresh_auth_tokens, validate_csrf

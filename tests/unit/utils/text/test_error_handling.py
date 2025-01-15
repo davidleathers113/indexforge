@@ -1,6 +1,7 @@
 """Tests for text processing error handling."""
 from src.utils.text_processing import clean_text
 
+
 def test_clean_text():
     """Test text cleaning functionality."""
     text = '\n    This is a\n    multiline text   with\n    extra   spaces\n    '

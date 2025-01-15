@@ -1,7 +1,7 @@
 """Text processing fixtures for testing."""
 
-import logging
 from dataclasses import dataclass, field
+import logging
 from typing import List
 from unittest.mock import MagicMock
 

@@ -5,8 +5,8 @@ handling both metadata updates and vector updates while maintaining cache consis
 """
 
 import logging
-import uuid
 from typing import Dict, List, Optional
+import uuid
 
 import weaviate
 

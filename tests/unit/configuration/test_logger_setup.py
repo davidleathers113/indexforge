@@ -3,7 +3,9 @@ import json
 import logging
 import os
 import threading
+
 from src.configuration.logger_setup import log_with_context, setup_json_logger, setup_logger
+
 
 def test_complete_logging_workflow(temp_log_file, cleanup_logger):
     """Test the complete logging workflow including different formats and rotation"""

@@ -2,8 +2,8 @@
 
 from unittest.mock import AsyncMock
 
-import pytest
 from fastapi import HTTPException
+import pytest
 
 from src.api.services.document_retrieval_service import DocumentRetrievalService
 

@@ -1,6 +1,7 @@
 """Tests for summarizer multi-chunk processing."""
 from src.utils.summarizer import DocumentSummarizer, SummarizerConfig
 
+
 def test_combine_summaries(mock_cache_manager):
     """Test combining multiple chunk summaries."""
     summarizer = DocumentSummarizer(model_name='facebook/bart-large-cnn', device=-1, batch_size=4, cache_manager=mock_cache_manager)

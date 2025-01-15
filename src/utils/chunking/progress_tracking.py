@@ -4,10 +4,10 @@ This module provides tools for tracking progress of long-running batch operation
 including completion percentage, ETA, and performance metrics.
 """
 
-import logging
-import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
+import logging
+import time
 from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)

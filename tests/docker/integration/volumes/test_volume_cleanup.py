@@ -6,7 +6,6 @@ import docker
 import pytest
 
 
-
 def test_anonymous_volume_cleanup(docker_client: Any) -> None:
     """Test cleanup of anonymous volumes."""
     container = docker_client.containers.run(

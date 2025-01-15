@@ -1,9 +1,9 @@
 """Metrics tracking for Weaviate operations."""
 
-import logging
-import time
 from dataclasses import dataclass, field
+import logging
 from statistics import mean, median
+import time
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)

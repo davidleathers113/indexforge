@@ -1,10 +1,12 @@
 """Tests for the EmbeddingGenerator class."""
 import numpy as np
-import pytest
 from openai.types.create_embedding_response import CreateEmbeddingResponse
 from openai.types.embedding import Embedding
+import pytest
+
 from src.embeddings.embedding_generator import EmbeddingGenerator
 from src.utils.text_processing import ChunkingConfig
+
 
 @pytest.fixture
 def mock_openai():

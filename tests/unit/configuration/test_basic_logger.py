@@ -1,5 +1,7 @@
 import logging
+
 from src.configuration.logger_setup import setup_logger
+
 
 def test_setup_logger_basic(temp_log_file, cleanup_logger):
     """Test basic logger setup with default parameters"""

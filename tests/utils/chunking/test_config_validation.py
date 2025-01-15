@@ -1,6 +1,8 @@
 """Tests for chunking configuration validation and error handling."""
 import pytest
+
 from src.utils.chunking import ChunkingConfig
+
 
 def test_default_config_is_valid():
     """Test that default configuration is valid."""

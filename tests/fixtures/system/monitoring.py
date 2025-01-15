@@ -1,8 +1,8 @@
 """Monitoring fixtures for testing."""
 
+from dataclasses import dataclass, field
 import logging
 import time
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock
 

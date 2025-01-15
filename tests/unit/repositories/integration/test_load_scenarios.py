@@ -4,9 +4,9 @@ This module contains integration tests focusing on system behavior under load
 and network partition scenarios, ensuring reliability and performance under stress.
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from unittest.mock import Mock, patch
 
 import pytest
