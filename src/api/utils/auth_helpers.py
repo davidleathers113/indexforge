@@ -1,7 +1,6 @@
 """Authentication helper utilities."""
 
 import secrets
-from typing import Optional
 
 from fastapi import Cookie, Header, HTTPException, status
 from supabase.client import AsyncClient
@@ -11,8 +10,8 @@ from src.api.middleware.csrf import generate_csrf_token, validate_csrf_token
 
 
 async def validate_csrf(
-    csrf_token: Optional[str] = Cookie(None),
-    x_csrf_token: Optional[str] = Header(None),
+    csrf_token: str | None = Cookie(None),
+    x_csrf_token: str | None = Header(None),
 ) -> None:
     """Validate CSRF tokens if present."""
     if csrf_token and x_csrf_token:

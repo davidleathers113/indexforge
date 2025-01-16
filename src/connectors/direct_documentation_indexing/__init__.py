@@ -49,4 +49,5 @@ from .connector import DocumentConnector
 from .processors.excel_processor import ExcelProcessor
 from .processors.word_processor import WordProcessor
 
+
 __all__ = ["DocumentConnector", "ExcelProcessor", "WordProcessor"]

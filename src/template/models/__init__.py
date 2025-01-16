@@ -8,4 +8,5 @@ This package is responsible for:
 
 from .settings import TemplateSettings
 
+
 __all__ = ["TemplateSettings"]

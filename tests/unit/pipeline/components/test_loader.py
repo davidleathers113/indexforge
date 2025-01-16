@@ -13,6 +13,7 @@ def config():
     """Create a test configuration."""
     return PipelineConfig(export_dir='test_dir', min_document_length=10)
 
+
 @pytest.fixture
 def mock_notion():
     """Create a mock NotionConnector."""
@@ -23,10 +24,12 @@ def mock_notion():
         instance.load_markdown_files.return_value = []
         yield instance
 
+
 @pytest.fixture
 def loader(config, mock_notion):
     """Create a test loader."""
     return DocumentLoader(config=config)
+
 
 def test_loader_initialization(config, mock_notion):
     """Test loader initialization."""
@@ -34,10 +37,12 @@ def test_loader_initialization(config, mock_notion):
     assert loader.config == config
     mock_notion.assert_called_once_with(str(config.export_dir))
 
+
 def test_loader_process_empty(loader):
     """Test processing with no documents."""
     result = loader.process()
     assert result == []
+
 
 def test_loader_process_csv_files(loader, mock_notion):
     """Test processing CSV files."""
@@ -49,6 +54,7 @@ def test_loader_process_csv_files(loader, mock_notion):
     assert 'id' in result[0]
     assert result[0]['content']['body'] == 'test content'
 
+
 def test_loader_process_html_files(loader, mock_notion):
     """Test processing HTML files."""
     html_docs = [{'content': {'body': 'test content'}}]
@@ -57,6 +63,7 @@ def test_loader_process_html_files(loader, mock_notion):
     assert len(result) == 1
     assert 'id' in result[0]
     assert result[0]['content']['body'] == 'test content'
+
 
 def test_loader_process_markdown_files(loader, mock_notion):
     """Test processing Markdown files."""
@@ -67,6 +74,7 @@ def test_loader_process_markdown_files(loader, mock_notion):
     assert 'id' in result[0]
     assert result[0]['content']['body'] == 'test content'
 
+
 def test_loader_uuid_generation(loader, mock_notion):
     """Test UUID generation for documents."""
     docs = [{'content': {'body': 'test content'}}]
@@ -75,6 +83,7 @@ def test_loader_uuid_generation(loader, mock_notion):
         result = loader.process()
         assert result[0]['id'] == '12345678-1234-5678-1234-567812345678'
 
+
 def test_loader_filter_invalid_documents(loader, mock_notion):
     """Test filtering of invalid documents."""
     docs = [{'content': {'body': ''}}, {'content': {'body': 'short'}}, {'content': {'body': '```code block```'}}, {'content': {'body': '```mermaid\ngraph TD;```'}}, {'content': {'body': 'valid document content'}}]
@@ -82,6 +91,7 @@ def test_loader_filter_invalid_documents(loader, mock_notion):
     result = loader.process()
     assert len(result) == 1
     assert result[0]['content']['body'] == 'valid document content'
+
 
 def test_loader_combine_all_sources(loader, mock_notion):
     """Test combining documents from all sources."""

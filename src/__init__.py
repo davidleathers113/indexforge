@@ -8,19 +8,20 @@ This is the root package of the document processing and indexing system. It prov
    - Compatibility information
 
 2. Package Structure:
+   - Core subpackage for base functionality
    - Models subpackage for data structures
    - Utilities for common operations
    - Pipeline components for document processing
    - Connectors for external services
 
 3. Package Exports:
+   - Core module for base functionality
    - Models module for public access
-   - Core functionality through submodules
    - Type definitions and interfaces
 
 Usage:
     ```python
-    from src import models
+    from src import core, models
     from src import __version__
 
     print(f"Package version: {__version__}")
@@ -34,6 +35,7 @@ Note:
 
 __version__ = "0.1.0"
 
-from . import models
+from . import core, models
 
-__all__ = ["models"]
+
+__all__ = ["core", "models"]

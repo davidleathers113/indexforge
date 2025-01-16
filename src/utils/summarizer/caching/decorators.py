@@ -54,9 +54,11 @@ Note:
     - Provides fallback on cache failure
 """
 
+from collections.abc import Callable
 import functools
 import logging
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
+
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +105,7 @@ def with_cache(key_prefix: str) -> Callable:
                 return result
 
             except Exception as e:
-                logger.warning(f"Cache operation failed: {str(e)}")
+                logger.warning(f"Cache operation failed: {e!s}")
                 # Fallback to function execution without caching
                 return func(self, *args, **kwargs)
 

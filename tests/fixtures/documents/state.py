@@ -3,12 +3,12 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
-from typing import Dict, List
 import uuid
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class DocumentState(BaseState):
     """Document state management."""
 
-    documents: Dict[str, Dict] = field(default_factory=dict)
+    documents: dict[str, dict] = field(default_factory=dict)
     next_id: int = 1
     chunk_size: int = 500
     embedding_dimensions: int = 3
@@ -41,7 +41,7 @@ class DocumentState(BaseState):
         self.next_id += 1
         return str(uuid.uuid5(namespace, id_bytes.hex()))
 
-    def create_embedding(self) -> List[float]:
+    def create_embedding(self) -> list[float]:
         """Generate a test embedding vector."""
         return [0.1 * (i + 1) for i in range(self.embedding_dimensions)]
 
@@ -51,9 +51,9 @@ class DocumentState(BaseState):
         title: str = "Test Document",
         summary: str = None,
         parent_id: str = None,
-        chunk_ids: List[str] = None,
+        chunk_ids: list[str] = None,
         with_embeddings: bool = True,
-    ) -> Dict:
+    ) -> dict:
         """Create a test document with optional features."""
         doc_id = self.create_uuid()
         doc = {

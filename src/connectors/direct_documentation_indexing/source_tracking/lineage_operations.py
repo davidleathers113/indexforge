@@ -5,13 +5,13 @@ This module provides functionality for managing relationships between documents,
 including derivation chains and parent-child relationships.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
-from typing import Dict, List, Optional, Union
 
 from .enums import TransformationType
 from .models import DocumentLineage
 from .transformation_manager import record_transformation
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,10 @@ def add_derivation(
     storage,
     parent_id: str,
     derived_id: str,
-    transform_type: Optional[Union[TransformationType, str]] = None,
+    transform_type: TransformationType | str | None = None,
     description: str = "",
-    parameters: Optional[Dict] = None,
-    metadata: Optional[Dict] = None,
+    parameters: dict | None = None,
+    metadata: dict | None = None,
 ) -> None:
     """Link a derived document to its parent.
 
@@ -89,7 +89,7 @@ def add_derivation(
             logger.debug("Adding %s to parent's derived documents", derived_id)
             parent_lineage.derived_documents.append(derived_id)
             parent_lineage.children.append(derived_id)
-            parent_lineage.last_modified = datetime.now(timezone.utc)
+            parent_lineage.last_modified = datetime.now(UTC)
             storage.save_lineage(parent_lineage)
             logger.debug(
                 "Updated parent lineage - Derived docs: %s, Children: %s",
@@ -102,7 +102,7 @@ def add_derivation(
             logger.debug("Adding %s to derived document's parents", parent_id)
             derived_lineage.parents.append(parent_id)
             derived_lineage.derived_from = parent_id  # Set the direct parent
-            derived_lineage.last_modified = datetime.now(timezone.utc)
+            derived_lineage.last_modified = datetime.now(UTC)
             storage.save_lineage(derived_lineage)
             logger.debug("Updated derived lineage - Parents: %s", derived_lineage.parents)
 
@@ -132,8 +132,8 @@ def add_derivation(
 def get_derivation_chain(
     storage,
     doc_id: str,
-    max_depth: Optional[int] = None,
-) -> List[DocumentLineage]:
+    max_depth: int | None = None,
+) -> list[DocumentLineage]:
     """Get the chain of document derivations leading to the given document.
 
     Args:
@@ -233,8 +233,8 @@ def get_derivation_chain(
 
         # Find path from root to target
         def find_path_to_target(
-            start_id: str, target_id: str, path: List[str] = None
-        ) -> Optional[List[str]]:
+            start_id: str, target_id: str, path: list[str] = None
+        ) -> list[str] | None:
             """Find a path from start_id to target_id through derived documents."""
             if path is None:
                 path = []

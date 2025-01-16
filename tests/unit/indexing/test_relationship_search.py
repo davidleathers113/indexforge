@@ -14,6 +14,7 @@ def search_mock():
     mock.relationship_search.return_value = [SearchResult(id='test-id-0', content={'body': 'Test content'}, metadata={'title': 'Test', 'parent_id': 'parent-1'}, score=0.9, distance=0.1, vector=[0.1, 0.2, 0.3])]
     return mock
 
+
 @pytest.fixture
 def vector_index(search_mock):
     """Create a VectorIndex instance with mocked search"""
@@ -21,6 +22,7 @@ def vector_index(search_mock):
     index.operations = MagicMock()
     index.operations.search = search_mock
     return index
+
 
 def test_relationship_search(vector_index, search_mock):
     """Test relationship search functionality"""

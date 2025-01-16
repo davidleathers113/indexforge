@@ -9,7 +9,9 @@ from weaviate.exceptions import UnexpectedStatusCodeException
 from src.indexing.vector_index import VectorIndex
 from tests.fixtures.constants import TEST_UUID
 
+
 logger = logging.getLogger(__name__)
+
 
 @pytest.fixture
 def mock_delete_404(mock_weaviate_client):
@@ -18,6 +20,7 @@ def mock_delete_404(mock_weaviate_client):
     mock_weaviate_client.data_object.delete.side_effect = UnexpectedStatusCodeException('Delete object', MagicMock(status_code=404))
     logger.debug('Configured mock to raise 404 error')
     return mock_weaviate_client
+
 
 @pytest.fixture
 def vector_index(mock_delete_404, mock_cache_manager):
@@ -36,11 +39,13 @@ def vector_index(mock_delete_404, mock_cache_manager):
         logger.debug('Vector index setup complete')
         return index
 
+
 def test_add_documents(vector_index, mock_weaviate_client, sample_document):
     """Test adding documents to the index"""
     doc_ids = vector_index.add_documents([sample_document])
     assert len(doc_ids) == 1
     assert doc_ids[0] == sample_document['uuid']
+
 
 def test_add_documents_with_deduplication(vector_index, mock_weaviate_client, sample_document):
     """Test document addition with deduplication"""
@@ -48,6 +53,7 @@ def test_add_documents_with_deduplication(vector_index, mock_weaviate_client, sa
     doc_ids = vector_index.add_documents(docs, deduplicate=True)
     assert len(doc_ids) == 1
     assert doc_ids[0] == sample_document['uuid']
+
 
 def test_add_documents_batch_processing(vector_index, mock_weaviate_client, sample_document):
     """Test batch processing of documents"""
@@ -60,7 +66,8 @@ def test_add_documents_batch_processing(vector_index, mock_weaviate_client, samp
     vector_index.batch_size = 2
     doc_ids = vector_index.add_documents(docs, deduplicate=False)
     assert len(doc_ids) == 5
-    assert all((doc_ids[i].endswith(f'567{i}') for i in range(5)))
+    assert all(doc_ids[i].endswith(f'567{i}') for i in range(5))
+
 
 def test_delete_documents(vector_index, mock_delete_404):
     """Test document deletion"""
@@ -76,6 +83,7 @@ def test_delete_documents(vector_index, mock_delete_404):
     mock_delete_404.data_object.delete.assert_called_once_with(TEST_UUID, class_name='Document')
     logger.info('Test completed successfully')
 
+
 def test_update_document(vector_index, mock_weaviate_client, vector_state):
     """Test document update"""
     vector_state.metadata[TEST_UUID] = {'content': 'test'}
@@ -85,17 +93,20 @@ def test_update_document(vector_index, mock_weaviate_client, vector_state):
     assert success is True
     mock_weaviate_client.data_object.update.assert_called_once_with(uuid_str=TEST_UUID, class_name='Document', data_object=updates, vector=None)
 
+
 def test_update_nonexistent_document(vector_index, mock_weaviate_client):
     """Test updating nonexistent document"""
     mock_weaviate_client.data_object.update.side_effect = Exception('Update of the object not successful! Unexpected status code: 404')
     success = vector_index.update_document('nonexistent', {'content': ['Updated content']})
     assert success is False
 
+
 def test_delete_error_handling(vector_index, mock_weaviate_client):
     """Test error handling in document deletion"""
     mock_weaviate_client.data_object.delete.side_effect = Exception('Delete object! Unexpected status code: 404')
     success = vector_index.delete_documents(['doc-1'])
     assert success is False
+
 
 def test_add_documents_with_cache(vector_index, mock_weaviate_client, mock_cache_manager, sample_document):
     """Test document addition with cache"""

@@ -23,10 +23,12 @@ def ref_manager():
     manager.add_chunk('The documentation at https://example.com/docs explains further.', uuid4())
     return manager
 
+
 @pytest.fixture
 def citation_detector(ref_manager):
     """Create a citation detector with the test reference manager."""
     return CitationDetector(ref_manager)
+
 
 def test_detect_direct_quotes(citation_detector):
     """Test detection of direct quotes."""
@@ -37,6 +39,7 @@ def test_detect_direct_quotes(citation_detector):
     assert quote_citations[0].text == 'a direct quote'
     assert quote_citations[0].source_chunk_id == chunk_id
 
+
 def test_detect_inline_references(citation_detector):
     """Test detection of inline section references."""
     chunk_id = next((chunk_id for chunk_id, chunk in citation_detector.ref_manager._chunks.items() if 'As described in Section 3.2' in chunk.content))
@@ -46,6 +49,7 @@ def test_detect_inline_references(citation_detector):
     assert 'Section 3.2' in inline_citations[0].text
     assert inline_citations[0].source_chunk_id == chunk_id
 
+
 def test_detect_urls(citation_detector):
     """Test detection of URL references."""
     chunk_id = next((chunk_id for chunk_id, chunk in citation_detector.ref_manager._chunks.items() if 'https://example.com/docs' in chunk.content))
@@ -54,6 +58,7 @@ def test_detect_urls(citation_detector):
     assert len(url_citations) == 1
     assert url_citations[0].text == 'https://example.com/docs'
     assert url_citations[0].source_chunk_id == chunk_id
+
 
 def test_create_citation_references(citation_detector):
     """Test creation of references from citations."""
@@ -67,15 +72,17 @@ def test_create_citation_references(citation_detector):
         assert 'cited_text' in metadata
         assert 'position' in metadata
 
+
 def test_citation_metadata(citation_detector):
     """Test citation metadata is correctly captured."""
     source_id = next((chunk_id for chunk_id, chunk in citation_detector.ref_manager._chunks.items() if 'https://example.com/docs' in chunk.content))
     citations = citation_detector.detect_citations(source_id)
-    url_citation = next((c for c in citations if c.citation_type == CitationType.URL))
+    url_citation = next(c for c in citations if c.citation_type == CitationType.URL)
     assert url_citation.metadata is not None
     assert 'full_match' in url_citation.metadata
     assert url_citation.start_pos >= 0
     assert url_citation.end_pos > url_citation.start_pos
+
 
 def test_bidirectional_citation_references(citation_detector):
     """Test that citation references are created bidirectionally."""
@@ -86,6 +93,7 @@ def test_bidirectional_citation_references(citation_detector):
         assert target_id in forward_refs
         backward_refs = citation_detector.ref_manager.get_references(target_id, ReferenceType.CITATION)
         assert source_id in backward_refs
+
 
 def test_multiple_citation_types(citation_detector):
     """Test detection of multiple citation types in the same chunk."""

@@ -97,6 +97,7 @@ from .validation import (
 )
 from .version_history import Change, ChangeType, VersionHistory, VersionTag
 
+
 __all__ = [
     # Core Classes
     "DocumentLineageManager",

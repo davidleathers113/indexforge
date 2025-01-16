@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 import logging
 import time
-from typing import Dict, Optional
+
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class ProgressTracker:
         self,
         operation_type: OperationType,
         total_items: int,
-        batch_size: Optional[int] = None,
+        batch_size: int | None = None,
         update_interval: float = 1.0,
     ):
         """Initialize progress tracker.
@@ -71,7 +71,7 @@ class ProgressTracker:
         self.update_interval = update_interval
         self.progress = ProgressMetrics(items_total=total_items)
         self.batch_metrics = BatchMetrics(batch_size=batch_size or 0)
-        self._batch_start_time: Optional[float] = None
+        self._batch_start_time: float | None = None
 
     def start_batch(self) -> None:
         """Record start of a new batch."""
@@ -173,7 +173,7 @@ class ProgressTracker:
         else:
             return f"{secs}s"
 
-    def get_progress_summary(self) -> Dict:
+    def get_progress_summary(self) -> dict:
         """Get summary of current progress.
 
         Returns:

@@ -9,6 +9,7 @@ from .formatters import (
     WhitespaceStripper,
 )
 
+
 __all__ = [
     "BaseFormatter",
     "BlackFormatter",

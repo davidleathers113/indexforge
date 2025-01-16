@@ -50,4 +50,5 @@ Note:
 
 from .settings import ClusteringConfig, SummarizerConfig
 
-__all__ = ["SummarizerConfig", "ClusteringConfig"]
+
+__all__ = ["ClusteringConfig", "SummarizerConfig"]

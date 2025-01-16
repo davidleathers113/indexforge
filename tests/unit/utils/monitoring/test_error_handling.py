@@ -1,4 +1,4 @@
-'Tests for error handling in monitoring.'
+"""Tests for error handling in monitoring."""
 import logging
 from unittest.mock import Mock, patch
 
@@ -19,6 +19,7 @@ def mock_process():
         mock.return_value = mock_instance
         yield mock_instance
 
+
 @pytest.fixture
 def mock_prometheus():
     """Create mock Prometheus metrics"""
@@ -34,6 +35,7 @@ def mock_prometheus():
         gauge_mock.return_value = gauge
         yield {'counter': counter, 'histogram': histogram, 'gauge': gauge}
 
+
 @pytest.fixture
 def mock_logger():
     """Create a mock logger"""
@@ -42,11 +44,13 @@ def mock_logger():
         mock.return_value = logger
         yield logger
 
+
 @pytest.fixture
 def monitor(mock_process, mock_prometheus, mock_logger, tmp_path):
     """Create a SystemMonitor instance with mocks"""
     log_path = tmp_path / 'system_metrics.log'
     return SystemMonitor(log_path=str(log_path))
+
 
 def test_system_metrics_error(monitor, mock_process):
     """Test handling of system metrics collection error"""
@@ -60,6 +64,7 @@ def test_system_metrics_error(monitor, mock_process):
     assert len(monitor.error_history) == 0
     assert len(monitor.performance_history) == 1
 
+
 def test_prometheus_metrics_error(monitor, mock_prometheus):
     """Test handling of Prometheus metrics error"""
     mock_prometheus['counter'].inc.side_effect = Exception('Prometheus error')
@@ -71,6 +76,7 @@ def test_prometheus_metrics_error(monitor, mock_prometheus):
     assert result == 'success'
     assert monitor.logger.error.called
     assert len(monitor.error_history) == 0
+
 
 def test_operation_error_handling(monitor):
     """Test handling of operation errors"""
@@ -87,6 +93,7 @@ def test_operation_error_handling(monitor):
     assert error_message in error_record['error']
     assert 'timestamp' in error_record
 
+
 def test_concurrent_error_handling(monitor):
     """Test error handling with concurrent operations"""
     import threading
@@ -102,7 +109,8 @@ def test_concurrent_error_handling(monitor):
     for thread in threads:
         thread.join()
     assert len(monitor.error_history) == 3
-    assert all((record['operation'] == 'thread_op' for record in monitor.error_history))
+    assert all(record['operation'] == 'thread_op' for record in monitor.error_history)
+
 
 def test_error_history_limit(monitor):
     """Test error history size limit"""
@@ -115,6 +123,7 @@ def test_error_history_limit(monitor):
         with pytest.raises(ValueError):
             test_function()
     assert len(monitor.error_history) == 2
+
 
 def test_error_context_capture(monitor):
     """Test error context information capture"""

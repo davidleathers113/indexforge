@@ -1,7 +1,7 @@
 """Base interfaces for metrics collection."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Protocol
+from typing import Protocol
 
 
 class MetricCollector(Protocol):
@@ -15,7 +15,7 @@ class MetricCollector(Protocol):
         """Record an error."""
         ...
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get metrics summary."""
         ...
 
@@ -49,6 +49,6 @@ class BaseMetrics(ABC):
             observer.on_metric_update(metric_type, value)
 
     @abstractmethod
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get metrics summary."""
         pass

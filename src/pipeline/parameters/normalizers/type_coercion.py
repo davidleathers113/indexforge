@@ -1,10 +1,11 @@
 """Type coercion normalizer implementation."""
 
 import logging
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 from src.pipeline.errors import ValidationError
 from src.pipeline.parameters.normalizers.base import Normalizer
+
 
 T = TypeVar("T")
 
@@ -12,12 +13,12 @@ T = TypeVar("T")
 class TypeCoercionNormalizer(Normalizer[Any, Optional[T]], Generic[T]):
     """Normalizer for type coercion."""
 
-    def __init__(self, target_type: Type[T], allow_none: bool = False):
+    def __init__(self, target_type: type[T], allow_none: bool = False):
         self.target_type = target_type
         self.allow_none = allow_none
         self.logger = logging.getLogger(__name__)
 
-    def normalize(self, value: Any) -> Optional[T]:
+    def normalize(self, value: Any) -> T | None:
         """Normalize a value by coercing it to the target type.
 
         Args:
@@ -59,7 +60,7 @@ class TypeCoercionNormalizer(Normalizer[Any, Optional[T]], Generic[T]):
             return value
 
         except (ValueError, TypeError) as e:
-            self.logger.error(f"Failed to coerce to {self.target_type.__name__}: {str(e)}")
+            self.logger.error(f"Failed to coerce to {self.target_type.__name__}: {e!s}")
             raise ValidationError(
                 f"Value must be {self.target_type.__name__}, got {type(value).__name__}"
             )

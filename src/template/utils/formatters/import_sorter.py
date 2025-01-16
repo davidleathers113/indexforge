@@ -1,11 +1,11 @@
 """Import sorter formatter."""
 
 import logging
-from typing import Dict
 
 import isort
 
 from .base_formatter import BaseFormatter
+
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class ImportSorter(BaseFormatter):
     """Sorts imports using isort."""
 
-    def __init__(self, config: Dict):
+    def __init__(self, config: dict):
         """Initialize with isort configuration.
 
         Args:

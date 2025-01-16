@@ -4,9 +4,9 @@ import ast
 from dataclasses import dataclass
 import logging
 from pathlib import Path
-from typing import Dict, Optional
 
 from openai import OpenAI
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +17,10 @@ class ProcessResult:
 
     success: bool
     content: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
-def validate_python_syntax(content: str) -> Optional[str]:
+def validate_python_syntax(content: str) -> str | None:
     """Validate Python syntax.
 
     Args:
@@ -35,7 +35,7 @@ def validate_python_syntax(content: str) -> Optional[str]:
     except SyntaxError as e:
         return f"Syntax error at line {e.lineno}, offset {e.offset}: {e.msg}"
     except Exception as e:
-        return f"Validation error: {str(e)}"
+        return f"Validation error: {e!s}"
 
 
 class TemplateDetector:
@@ -65,7 +65,7 @@ class TemplateDetector:
 class AIProcessor:
     """Handles AI-powered code improvements."""
 
-    def __init__(self, config: Dict):
+    def __init__(self, config: dict):
         """Initialize with OpenAI configuration.
 
         Args:
@@ -134,14 +134,14 @@ class AIProcessor:
 
         except Exception as e:
             return ProcessResult(
-                success=False, content=content, error=f"AI processing failed: {str(e)}"
+                success=False, content=content, error=f"AI processing failed: {e!s}"
             )
 
 
 class FileProcessor:
     """Processes files with appropriate formatters."""
 
-    def __init__(self, processors: Dict, is_template: bool = False, use_ai: bool = False):
+    def __init__(self, processors: dict, is_template: bool = False, use_ai: bool = False):
         """Initialize with processors and flags."""
         self.processors = processors
         self.is_template = is_template
@@ -199,6 +199,6 @@ class FileProcessor:
             return ProcessResult(success=True, content=content)
 
         except Exception as e:
-            error_msg = f"Processing failed: {str(e)}"
+            error_msg = f"Processing failed: {e!s}"
             logger.error(error_msg, exc_info=True)
             return ProcessResult(success=False, content=content, error=error_msg)

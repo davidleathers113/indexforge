@@ -1,7 +1,7 @@
 """Weaviate cache strategies."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any
 
 from src.api.repositories.weaviate.cache.providers import CacheProvider
 
@@ -18,7 +18,7 @@ class CacheStrategy(ABC):
         self.provider = provider
 
     @abstractmethod
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -30,7 +30,7 @@ class CacheStrategy(ABC):
         pass
 
     @abstractmethod
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
         """Set value in cache.
 
         Args:
@@ -58,7 +58,7 @@ class CacheStrategy(ABC):
 class SimpleCache(CacheStrategy):
     """Simple cache strategy with basic operations."""
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -69,7 +69,7 @@ class SimpleCache(CacheStrategy):
         """
         return await self.provider.get(key)
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
         """Set value in cache.
 
         Args:
@@ -105,7 +105,7 @@ class TwoLevelCache(CacheStrategy):
         self.local = local_provider
         self.remote = remote_provider
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -128,7 +128,7 @@ class TwoLevelCache(CacheStrategy):
 
         return None
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
         """Set value in cache.
 
         Args:
@@ -182,8 +182,8 @@ class QueryCache(CacheStrategy):
         return f"{self.namespace}:{query_hash}"
 
     async def get_query_result(
-        self, query_hash: str, metadata: Optional[Dict] = None
-    ) -> Optional[Dict]:
+        self, query_hash: str, metadata: dict | None = None
+    ) -> dict | None:
         """Get cached query result.
 
         Args:
@@ -207,9 +207,9 @@ class QueryCache(CacheStrategy):
     async def set_query_result(
         self,
         query_hash: str,
-        result: Dict,
-        metadata: Optional[Dict] = None,
-        ttl: Optional[int] = None,
+        result: dict,
+        metadata: dict | None = None,
+        ttl: int | None = None,
     ) -> None:
         """Cache query result.
 

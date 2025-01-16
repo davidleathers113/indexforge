@@ -11,7 +11,6 @@ Main Components:
     - DocumentIndexer: Core class for managing document indices
 """
 
-from typing import Dict, List
 
 from src.indexing.vector_index import VectorIndex
 from src.pipeline.components.base import PipelineComponent
@@ -58,7 +57,7 @@ class DocumentIndexer(PipelineComponent):
             self.logger.error("Failed to initialize vector index: %s", str(e))
             raise IndexingError("Vector index initialization failed") from e
 
-    def process(self, documents: List[Dict], deduplicate: bool = True, **kwargs) -> List[Dict]:
+    def process(self, documents: list[dict], deduplicate: bool = True, **kwargs) -> list[dict]:
         """Process documents by indexing them in the vector search engine.
 
         Args:

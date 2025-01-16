@@ -35,7 +35,7 @@ def test_validation_performance(temp_log_file: str, cleanup_logger: Any) -> None
         # Test standard validation
         start_time = time.time()
         standard_result = []
-        with open(temp_log_file, "r", encoding="utf-8") as f:
+        with open(temp_log_file, encoding="utf-8") as f:
             standard_result = validate_log_file(
                 f.readlines(),
                 required_fields={"message", "thread_id"},
@@ -57,7 +57,7 @@ def test_validation_performance(temp_log_file: str, cleanup_logger: Any) -> None
 
         # Verify results match
         assert len(standard_result) == len(streaming_result)
-        for std_entry, stream_entry in zip(standard_result, streaming_result):
+        for std_entry, stream_entry in zip(standard_result, streaming_result, strict=False):
             assert std_entry == stream_entry
 
     # Report results

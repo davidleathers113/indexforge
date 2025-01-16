@@ -1,7 +1,6 @@
 """Weaviate document operations."""
 
 import json
-from typing import Dict, List, Optional
 
 from weaviate.util import generate_uuid5
 
@@ -13,7 +12,7 @@ class DocumentRepository(BaseWeaviateRepository):
     """Repository for document operations."""
 
     @with_weaviate_error_handling
-    async def create_document(self, document: Dict) -> str:
+    async def create_document(self, document: dict) -> str:
         """Create a new document.
 
         Args:
@@ -37,7 +36,7 @@ class DocumentRepository(BaseWeaviateRepository):
         return str(doc_id)
 
     @with_weaviate_error_handling
-    async def get_document(self, document_id: str) -> Optional[Dict]:
+    async def get_document(self, document_id: str) -> dict | None:
         """Get document by ID.
 
         Args:
@@ -71,7 +70,7 @@ class DocumentRepository(BaseWeaviateRepository):
         }
 
     @with_weaviate_error_handling
-    async def update_document(self, document_id: str, document: Dict) -> bool:
+    async def update_document(self, document_id: str, document: dict) -> bool:
         """Update existing document.
 
         Args:
@@ -120,10 +119,10 @@ class DocumentRepository(BaseWeaviateRepository):
     @with_weaviate_error_handling
     async def list_documents(
         self,
-        file_type: Optional[str] = None,
+        file_type: str | None = None,
         limit: int = 10,
         offset: int = 0,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """List documents with optional filtering.
 
         Args:
@@ -167,7 +166,7 @@ class DocumentRepository(BaseWeaviateRepository):
 
         return documents
 
-    def _validate_document(self, document: Dict) -> None:
+    def _validate_document(self, document: dict) -> None:
         """Validate document schema.
 
         Args:

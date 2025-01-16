@@ -37,4 +37,5 @@ Example:
 from .cross_reference_manager import CrossReferenceManager
 from .models import ChunkReference, ReferenceType
 
-__all__ = ["CrossReferenceManager", "ChunkReference", "ReferenceType"]
+
+__all__ = ["ChunkReference", "CrossReferenceManager", "ReferenceType"]

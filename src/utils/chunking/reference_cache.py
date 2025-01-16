@@ -6,10 +6,11 @@ including cache invalidation strategies and memory optimization.
 
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Dict, Optional, Set, TypeVar
+from typing import TypeVar
 from uuid import UUID
 
 from .references import Reference, ReferenceManager
+
 
 T = TypeVar("T")
 
@@ -26,7 +27,7 @@ class LRUCache(OrderedDict):
         super().__init__()
         self.maxsize = maxsize
 
-    def get(self, key: T) -> Optional[T]:
+    def get(self, key: T) -> T | None:
         """Get item from cache and move to end if exists.
 
         Args:
@@ -87,11 +88,11 @@ class ReferenceCache:
         """
         self.ref_manager = ref_manager
         self.reference_cache = LRUCache(maxsize=maxsize)
-        self.forward_index: Dict[UUID, Set[UUID]] = {}  # source -> targets
-        self.reverse_index: Dict[UUID, Set[UUID]] = {}  # target -> sources
+        self.forward_index: dict[UUID, set[UUID]] = {}  # source -> targets
+        self.reverse_index: dict[UUID, set[UUID]] = {}  # target -> sources
         self.stats = CacheStats()
 
-    def get_reference(self, source_id: UUID, target_id: UUID) -> Optional[Reference]:
+    def get_reference(self, source_id: UUID, target_id: UUID) -> Reference | None:
         """Get reference from cache if available, falling back to manager.
 
         Args:
@@ -178,7 +179,7 @@ class ReferenceCache:
                 self.invalidate_reference(source_id, chunk_id)
             del self.reverse_index[chunk_id]
 
-    def get_chunk_references(self, chunk_id: UUID) -> Dict[UUID, Reference]:
+    def get_chunk_references(self, chunk_id: UUID) -> dict[UUID, Reference]:
         """Get all references involving a chunk.
 
         Args:

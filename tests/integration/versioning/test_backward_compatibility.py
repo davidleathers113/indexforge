@@ -5,7 +5,7 @@ of schema versions when integrating Core Schema System with
 Document Processing Schema.
 """
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -22,6 +22,7 @@ def test_old_schema_version_acceptance(valid_document, base_schema):
         doc['schema_version'] = 1
         SchemaValidator.validate_object(doc)
 
+
 def test_missing_new_fields_handled(valid_document, base_schema):
     """Test that documents missing newer optional fields are accepted."""
     doc = deepcopy(valid_document)
@@ -32,14 +33,16 @@ def test_missing_new_fields_handled(valid_document, base_schema):
             del doc[field]
     SchemaValidator.validate_object(doc)
 
+
 def test_deprecated_fields_handled(valid_document, base_schema):
     """Test that documents with deprecated fields are handled correctly."""
     doc = deepcopy(valid_document)
     doc['schema_version'] = base_schema['version'] - 1
     doc['deprecated_field'] = 'old value'
-    doc['legacy_timestamp'] = datetime.now(timezone.utc).isoformat()
+    doc['legacy_timestamp'] = datetime.now(UTC).isoformat()
     with pytest.warns(DeprecationWarning):
         SchemaValidator.validate_object(doc)
+
 
 def test_field_type_evolution(valid_document, base_schema):
     """Test handling of fields whose types have evolved over versions."""

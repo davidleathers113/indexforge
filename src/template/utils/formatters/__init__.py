@@ -7,6 +7,7 @@ from .indentation_fixer import IndentationFixer
 from .multiple_statement_splitter import MultipleStatementSplitter
 from .whitespace_stripper import WhitespaceStripper
 
+
 __all__ = [
     "BaseFormatter",
     "BlackFormatter",

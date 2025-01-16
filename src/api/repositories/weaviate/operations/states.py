@@ -1,9 +1,9 @@
 """Batch operation states."""
 
 import logging
-from typing import Dict, List
 
 from src.api.repositories.weaviate.operations.base import BatchOperation, BatchOperationState
+
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class InitialState(BatchOperationState):
     """Initial state for batch operations."""
 
-    def process(self, operation: BatchOperation, items: List[Dict]) -> List[Dict]:
+    def process(self, operation: BatchOperation, items: list[dict]) -> list[dict]:
         """Process items in initial state."""
         operation.performance_tracker.start_batch(len(items))
         return items
@@ -20,7 +20,7 @@ class InitialState(BatchOperationState):
 class ProcessingState(BatchOperationState):
     """Processing state for batch operations."""
 
-    def process(self, operation: BatchOperation, items: List[Dict]) -> List[Dict]:
+    def process(self, operation: BatchOperation, items: list[dict]) -> list[dict]:
         """Process items in batch."""
         results = []
         successful = 0
@@ -35,7 +35,7 @@ class ProcessingState(BatchOperationState):
                         batch.add_object(**item)
                         successful += 1
                     except Exception as e:
-                        logger.error(f"Failed to add item: {str(e)}")
+                        logger.error(f"Failed to add item: {e!s}")
                         results.append(
                             {"id": item.get("id", "unknown"), "status": "error", "error": str(e)}
                         )
@@ -45,7 +45,7 @@ class ProcessingState(BatchOperationState):
             return results
 
         except Exception as e:
-            logger.error(f"Batch processing failed: {str(e)}")
+            logger.error(f"Batch processing failed: {e!s}")
             operation.metrics.record_batch_error()
             raise
 
@@ -53,7 +53,7 @@ class ProcessingState(BatchOperationState):
 class CompletionState(BatchOperationState):
     """Completion state for batch operations."""
 
-    def process(self, operation: BatchOperation, items: List[Dict]) -> List[Dict]:
+    def process(self, operation: BatchOperation, items: list[dict]) -> list[dict]:
         """Process completion of batch operation."""
         successful = sum(1 for item in items if item.get("status") != "error")
         failed = len(items) - successful
@@ -67,7 +67,7 @@ class CompletionState(BatchOperationState):
 class ErrorState(BatchOperationState):
     """Error state for batch operations."""
 
-    def process(self, operation: BatchOperation, items: List[Dict]) -> List[Dict]:
+    def process(self, operation: BatchOperation, items: list[dict]) -> list[dict]:
         """Process error state."""
         operation.performance_tracker.end_batch(successful_objects=0, failed_objects=len(items))
         operation.metrics.record_batch_error()

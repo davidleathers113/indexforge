@@ -8,6 +8,7 @@ from src.api.models.responses import AuthResponse
 from src.api.utils.auth_helpers import refresh_auth_tokens, validate_csrf
 from src.api.utils.cookie_manager import set_auth_cookies
 
+
 router = APIRouter(tags=["auth"])
 
 

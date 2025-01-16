@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import tracemalloc
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -21,14 +21,14 @@ def doc_tracker():
 
 
 @pytest.fixture
-def valid_document() -> Dict[str, Any]:
+def valid_document() -> dict[str, Any]:
     """Fixture providing a valid document that meets all schema requirements."""
     return {
         "content_body": "Test document content",
         "content_summary": "Test summary",
         "content_title": "Test Document",
         "schema_version": 1,
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "timestamp_utc": datetime.now(UTC).isoformat(),
         "parent_id": None,
         "chunk_ids": [],
         "embedding": [0.1] * 384,  # 384-dimensional vector
@@ -45,7 +45,7 @@ def mock_processor(mocker):
             "summary": "Test summary",
             "title": "Test Document",
         },
-        "metadata": {"source_type": "word", "created_at": datetime.now(timezone.utc).isoformat()},
+        "metadata": {"source_type": "word", "created_at": datetime.now(UTC).isoformat()},
     }
     return processor
 

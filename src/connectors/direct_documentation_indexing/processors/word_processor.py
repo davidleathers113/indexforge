@@ -12,11 +12,12 @@ The processor focuses on .docx format using the python-docx library.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from docx import Document
 
 from .base_processor import BaseProcessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ class WordProcessor(BaseProcessor):
 
     SUPPORTED_EXTENSIONS = {".docx", ".doc"}
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the Word processor with configuration.
 
         Sets up the processor with optional configuration parameters that
@@ -99,7 +100,7 @@ class WordProcessor(BaseProcessor):
         """
         return file_path.suffix.lower() in self.SUPPORTED_EXTENSIONS
 
-    def process(self, file_path: Path) -> Dict[str, Any]:
+    def process(self, file_path: Path) -> dict[str, Any]:
         """Process a Word document and extract its content.
 
         Processes the document, extracting full text content and any additional
@@ -157,7 +158,7 @@ class WordProcessor(BaseProcessor):
             return {"status": "success", "content": content}
 
         except Exception as e:
-            logger.error(f"Error processing Word document {file_path}: {str(e)}")
+            logger.error(f"Error processing Word document {file_path}: {e!s}")
             return {"status": "error", "error": str(e), "content": {"metadata": metadata}}
 
     def _extract_full_text(self, doc: Document) -> str:
@@ -179,7 +180,7 @@ class WordProcessor(BaseProcessor):
         """
         return "\n".join(paragraph.text for paragraph in doc.paragraphs)
 
-    def _extract_headers(self, doc: Document) -> Dict[str, Any]:
+    def _extract_headers(self, doc: Document) -> dict[str, Any]:
         """Extract headers and their hierarchical structure.
 
         Extracts headers from the document, organizing them by their level
@@ -208,7 +209,7 @@ class WordProcessor(BaseProcessor):
 
         return headers
 
-    def _extract_tables(self, doc: Document) -> List[Dict[str, Any]]:
+    def _extract_tables(self, doc: Document) -> list[dict[str, Any]]:
         """Extract tables and their data from the document.
 
         Processes all tables in the document, extracting their content
@@ -240,7 +241,7 @@ class WordProcessor(BaseProcessor):
 
         return tables_data
 
-    def _extract_image_data(self, doc: Document) -> List[Dict[str, Any]]:
+    def _extract_image_data(self, doc: Document) -> list[dict[str, Any]]:
         """Extract metadata for images in the document.
 
         Extracts basic information about images embedded in the document,

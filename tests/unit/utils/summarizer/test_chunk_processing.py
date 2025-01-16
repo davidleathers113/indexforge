@@ -12,12 +12,14 @@ def mock_pipeline():
     """Create a mock pipeline."""
     return Mock(return_value=[{'summary_text': 'Mocked summary'}])
 
+
 @pytest.fixture
 def summarizer(mock_pipeline):
     """Create a summarizer instance with mocked pipeline."""
     processor = DocumentSummarizer()
     processor._pipeline = mock_pipeline
     return processor
+
 
 def test_summarize_chunk(mock_pipeline, summarizer):
     """Test summarization of a single text chunk."""
@@ -29,6 +31,7 @@ def test_summarize_chunk(mock_pipeline, summarizer):
     call_args = mock_pipeline.call_args[1]
     assert call_args['max_length'] == config.max_length
     assert call_args['min_length'] == config.min_length
+
 
 def test_summarize_chunk_error_handling(mock_pipeline, summarizer):
     """Test error handling in chunk summarization."""

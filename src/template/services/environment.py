@@ -9,11 +9,11 @@ This module is responsible for:
 import logging
 from pathlib import Path
 import textwrap
-from typing import Union
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 
 from src.template.models.settings import TemplateSettings
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class EnvironmentService:
         self._settings = settings
         self._logger = logging.getLogger(__name__)
 
-    def create_environment(self, templates_dir: Union[str, Path]) -> Environment:
+    def create_environment(self, templates_dir: str | Path) -> Environment:
         """Creates a new Jinja2 environment.
 
         This method is responsible for:

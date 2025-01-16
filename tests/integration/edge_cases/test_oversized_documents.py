@@ -3,16 +3,17 @@
 This module contains tests that verify the handling of documents that exceed
 normal size limits, including large content bodies and embeddings.
 """
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
 from src.indexing.schema import SchemaValidator
 
 
-def create_base_document() -> Dict[str, Any]:
+def create_base_document() -> dict[str, Any]:
     """Create a base test document."""
     return {'content_body': 'Test content', 'schema_version': 1, 'timestamp_utc': '2024-01-20T12:00:00Z', 'parent_id': None, 'chunk_ids': [], 'embedding': [0.1] * 384}
+
 
 def test_oversized_content_body():
     """Test handling of documents with extremely large content bodies."""
@@ -21,6 +22,7 @@ def test_oversized_content_body():
     doc['content_body'] = large_content
     with pytest.raises(ValueError, match='content.*size.*exceeded'):
         SchemaValidator.validate_object(doc)
+
 
 def test_oversized_embedding():
     """Test handling of documents with incorrect embedding dimensions."""
@@ -32,12 +34,14 @@ def test_oversized_embedding():
     with pytest.raises(ValueError, match='embedding.*dimension'):
         SchemaValidator.validate_object(doc)
 
+
 def test_large_chunk_list():
     """Test handling of documents with an excessive number of chunks."""
     doc = create_base_document()
     doc['chunk_ids'] = [f'chunk_{i}' for i in range(10000)]
     with pytest.raises(ValueError, match='chunks.*limit'):
         SchemaValidator.validate_object(doc)
+
 
 def test_deep_metadata_nesting():
     """Test handling of documents with deeply nested metadata."""
@@ -51,6 +55,7 @@ def test_deep_metadata_nesting():
     with pytest.raises(ValueError, match='metadata.*nesting'):
         SchemaValidator.validate_object(doc)
 
+
 def test_large_metadata_object():
     """Test handling of documents with very large metadata objects."""
     doc = create_base_document()
@@ -58,11 +63,13 @@ def test_large_metadata_object():
     with pytest.raises(ValueError, match='metadata.*size'):
         SchemaValidator.validate_object(doc)
 
+
 def test_large_batch_processing():
     """Test handling of very large batches of documents."""
     docs = [create_base_document() for _ in range(10000)]
     with pytest.raises(ValueError, match='batch.*size'):
         SchemaValidator.validate_batch(docs)
+
 
 def test_content_with_special_characters():
     """Test handling of content with a high proportion of special characters."""
@@ -70,6 +77,7 @@ def test_content_with_special_characters():
     special_chars = ''.join([chr(i) for i in range(32, 127)])
     doc['content_body'] = special_chars * 1000
     SchemaValidator.validate_object(doc)
+
 
 def test_binary_content_handling():
     """Test handling of content with binary data."""
@@ -79,6 +87,7 @@ def test_binary_content_handling():
     with pytest.raises(ValueError, match='invalid.*characters'):
         SchemaValidator.validate_object(doc)
 
+
 def test_maximum_valid_sizes():
     """Test documents that are exactly at the maximum allowed sizes."""
     doc = create_base_document()
@@ -86,6 +95,7 @@ def test_maximum_valid_sizes():
     doc['chunk_ids'] = [f'chunk_{i}' for i in range(1000)]
     doc['metadata'] = {f'field_{i}': f'value_{i}' for i in range(100)}
     SchemaValidator.validate_object(doc)
+
 
 def test_unicode_content_handling():
     """Test handling of content with various Unicode characters."""

@@ -6,7 +6,6 @@ reference generation based on semantic similarity and topic mapping.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID
 
 import numpy as np
@@ -42,8 +41,8 @@ class SemanticProcessor:
     def __init__(
         self,
         ref_manager: ReferenceManager,
-        config: Optional[SemanticConfig] = None,
-        embedding_cache: Optional[Dict[UUID, np.ndarray]] = None,
+        config: SemanticConfig | None = None,
+        embedding_cache: dict[UUID, np.ndarray] | None = None,
     ):
         """Initialize the semantic processor.
 
@@ -91,7 +90,7 @@ class SemanticProcessor:
         emb2 = self.get_chunk_embedding(chunk_id2)
         return float(np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2)))
 
-    def find_similar_chunks(self, chunk_id: UUID) -> List[Tuple[UUID, float]]:
+    def find_similar_chunks(self, chunk_id: UUID) -> list[tuple[UUID, float]]:
         """Find chunks similar to the given chunk.
 
         Args:
@@ -121,7 +120,7 @@ class SemanticProcessor:
 
     def detect_semantic_relationships(
         self, chunk_id: UUID
-    ) -> Dict[ReferenceType, List[Tuple[UUID, float]]]:
+    ) -> dict[ReferenceType, list[tuple[UUID, float]]]:
         """Detect semantic relationships for a chunk.
 
         Args:
@@ -147,7 +146,7 @@ class SemanticProcessor:
 
         return relationships
 
-    def create_semantic_references(self, chunk_id: UUID) -> List[Tuple[UUID, ReferenceType, float]]:
+    def create_semantic_references(self, chunk_id: UUID) -> list[tuple[UUID, ReferenceType, float]]:
         """Create semantic references for a chunk.
 
         Args:
@@ -174,8 +173,8 @@ class SemanticProcessor:
         return created_refs
 
     def analyze_topic_relationships(
-        self, chunk_ids: Set[UUID], num_topics: int = 5
-    ) -> Dict[str, Set[UUID]]:
+        self, chunk_ids: set[UUID], num_topics: int = 5
+    ) -> dict[str, set[UUID]]:
         """Group chunks by topic similarity using k-means clustering.
 
         Args:
@@ -226,7 +225,7 @@ class SemanticProcessor:
 
         # Group chunks by topic
         topics = {}
-        for chunk_id, cluster_id in zip(valid_chunk_ids, cluster_labels):
+        for chunk_id, cluster_id in zip(valid_chunk_ids, cluster_labels, strict=False):
             topic_label = f"Topic {cluster_id + 1}: {topic_terms[cluster_id]}"
             if topic_label not in topics:
                 topics[topic_label] = set()

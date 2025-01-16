@@ -9,6 +9,7 @@ import pytest
 from ..core.base import BaseState
 from ..data.vector import mock_weaviate_client
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -63,7 +64,7 @@ def mock_schema_migrator(mock_schema_validator, mock_weaviate_client):
                 state.needs_migration = True
 
         except Exception as e:
-            state.add_error(f"Error ensuring schema: {str(e)}")
+            state.add_error(f"Error ensuring schema: {e!s}")
             raise
 
     # Configure mock methods

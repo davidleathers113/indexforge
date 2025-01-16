@@ -13,6 +13,7 @@ def test_summarizer_config_defaults():
     assert config.chunk_size == 1024
     assert config.chunk_overlap == 100
 
+
 def test_summarizer_config_custom_values():
     """Test SummarizerConfig with custom values."""
     config = SummarizerConfig(max_length=200, min_length=100, do_sample=True, temperature=0.8, top_p=0.95, chunk_size=512, chunk_overlap=50)

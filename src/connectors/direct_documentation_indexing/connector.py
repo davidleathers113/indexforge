@@ -10,7 +10,7 @@ interface for processing different types of document files.
 
 import logging
 from pathlib import Path
-from typing import Dict, Union
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,16 +46,16 @@ class DocumentConnector:
         self._processors = {}
 
     @property
-    def processors(self) -> Dict:
+    def processors(self) -> dict:
         """Get the dictionary of file type processors."""
         return self._processors
 
     @processors.setter
-    def processors(self, value: Dict):
+    def processors(self, value: dict):
         """Set the dictionary of file type processors."""
         self._processors = value
 
-    def process_file(self, file_path: Union[str, Path]) -> Dict:
+    def process_file(self, file_path: str | Path) -> dict:
         """Process a document file using the appropriate processor.
 
         Attempts to process the given file by:
@@ -104,5 +104,5 @@ class DocumentConnector:
 
             return {"status": "error", "message": f"No suitable processor found for {file_path}"}
         except Exception as e:
-            logger.error(f"Failed to process file {file_path}: {str(e)}")
+            logger.error(f"Failed to process file {file_path}: {e!s}")
             return {"status": "error", "message": str(e), "file": str(file_path)}

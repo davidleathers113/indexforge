@@ -1,13 +1,14 @@
 """Test basic volume operations."""
 
-from typing import Any, Dict, Generator
+from collections.abc import Generator
+from typing import Any
 import uuid
 
 import pytest
 
 
 @pytest.fixture
-def test_volume(docker_client: Any) -> Generator[Dict[str, Any], None, None]:
+def test_volume(docker_client: Any) -> Generator[dict[str, Any], None, None]:
     """Create a test volume."""
     volume = docker_client.volumes.create(
         name=f"test-volume-{uuid.uuid4().hex[:8]}",
@@ -33,7 +34,7 @@ def test_volume_creation(docker_client: Any) -> None:
         volume.remove()
 
 
-def test_volume_mounting(docker_client: Any, test_volume: Dict[str, Any]) -> None:
+def test_volume_mounting(docker_client: Any, test_volume: dict[str, Any]) -> None:
     """Test volume mounting in container."""
     container = docker_client.containers.run(
         "test-image:latest",

@@ -13,6 +13,7 @@ def test_cache_hit(mock_cache_manager, sample_document):
     assert result2['summary'] == result1['summary']
     assert mock_cache_manager.get.called
 
+
 def test_cache_miss(mock_cache_manager, sample_document):
     """Test cache miss when generating summary."""
     summarizer = DocumentSummarizer(model_name='facebook/bart-large-cnn', device=-1, batch_size=4, cache_manager=mock_cache_manager)
@@ -22,6 +23,7 @@ def test_cache_miss(mock_cache_manager, sample_document):
     assert result['status'] == 'success'
     assert mock_cache_manager.get.called
     assert mock_cache_manager.set.called
+
 
 def test_cache_with_different_configs(mock_cache_manager, sample_document):
     """Test caching with different configurations."""

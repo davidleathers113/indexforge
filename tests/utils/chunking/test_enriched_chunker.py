@@ -18,6 +18,7 @@ def enriched_chunker():
     config = EnrichedChunkingConfig(chunking_config=chunking_config, semantic_config=semantic_config, enable_topic_clustering=True, min_cluster_size=2, max_topics=3)
     return EnrichedChunker(config)
 
+
 def test_basic_chunking(enriched_chunker):
     """Test basic chunking functionality without semantic enrichment."""
     text = 'This is a test paragraph. It contains multiple sentences. ' * 5
@@ -28,6 +29,7 @@ def test_basic_chunking(enriched_chunker):
         assert 'content' in chunk
         assert 'metadata' in chunk
         assert isinstance(chunk['metadata'], dict)
+
 
 def test_topic_clustering(enriched_chunker):
     """Test topic clustering and metadata enrichment."""
@@ -41,16 +43,18 @@ def test_topic_clustering(enriched_chunker):
     assert len(topics_found) > 0
     assert len(topics_found) <= enriched_chunker.config.max_topics
 
+
 def test_semantic_relationships(enriched_chunker):
     """Test semantic relationship detection between chunks."""
     text = '\n    Machine learning is a subset of artificial intelligence.\n    Neural networks are used in deep learning applications.\n    Data science involves statistical analysis and modeling.\n    '
     chunks = enriched_chunker.process_text(text)
     relationships_found = False
     for chunk in chunks:
-        if 'similar_chunks' in chunk['metadata'] or any((key.startswith('related_') for key in chunk['metadata'])):
+        if 'similar_chunks' in chunk['metadata'] or any(key.startswith('related_') for key in chunk['metadata']):
             relationships_found = True
             break
     assert relationships_found
+
 
 def test_batch_processing(enriched_chunker):
     """Test batch processing of multiple texts."""
@@ -64,6 +68,7 @@ def test_batch_processing(enriched_chunker):
             assert 'content' in chunk
             assert 'metadata' in chunk
 
+
 def test_configuration_options(enriched_chunker):
     """Test different configuration options."""
     enriched_chunker.config.enable_topic_clustering = False
@@ -75,6 +80,7 @@ def test_configuration_options(enriched_chunker):
     chunks = enriched_chunker.process_text(text)
     for chunk in chunks:
         assert 'similar_chunks' not in chunk['metadata']
+
 
 def test_edge_cases(enriched_chunker):
     """Test edge cases and error handling."""

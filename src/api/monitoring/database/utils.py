@@ -13,6 +13,7 @@ Features:
 import re
 from typing import Literal
 
+
 # Type definitions
 OperationType = Literal["select", "insert", "update", "delete", "other"]
 

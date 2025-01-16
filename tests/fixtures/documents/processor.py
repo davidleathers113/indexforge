@@ -1,12 +1,12 @@
 """Document processor for testing."""
 
 import logging
-from typing import Dict, List
 from unittest.mock import MagicMock
 
 import pytest
 
 from .state import DocumentState
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ def mock_doc_processor(doc_state: DocumentState):
     """Mock document processor for testing."""
     mock_processor = MagicMock()
 
-    def process_document(doc: Dict) -> Dict:
+    def process_document(doc: dict) -> dict:
         """Process a document with error tracking."""
         try:
             # Basic validation
@@ -61,7 +61,7 @@ def mock_doc_processor(doc_state: DocumentState):
             raise ValueError("Chunk size must be positive")
         doc_state.chunk_size = size
 
-    def batch_documents(documents: List[Dict], batch_size: int) -> List[List[Dict]]:
+    def batch_documents(documents: list[dict], batch_size: int) -> list[list[dict]]:
         """Split documents into batches."""
         try:
             if not documents:
@@ -71,7 +71,7 @@ def mock_doc_processor(doc_state: DocumentState):
             doc_state.add_error(str(e))
             raise
 
-    def deduplicate_documents(documents: List[Dict]) -> List[Dict]:
+    def deduplicate_documents(documents: list[dict]) -> list[dict]:
         """Mock document deduplication."""
         try:
             # For testing, just process each document

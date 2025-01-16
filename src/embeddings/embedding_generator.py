@@ -6,13 +6,13 @@ generation with configurable parameters.
 """
 
 import logging
-from typing import Dict, List, Optional, Union
 
 import numpy as np
 from openai import OpenAI
 
 from src.utils.cache_manager import CacheManager
 from src.utils.chunking import ChunkingConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +37,12 @@ class EmbeddingGenerator:
         model: str = "text-embedding-3-small",
         chunk_size: int = 512,
         chunk_overlap: int = 50,
-        dimensions: Optional[int] = None,
-        cache_manager: Optional[CacheManager] = None,
+        dimensions: int | None = None,
+        cache_manager: CacheManager | None = None,
         cache_host: str = "localhost",
         cache_port: int = 6379,
         cache_ttl: int = 86400,
-        client: Optional[OpenAI] = None,
+        client: OpenAI | None = None,
     ):
         """Initialize the embedding generator with specified configuration.
 
@@ -79,7 +79,7 @@ class EmbeddingGenerator:
             )
             logger.debug(f"Created chunking config: {self.chunking_config}")
         except Exception as e:
-            logger.error(f"Failed to create chunking config: {str(e)}")
+            logger.error(f"Failed to create chunking config: {e!s}")
             raise
 
         self.client = client or OpenAI()
@@ -91,7 +91,7 @@ class EmbeddingGenerator:
         )
         logger.info("EmbeddingGenerator initialization complete")
 
-    def _normalize_l2(self, x: Union[List[float], np.ndarray]) -> np.ndarray:
+    def _normalize_l2(self, x: list[float] | np.ndarray) -> np.ndarray:
         """Perform L2 normalization on embedding vectors.
 
         Normalizes input vectors to have unit L2 norm (Euclidean length = 1), which is
@@ -136,7 +136,7 @@ class EmbeddingGenerator:
             normalized = np.divide(x, norms, out=x.copy(), where=norms != 0)
             return normalized
 
-    def _get_embedding(self, text: str) -> List[float]:
+    def _get_embedding(self, text: str) -> list[float]:
         """Generate embedding for a single text segment.
 
         Makes an API call to OpenAI to generate an embedding vector for the given text,
@@ -175,7 +175,7 @@ class EmbeddingGenerator:
             return embedding
 
         except Exception as e:
-            error_msg = f"Error generating embedding: {str(e)}"
+            error_msg = f"Error generating embedding: {e!s}"
             logger.error(error_msg, exc_info=True)
             raise Exception(error_msg) from e
 
@@ -199,10 +199,10 @@ class EmbeddingGenerator:
 
             logger.info("EmbeddingGenerator resources cleaned up")
         except Exception as e:
-            logger.error(f"Error during cleanup: {str(e)}")
+            logger.error(f"Error during cleanup: {e!s}")
             raise
 
-    def generate_embeddings(self, documents: List[Dict]) -> List[Dict]:
+    def generate_embeddings(self, documents: list[dict]) -> list[dict]:
         """Generate embeddings for a batch of documents.
 
         Processes a list of documents, generating embeddings for both body text and
@@ -256,7 +256,7 @@ class EmbeddingGenerator:
                     chunks = chunk_text_by_tokens(body_text, self.chunking_config)
                     logger.debug(f"Created {len(chunks)} chunks")
                 except Exception as e:
-                    logger.error(f"Failed to chunk text: {str(e)}, config={self.chunking_config}")
+                    logger.error(f"Failed to chunk text: {e!s}, config={self.chunking_config}")
                     raise
 
                 chunk_embeddings = []
@@ -265,11 +265,11 @@ class EmbeddingGenerator:
                 # Try to generate embeddings for each chunk
                 for i, chunk in enumerate(chunks):
                     try:
-                        logger.debug(f"Processing chunk {i+1}/{len(chunks)} of length {len(chunk)}")
+                        logger.debug(f"Processing chunk {i + 1}/{len(chunks)} of length {len(chunk)}")
                         embedding = self._get_embedding(chunk)
                         chunk_embeddings.append(embedding)
                     except Exception as e:
-                        logger.error(f"Failed to generate embedding for chunk {i+1}: {str(e)}")
+                        logger.error(f"Failed to generate embedding for chunk {i + 1}: {e!s}")
                         failed_chunks += 1
 
                 if failed_chunks == len(chunks):
@@ -295,7 +295,7 @@ class EmbeddingGenerator:
                     if summary_embedding:
                         logger.debug("Generated summary embedding")
                 except Exception as e:
-                    logger.error(f"Failed to generate summary embedding: {str(e)}")
+                    logger.error(f"Failed to generate summary embedding: {e!s}")
                     summary_embedding = None
 
                 # Update document with embeddings
@@ -315,14 +315,14 @@ class EmbeddingGenerator:
                 logger.info("Successfully processed document")
 
             except Exception as e:
-                logger.error(f"Error processing document: {str(e)}", exc_info=True)
+                logger.error(f"Error processing document: {e!s}", exc_info=True)
                 doc["embeddings"].update(
                     {
                         "body": [],
                         "summary": None,
                         "version": "v1_failed",
                         "model": self.model,
-                        "error": f"Failed to generate embeddings: {str(e)}",
+                        "error": f"Failed to generate embeddings: {e!s}",
                     }
                 )
 

@@ -8,6 +8,7 @@ This module provides text-related functionality:
 
 from .processor import TextState, mock_encoding, mock_tiktoken, text_state
 
+
 __all__ = [
     "TextState",
     "mock_encoding",

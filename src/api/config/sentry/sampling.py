@@ -3,12 +3,12 @@
 This module handles trace sampling decisions based on context and environment.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from src.api.config.settings import settings
 
 
-def traces_sampler(sampling_context: Dict[str, Any]) -> float:
+def traces_sampler(sampling_context: dict[str, Any]) -> float:
     """Determine trace sampling rate based on context."""
     if settings.ENVIRONMENT == "development":
         return 1.0

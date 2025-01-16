@@ -29,5 +29,5 @@ class URLNormalizer(Normalizer[str, str]):
             self.logger.debug(f"Normalized URL {value} to {normalized}")
             return normalized
         except Exception as e:
-            self.logger.warning(f"Failed to normalize URL {value}: {str(e)}")
+            self.logger.warning(f"Failed to normalize URL {value}: {e!s}")
             return value

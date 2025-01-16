@@ -8,6 +8,7 @@ This module provides schema-related functionality:
 from .migrator import MigratorState, mock_schema_migrator
 from .validator import SchemaState, mock_schema_validator
 
+
 __all__ = [
     "MigratorState",
     "SchemaState",

@@ -5,14 +5,14 @@ This module handles event processing, error handling, and context enrichment for
 
 import json
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from src.api.config.sentry.utils import get_git_commit
 from src.api.config.settings import settings
 from src.api.monitoring.metrics import record_error
 
 
-def _get_error_fingerprint(exc_value: Exception, event: Dict[str, Any]) -> list:
+def _get_error_fingerprint(exc_value: Exception, event: dict[str, Any]) -> list:
     """Generate error fingerprint based on exception type."""
     if isinstance(exc_value, ValueError):
         error_msg = str(exc_value)
@@ -53,7 +53,7 @@ def _get_message_fingerprint(message: str) -> list:
     return ["unhandled-error", message[:50]]
 
 
-def before_send(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def before_send(event: dict[str, Any], hint: dict[str, Any]) -> dict[str, Any] | None:
     """Filter and modify events before sending to Sentry."""
     # Handle exception events
     if "exc_info" in hint:

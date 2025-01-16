@@ -7,10 +7,9 @@ This module contains the DocumentLineageManager class, which provides methods fo
 - Fetching lineage and transformation history
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 from .enums import LogLevel, ProcessingStatus, TransformationType
 from .health_check import perform_health_check
@@ -19,20 +18,21 @@ from .models import DocumentLineage, HealthCheckResult, LogEntry, ProcessingStep
 from .utils import load_json, save_json
 from .validation import validate_circular_derivations, validate_lineage_relationships
 
+
 logger = logging.getLogger(__name__)
 
 
 class DocumentLineageManager:
     """Manages document lineage tracking and operations."""
 
-    def __init__(self, storage_dir: Optional[str] = None):
+    def __init__(self, storage_dir: str | None = None):
         """Initialize the document lineage manager.
 
         Args:
             storage_dir: Optional directory for storing lineage data
         """
         self.storage_dir = Path(storage_dir) if storage_dir else Path(__file__).parent / "lineage"
-        self.lineage_data: Dict[str, DocumentLineage] = {}
+        self.lineage_data: dict[str, DocumentLineage] = {}
         self._load_lineage_data()
 
     def _get_storage_path(self) -> Path:
@@ -143,10 +143,10 @@ class DocumentLineageManager:
     def add_document(
         self,
         doc_id: str,
-        origin_id: Optional[str] = None,
-        origin_source: Optional[str] = None,
-        origin_type: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        origin_id: str | None = None,
+        origin_source: str | None = None,
+        origin_type: str | None = None,
+        metadata: dict | None = None,
     ) -> None:
         """Add a new document to lineage tracking.
 
@@ -175,10 +175,10 @@ class DocumentLineageManager:
     def record_transformation(
         self,
         doc_id: str,
-        transform_type: Union[TransformationType, str],
+        transform_type: TransformationType | str,
         description: str = "",
-        parameters: Optional[Dict] = None,
-        metadata: Optional[Dict] = None,
+        parameters: dict | None = None,
+        metadata: dict | None = None,
     ) -> None:
         """Record a transformation applied to a document.
 
@@ -207,17 +207,17 @@ class DocumentLineageManager:
 
         lineage = self.lineage_data[doc_id]
         lineage.transformations.append(transformation)
-        lineage.last_modified = datetime.now(timezone.utc)
+        lineage.last_modified = datetime.now(UTC)
         self._save_lineage_data()
 
     def add_derivation(
         self,
         parent_id: str,
         derived_id: str,
-        transform_type: Optional[Union[TransformationType, str]] = None,
+        transform_type: TransformationType | str | None = None,
         description: str = "",
-        parameters: Optional[Dict] = None,
-        metadata: Optional[Dict] = None,
+        parameters: dict | None = None,
+        metadata: dict | None = None,
     ) -> None:
         """Link a derived document to its parent.
 
@@ -248,12 +248,12 @@ class DocumentLineageManager:
         parent = self.lineage_data[parent_id]
         if derived_id not in parent.derived_documents:
             parent.derived_documents.append(derived_id)
-            parent.last_modified = datetime.now(timezone.utc)
+            parent.last_modified = datetime.now(UTC)
 
         # Update derived document's parent reference
         derived = self.lineage_data[derived_id]
         derived.derived_from = parent_id
-        derived.last_modified = datetime.now(timezone.utc)
+        derived.last_modified = datetime.now(UTC)
 
         # Record transformation if provided
         if transform_type:
@@ -267,7 +267,7 @@ class DocumentLineageManager:
 
         self._save_lineage_data()
 
-    def get_lineage(self, doc_id: str) -> Optional[DocumentLineage]:
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
         """Get lineage information for a document.
 
         Args:
@@ -279,8 +279,8 @@ class DocumentLineageManager:
         return self.lineage_data.get(doc_id)
 
     def get_transformation_history(
-        self, doc_id: str, transform_type: Optional[Union[TransformationType, str]] = None
-    ) -> List[Transformation]:
+        self, doc_id: str, transform_type: TransformationType | str | None = None
+    ) -> list[Transformation]:
         """Get transformation history for a document.
 
         Args:
@@ -301,7 +301,7 @@ class DocumentLineageManager:
 
         return transformations
 
-    def get_derivation_chain(self, doc_id: str, max_depth: int = 10) -> Dict[str, List[str]]:
+    def get_derivation_chain(self, doc_id: str, max_depth: int = 10) -> dict[str, list[str]]:
         """Get the derivation chain for a document.
 
         Args:
@@ -320,7 +320,7 @@ class DocumentLineageManager:
 
         return chain
 
-    def validate_lineage(self) -> List[str]:
+    def validate_lineage(self) -> list[str]:
         """Validate the integrity of document lineage.
 
         Returns:
@@ -331,7 +331,7 @@ class DocumentLineageManager:
         errors.extend(validate_circular_derivations(self.lineage_data))
         return errors
 
-    def health_check(self, thresholds: Optional[Dict[str, float]] = None) -> HealthCheckResult:
+    def health_check(self, thresholds: dict[str, float] | None = None) -> HealthCheckResult:
         """Perform a health check of the system.
 
         Args:
@@ -346,9 +346,9 @@ class DocumentLineageManager:
     def log_error_or_warning(
         self,
         doc_id: str,
-        log_level: Union[LogLevel, str],
+        log_level: LogLevel | str,
         message: str,
-        details: Optional[Dict] = None,
+        details: dict | None = None,
     ) -> None:
         """Log an error or warning for a document.
 
@@ -383,16 +383,16 @@ class DocumentLineageManager:
 
         lineage = self.lineage_data[doc_id]
         lineage.error_logs.append(log_entry)
-        lineage.last_modified = datetime.now(timezone.utc)
+        lineage.last_modified = datetime.now(UTC)
         self._save_lineage_data()
 
     def get_error_logs(
         self,
         doc_id: str,
-        log_level: Optional[LogLevel] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-    ) -> List[LogEntry]:
+        log_level: LogLevel | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+    ) -> list[LogEntry]:
         """Get error logs for a document with optional filters.
 
         Args:

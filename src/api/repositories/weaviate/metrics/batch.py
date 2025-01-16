@@ -1,7 +1,6 @@
 """Basic batch operation metrics."""
 
 from dataclasses import dataclass, field
-from typing import Dict
 
 from .base import BaseMetrics
 
@@ -16,7 +15,7 @@ class BatchMetrics(BaseMetrics):
     total_objects: int = 0
     successful_objects: int = 0
     failed_objects: int = 0
-    errors: Dict[str, int] = field(default_factory=dict)
+    errors: dict[str, int] = field(default_factory=dict)
 
     def record_batch_completion(self) -> None:
         """Record successful batch completion."""
@@ -43,7 +42,7 @@ class BatchMetrics(BaseMetrics):
         self.errors[error_type] = self.errors.get(error_type, 0) + 1
         self.notify_observers("object_error_rate", self.failed_objects / self.total_objects)
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get metrics summary."""
         return {
             "batches": {

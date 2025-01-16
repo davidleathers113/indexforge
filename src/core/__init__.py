@@ -20,6 +20,7 @@ from .interfaces import (
     SemanticReferenceManager,
     StorageMetrics,
     TextProcessor,
+    VectorSearcher,
 )
 from .models import (
     Chunk,
@@ -52,6 +53,7 @@ from .utils import (
     validate_reference_integrity,
 )
 
+
 __all__ = [
     # Base classes
     "BaseService",
@@ -69,6 +71,7 @@ __all__ = [
     "SemanticReferenceManager",
     "StorageMetrics",
     "TextProcessor",
+    "VectorSearcher",
     # Models
     "Chunk",
     "ChunkMetadata",

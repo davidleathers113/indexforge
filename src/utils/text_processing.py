@@ -57,7 +57,6 @@ Note:
 """
 
 import logging
-from typing import Optional
 
 import numpy as np
 import torch
@@ -71,6 +70,7 @@ from .chunking.base import (
     get_token_encoding,
 )
 
+
 logger = logging.getLogger(__name__)
 
 # Initialize the model and tokenizer globally for reuse
@@ -83,19 +83,19 @@ _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 _model = _model.to(_device)
 
 __all__ = [
-    "clean_text",
-    "truncate_text",
+    "ChunkingConfig",
     "chunk_text_by_chars",
     "chunk_text_by_tokens",
     "chunk_text_by_words",
-    "get_token_encoding",
-    "ChunkingConfig",
+    "clean_text",
     "count_tokens",
     "generate_embeddings",
+    "get_token_encoding",
+    "truncate_text",
 ]
 
 
-def count_tokens(text: str, model_name: Optional[str] = None) -> int:
+def count_tokens(text: str, model_name: str | None = None) -> int:
     """Count the number of tokens in a text string.
 
     Args:
@@ -137,7 +137,7 @@ def truncate_text(
     text: str,
     max_length: int,
     use_tokens: bool = False,
-    model_name: Optional[str] = None,
+    model_name: str | None = None,
 ) -> str:
     """Truncate text to a maximum length.
 

@@ -58,12 +58,13 @@ Note:
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from transformers import Pipeline
 
 from ...text_processing import chunk_text_by_words, clean_text
 from ..config.settings import SummarizerConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class SummarizationPipeline:
     def __init__(
         self,
         pipeline: Pipeline,
-        config: Optional[SummarizerConfig] = None,
+        config: SummarizerConfig | None = None,
     ) -> None:
         """Initialize the summarization pipeline.
 
@@ -124,8 +125,8 @@ class SummarizationPipeline:
             self.config.min_word_count = min_word_count
 
     def generate_summary(
-        self, text: str, config: Optional[SummarizerConfig] = None
-    ) -> Dict[str, Any]:
+        self, text: str, config: SummarizerConfig | None = None
+    ) -> dict[str, Any]:
         """Generate a summary for the given text.
 
         Args:
@@ -175,7 +176,7 @@ class SummarizationPipeline:
                         chunk_summaries.append(summary)
                 except Exception as e:
                     failed_chunks += 1
-                    logger.error(f"Error processing chunk {i}: {str(e)}")
+                    logger.error(f"Error processing chunk {i}: {e!s}")
                     continue
 
             if not chunk_summaries:
@@ -206,7 +207,7 @@ class SummarizationPipeline:
         except ValidationError as e:
             return {"status": "error", "error": str(e)}
         except Exception as e:
-            logger.error(f"Error generating summary: {str(e)}")
+            logger.error(f"Error generating summary: {e!s}")
             return {"status": "error", "error": str(e)}
 
     def _summarize_chunk(self, text: str) -> str:
@@ -229,10 +230,10 @@ class SummarizationPipeline:
             )
             return result[0]["summary_text"].strip()
         except Exception as e:
-            logger.error(f"Error in summarization: {str(e)}")
-            raise SummarizationError(f"Failed to summarize chunk: {str(e)}")
+            logger.error(f"Error in summarization: {e!s}")
+            raise SummarizationError(f"Failed to summarize chunk: {e!s}")
 
-    def _combine_summaries(self, summaries: List[str]) -> str:
+    def _combine_summaries(self, summaries: list[str]) -> str:
         """Combine multiple summaries into one.
 
         Args:

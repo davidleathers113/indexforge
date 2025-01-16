@@ -28,6 +28,7 @@ from src.api.monitoring.recorders import (
     record_external_request,
 )
 
+
 __all__ = [
     # Middleware
     "timing_middleware",

@@ -6,7 +6,6 @@ single and batch document deletions with detailed logging and status reporting.
 """
 
 import logging
-from typing import List, Optional
 import uuid
 
 import weaviate
@@ -35,7 +34,7 @@ class DocumentDeletion:
         self,
         client: weaviate.Client,
         class_name: str,
-        cache_manager: Optional[CacheManager] = None,
+        cache_manager: CacheManager | None = None,
         test_mode: bool = False,
     ):
         """Initialize the document deletion handler.
@@ -65,7 +64,7 @@ class DocumentDeletion:
         self.test_mode = test_mode
         self.logger = logging.getLogger(__name__)
 
-    def delete_documents(self, doc_ids: List[str]) -> bool:
+    def delete_documents(self, doc_ids: list[str]) -> bool:
         """Delete multiple documents from the storage system.
 
         Processes a list of document IDs for deletion, validating each UUID
@@ -127,19 +126,19 @@ class DocumentDeletion:
                         self.logger.debug(f"Clearing cache for {doc_id}")
                         self.cache_manager.delete(f"doc:{doc_id}")
                 except ValueError as ve:
-                    self.logger.error(f"Invalid UUID format for document {doc_id}: {str(ve)}")
+                    self.logger.error(f"Invalid UUID format for document {doc_id}: {ve!s}")
                     return False
                 except UnexpectedStatusCodeException as e:
                     if "404" in str(e):
                         self.logger.warning(f"Document {doc_id} not found, skipping")
                         continue
-                    self.logger.error(f"Error deleting document {doc_id}: {str(e)}")
+                    self.logger.error(f"Error deleting document {doc_id}: {e!s}")
                     return False
                 except Exception as e:
-                    self.logger.error(f"Error deleting document {doc_id}: {str(e)}")
+                    self.logger.error(f"Error deleting document {doc_id}: {e!s}")
                     return False
             self.logger.info("Document deletion completed successfully")
             return True
         except Exception as e:
-            self.logger.error(f"Error deleting documents: {str(e)}")
+            self.logger.error(f"Error deleting documents: {e!s}")
             return False

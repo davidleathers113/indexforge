@@ -1,7 +1,6 @@
 """Document deletion operations."""
 
 import logging
-from typing import Dict, List, Optional
 
 from weaviate.collections import Collection
 
@@ -13,13 +12,14 @@ from src.api.repositories.weaviate.operations.states import (
     ProcessingState,
 )
 
+
 logger = logging.getLogger(__name__)
 
 
 class DeleteOperation(BatchOperation):
     """Handles document deletion operations."""
 
-    def __init__(self, collection: Collection, batch_size: Optional[int] = None):
+    def __init__(self, collection: Collection, batch_size: int | None = None):
         """Initialize deletion operation."""
         super().__init__(collection, batch_size)
         self.initial_state = InitialState()
@@ -28,15 +28,15 @@ class DeleteOperation(BatchOperation):
         self.error_state = ErrorState()
         self.current_state = self.initial_state
 
-    def prepare_item(self, item: Dict) -> Dict:
+    def prepare_item(self, item: dict) -> dict:
         """Prepare document for deletion."""
         return {"uuid": item["uuid"]} if "uuid" in item else item
 
-    def validate_item(self, item: Dict) -> bool:
+    def validate_item(self, item: dict) -> bool:
         """Validate document before deletion."""
         return "uuid" in item
 
-    def process_batch(self, batch: List[Dict]) -> List[Dict]:
+    def process_batch(self, batch: list[dict]) -> list[dict]:
         """Process a batch of documents for deletion."""
         try:
             # Initial state
@@ -49,5 +49,5 @@ class DeleteOperation(BatchOperation):
             return self.completion_state.process(self, results)
 
         except Exception as e:
-            logger.error(f"Batch deletion failed: {str(e)}")
+            logger.error(f"Batch deletion failed: {e!s}")
             return self.error_state.process(self, batch)

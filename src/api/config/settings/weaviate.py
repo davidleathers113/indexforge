@@ -1,6 +1,5 @@
 """Weaviate settings configuration."""
 
-from typing import Optional
 
 from pydantic import Field, field_validator
 
@@ -12,10 +11,10 @@ class WeaviateSettings(BaseAppSettings):
 
     # Connection Settings
     WEAVIATE_URL: str = Field(default="http://localhost:8080", description="Weaviate server URL")
-    WEAVIATE_API_KEY: Optional[str] = Field(
+    WEAVIATE_API_KEY: str | None = Field(
         default=None, description="API key for Weaviate authentication"
     )
-    WEAVIATE_PORT: Optional[int] = Field(default=8080, description="Weaviate server port")
+    WEAVIATE_PORT: int | None = Field(default=8080, description="Weaviate server port")
     WEAVIATE_GRPC_PORT: int = Field(default=50051, description="Weaviate gRPC port")
 
     # Operation Settings

@@ -3,9 +3,9 @@
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Dict, Optional
 
 from fastapi import UploadFile
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class FileProcessor:
         return temp_path
 
     @staticmethod
-    def determine_processor_type(file_path: Path) -> Optional[str]:
+    def determine_processor_type(file_path: Path) -> str | None:
         """Determine the appropriate processor type for a file.
 
         Args:
@@ -64,7 +64,7 @@ class FileProcessor:
         return None
 
     @staticmethod
-    async def validate_file(file: UploadFile) -> Optional[str]:
+    async def validate_file(file: UploadFile) -> str | None:
         """Validate file type and size.
 
         Args:
@@ -78,7 +78,7 @@ class FileProcessor:
         await file.seek(0)
 
         if len(content) > MAX_FILE_SIZE:
-            return f"File size exceeds maximum limit of {MAX_FILE_SIZE/1024/1024}MB"
+            return f"File size exceeds maximum limit of {MAX_FILE_SIZE / 1024 / 1024}MB"
 
         # Check file type
         mime_type = mimetypes.guess_type(file.filename)[0]
@@ -88,7 +88,7 @@ class FileProcessor:
         return None
 
     @staticmethod
-    def get_metadata(file: UploadFile, file_path: Path) -> Dict:
+    def get_metadata(file: UploadFile, file_path: Path) -> dict:
         """Get file metadata.
 
         Args:

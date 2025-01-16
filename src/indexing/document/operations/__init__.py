@@ -33,4 +33,5 @@ from src.indexing.document.operations.addition import DocumentAddition
 from src.indexing.document.operations.deletion import DocumentDeletion
 from src.indexing.document.operations.update import DocumentUpdate
 
+
 __all__ = ["DocumentAddition", "DocumentDeletion", "DocumentUpdate"]

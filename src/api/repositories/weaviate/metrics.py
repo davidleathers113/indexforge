@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import logging
 from statistics import mean, median
 import time
-from typing import Dict, List, Optional
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class BatchPerformanceMetrics:
     duration_seconds: float
     objects_per_second: float
     error_rate: float
-    memory_usage_mb: Optional[float] = None
+    memory_usage_mb: float | None = None
 
 
 class BatchPerformanceTracker:
@@ -34,8 +34,8 @@ class BatchPerformanceTracker:
         self.min_batch_size = min_batch_size
         self.max_batch_size = max_batch_size
         self.window_size = window_size
-        self.metrics_history: List[BatchPerformanceMetrics] = []
-        self.current_batch_start: Optional[float] = None
+        self.metrics_history: list[BatchPerformanceMetrics] = []
+        self.current_batch_start: float | None = None
         self.optimal_batch_size: int = min_batch_size
 
     def start_batch(self, batch_size: int) -> None:
@@ -44,7 +44,7 @@ class BatchPerformanceTracker:
         self.current_batch_size = batch_size
 
     def end_batch(
-        self, successful_objects: int, failed_objects: int, memory_usage_mb: Optional[float] = None
+        self, successful_objects: int, failed_objects: int, memory_usage_mb: float | None = None
     ) -> None:
         """Record metrics for completed batch."""
         if self.current_batch_start is None:
@@ -73,7 +73,7 @@ class BatchPerformanceTracker:
             return
 
         # Group metrics by batch size
-        size_groups: Dict[int, List[BatchPerformanceMetrics]] = {}
+        size_groups: dict[int, list[BatchPerformanceMetrics]] = {}
         for metric in self.metrics_history:
             if metric.batch_size not in size_groups:
                 size_groups[metric.batch_size] = []
@@ -106,7 +106,7 @@ class BatchPerformanceTracker:
         """Get the current optimal batch size."""
         return self.optimal_batch_size
 
-    def get_performance_summary(self) -> Dict:
+    def get_performance_summary(self) -> dict:
         """Get summary of recent performance metrics."""
         if not self.metrics_history:
             return {"error": "No performance data available"}
@@ -141,7 +141,7 @@ class BatchMetrics:
     total_objects: int = 0
     successful_objects: int = 0
     failed_objects: int = 0
-    errors: Dict[str, int] = field(default_factory=dict)
+    errors: dict[str, int] = field(default_factory=dict)
 
     def record_batch_completion(self) -> None:
         """Record successful batch completion."""
@@ -168,7 +168,7 @@ class BatchMetrics:
         self.failed_objects += 1
         self.errors[error_type] = self.errors.get(error_type, 0) + 1
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get metrics summary.
 
         Returns:

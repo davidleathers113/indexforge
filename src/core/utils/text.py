@@ -5,7 +5,6 @@ chunking, cleaning, and normalization operations.
 """
 
 import re
-from typing import List, Tuple
 
 import numpy as np
 
@@ -31,7 +30,7 @@ def clean_text(text: str) -> str:
     return text
 
 
-def split_into_sentences(text: str) -> List[str]:
+def split_into_sentences(text: str) -> list[str]:
     """Split text into sentences.
 
     Args:
@@ -50,7 +49,7 @@ def chunk_text_by_sentences(
     min_chunk_size: int = 100,
     max_chunk_size: int = 1000,
     overlap: int = 50,
-) -> List[Tuple[str, Tuple[int, int]]]:
+) -> list[tuple[str, tuple[int, int]]]:
     """Split text into chunks by sentences.
 
     Args:
@@ -97,7 +96,7 @@ def chunk_text_by_sentences(
 
 def find_text_boundaries(
     text: str, pattern: str, window_size: int = 100
-) -> List[Tuple[int, int, float]]:
+) -> list[tuple[int, int, float]]:
     """Find text boundaries around pattern matches.
 
     Args:

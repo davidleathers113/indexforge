@@ -2,8 +2,6 @@
 
 import tracemalloc
 
-import pytest
-
 
 def pytest_configure(config):
     """Configure pytest with enhanced exception handling."""

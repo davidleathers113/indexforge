@@ -1,6 +1,5 @@
 """String parameter type implementation."""
 
-from typing import Optional, Union
 
 from src.pipeline.parameters.base import Parameter
 from src.pipeline.parameters.normalizers.type_coercion import TypeCoercionNormalizer
@@ -13,13 +12,13 @@ class StringParameter(Parameter):
     def __init__(
         self,
         name: str,
-        value: Union[str, bytes],
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
+        value: str | bytes,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ):
         super().__init__(name, value, required, allow_none, description)
         self.min_length = min_length
@@ -34,7 +33,7 @@ class StringParameter(Parameter):
         if self._value is not None:
             self.validator.validate(self._value, self.name)
 
-    def normalize(self) -> Optional[str]:
+    def normalize(self) -> str | None:
         """Normalize the string value."""
         if self._value is None:
             return None

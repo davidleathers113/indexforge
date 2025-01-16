@@ -1,6 +1,7 @@
 """Test basic network connectivity."""
 
-from typing import Any, Dict, Generator
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 
@@ -8,7 +9,7 @@ from ...utils.docker_test_utils import DockerTestUtils
 
 
 @pytest.fixture
-def docker_network(docker_client: Any) -> Generator[Dict[str, Any], None, None]:
+def docker_network(docker_client: Any) -> Generator[dict[str, Any], None, None]:
     """Create a dedicated test network."""
     network = docker_client.networks.create(
         "test-network",
@@ -37,7 +38,7 @@ def test_network_creation(docker_client: Any) -> None:
         network.remove()
 
 
-def test_container_network_connection(docker_client: Any, docker_network: Dict[str, Any]) -> None:
+def test_container_network_connection(docker_client: Any, docker_network: dict[str, Any]) -> None:
     """Test container can connect to network."""
     container = docker_client.containers.run(
         "test-image:latest",

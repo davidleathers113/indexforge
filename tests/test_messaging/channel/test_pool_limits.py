@@ -1,7 +1,6 @@
 """Tests for RabbitMQ channel pool limit scenarios."""
 
 import asyncio
-from typing import List
 
 import pytest
 
@@ -19,7 +18,7 @@ async def test_channel_pool_limits(connection_manager, mock_rabbitmq):
     """
     # Store original channel limit
     original_max_channels = rabbitmq_settings.max_channels_per_connection
-    channels: List[object] = []
+    channels: list[object] = []
 
     try:
         # Set max channels to 2 for this test

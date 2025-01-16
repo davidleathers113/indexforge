@@ -6,6 +6,7 @@ from .oauth_routes import router as oauth_router
 from .token_routes import router as token_router
 from .user_routes import router as user_router
 
+
 # Create main auth router
 router = APIRouter(prefix="/auth", tags=["auth"])
 

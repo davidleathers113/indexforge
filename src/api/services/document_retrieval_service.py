@@ -2,12 +2,12 @@
 
 import logging
 import mimetypes
-from typing import Dict, List, Optional
 
 from fastapi import HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from src.api.repositories.weaviate_repo import WeaviateRepository
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class DocumentRetrievalService:
         """
         self._repository = repository
 
-    async def list_documents(self, file_type: Optional[str], limit: int, offset: int) -> List[Dict]:
+    async def list_documents(self, file_type: str | None, limit: int, offset: int) -> list[dict]:
         """List indexed documents with optional filtering.
 
         Args:
@@ -36,7 +36,7 @@ class DocumentRetrievalService:
         """
         return await self._repository.list_documents(file_type, limit, offset)
 
-    async def get_document(self, document_id: str) -> Optional[Dict]:
+    async def get_document(self, document_id: str) -> dict | None:
         """Get a specific document by ID.
 
         Args:

@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass, field
 import logging
-from typing import Dict, List, Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -14,7 +13,7 @@ from .base import BaseState
 class LoggerState(BaseState):
     """Logger state management."""
 
-    messages: List[Dict] = field(default_factory=list)
+    messages: list[dict] = field(default_factory=list)
     log_level: int = logging.INFO
     log_format: str = "%(levelname)s - %(message)s"
     capture_output: bool = True
@@ -40,7 +39,7 @@ class LoggerState(BaseState):
             }
         )
 
-    def get_messages(self, level: Optional[int] = None) -> List[Dict]:
+    def get_messages(self, level: int | None = None) -> list[dict]:
         """Get filtered log messages."""
         if level is None:
             return self.messages.copy()

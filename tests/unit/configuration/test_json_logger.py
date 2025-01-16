@@ -12,6 +12,7 @@ def test_setup_json_logger(temp_log_file, cleanup_logger):
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0].formatter, JsonFormatter)
 
+
 def test_json_formatter():
     """Test JSON formatter output"""
     formatter = JsonFormatter()
@@ -22,6 +23,7 @@ def test_json_formatter():
     assert log_data['level'] == 'INFO'
     assert log_data['logger'] == 'test_logger'
     assert log_data['message'] == 'Test message'
+
 
 def test_json_formatter_with_exception():
     """Test JSON formatter with exception information"""

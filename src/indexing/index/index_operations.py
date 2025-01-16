@@ -48,7 +48,6 @@ Example:
 """
 
 import logging
-from typing import Dict, List, Optional
 
 import weaviate
 
@@ -116,7 +115,7 @@ class IndexOperations:
         client: weaviate.Client,
         class_name: str,
         batch_size: int,
-        cache_manager: Optional[CacheManager] = None,
+        cache_manager: CacheManager | None = None,
         test_mode: bool = False,
         schema_validator=None,
     ):
@@ -174,11 +173,11 @@ class IndexOperations:
         try:
             self.schema.ensure_schema()
         except Exception as e:
-            msg = f"Error initializing index: {str(e)}"
+            msg = f"Error initializing index: {e!s}"
             self.logger.error(msg)
             raise
 
-    def add_documents(self, documents: List[Dict], deduplicate: bool = True) -> List[str]:
+    def add_documents(self, documents: list[dict], deduplicate: bool = True) -> list[str]:
         """
         Add a batch of documents to the index.
 
@@ -223,11 +222,11 @@ class IndexOperations:
             self.initialize()  # Ensure schema exists
             return self.documents.add_documents(documents, deduplicate)
         except Exception as e:
-            msg = f"Error adding documents: {str(e)}"
+            msg = f"Error adding documents: {e!s}"
             self.logger.error(msg)
             raise
 
-    def delete_documents(self, doc_ids: List[str]) -> bool:
+    def delete_documents(self, doc_ids: list[str]) -> bool:
         """
         Delete multiple documents from the index by their IDs.
 
@@ -252,7 +251,7 @@ class IndexOperations:
         return self.documents.delete_documents(doc_ids)
 
     def update_document(
-        self, doc_id: str, updates: Dict, vector: Optional[List[float]] = None
+        self, doc_id: str, updates: dict, vector: list[float] | None = None
     ) -> bool:
         """
         Update a document's properties and optionally its vector.
@@ -287,11 +286,11 @@ class IndexOperations:
 
     def semantic_search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         min_score: float = 0.7,
-        additional_props: Optional[List[str]] = None,
-    ) -> List[SearchResult]:
+        additional_props: list[str] | None = None,
+    ) -> list[SearchResult]:
         """
         Perform semantic search using vector similarity.
 
@@ -328,11 +327,11 @@ class IndexOperations:
     def hybrid_search(
         self,
         text_query: str,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         alpha: float = 0.5,
-        additional_props: Optional[List[str]] = None,
-    ) -> List[SearchResult]:
+        additional_props: list[str] | None = None,
+    ) -> list[SearchResult]:
         """
         Perform hybrid search combining text and vector similarity.
 

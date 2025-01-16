@@ -1,7 +1,6 @@
 """String value validator implementation."""
 
 import re
-from typing import Optional
 
 from src.pipeline.errors import ValidationError
 from src.pipeline.parameters.validators.base import Validator
@@ -12,9 +11,9 @@ class StringValidator(Validator):
 
     def __init__(
         self,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
     ):
         self.min_length = min_length
         self.max_length = max_length
@@ -40,7 +39,7 @@ class StringValidator(Validator):
             try:
                 value = value.decode("utf-8")
             except UnicodeDecodeError as e:
-                raise ValidationError(f"Invalid UTF-8 encoding in {param_name}: {str(e)}")
+                raise ValidationError(f"Invalid UTF-8 encoding in {param_name}: {e!s}")
 
         value = value.strip()
 

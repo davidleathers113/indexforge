@@ -35,6 +35,7 @@ def test_valid_log_entry(json_logger: logging.Logger, temp_log_file: str) -> Non
     verify_log_structure(entry, required_fields={'message', 'thread_id'}, optional_fields={'timestamp'})
     validate_log_entry(entry, required_fields={'message', 'thread_id'}, field_types={'message': str, 'thread_id': int, 'timestamp': int})
 
+
 def test_field_presence_validation(json_logger: logging.Logger) -> None:
     """Test validation of required fields.
 
@@ -53,6 +54,7 @@ def test_field_presence_validation(json_logger: logging.Logger) -> None:
         validate_log_entry(entry, required_fields, {})
     assert 'thread_id' in str(exc_info.value)
     assert 'level' in str(exc_info.value)
+
 
 def test_type_validation(json_logger: logging.Logger) -> None:
     """Test validation of field types.
@@ -73,6 +75,7 @@ def test_type_validation(json_logger: logging.Logger) -> None:
         validate_log_entry(entry, set(), field_types)
     assert 'message' in str(exc_info.value)
 
+
 def test_json_structure(write_test_logs: Any, temp_log_file: str) -> None:
     """Test validation of JSON log file structure.
 
@@ -83,8 +86,8 @@ def test_json_structure(write_test_logs: Any, temp_log_file: str) -> None:
     """
     entries = [create_test_log_entry('Message 1', 1, level='INFO'), create_test_log_entry('Message 2', 2, level='ERROR'), create_test_log_entry('Message 3', 3, level='WARNING')]
     write_test_logs(entries)
-    with open(temp_log_file, 'r', encoding='utf-8') as f:
+    with open(temp_log_file, encoding='utf-8') as f:
         validated = validate_log_file(f.readlines(), required_fields={'message', 'thread_id', 'level'}, field_types={'message': str, 'thread_id': int, 'level': str})
     assert len(validated) == len(entries)
-    for entry, original in zip(validated, entries):
+    for entry, original in zip(validated, entries, strict=False):
         verify_log_structure(entry, required_fields={'message', 'thread_id', 'level'})

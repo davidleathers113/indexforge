@@ -6,7 +6,6 @@ into direct, indirect, and structural types, with rich metadata for each type.
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Dict, Tuple
 from uuid import UUID
 
 from .citation_detector import CitationType
@@ -27,8 +26,8 @@ class ReferenceClassification:
 
     category: ReferenceCategory
     confidence: float  # Classification confidence score (0-1)
-    evidence: Dict  # Supporting evidence for classification
-    metadata: Dict  # Additional metadata about the reference
+    evidence: dict  # Supporting evidence for classification
+    metadata: dict  # Additional metadata about the reference
 
 
 class ReferenceClassifier:
@@ -83,7 +82,7 @@ class ReferenceClassifier:
         if (source_id, target_id) not in self.ref_manager._references:
             raise ValueError(f"No reference exists between {source_id} and {target_id}")
 
-        ref = self.ref_manager._references[(source_id, target_id)]
+        ref = self.ref_manager._references[source_id, target_id]
         category = self.type_categories[ref_type]
 
         # Gather evidence based on reference type and metadata
@@ -100,7 +99,7 @@ class ReferenceClassifier:
             metadata=metadata,
         )
 
-    def _gather_classification_evidence(self, ref) -> Dict:
+    def _gather_classification_evidence(self, ref) -> dict:
         """Gather evidence to support reference classification."""
         evidence = {
             "ref_type": ref.ref_type.value,
@@ -133,7 +132,7 @@ class ReferenceClassifier:
 
         return evidence
 
-    def _calculate_confidence(self, evidence: Dict) -> float:
+    def _calculate_confidence(self, evidence: dict) -> float:
         """Calculate confidence score for classification."""
         confidence = 0.5  # Base confidence
 
@@ -152,7 +151,7 @@ class ReferenceClassifier:
 
         return min(1.0, confidence)  # Cap at 1.0
 
-    def _enrich_metadata(self, ref, category: ReferenceCategory, evidence: Dict) -> Dict:
+    def _enrich_metadata(self, ref, category: ReferenceCategory, evidence: dict) -> dict:
         """Enrich reference metadata with classification details."""
         metadata = ref.metadata.copy() if ref.metadata else {}
 
@@ -178,7 +177,7 @@ class ReferenceClassifier:
 
         return metadata
 
-    def classify_all_references(self) -> Dict[Tuple[UUID, UUID], ReferenceClassification]:
+    def classify_all_references(self) -> dict[tuple[UUID, UUID], ReferenceClassification]:
         """Classify all references in the reference manager.
 
         Returns:
@@ -188,7 +187,7 @@ class ReferenceClassifier:
         for (source_id, target_id), ref in self.ref_manager._references.items():
             try:
                 classification = self.classify_reference(source_id, target_id, ref.ref_type)
-                classifications[(source_id, target_id)] = classification
+                classifications[source_id, target_id] = classification
             except ValueError:
                 continue  # Skip invalid references
 
@@ -207,7 +206,7 @@ class ReferenceClassifier:
         if (source_id, target_id) not in self.ref_manager._references:
             raise ValueError(f"No reference exists between {source_id} and {target_id}")
 
-        ref = self.ref_manager._references[(source_id, target_id)]
+        ref = self.ref_manager._references[source_id, target_id]
         classification = self.classify_reference(source_id, target_id, ref.ref_type)
 
         # Update reference metadata
@@ -215,5 +214,5 @@ class ReferenceClassifier:
 
         # Update reverse reference if bidirectional
         if ref.bidirectional and (target_id, source_id) in self.ref_manager._references:
-            reverse_ref = self.ref_manager._references[(target_id, source_id)]
+            reverse_ref = self.ref_manager._references[target_id, source_id]
             reverse_ref.metadata.update(classification.metadata)

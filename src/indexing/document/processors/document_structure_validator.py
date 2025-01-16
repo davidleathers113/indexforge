@@ -5,7 +5,7 @@ meet required structure, content, and metadata requirements before processing.
 """
 
 import time
-from typing import Any, Dict, Optional, Set
+from typing import Any
 
 from src.api.monitoring.collectors.document_metrics import DocumentMetrics
 from src.api.monitoring.tracing import DocumentTracer
@@ -19,7 +19,7 @@ class DocumentStructureValidator(BaseDocumentProcessor):
         self,
         metrics: DocumentMetrics,
         tracer: DocumentTracer,
-        required_fields: Optional[Set[str]] = None,
+        required_fields: set[str] | None = None,
         content_min_length: int = 10,
         max_metadata_keys: int = 20,
     ):
@@ -37,7 +37,7 @@ class DocumentStructureValidator(BaseDocumentProcessor):
         self.content_min_length = content_min_length
         self.max_metadata_keys = max_metadata_keys
 
-    def process(self, document: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+    def process(self, document: dict[str, Any], **kwargs) -> dict[str, Any]:
         """Validate document structure and content.
 
         Args:
@@ -95,7 +95,7 @@ class DocumentStructureValidator(BaseDocumentProcessor):
             self._record_processing_error(document_id, e)
             raise
 
-    def _validate_required_fields(self, document: Dict[str, Any]) -> None:
+    def _validate_required_fields(self, document: dict[str, Any]) -> None:
         """Validate presence of required fields.
 
         Args:
@@ -108,7 +108,7 @@ class DocumentStructureValidator(BaseDocumentProcessor):
         if missing_fields:
             raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
 
-    def _validate_content(self, document: Dict[str, Any]) -> None:
+    def _validate_content(self, document: dict[str, Any]) -> None:
         """Validate document content.
 
         Args:
@@ -127,7 +127,7 @@ class DocumentStructureValidator(BaseDocumentProcessor):
                 f"({self.content_min_length})"
             )
 
-    def _validate_metadata(self, document: Dict[str, Any]) -> None:
+    def _validate_metadata(self, document: dict[str, Any]) -> None:
         """Validate document metadata.
 
         Args:

@@ -52,12 +52,12 @@ Example:
 """
 
 import logging
-from typing import Dict, List, Optional
 
 from src.indexing.search import SearchResult
 
 from .index_config import IndexConfig, IndexInitializer
 from .index_operations import IndexOperations
+
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -217,7 +217,7 @@ class VectorIndex:
         """
         return self._initialized
 
-    def get_schema(self) -> Optional[Dict]:
+    def get_schema(self) -> dict | None:
         """
         Get the current schema configuration.
 
@@ -238,7 +238,7 @@ class VectorIndex:
             return None
         return self.operations.schema.validator.get_schema()
 
-    def add_documents(self, documents: List[Dict], deduplicate: bool = True) -> List[str]:
+    def add_documents(self, documents: list[dict], deduplicate: bool = True) -> list[str]:
         """
         Add multiple documents to the vector index.
 
@@ -284,7 +284,7 @@ class VectorIndex:
         logger.debug(f"Added documents with IDs: {doc_ids}")
         return doc_ids
 
-    def delete_documents(self, doc_ids: List[str]) -> bool:
+    def delete_documents(self, doc_ids: list[str]) -> bool:
         """
         Delete multiple documents from the index.
 
@@ -312,7 +312,7 @@ class VectorIndex:
         return success
 
     def update_document(
-        self, doc_id: str, updates: Dict, vector: Optional[List[float]] = None
+        self, doc_id: str, updates: dict, vector: list[float] | None = None
     ) -> bool:
         """
         Update a document's properties and optionally its vector.
@@ -351,11 +351,11 @@ class VectorIndex:
 
     def semantic_search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         min_score: float = 0.7,
-        additional_props: Optional[List[str]] = None,
-    ) -> List[SearchResult]:
+        additional_props: list[str] | None = None,
+    ) -> list[SearchResult]:
         """
         Perform semantic search using vector similarity.
 
@@ -392,11 +392,11 @@ class VectorIndex:
     def hybrid_search(
         self,
         text_query: str,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         alpha: float = 0.5,
-        additional_props: Optional[List[str]] = None,
-    ) -> List[SearchResult]:
+        additional_props: list[str] | None = None,
+    ) -> list[SearchResult]:
         """
         Perform hybrid search combining text and vector similarity.
 
@@ -470,5 +470,5 @@ class VectorIndex:
 
             logger.info("VectorIndex resources cleaned up")
         except Exception as e:
-            logger.error(f"Error during cleanup: {str(e)}")
+            logger.error(f"Error during cleanup: {e!s}")
             raise

@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass
 import logging
-from typing import Dict, Optional
 from unittest.mock import MagicMock
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class SchemaState(BaseState):
     """Schema validator state."""
 
-    schema: Optional[Dict] = None
+    schema: dict | None = None
     schema_version_valid: bool = True
 
     def reset(self):
@@ -60,7 +60,7 @@ def mock_schema_validator():
             return True
 
         except Exception as e:
-            state.add_error(f"Error validating schema: {str(e)}")
+            state.add_error(f"Error validating schema: {e!s}")
             return False
 
     def mock_check_schema_version():

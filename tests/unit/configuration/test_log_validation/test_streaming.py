@@ -8,7 +8,8 @@ Tests:
 - Partial line handling
 """
 
-from typing import Any, Callable, Dict, List
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -24,7 +25,7 @@ def test_log_validation():
 
 
 def test_large_file_streaming(
-    write_test_logs: Callable[[List[Dict[str, Any]]], None], temp_log_file: str
+    write_test_logs: Callable[[list[dict[str, Any]]], None], temp_log_file: str
 ) -> None:
     """Test streaming validation with a large file.
 
@@ -46,7 +47,7 @@ def test_large_file_streaming(
 
 
 def test_partial_line_handling(
-    write_test_logs: Callable[[List[Dict[str, Any]]], None], temp_log_file: str
+    write_test_logs: Callable[[list[dict[str, Any]]], None], temp_log_file: str
 ) -> None:
     """Test handling of partial lines in streaming validation.
 
@@ -68,7 +69,7 @@ def test_partial_line_handling(
 
 
 def test_size_limit_validation(
-    write_test_logs: Callable[[List[Dict[str, Any]]], None], temp_log_file: str
+    write_test_logs: Callable[[list[dict[str, Any]]], None], temp_log_file: str
 ) -> None:
     """Test validation with size limits.
 
@@ -92,7 +93,7 @@ def test_size_limit_validation(
 
 
 def test_streaming_memory_usage(
-    write_test_logs: Callable[[List[Dict[str, Any]]], None], temp_log_file: str
+    write_test_logs: Callable[[list[dict[str, Any]]], None], temp_log_file: str
 ) -> None:
     """Test memory usage during streaming validation.
 
@@ -115,7 +116,7 @@ def test_streaming_memory_usage(
 
 
 def test_streaming_error_location(
-    write_test_logs: Callable[[List[Dict[str, Any]]], None], temp_log_file: str
+    write_test_logs: Callable[[list[dict[str, Any]]], None], temp_log_file: str
 ) -> None:
     """Test error location reporting in streaming validation.
 
@@ -143,7 +144,7 @@ def test_streaming_error_location(
 
 
 def test_streaming_validation(
-    write_test_logs: Callable[[List[Dict[str, Any]]], None], temp_log_file: str
+    write_test_logs: Callable[[list[dict[str, Any]]], None], temp_log_file: str
 ) -> None:
     """Test basic streaming validation functionality.
 

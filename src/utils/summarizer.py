@@ -59,13 +59,13 @@ Note:
 
 from functools import wraps
 import logging
-from typing import Dict, List
 
 from transformers import pipeline
 
 from src.models.settings import SummarizerConfig
 from src.utils.cache_manager import CacheManager, cached_with_retry
 from src.utils.text_processing import chunk_text_by_words, clean_text, truncate_text
+
 
 logger = logging.getLogger(__name__)
 
@@ -144,10 +144,10 @@ class DocumentSummarizer:
 
             return summary.strip()
         except Exception as e:
-            self.logger.error(f"Error summarizing chunk: {str(e)}")
+            self.logger.error(f"Error summarizing chunk: {e!s}")
             raise  # Re-raise to be handled by caller
 
-    def _combine_summaries(self, summaries: List[str], config: SummarizerConfig) -> str:
+    def _combine_summaries(self, summaries: list[str], config: SummarizerConfig) -> str:
         """Combine multiple summaries into one."""
         if not summaries:
             return ""
@@ -173,7 +173,7 @@ class DocumentSummarizer:
         # Ensure the final summary respects max_length
         return truncate_text(final_summary, config.max_length, use_tokens=False)
 
-    def generate_summary(self, text: str, config: SummarizerConfig = None) -> Dict:
+    def generate_summary(self, text: str, config: SummarizerConfig = None) -> dict:
         """Generate a summary for the given text.
 
         Args:
@@ -200,7 +200,7 @@ class DocumentSummarizer:
                     summary = self._summarize_chunk(chunk, config)
                     chunk_summaries.append(summary)
                 except Exception as e:
-                    self.logger.error(f"Error processing chunk: {str(e)}")
+                    self.logger.error(f"Error processing chunk: {e!s}")
                     # Continue with other chunks even if one fails
                     continue
 
@@ -212,14 +212,14 @@ class DocumentSummarizer:
             return {"status": "success", "summary": final_summary}
 
         except Exception as e:
-            self.logger.error(f"Error generating summary: {str(e)}")
+            self.logger.error(f"Error generating summary: {e!s}")
             return {"status": "error", "error": str(e)}
 
     def process_documents(
         self,
-        documents: List[Dict],
+        documents: list[dict],
         config: SummarizerConfig = None,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Process a batch of documents.
 
         Args:
@@ -266,7 +266,7 @@ class DocumentSummarizer:
                 processed_docs.append(processed_doc)
 
             except Exception as e:
-                self.logger.error(f"Error processing document: {str(e)}")
+                self.logger.error(f"Error processing document: {e!s}")
                 # Add document with error info
                 processed_doc = doc.copy()
                 processed_doc["content"]["summary"] = None

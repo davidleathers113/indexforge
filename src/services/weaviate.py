@@ -1,22 +1,12 @@
-"""Weaviate service module.
+"""Weaviate service module with advanced batch operations.
 
 This module provides a high-performance, fault-tolerant interface for Weaviate vector operations.
 It implements advanced connection management, graceful degradation, and comprehensive observability.
 """
 
-from contextlib import asynccontextmanager
+from collections.abc import Callable
 from functools import wraps
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    AsyncGenerator,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Protocol,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, TypeVar
 
 import backoff
 import weaviate
@@ -24,6 +14,7 @@ from weaviate.client import WeaviateClient as BaseWeaviateClient
 from weaviate.exceptions import WeaviateConnectionError, WeaviateRequestError, WeaviateTimeout
 
 from src.core.interfaces import VectorService
+from src.core.metrics import ServiceMetricsCollector
 from src.services.base import (
     BaseService,
     ServiceInitializationError,
@@ -39,10 +30,7 @@ WeaviateResponse = TypeVar("WeaviateResponse")
 
 
 def require_initialized(func: Callable[..., T]) -> Callable[..., T]:
-    """Decorator to ensure service is initialized before operation.
-
-    Provides clean error handling and state validation.
-    """
+    """Decorator to ensure service is initialized before operation."""
 
     @wraps(func)
     async def wrapper(self: "WeaviateClient", *args: Any, **kwargs: Any) -> T:
@@ -68,58 +56,208 @@ class WeaviateOperationContext(Protocol):
 
 
 class WeaviateClient(VectorService, BaseService):
-    """High-performance Weaviate client for vector operations.
-
-    Features:
-    - Automatic connection management and recovery
-    - Comprehensive error handling with backoff strategies
-    - Rich observability and health monitoring
-    - Thread-safe operations with context managers
-    - Graceful degradation under load
-    """
+    """High-performance Weaviate client for vector operations."""
 
     def __init__(self, settings: "Settings") -> None:
-        """Initialize Weaviate client with advanced configuration.
-
-        Args:
-            settings: Application settings containing Weaviate configuration
-        """
+        """Initialize Weaviate client with advanced configuration."""
         BaseService.__init__(self)
         VectorService.__init__(self, settings)
         self._settings = settings
         self._client: Optional[BaseWeaviateClient] = None
         self._health_check_failures = 0
         self._MAX_HEALTH_CHECK_FAILURES = 3
+        self._batch_size = 100
+        self._vector_cache: Dict[str, List[float]] = {}
+        self._metrics = ServiceMetricsCollector(
+            service_name="weaviate",
+            max_history=5000,
+            memory_threshold_mb=500,
+        )
 
-    @asynccontextmanager
-    async def operation_context(self) -> AsyncGenerator[BaseWeaviateClient, None]:
-        """Context manager for safe Weaviate operations.
+    @require_initialized
+    async def batch_add_objects(
+        self,
+        class_name: str,
+        objects: List[Dict[str, Any]],
+        vectors: Optional[List[List[float]]] = None,
+        batch_size: Optional[int] = None,
+    ) -> List[str]:
+        """Add multiple objects to Weaviate efficiently.
 
-        Provides automatic error handling and connection management.
+        Args:
+            class_name: Weaviate class name
+            objects: List of objects to add
+            vectors: Optional list of vector embeddings
+            batch_size: Optional custom batch size
 
-        Yields:
-            BaseWeaviateClient: Configured Weaviate client
+        Returns:
+            List[str]: List of created object UUIDs
 
         Raises:
             ServiceNotInitializedError: If service is not initialized
-            ServiceStateError: If client is in an invalid state
+            ServiceStateError: If batch operation fails
         """
-        if not self.is_initialized or not self._client:
-            raise ServiceNotInitializedError("Weaviate service is not initialized")
+        if not objects:
+            return []
 
-        try:
-            yield self._client
-        except WeaviateConnectionError as e:
-            self._health_check_failures += 1
-            if self._health_check_failures >= self._MAX_HEALTH_CHECK_FAILURES:
-                self._initialized = False
-            raise ServiceStateError(f"Connection error during operation: {str(e)}") from e
-        except WeaviateTimeout as e:
-            raise ServiceStateError(f"Operation timed out: {str(e)}") from e
-        except WeaviateRequestError as e:
-            raise ServiceStateError(f"Invalid request: {str(e)}") from e
-        except Exception as e:
-            raise ServiceStateError(f"Unexpected error during operation: {str(e)}") from e
+        batch_size = batch_size or self._batch_size
+        uuids: List[str] = []
+
+        with self._metrics.measure_operation(
+            "batch_add_objects",
+            {
+                "class_name": class_name,
+                "object_count": len(objects),
+                "batch_size": batch_size,
+            },
+        ):
+            async with self.operation_context() as client:
+                try:
+                    # Process in batches
+                    for i in range(0, len(objects), batch_size):
+                        batch_objects = objects[i : i + batch_size]
+                        batch_vectors = vectors[i : i + batch_size] if vectors else None
+
+                        # Create batch
+                        with client.batch as batch:
+                            for j, obj in enumerate(batch_objects):
+                                vector = batch_vectors[j] if batch_vectors else None
+                                uuid = str(
+                                    batch.add_data_object(
+                                        data_object=obj,
+                                        class_name=class_name,
+                                        vector=vector,
+                                    )
+                                )
+                                uuids.append(uuid)
+
+                    return uuids
+
+                except WeaviateRequestError as e:
+                    raise ServiceStateError(f"Batch operation failed: {e!s}") from e
+
+    @require_initialized
+    async def search_vectors(
+        self,
+        class_name: str,
+        vector: List[float],
+        limit: int = 10,
+        distance_threshold: float = 0.8,
+        with_payload: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """Search for similar vectors with optimized performance.
+
+        Args:
+            class_name: Weaviate class name
+            vector: Query vector
+            limit: Maximum number of results
+            distance_threshold: Similarity threshold
+            with_payload: Whether to include object data
+
+        Returns:
+            List[Dict[str, Any]]: Search results
+
+        Raises:
+            ServiceNotInitializedError: If service is not initialized
+            ServiceStateError: If search operation fails
+        """
+        with self._metrics.measure_operation(
+            "search_vectors",
+            {
+                "class_name": class_name,
+                "limit": limit,
+                "distance_threshold": distance_threshold,
+                "with_payload": with_payload,
+            },
+        ):
+            async with self.operation_context() as client:
+                try:
+                    # Cache query vector for potential reuse
+                    query_id = str(hash(str(vector)))
+                    self._vector_cache[query_id] = vector
+
+                    # Build optimized query
+                    query = (
+                        client.query.get(class_name)
+                        .with_near_vector({"vector": vector, "distance": distance_threshold})
+                        .with_limit(limit)
+                    )
+
+                    if with_payload:
+                        query = query.with_additional(["payload"])
+
+                    result = query.do()
+
+                    # Clean up cache periodically
+                    if len(self._vector_cache) > 1000:
+                        self._vector_cache.clear()
+
+                    return result.get("data", {}).get("Get", {}).get(class_name, [])
+
+                except WeaviateRequestError as e:
+                    raise ServiceStateError(f"Vector search failed: {e!s}") from e
+
+    @require_initialized
+    async def delete_batch(
+        self, class_name: str, uuids: List[str], batch_size: Optional[int] = None
+    ) -> None:
+        """Delete multiple objects efficiently.
+
+        Args:
+            class_name: Weaviate class name
+            uuids: List of UUIDs to delete
+            batch_size: Optional custom batch size
+
+        Raises:
+            ServiceNotInitializedError: If service is not initialized
+            ServiceStateError: If batch deletion fails
+        """
+        if not uuids:
+            return
+
+        batch_size = batch_size or self._batch_size
+
+        with self._metrics.measure_operation(
+            "delete_batch",
+            {
+                "class_name": class_name,
+                "uuid_count": len(uuids),
+                "batch_size": batch_size,
+            },
+        ):
+            async with self.operation_context() as client:
+                try:
+                    # Process deletions in batches
+                    for i in range(0, len(uuids), batch_size):
+                        batch_uuids = uuids[i : i + batch_size]
+
+                        with client.batch as batch:
+                            for uuid in batch_uuids:
+                                batch.delete_objects(
+                                    class_name=class_name,
+                                    where={
+                                        "path": ["id"],
+                                        "operator": "Equal",
+                                        "valueString": uuid,
+                                    },
+                                )
+
+                except WeaviateRequestError as e:
+                    raise ServiceStateError(f"Batch deletion failed: {e!s}") from e
+
+    async def cleanup(self) -> None:
+        """Clean up Weaviate resources with graceful shutdown."""
+        with self._metrics.measure_operation("cleanup"):
+            if self._client and hasattr(self._client, "close"):
+                try:
+                    self._client.close()
+                except Exception as e:
+                    self.add_metadata("cleanup_error", str(e))
+            self._client = None
+            self._initialized = False
+            self._health_check_failures = 0
+            self._vector_cache.clear()
+            self._metrics.reset()
 
     @backoff.on_exception(
         backoff.expo, (WeaviateConnectionError, WeaviateTimeout), max_tries=3, max_time=30
@@ -136,45 +274,32 @@ class WeaviateClient(VectorService, BaseService):
         Raises:
             ServiceInitializationError: If initialization fails after retries
         """
-        try:
-            # Create client with minimal configuration
-            self._client = weaviate.Client()
-
-            # Configure client after creation
-            self._client._connection.url = str(self._settings.weaviate_url)
-            if self._settings.weaviate_api_key:
-                self._client._connection.api_key = self._settings.weaviate_api_key
-
-            # Verify connection and schema access
-            await self.health_check()
-
-            # Update service state
-            self._initialized = True
-            self._health_check_failures = 0
-
-            # Record initialization metadata
-            self.add_metadata("weaviate_url", str(self._settings.weaviate_url))
-            self.add_metadata("has_api_key", bool(self._settings.weaviate_api_key))
-            self.add_metadata("initialization_time", self.get_current_time())
-
-        except Exception as e:
-            raise ServiceInitializationError(
-                f"Failed to initialize Weaviate connection: {str(e)}"
-            ) from e
-
-    async def cleanup(self) -> None:
-        """Clean up Weaviate resources with graceful shutdown.
-
-        Ensures proper resource cleanup and connection termination.
-        """
-        if self._client and hasattr(self._client, "close"):
+        with self._metrics.measure_operation("initialize"):
             try:
-                self._client.close()
+                # Create client with minimal configuration
+                self._client = weaviate.Client()
+
+                # Configure client after creation
+                self._client._connection.url = str(self._settings.weaviate_url)
+                if self._settings.weaviate_api_key:
+                    self._client._connection.api_key = self._settings.weaviate_api_key
+
+                # Verify connection and schema access
+                await self.health_check()
+
+                # Update service state
+                self._initialized = True
+                self._health_check_failures = 0
+
+                # Record initialization metadata
+                self.add_metadata("weaviate_url", str(self._settings.weaviate_url))
+                self.add_metadata("has_api_key", bool(self._settings.weaviate_api_key))
+                self.add_metadata("initialization_time", self.get_current_time())
+
             except Exception as e:
-                self.add_metadata("cleanup_error", str(e))
-        self._client = None
-        self._initialized = False
-        self._health_check_failures = 0
+                raise ServiceInitializationError(
+                    f"Failed to initialize Weaviate connection: {e!s}"
+                ) from e
 
     @backoff.on_exception(backoff.expo, WeaviateConnectionError, max_tries=2, max_time=10)
     async def health_check(self) -> bool:
@@ -183,24 +308,25 @@ class WeaviateClient(VectorService, BaseService):
         Returns:
             bool: True if Weaviate is healthy, False otherwise
         """
-        try:
-            if not self._client:
+        with self._metrics.measure_operation("health_check"):
+            try:
+                if not self._client:
+                    return False
+
+                # Verify schema access and basic operations
+                self._client.schema.get()
+
+                # Reset failure counter on successful check
+                self._health_check_failures = 0
+                return True
+
+            except Exception:
+                self._health_check_failures += 1
                 return False
-
-            # Verify schema access and basic operations
-            self._client.schema.get()
-
-            # Reset failure counter on successful check
-            self._health_check_failures = 0
-            return True
-
-        except Exception:
-            self._health_check_failures += 1
-            return False
 
     @require_initialized
     async def add_object(
-        self, class_name: str, data_object: Dict[str, Any], vector: Optional[List[float]] = None
+        self, class_name: str, data_object: dict[str, Any], vector: list[float] | None = None
     ) -> str:
         """Add object to Weaviate with advanced error handling.
 
@@ -222,10 +348,10 @@ class WeaviateClient(VectorService, BaseService):
                     client.data.creator().with_vector(vector).with_payload(data_object).create()
                 )
             except WeaviateRequestError as e:
-                raise ServiceStateError(f"Failed to add object: {str(e)}") from e
+                raise ServiceStateError(f"Failed to add object: {e!s}") from e
 
     @require_initialized
-    async def get_object(self, class_name: str, uuid: str) -> Optional[Dict[str, Any]]:
+    async def get_object(self, class_name: str, uuid: str) -> dict[str, Any] | None:
         """Get object from Weaviate with advanced error handling.
 
         Args:
@@ -262,4 +388,20 @@ class WeaviateClient(VectorService, BaseService):
             try:
                 client.data.delete_by_id(uuid=uuid).do()
             except WeaviateRequestError as e:
-                raise ServiceStateError(f"Failed to delete object: {str(e)}") from e
+                raise ServiceStateError(f"Failed to delete object: {e!s}") from e
+
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get service metrics.
+
+        Returns:
+            Dict[str, Any]: Current service metrics
+        """
+        return self._metrics.get_current_metrics()
+
+    def get_health(self) -> Dict[str, Any]:
+        """Get service health status.
+
+        Returns:
+            Dict[str, Any]: Current health status
+        """
+        return self._metrics.check_health()

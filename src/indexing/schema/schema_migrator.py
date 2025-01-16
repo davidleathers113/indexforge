@@ -128,7 +128,7 @@ class SchemaMigrator:
             else:
                 self.logger.info("Schema is up to date")
         except Exception as e:
-            self.logger.error(f"Error ensuring schema: {str(e)}", exc_info=True)
+            self.logger.error(f"Error ensuring schema: {e!s}", exc_info=True)
             raise
 
     def _create_schema(self) -> None:
@@ -159,7 +159,7 @@ class SchemaMigrator:
             self.client.schema.create_class(schema)
             self.logger.info("Schema created successfully")
         except Exception as e:
-            self.logger.error(f"Error creating schema: {str(e)}", exc_info=True)
+            self.logger.error(f"Error creating schema: {e!s}", exc_info=True)
             raise
 
     def _migrate_schema(self) -> None:
@@ -197,5 +197,5 @@ class SchemaMigrator:
             self.client.schema.create_class(schema)
             self.logger.info("Schema migration completed successfully")
         except Exception as e:
-            self.logger.error(f"Error migrating schema: {str(e)}", exc_info=True)
+            self.logger.error(f"Error migrating schema: {e!s}", exc_info=True)
             raise

@@ -6,7 +6,6 @@ relationships and topic groupings.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 from .base import Chunk, ChunkingConfig
@@ -19,7 +18,7 @@ class EnrichedChunkingConfig:
     """Configuration for enriched chunking with semantic analysis."""
 
     chunking_config: ChunkingConfig
-    semantic_config: Optional[SemanticConfig] = None
+    semantic_config: SemanticConfig | None = None
     enable_topic_clustering: bool = True
     min_cluster_size: int = 3
     max_topics: int = 10
@@ -46,7 +45,7 @@ class EnrichedChunker:
         else:
             self.semantic_processor = None
 
-    def process_text(self, text: str) -> List[Dict]:
+    def process_text(self, text: str) -> list[dict]:
         """Process text into chunks with semantic enrichment.
 
         Args:
@@ -103,7 +102,7 @@ class EnrichedChunker:
 
         return enriched_chunks
 
-    def batch_process_texts(self, texts: List[str]) -> List[List[Dict]]:
+    def batch_process_texts(self, texts: list[str]) -> list[list[dict]]:
         """Process multiple texts in batch, maintaining relationships across all chunks.
 
         Args:
@@ -147,8 +146,8 @@ class EnrichedChunker:
         ]
 
     def _enrich_chunk(
-        self, chunk: "Chunk", topics: Dict[str, Set[UUID]], all_chunk_ids: Set[UUID]
-    ) -> Dict:
+        self, chunk: "Chunk", topics: dict[str, set[UUID]], all_chunk_ids: set[UUID]
+    ) -> dict:
         """Enrich a single chunk with semantic metadata.
 
         Args:

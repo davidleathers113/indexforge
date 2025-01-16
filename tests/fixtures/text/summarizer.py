@@ -2,11 +2,11 @@
 
 from dataclasses import dataclass, field
 import logging
-from typing import Dict, List, Optional
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class SummarizerState(BaseState):
     max_length: int = 130
     min_length: int = 30
     error_mode: bool = False
-    summaries: List[Dict] = field(default_factory=list)
+    summaries: list[dict] = field(default_factory=list)
 
     def reset(self):
         """Reset state to defaults."""
@@ -36,7 +36,7 @@ class SummarizerState(BaseState):
             }
         )
 
-    def get_last_summary(self) -> Optional[Dict]:
+    def get_last_summary(self) -> dict | None:
         """Get the most recent summary."""
         return self.summaries[-1] if self.summaries else None
 

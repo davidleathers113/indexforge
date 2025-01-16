@@ -48,10 +48,11 @@ from .schema_migrator import SchemaMigrator
 from .schema_validator import SchemaValidator
 from .validators import validate_document_fields, validate_embedding
 
+
 __all__ = [
     "SchemaDefinition",
-    "SchemaValidator",
     "SchemaMigrator",
+    "SchemaValidator",
     "validate_document_fields",
     "validate_embedding",
 ]

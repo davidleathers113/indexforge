@@ -7,9 +7,8 @@ ChunkReference class for storing reference metadata.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Dict, Optional
 
 
 class ReferenceType(Enum):
@@ -55,12 +54,12 @@ class ChunkReference:
     source_id: str
     target_id: str
     ref_type: ReferenceType
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    similarity_score: Optional[float] = None
-    topic_id: Optional[int] = None
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    similarity_score: float | None = None
+    topic_id: int | None = None
 
     @property
-    def metadata(self) -> Dict:
+    def metadata(self) -> dict:
         """Get reference metadata."""
         meta = {
             "timestamp": self.timestamp.isoformat(),

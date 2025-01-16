@@ -14,6 +14,7 @@ def mock_encoding():
     mock.decode.side_effect = lambda tokens: ' '.join(['word'] * (len(tokens) // 2))
     return mock
 
+
 @pytest.fixture
 def mock_tiktoken(mock_encoding):
     """Create a mock tiktoken module."""
@@ -22,6 +23,7 @@ def mock_tiktoken(mock_encoding):
         mock_tiktoken.get_encoding.return_value = mock_encoding
         yield mock_tiktoken
 
+
 def test_truncate_text(mock_tiktoken):
     """Test text truncation by token count."""
     text = 'This is a long text that needs truncation'
@@ -29,9 +31,11 @@ def test_truncate_text(mock_tiktoken):
     assert len(truncated.split()) == 2
     assert isinstance(truncated, str)
 
+
 def test_truncate_text_empty(mock_tiktoken):
     """Test truncating empty text."""
     assert truncate_text('', max_length=10, use_tokens=True) == ''
+
 
 def test_truncate_text_no_truncation_needed(mock_tiktoken):
     """Test truncation when text is already short enough."""

@@ -5,7 +5,6 @@ addition, deletion, and updates. It integrates with Weaviate for vector storage 
 supports batch operations, caching, and document deduplication.
 """
 
-from typing import Dict, List, Optional
 
 import weaviate
 
@@ -43,7 +42,7 @@ class DocumentStorage:
         client: weaviate.Client,
         class_name: str,
         batch_size: int = 100,
-        cache_manager: Optional[CacheManager] = None,
+        cache_manager: CacheManager | None = None,
         test_mode: bool = False,
     ):
         """Initialize document storage manager.
@@ -91,7 +90,7 @@ class DocumentStorage:
         self.deletion = DocumentDeletion(client, class_name, cache_manager, test_mode=test_mode)
         self.update = DocumentUpdate(client, class_name, self.processor, cache_manager)
 
-    def add_documents(self, documents: List[Dict], deduplicate: bool = True) -> List[str]:
+    def add_documents(self, documents: list[dict], deduplicate: bool = True) -> list[str]:
         """Add multiple documents to storage.
 
         Processes and adds a batch of documents to the storage system, with optional
@@ -121,7 +120,7 @@ class DocumentStorage:
         """
         return self.addition.add_documents(documents, deduplicate)
 
-    def delete_documents(self, doc_ids: List[str]) -> bool:
+    def delete_documents(self, doc_ids: list[str]) -> bool:
         """Delete multiple documents from storage.
 
         Removes specified documents from the storage system and updates
@@ -144,7 +143,7 @@ class DocumentStorage:
         return self.deletion.delete_documents(doc_ids)
 
     def update_document(
-        self, doc_id: str, updates: Dict, vector: Optional[List[float]] = None
+        self, doc_id: str, updates: dict, vector: list[float] | None = None
     ) -> bool:
         """Update a single document in storage.
 

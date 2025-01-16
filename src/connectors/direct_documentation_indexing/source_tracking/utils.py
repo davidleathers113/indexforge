@@ -11,12 +11,13 @@ from datetime import datetime
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
 
-def load_json(path: Path) -> Dict[str, Any]:
+def load_json(path: Path) -> dict[str, Any]:
     """Load JSON data from a file.
 
     Args:
@@ -26,7 +27,7 @@ def load_json(path: Path) -> Dict[str, Any]:
         Dictionary containing the loaded JSON data
     """
     try:
-        with open(path, "r") as file:
+        with open(path) as file:
             return json.load(file)
     except FileNotFoundError:
         return {}
@@ -35,7 +36,7 @@ def load_json(path: Path) -> Dict[str, Any]:
         return {}
 
 
-def save_json(path: Path, data: Dict[str, Any], indent: int = 2) -> bool:
+def save_json(path: Path, data: dict[str, Any], indent: int = 2) -> bool:
     """Save data to a JSON file.
 
     Args:
@@ -56,7 +57,7 @@ def save_json(path: Path, data: Dict[str, Any], indent: int = 2) -> bool:
         return False
 
 
-def parse_iso_datetime(date_str: str) -> Optional[datetime]:
+def parse_iso_datetime(date_str: str) -> datetime | None:
     """Parse an ISO format datetime string.
 
     Args:

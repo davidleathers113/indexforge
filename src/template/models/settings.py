@@ -7,7 +7,6 @@ This module is responsible for:
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -44,8 +43,8 @@ class TemplateSettings:
     comment_end_string: str = "#}"
 
     # Line handling
-    line_statement_prefix: Optional[str] = None
-    line_comment_prefix: Optional[str] = None
+    line_statement_prefix: str | None = None
+    line_comment_prefix: str | None = None
     trim_blocks: bool = True
     lstrip_blocks: bool = True
 

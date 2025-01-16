@@ -6,12 +6,12 @@ against requirements, including v4.x specific features.
 """
 
 import logging
-from typing import Dict, Set
+
 
 logger = logging.getLogger(__name__)
 
 # Required properties that must be present in the schema
-REQUIRED_PROPERTIES: Set[str] = {
+REQUIRED_PROPERTIES: set[str] = {
     "content_body",
     "content_summary",
     "content_title",
@@ -23,7 +23,7 @@ REQUIRED_PROPERTIES: Set[str] = {
 }
 
 
-def validate_schema(schema: Dict) -> bool:
+def validate_schema(schema: dict) -> bool:
     """Validate base schema configuration."""
     try:
         # Basic validation
@@ -55,11 +55,11 @@ def validate_schema(schema: Dict) -> bool:
 
         return True
     except Exception as e:
-        logger.error(f"Error validating schema: {str(e)}", exc_info=True)
+        logger.error(f"Error validating schema: {e!s}", exc_info=True)
         return False
 
 
-def validate_vectorizer_config(config: Dict) -> bool:
+def validate_vectorizer_config(config: dict) -> bool:
     """Validate vectorizer configuration for v4.x."""
     try:
         if not config:
@@ -72,11 +72,11 @@ def validate_vectorizer_config(config: Dict) -> bool:
 
         return True
     except Exception as e:
-        logger.error(f"Error validating vectorizer config: {str(e)}", exc_info=True)
+        logger.error(f"Error validating vectorizer config: {e!s}", exc_info=True)
         return False
 
 
-def validate_compression_config(config: Dict) -> bool:
+def validate_compression_config(config: dict) -> bool:
     """Validate vector compression configuration for v4.x."""
     try:
         if not config:
@@ -96,11 +96,11 @@ def validate_compression_config(config: Dict) -> bool:
 
         return True
     except Exception as e:
-        logger.error(f"Error validating compression config: {str(e)}", exc_info=True)
+        logger.error(f"Error validating compression config: {e!s}", exc_info=True)
         return False
 
 
-def validate_multimodal_config(config: Dict) -> bool:
+def validate_multimodal_config(config: dict) -> bool:
     """Validate multimodal configuration for v4.x."""
     try:
         if not config:
@@ -113,5 +113,5 @@ def validate_multimodal_config(config: Dict) -> bool:
 
         return True
     except Exception as e:
-        logger.error(f"Error validating multimodal config: {str(e)}", exc_info=True)
+        logger.error(f"Error validating multimodal config: {e!s}", exc_info=True)
         return False

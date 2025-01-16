@@ -1,6 +1,6 @@
 """Tests for LogEntry class functionality."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -14,14 +14,14 @@ def sample_log_entry():
     return LogEntry(
         message="Test message",
         log_level=LogLevel.ERROR,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         metadata={"key": "value"},
     )
 
 
 def test_log_entry_creation():
     """Test creating a log entry with all fields."""
-    timestamp = datetime.now(timezone.utc)
+    timestamp = datetime.now(UTC)
     metadata = {"source": "test", "code": 123}
 
     entry = LogEntry(
@@ -37,7 +37,7 @@ def test_log_entry_creation():
 def test_log_entry_default_metadata():
     """Test log entry creation with default metadata."""
     entry = LogEntry(
-        message="Test", log_level=LogLevel.WARNING, timestamp=datetime.now(timezone.utc)
+        message="Test", log_level=LogLevel.WARNING, timestamp=datetime.now(UTC)
     )
 
     assert entry.metadata == {}, "Default metadata should be empty dict"
@@ -63,4 +63,4 @@ def test_log_entry_serialization(sample_log_entry):
 def test_log_entry_invalid_level():
     """Test handling of invalid log levels."""
     with pytest.raises(ValueError):
-        LogEntry(message="Test", log_level="INVALID", timestamp=datetime.now(timezone.utc))
+        LogEntry(message="Test", log_level="INVALID", timestamp=datetime.now(UTC))

@@ -11,6 +11,7 @@ def vector_index(mock_weaviate_client, mock_cache_manager):
     """Create a VectorIndex instance with mocks"""
     return VectorIndex(client_url='http://localhost:8080', class_name='Document', batch_size=100)
 
+
 def test_ensure_schema_existing(vector_index, mock_weaviate_client, mock_schema_validator):
     """Test schema handling when it already exists"""
     mock_schema_validator.get_schema.return_value = {'class': 'Document', 'properties': []}

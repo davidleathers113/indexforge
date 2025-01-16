@@ -49,9 +49,10 @@ from dataclasses import dataclass
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .source_tracker import SourceTracker
+
 
 logger = logging.getLogger(__name__)
 
@@ -98,9 +99,9 @@ class TenantConfig:
     """
 
     tenant_id: str
-    schema_overrides: Dict[str, Any]  # Tenant-specific schema overrides
-    property_overrides: Dict[str, Any]  # Tenant-specific property overrides
-    vectorizer_overrides: Dict[str, Any]  # Tenant-specific vectorizer settings
+    schema_overrides: dict[str, Any]  # Tenant-specific schema overrides
+    property_overrides: dict[str, Any]  # Tenant-specific property overrides
+    vectorizer_overrides: dict[str, Any]  # Tenant-specific vectorizer settings
     cross_tenant_search: bool  # Whether cross-tenant search is enabled
     isolation_level: str  # Level of tenant isolation (strict, flexible)
 
@@ -143,8 +144,8 @@ class TenantSourceTracker(SourceTracker):
         self,
         tenant_id: str,
         source_type: str,
-        config_dir: Optional[str] = None,
-        tenant_config_dir: Optional[str] = None,
+        config_dir: str | None = None,
+        tenant_config_dir: str | None = None,
     ):
         """
         Initialize tenant-aware source tracker.
@@ -196,7 +197,7 @@ class TenantSourceTracker(SourceTracker):
 
         try:
             if config_path.exists():
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config_data = json.load(f)
                     return TenantConfig(**config_data)
             else:
@@ -225,7 +226,7 @@ class TenantSourceTracker(SourceTracker):
             isolation_level="strict",
         )
 
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """
         Get tenant-specific schema, overriding source schema where specified.
 
@@ -271,7 +272,7 @@ class TenantSourceTracker(SourceTracker):
 
         return base_schema
 
-    def validate_schema(self) -> List[str]:
+    def validate_schema(self) -> list[str]:
         """
         Validate the tenant-specific schema configuration.
 
@@ -313,7 +314,7 @@ class TenantSourceTracker(SourceTracker):
 
         return errors
 
-    def update_tenant_config(self, config_updates: Dict[str, Any]) -> None:
+    def update_tenant_config(self, config_updates: dict[str, Any]) -> None:
         """
         Update tenant-specific configuration.
 
@@ -362,7 +363,7 @@ class TenantSourceTracker(SourceTracker):
             logger.error(f"Error updating tenant config: {e}")
             raise
 
-    def get_search_filters(self) -> Dict[str, Any]:
+    def get_search_filters(self) -> dict[str, Any]:
         """
         Get search filters for tenant isolation.
 

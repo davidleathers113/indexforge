@@ -1,6 +1,6 @@
+from collections.abc import Generator
 from pathlib import Path
 import time
-from typing import Dict, Generator
 
 import docker
 from docker.models.containers import Container
@@ -9,7 +9,7 @@ import pytest
 
 @pytest.fixture(scope="function")
 def running_container(
-    docker_client: docker.DockerClient, dockerfile: Path, test_environment: Dict[str, str]
+    docker_client: docker.DockerClient, dockerfile: Path, test_environment: dict[str, str]
 ) -> Generator[Container, None, None]:
     """Provide a running container for testing."""
     # Build image first
@@ -43,7 +43,7 @@ def running_container(
 
 
 def test_container_startup_time(
-    docker_client: docker.DockerClient, dockerfile: Path, test_environment: Dict[str, str]
+    docker_client: docker.DockerClient, dockerfile: Path, test_environment: dict[str, str]
 ) -> None:
     """Test that container starts within acceptable time."""
     MAX_STARTUP_TIME = 10  # seconds

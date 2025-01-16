@@ -1,6 +1,6 @@
 """Tests for log filtering functionality."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -10,7 +10,7 @@ from src.connectors.direct_documentation_indexing.source_tracking.enums import L
 @pytest.fixture
 def populated_logger(error_logger, sample_document):
     """Create a logger with sample log entries."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Add logs at different times with different levels
     error_logger.log_error(
@@ -34,7 +34,7 @@ def populated_logger(error_logger, sample_document):
 
 def test_filter_by_time_range(populated_logger, sample_document):
     """Test filtering logs by time range."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Get logs from last hour
     recent_logs = populated_logger.get_logs(
@@ -76,7 +76,7 @@ def test_filter_by_metadata(populated_logger, sample_document):
 
 def test_combined_filters(populated_logger, sample_document):
     """Test combining multiple filter criteria."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     filtered_logs = populated_logger.get_logs(
         sample_document.id,
@@ -92,7 +92,7 @@ def test_combined_filters(populated_logger, sample_document):
 
 def test_filter_empty_results(populated_logger, sample_document):
     """Test filtering with criteria that match no logs."""
-    future_time = datetime.now(timezone.utc) + timedelta(hours=1)
+    future_time = datetime.now(UTC) + timedelta(hours=1)
 
     # Filter for future logs
     future_logs = populated_logger.get_logs(sample_document.id, start_time=future_time)

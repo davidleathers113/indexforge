@@ -7,7 +7,6 @@ import logging.handlers
 import os
 from pathlib import Path
 import sys
-from typing import Dict, Optional, Union
 
 
 class LogLevel(Enum):
@@ -46,9 +45,9 @@ class LogConfig:
     level: LogLevel = LogLevel.NORMAL
     format: str = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
     date_format: str = "%Y-%m-%d %H:%M:%S"
-    file_path: Optional[Union[str, Path]] = None
-    rotation_config: Optional[LogRotationConfig] = None
-    extra_fields: Dict[str, str] = field(default_factory=dict)
+    file_path: str | Path | None = None
+    rotation_config: LogRotationConfig | None = None
+    extra_fields: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         """Initialize configuration with defaults."""
@@ -71,7 +70,7 @@ class LogConfig:
             raise ValueError("extra_fields must be a dictionary")
 
 
-def setup_logging(config: Optional[LogConfig] = None) -> logging.Logger:
+def setup_logging(config: LogConfig | None = None) -> logging.Logger:
     """Configure and return the logger.
 
     Args:

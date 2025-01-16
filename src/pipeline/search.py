@@ -54,7 +54,6 @@ Note:
 """
 
 import logging
-from typing import Dict, List, Optional
 
 from src.embeddings.embedding_generator import EmbeddingGenerator
 from src.indexing.vector_index import VectorIndex
@@ -91,11 +90,11 @@ class SearchOperations:
     def search(
         self,
         query_text: str,
-        query_vector: Optional[List[float]] = None,
+        query_vector: list[float] | None = None,
         limit: int = 10,
         min_score: float = 0.7,
         use_hybrid: bool = True,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Search for documents using text and/or vector similarity.
 
         Performs semantic or hybrid search based on the provided query and
@@ -152,12 +151,12 @@ class SearchOperations:
             return results
 
         except Exception as e:
-            self.logger.error(f"Search error: {str(e)}")
+            self.logger.error(f"Search error: {e!s}")
             return []
 
     def find_similar_topics(
-        self, query_text: str, documents: List[Dict], top_k: int = 5
-    ) -> List[Dict]:
+        self, query_text: str, documents: list[dict], top_k: int = 5
+    ) -> list[dict]:
         """Find topics similar to a query.
 
         Identifies topics in the document collection that are semantically
@@ -197,5 +196,5 @@ class SearchOperations:
             return results
 
         except Exception as e:
-            self.logger.error(f"Topic search error: {str(e)}")
+            self.logger.error(f"Topic search error: {e!s}")
             return []

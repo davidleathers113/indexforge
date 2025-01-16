@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -17,8 +16,8 @@ class UserRole(str, Enum):
 class ProfileBase(BaseModel):
     """Base profile model."""
 
-    name: Optional[str] = None
-    avatar_url: Optional[str] = None
+    name: str | None = None
+    avatar_url: str | None = None
     role: UserRole = Field(default=UserRole.USER)
 
 

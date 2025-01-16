@@ -28,7 +28,7 @@ Example:
     ```
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class ConfigurationBuilder:
@@ -58,10 +58,10 @@ class ConfigurationBuilder:
     @staticmethod
     def vectorizer_config(
         vectorizer: str,
-        model: Optional[str] = None,
-        pooling: Optional[str] = None,
+        model: str | None = None,
+        pooling: str | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create a vectorizer configuration.
 
@@ -100,13 +100,13 @@ class ConfigurationBuilder:
         distance: str = "cosine",
         ef: int = 100,
         max_connections: int = 64,
-        dynamic_ef_min: Optional[int] = None,
-        dynamic_ef_max: Optional[int] = None,
-        dynamic_ef_factor: Optional[float] = None,
-        vector_cache_max_objects: Optional[int] = None,
-        cleanup_interval_seconds: Optional[int] = None,
+        dynamic_ef_min: int | None = None,
+        dynamic_ef_max: int | None = None,
+        dynamic_ef_factor: float | None = None,
+        vector_cache_max_objects: int | None = None,
+        cleanup_interval_seconds: int | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create a vector index configuration.
 
@@ -157,7 +157,7 @@ class ConfigurationBuilder:
     def bm25_config(
         b: float = 0.75,
         k1: float = 1.2,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create a BM25 configuration.
 

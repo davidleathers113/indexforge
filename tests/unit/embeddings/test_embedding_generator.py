@@ -46,15 +46,18 @@ def mock_openai():
                     raise ValueError('Invalid input type')
     return MockOpenAI()
 
+
 @pytest.fixture
 def sample_document():
     """Create a sample document for testing."""
     return {'content': {'body': 'This is a test document.', 'summary': 'Test summary'}, 'embeddings': {'body': None, 'summary': None, 'version': None, 'model': None}, 'metadata': {'title': 'Test Document'}}
 
+
 @pytest.fixture
 def embedding_generator(mock_openai):
     """Create an EmbeddingGenerator instance with mocks."""
     return EmbeddingGenerator(model='text-embedding-3-small', chunk_size=256, chunk_overlap=50, dimensions=3, client=mock_openai)
+
 
 def test_embedding_generator_initialization(mock_openai):
     """Test EmbeddingGenerator initialization with default values."""
@@ -66,6 +69,7 @@ def test_embedding_generator_initialization(mock_openai):
     assert generator.dimensions is None
     assert generator.client == mock_openai
 
+
 def test_embedding_generator_custom_config(mock_openai):
     """Test EmbeddingGenerator initialization with custom values."""
     generator = EmbeddingGenerator(model='custom-model', chunk_size=128, chunk_overlap=25, dimensions=128, client=mock_openai)
@@ -75,6 +79,7 @@ def test_embedding_generator_custom_config(mock_openai):
     assert generator.dimensions == 128
     assert generator.client == mock_openai
     assert generator.chunking_config.max_chunk_size == 128 * 4
+
 
 def test_get_embedding(embedding_generator, mock_openai):
     """Test generating embedding for single text."""
@@ -86,6 +91,7 @@ def test_get_embedding(embedding_generator, mock_openai):
     expected = [0.267261, 0.534522, 0.801784]
     np.testing.assert_array_almost_equal(embedding, expected, decimal=5)
 
+
 def test_get_embedding_normalization(embedding_generator):
     """Test L2 normalization of embeddings."""
     vec = [1.0, 2.0, 2.0]
@@ -95,9 +101,10 @@ def test_get_embedding_normalization(embedding_generator):
     assert np.allclose(normalized, expected, rtol=0.001)
     matrix = [[1.0, 2.0, 2.0], [3.0, 4.0, 4.0]]
     normalized = embedding_generator._normalize_l2(matrix)
-    assert all((np.allclose(np.linalg.norm(row), 1.0) for row in normalized))
+    assert all(np.allclose(np.linalg.norm(row), 1.0) for row in normalized)
     expected = np.array([[0.33333333, 0.66666667, 0.66666667], [0.46852129, 0.62469505, 0.62469505]])
     assert np.allclose(normalized, expected, rtol=0.001)
+
 
 def test_get_embedding_error_handling(embedding_generator, mock_openai):
     """Test error handling in embedding generation."""
@@ -109,6 +116,7 @@ def test_get_embedding_error_handling(embedding_generator, mock_openai):
     with pytest.raises(Exception, match='Error generating embedding: Invalid input type: text must be a string'):
         embedding_generator._get_embedding(None)
 
+
 def test_generate_embeddings_single_document(embedding_generator, sample_document):
     """Test generating embeddings for a single document."""
     docs = embedding_generator.generate_embeddings([sample_document])
@@ -118,6 +126,7 @@ def test_generate_embeddings_single_document(embedding_generator, sample_documen
     assert len(doc['embeddings']['body']) == 3
     assert doc['embeddings']['version'] == 'v1'
     assert doc['embeddings']['model'] == embedding_generator.model
+
 
 def test_generate_embeddings_long_document(embedding_generator, mock_openai):
     """Test generating embeddings for document requiring chunking."""
@@ -131,6 +140,7 @@ def test_generate_embeddings_long_document(embedding_generator, mock_openai):
     assert isinstance(doc['embeddings']['chunks']['texts'], list)
     assert isinstance(doc['embeddings']['chunks']['vectors'], list)
 
+
 def test_generate_embeddings_batch(embedding_generator, sample_document):
     """Test generating embeddings for multiple documents."""
     docs = [dict(sample_document), dict(sample_document)]
@@ -142,6 +152,7 @@ def test_generate_embeddings_batch(embedding_generator, sample_document):
         assert isinstance(doc['embeddings']['body'], list)
         assert len(doc['embeddings']['body']) == 3
 
+
 def test_generate_embeddings_api_error(embedding_generator, mock_openai, sample_document):
     """Test handling of API errors during embedding generation."""
     mock_openai.raise_error()
@@ -152,6 +163,7 @@ def test_generate_embeddings_api_error(embedding_generator, mock_openai, sample_
     assert 'error' in docs[0]['embeddings']
     assert 'Failed to generate embeddings for all chunks' in docs[0]['embeddings']['error']
 
+
 def test_generate_embeddings_invalid_document(embedding_generator):
     """Test handling of invalid document structure."""
     invalid_doc = {'content': {}, 'embeddings': {'body': None, 'summary': None, 'version': None, 'model': None}}
@@ -159,6 +171,7 @@ def test_generate_embeddings_invalid_document(embedding_generator):
     assert len(docs) == 1
     assert docs[0]['embeddings']['version'] == 'v1_failed'
     assert 'Document has no body text' in docs[0]['embeddings']['error']
+
 
 def test_chunk_averaging(embedding_generator, mock_openai):
     """Test averaging of chunk embeddings."""

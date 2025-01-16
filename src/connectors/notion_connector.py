@@ -7,7 +7,6 @@ and conversion into a standardized document format suitable for further processi
 
 from pathlib import Path
 import sys
-from typing import Dict, List
 
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -37,7 +36,7 @@ class NotionConnector:
         """
         self.export_path = Path(export_path)
 
-    def load_csv_files(self) -> Dict[str, pd.DataFrame]:
+    def load_csv_files(self) -> dict[str, pd.DataFrame]:
         """Load and validate CSV files from the Notion export directory.
 
         Processes all CSV files in the export directory, performing validation
@@ -65,7 +64,7 @@ class NotionConnector:
             if not csv_file.name.endswith("_all.csv"):
                 try:
                     # First try to read the file to validate structure
-                    with open(csv_file, "r", encoding="utf-8") as f:
+                    with open(csv_file, encoding="utf-8") as f:
                         lines = f.readlines()
 
                     if not lines:
@@ -92,7 +91,7 @@ class NotionConnector:
 
                         if col_count != expected_cols:
                             raise pd.errors.ParserError(
-                                f"Expected {expected_cols} fields in line {i+1}, saw {col_count}"
+                                f"Expected {expected_cols} fields in line {i + 1}, saw {col_count}"
                             )
 
                     # If validation passes, read with pandas
@@ -110,7 +109,7 @@ class NotionConnector:
                     # Convert all parsing errors to EmptyDataError as expected by tests
                     raise pd.errors.EmptyDataError(str(e)) from e
                 except Exception as e:
-                    print(f"Error reading CSV file {csv_file}: {str(e)}")
+                    print(f"Error reading CSV file {csv_file}: {e!s}")
                     continue
 
         return csv_files
@@ -140,10 +139,10 @@ class NotionConnector:
         if strict:
             # In strict mode, only try UTF-8 and fail on any errors
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     return f.read()
             except (UnicodeError, OSError) as e:
-                print(f"Error reading file {file_path}: {str(e)}")
+                print(f"Error reading file {file_path}: {e!s}")
                 raise
 
         # In recovery mode, try multiple encodings
@@ -153,18 +152,18 @@ class NotionConnector:
         for encoding in encodings:
             for errors in error_modes:
                 try:
-                    with open(file_path, "r", encoding=encoding, errors=errors) as f:
+                    with open(file_path, encoding=encoding, errors=errors) as f:
                         content = f.read()
                         if content:  # Only return if we got actual content
                             return content
                 except Exception as e:
-                    print(f"Failed to read with {encoding} ({errors}): {str(e)}")
+                    print(f"Failed to read with {encoding} ({errors}): {e!s}")
                     continue
 
         print(f"Failed to read file {file_path} with all encodings")
         return ""
 
-    def load_html_files(self) -> List[Dict]:
+    def load_html_files(self) -> list[dict]:
         """Load and process HTML files from the Notion export directory.
 
         Extracts content and metadata from HTML files, converting them into
@@ -233,12 +232,12 @@ class NotionConnector:
                 }
                 documents.append(doc)
             except Exception as e:
-                print(f"Error processing HTML file {html_file}: {str(e)}")
+                print(f"Error processing HTML file {html_file}: {e!s}")
                 continue
 
         return documents
 
-    def load_markdown_files(self) -> List[Dict]:
+    def load_markdown_files(self) -> list[dict]:
         """Load and process Markdown files from the Notion export directory.
 
         Processes Markdown files, extracting content and metadata into the
@@ -301,12 +300,12 @@ class NotionConnector:
                 }
                 documents.append(doc)
             except Exception as e:
-                print(f"Error processing Markdown file {md_file}: {str(e)}")
+                print(f"Error processing Markdown file {md_file}: {e!s}")
                 continue
 
         return documents
 
-    def normalize_data(self, dataframes: Dict[str, pd.DataFrame]) -> List[Dict]:
+    def normalize_data(self, dataframes: dict[str, pd.DataFrame]) -> list[dict]:
         """Convert Notion CSV data into standardized document format.
 
         Processes pandas DataFrames containing Notion data and converts them
@@ -362,7 +361,7 @@ class NotionConnector:
 
         return normalized_docs
 
-    def load_documents(self) -> List[Dict]:
+    def load_documents(self) -> list[dict]:
         """Load all documents from the Notion export.
 
         Convenience method that calls process_export() to load and process
@@ -379,7 +378,7 @@ class NotionConnector:
         """
         return self.process_export()
 
-    def process_export(self) -> List[Dict]:
+    def process_export(self) -> list[dict]:
         """Process the entire Notion export directory.
 
         Main method that orchestrates the processing of all supported file types

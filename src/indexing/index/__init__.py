@@ -37,4 +37,5 @@ Example:
 from .index_config import IndexConfig
 from .vector_index import VectorIndex
 
-__all__ = ["VectorIndex", "IndexConfig"]
+
+__all__ = ["IndexConfig", "VectorIndex"]

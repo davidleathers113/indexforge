@@ -8,9 +8,9 @@ import json
 import logging
 from pathlib import Path
 import sys
-from typing import Dict, List
 
 import weaviate
+
 
 # Add project root to Python path
 project_root = str(Path(__file__).parent.parent)
@@ -22,6 +22,7 @@ from src.connectors.direct_documentation_indexing import (  # noqa: E402
     ExcelProcessor,
     WordProcessor,
 )
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +38,7 @@ def delete_existing_schema(client: weaviate.Client) -> None:
             client.schema.delete_class("Document")
             logger.info("Successfully deleted Document collection")
     except Exception as e:
-        logger.error(f"Failed to delete schema: {str(e)}")
+        logger.error(f"Failed to delete schema: {e!s}")
         raise
 
 
@@ -99,11 +100,11 @@ def setup_weaviate_schema(client: weaviate.Client) -> None:
         client.schema.create_class(schema)
         logger.info("Created Weaviate schema successfully")
     except Exception as e:
-        logger.error(f"Failed to create schema: {str(e)}")
+        logger.error(f"Failed to create schema: {e!s}")
         raise
 
 
-def index_documents(client: weaviate.Client, documents: List[Dict]) -> None:
+def index_documents(client: weaviate.Client, documents: list[dict]) -> None:
     """Index documents in Weaviate using optimized batch import with upsert behavior."""
     try:
         # Configure batch settings with consistency level
@@ -145,7 +146,7 @@ def index_documents(client: weaviate.Client, documents: List[Dict]) -> None:
 
         logger.info(f"Successfully indexed {len(documents)} documents")
     except Exception as e:
-        logger.error(f"Failed to index documents: {str(e)}")
+        logger.error(f"Failed to index documents: {e!s}")
         raise
 
 
@@ -223,7 +224,7 @@ def main():
                             logger.warning(f"- {result['file']}: {result['error']}")
 
             except Exception as e:
-                logger.error(f"Failed to process directory {subdir}: {str(e)}")
+                logger.error(f"Failed to process directory {subdir}: {e!s}")
 
         # Index all processed documents in Weaviate
         if all_documents:
@@ -233,7 +234,7 @@ def main():
             logger.warning("No documents were successfully processed for indexing")
 
     except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
+        logger.error(f"An error occurred: {e!s}")
         raise
 
 

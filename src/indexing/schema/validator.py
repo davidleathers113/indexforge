@@ -25,7 +25,7 @@ Example:
 """
 
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 from src.indexing.schema.exceptions import (
     ClassNameError,
@@ -99,7 +99,7 @@ class SchemaValidator:
             )
 
     @staticmethod
-    def validate_properties(properties: List[Dict[str, Any]]) -> None:
+    def validate_properties(properties: list[dict[str, Any]]) -> None:
         """
         Validate schema properties.
 
@@ -157,7 +157,7 @@ class SchemaValidator:
                 )
 
     @staticmethod
-    def validate_configurations(configs: Dict[str, Dict[str, Any]]) -> None:
+    def validate_configurations(configs: dict[str, dict[str, Any]]) -> None:
         """
         Validate schema configurations.
 

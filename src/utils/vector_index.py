@@ -14,7 +14,6 @@ Example:
     ```
 """
 
-from typing import List, Optional, Tuple, Union
 
 from faiss import IndexFlatL2
 import numpy as np
@@ -36,8 +35,8 @@ class VectorIndex:
 
     def add_vectors(
         self,
-        vectors: Union[List[List[float]], np.ndarray],
-        ids: Optional[List[str]] = None,
+        vectors: list[list[float]] | np.ndarray,
+        ids: list[str] | None = None,
     ) -> None:
         """Add vectors to the index.
 
@@ -54,8 +53,8 @@ class VectorIndex:
         self.index.add(vectors)
 
     def search(
-        self, query: Union[List[float], np.ndarray], k: int = 5
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        self, query: list[float] | np.ndarray, k: int = 5
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Search for nearest neighbors.
 
         Args:

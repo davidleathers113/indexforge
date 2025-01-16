@@ -3,12 +3,12 @@
 from dataclasses import dataclass, field
 import logging
 import time
-from typing import Dict, List, Optional
 from unittest.mock import MagicMock
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 class MonitoringState(BaseState):
     """Monitoring state management."""
 
-    metrics: Dict[str, float] = field(default_factory=dict)
-    labels: Dict[str, Dict] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
+    labels: dict[str, dict] = field(default_factory=dict)
     start_time: float = field(default_factory=time.time)
     error_mode: bool = False
 
@@ -30,7 +30,7 @@ class MonitoringState(BaseState):
         self.start_time = time.time()
         self.error_mode = False
 
-    def record_metric(self, name: str, value: float, labels: Optional[Dict] = None):
+    def record_metric(self, name: str, value: float, labels: dict | None = None):
         """Record a metric value."""
         self.metrics[name] = value
         if labels:
@@ -43,7 +43,7 @@ def mock_monitor():
     mock_mon = MagicMock()
     state = MonitoringState()
 
-    def mock_record(name: str, value: float, labels: Optional[Dict] = None):
+    def mock_record(name: str, value: float, labels: dict | None = None):
         """Record a metric."""
         try:
             if state.error_mode:
@@ -56,11 +56,11 @@ def mock_monitor():
             state.add_error(str(e))
             raise
 
-    def mock_get_metric(name: str) -> Optional[float]:
+    def mock_get_metric(name: str) -> float | None:
         """Get a recorded metric value."""
         return state.metrics.get(name)
 
-    def mock_get_labels(name: str) -> Optional[Dict]:
+    def mock_get_labels(name: str) -> dict | None:
         """Get labels for a metric."""
         return state.labels.get(name)
 
@@ -123,12 +123,12 @@ def mock_prometheus():
                 state.add_error(str(e))
                 raise
 
-    def mock_counter(name: str, documentation: str, labelnames: Optional[List[str]] = None):
+    def mock_counter(name: str, documentation: str, labelnames: list[str] | None = None):
         counter = MockCounter()
         counter.name = name
         return counter
 
-    def mock_gauge(name: str, documentation: str, labelnames: Optional[List[str]] = None):
+    def mock_gauge(name: str, documentation: str, labelnames: list[str] | None = None):
         gauge = MockGauge()
         gauge.name = name
         return gauge

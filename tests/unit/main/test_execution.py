@@ -24,6 +24,7 @@ def test_pipeline_execution(pipeline_with_mocks):
         assert doc.get('processed') is True
         assert doc.get('pipeline_version') == '1.0.0'
 
+
 def test_pipeline_options(pipeline_with_mocks):
     """Test that pipeline accepts and uses options correctly."""
     pipeline = pipeline_with_mocks
@@ -34,6 +35,7 @@ def test_pipeline_options(pipeline_with_mocks):
     assert pipeline.doc_processor.deduplicate_documents.called
     assert pipeline.pii_detector.analyze_document.called
 
+
 def test_pipeline_error_handling(pipeline_with_mocks, tmp_path):
     """Test that pipeline handles errors properly."""
     export_dir = tmp_path / 'notion_export'
@@ -43,6 +45,7 @@ def test_pipeline_error_handling(pipeline_with_mocks, tmp_path):
     with pytest.raises(PipelineError) as exc_info:
         pipeline.process_documents()
     assert 'Pipeline processing failed' in str(exc_info.value)
+
 
 def test_pipeline_initialization_with_defaults(pipeline_with_mocks, tmp_path):
     """Test that pipeline is initialized with default parameters."""

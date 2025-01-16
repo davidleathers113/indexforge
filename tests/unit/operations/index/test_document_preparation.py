@@ -6,6 +6,7 @@ import pytest
 
 from src.api.repositories.weaviate.operations.index import IndexOperation
 
+
 # Test data constants
 TEST_DOCUMENTS = [
     {"id": "1", "text": "Sample text", "metadata": {"source": "test"}},

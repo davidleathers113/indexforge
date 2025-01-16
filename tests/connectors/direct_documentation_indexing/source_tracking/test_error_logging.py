@@ -1,6 +1,6 @@
 """Tests for error logging operations."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -46,7 +46,7 @@ def test_log_warning(error_logger, sample_document):
 def test_get_logs_time_filtered(error_logger, sample_document):
     """Test retrieving logs with time filtering."""
     # Log entries at different times
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     old_time = now - timedelta(hours=2)
 
     error_logger.log_error(sample_document.id, "Old error", timestamp=old_time)

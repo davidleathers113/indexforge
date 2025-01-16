@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -14,20 +14,24 @@ def temp_config_dir(tmp_path):
     """Create a temporary directory for test configs."""
     return tmp_path / 'configs'
 
+
 @pytest.fixture
 def temp_tenant_config_dir(tmp_path):
     """Create a temporary directory for tenant configs."""
     return tmp_path / 'tenant_configs'
 
+
 @pytest.fixture
-def word_source_config() -> Dict[str, Any]:
+def word_source_config() -> dict[str, Any]:
     """Sample Word document source configuration."""
     return {'schema_variations': {'class': 'WordDocument', 'description': 'Document from word source', 'vectorizer': 'text2vec-transformers'}, 'custom_properties': {'word_metadata': {'dataType': ['text'], 'description': 'Word document specific metadata'}, 'headers': {'dataType': ['text[]'], 'description': 'Document headers'}}, 'vectorizer_settings': {'model': 'sentence-transformers-all-MiniLM-L6-v2', 'poolingStrategy': 'mean'}, 'cross_source_mappings': {'excel': 'document_id'}}
 
+
 @pytest.fixture
-def tenant_config() -> Dict[str, Any]:
+def tenant_config() -> dict[str, Any]:
     """Sample tenant configuration."""
     return {'tenant_id': 'test_tenant', 'schema_overrides': {'description': 'Custom tenant description'}, 'property_overrides': {'custom_field': {'dataType': ['text'], 'description': 'Tenant-specific field'}}, 'vectorizer_overrides': {'model': 'custom-model'}, 'cross_tenant_search': True, 'isolation_level': 'flexible'}
+
 
 def test_source_tracker_default_config():
     """Test SourceTracker with default configuration."""
@@ -37,6 +41,7 @@ def test_source_tracker_default_config():
     assert 'content' in schema['properties']
     assert 'source_id' in schema['properties']
     assert schema['moduleConfig']['text2vec-transformers']['model'] == 'sentence-transformers-all-MiniLM-L6-v2'
+
 
 def test_source_tracker_custom_config(temp_config_dir, word_source_config):
     """Test SourceTracker with custom configuration."""
@@ -52,11 +57,13 @@ def test_source_tracker_custom_config(temp_config_dir, word_source_config):
     assert 'headers' in schema['properties']
     assert tracker.get_cross_source_mappings()['excel'] == 'document_id'
 
+
 def test_source_tracker_schema_validation():
     """Test schema validation in SourceTracker."""
     tracker = SourceTracker('word')
     errors = tracker.validate_schema()
     assert not errors
+
 
 def test_tenant_source_tracker_default_config():
     """Test TenantSourceTracker with default configuration."""
@@ -65,6 +72,7 @@ def test_tenant_source_tracker_default_config():
     assert 'tenant_id' in schema['properties']
     assert not tracker.is_cross_tenant_search_enabled()
     assert tracker.get_isolation_level() == 'strict'
+
 
 def test_tenant_source_tracker_custom_config(temp_config_dir, temp_tenant_config_dir, word_source_config, tenant_config):
     """Test TenantSourceTracker with custom configuration."""
@@ -86,11 +94,13 @@ def test_tenant_source_tracker_custom_config(temp_config_dir, temp_tenant_config
     assert tracker.is_cross_tenant_search_enabled()
     assert tracker.get_isolation_level() == 'flexible'
 
+
 def test_tenant_source_tracker_search_filters():
     """Test search filter generation for tenant isolation."""
     tracker = TenantSourceTracker('test_tenant', 'word')
     filters = tracker.get_search_filters()
     assert filters['tenant_id'] == 'test_tenant'
+
 
 def test_tenant_source_tracker_config_update(temp_tenant_config_dir):
     """Test tenant configuration updates."""
@@ -103,7 +113,7 @@ def test_tenant_source_tracker_config_update(temp_tenant_config_dir):
     assert tracker.get_isolation_level() == 'flexible'
     config_path = config_dir / 'test_tenant_config.json'
     assert config_path.exists()
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         saved_config = json.load(f)
         assert saved_config['cross_tenant_search'] is True
         assert saved_config['isolation_level'] == 'flexible'

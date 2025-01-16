@@ -27,7 +27,6 @@ Example:
     ```
 """
 
-from typing import Dict, List
 
 from src.indexing.schema.configurations import (
     CHUNK_IDS_PROPERTY,
@@ -85,7 +84,7 @@ class SchemaDefinition:
     SCHEMA_VERSION = CURRENT_SCHEMA_VERSION
 
     @staticmethod
-    def get_properties() -> List[Dict]:
+    def get_properties() -> list[dict]:
         """
         Get the list of schema properties.
 
@@ -111,7 +110,7 @@ class SchemaDefinition:
         ]
 
     @staticmethod
-    def get_configurations() -> Dict:
+    def get_configurations() -> dict:
         """
         Get the schema configurations.
 
@@ -135,7 +134,7 @@ class SchemaDefinition:
         }
 
     @classmethod
-    def get_schema(cls, class_name: str) -> Dict:
+    def get_schema(cls, class_name: str) -> dict:
         """
         Get the complete schema definition for a given class name.
 

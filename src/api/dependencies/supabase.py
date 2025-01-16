@@ -1,6 +1,6 @@
 """Supabase client dependency."""
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from supabase.client import AsyncClient, create_client
 

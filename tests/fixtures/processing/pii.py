@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass, field
 import logging
-from typing import Dict, List
 from unittest.mock import MagicMock
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class PIIState(BaseState):
     """PII detector state."""
 
-    findings: List[Dict] = field(default_factory=list)
+    findings: list[dict] = field(default_factory=list)
     error_mode: bool = False
 
     def reset(self):
@@ -43,7 +43,7 @@ def mock_pii_detector(pii_state):
     """Mock PII detector for testing."""
     mock_detector = MagicMock()
 
-    def mock_detect(text: str) -> List[Dict]:
+    def mock_detect(text: str) -> list[dict]:
         """Detect PII in text."""
         try:
             if pii_state.error_mode:
@@ -86,7 +86,7 @@ def mock_pii_detector(pii_state):
             pii_state.add_error(str(e))
             raise
 
-    def analyze_document(doc: Dict) -> Dict:
+    def analyze_document(doc: dict) -> dict:
         """Analyze document for PII."""
         try:
             if pii_state.error_mode:

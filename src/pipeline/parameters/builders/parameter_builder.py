@@ -1,6 +1,6 @@
 """Parameter builder implementation."""
 
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from src.pipeline.parameters.base import ParameterSet
 from src.pipeline.parameters.factory import ParameterFactory
@@ -17,13 +17,13 @@ class ParameterBuilder:
     def add_string_parameter(
         self,
         name: str,
-        value: Union[str, bytes],
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
+        value: str | bytes,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> "ParameterBuilder":
         """Add a string parameter."""
         param = self.factory.create_string_parameter(
@@ -42,12 +42,12 @@ class ParameterBuilder:
     def add_numeric_parameter(
         self,
         name: str,
-        value: Union[int, float, str],
-        min_value: Optional[Union[int, float]] = None,
-        max_value: Optional[Union[int, float]] = None,
+        value: int | float | str,
+        min_value: int | float | None = None,
+        max_value: int | float | None = None,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> "ParameterBuilder":
         """Add a numeric parameter."""
         param = self.factory.create_numeric_parameter(
@@ -66,10 +66,10 @@ class ParameterBuilder:
         self,
         name: str,
         value: str,
-        allowed_schemes: Optional[list[str]] = None,
+        allowed_schemes: list[str] | None = None,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> "ParameterBuilder":
         """Add a URL parameter."""
         param = self.factory.create_url_parameter(
@@ -86,9 +86,9 @@ class ParameterBuilder:
     def add_cache_parameter(
         self,
         name: str = "cache",
-        value: Optional[Union[CacheConfig, Dict[str, Any]]] = None,
+        value: CacheConfig | dict[str, Any] | None = None,
         required: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> "ParameterBuilder":
         """Add a cache parameter."""
         param = self.factory.create_cache_parameter(

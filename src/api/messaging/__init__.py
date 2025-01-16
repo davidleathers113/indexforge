@@ -23,6 +23,7 @@ from src.api.messaging.rabbitmq_message_types import (
     ProcessingResult,
 )
 
+
 __all__ = [
     # Connection Management
     "RabbitMQConnectionManager",

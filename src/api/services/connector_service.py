@@ -8,6 +8,7 @@ from src.connectors.direct_documentation_indexing import (
     WordProcessor,
 )
 
+
 logger = logging.getLogger(__name__)
 
 

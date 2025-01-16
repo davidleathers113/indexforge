@@ -1,7 +1,7 @@
 """Weaviate query filters."""
 
 from datetime import datetime
-from typing import Any, List, Optional, Union
+from typing import Any
 
 from weaviate.classes.query import Filter
 
@@ -46,7 +46,7 @@ class FilterBuilder:
 
     @staticmethod
     def create_numeric_filter(
-        field: str, value: Union[int, float], operator: str = "Equal"
+        field: str, value: int | float, operator: str = "Equal"
     ) -> Filter:
         """Create numeric filter.
 
@@ -78,7 +78,7 @@ class FilterBuilder:
         return Filter.by_property(field).is_not_none()
 
     @staticmethod
-    def create_in_filter(field: str, values: List[Any]) -> Filter:
+    def create_in_filter(field: str, values: list[Any]) -> Filter:
         """Create in filter.
 
         Args:
@@ -91,7 +91,7 @@ class FilterBuilder:
         return Filter.by_property(field).contains_any(values)
 
     @classmethod
-    def from_document_filter(cls, filter_params: DocumentFilter) -> Optional[Filter]:
+    def from_document_filter(cls, filter_params: DocumentFilter) -> Filter | None:
         """Create filter from document filter parameters.
 
         Args:

@@ -7,7 +7,6 @@ of references (direct, indirect, structural) and ensures reference integrity.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID, uuid4
 
 
@@ -39,7 +38,7 @@ class Reference:
     source_id: UUID
     target_id: UUID
     ref_type: ReferenceType
-    metadata: Dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
     bidirectional: bool = True
 
     def __post_init__(self):
@@ -60,13 +59,13 @@ class ChunkReference:
 
     chunk_id: UUID
     content: str
-    references: Dict[ReferenceType, Set[UUID]] = field(
+    references: dict[ReferenceType, set[UUID]] = field(
         default_factory=lambda: {rt: set() for rt in ReferenceType}
     )
-    metadata: Dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
     @property
-    def all_references(self) -> Set[UUID]:
+    def all_references(self) -> set[UUID]:
         """Get all referenced chunk IDs regardless of type."""
         return {ref for refs in self.references.values() for ref in refs}
 
@@ -76,10 +75,10 @@ class ReferenceManager:
 
     def __init__(self):
         """Initialize the reference manager."""
-        self._chunks: Dict[UUID, ChunkReference] = {}
-        self._references: Dict[Tuple[UUID, UUID], Reference] = {}
+        self._chunks: dict[UUID, ChunkReference] = {}
+        self._references: dict[tuple[UUID, UUID], Reference] = {}
 
-    def add_chunk(self, content: str, chunk_id: Optional[UUID] = None) -> UUID:
+    def add_chunk(self, content: str, chunk_id: UUID | None = None) -> UUID:
         """Add a new chunk to the reference system.
 
         Args:
@@ -104,7 +103,7 @@ class ReferenceManager:
         source_id: UUID,
         target_id: UUID,
         ref_type: ReferenceType,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
         bidirectional: bool = True,
     ) -> None:
         """Add a reference between two chunks.
@@ -136,13 +135,13 @@ class ReferenceManager:
         )
 
         # Add to references
-        self._references[(source_id, target_id)] = ref
+        self._references[source_id, target_id] = ref
         self._chunks[source_id].references[ref_type].add(target_id)
 
         # Add reverse reference if bidirectional
         if bidirectional:
             reverse_type = self._get_reverse_reference_type(ref_type)
-            self._references[(target_id, source_id)] = Reference(
+            self._references[target_id, source_id] = Reference(
                 source_id=target_id,
                 target_id=source_id,
                 ref_type=reverse_type,
@@ -151,7 +150,7 @@ class ReferenceManager:
             )
             self._chunks[target_id].references[reverse_type].add(source_id)
 
-    def get_references(self, chunk_id: UUID, ref_type: Optional[ReferenceType] = None) -> Set[UUID]:
+    def get_references(self, chunk_id: UUID, ref_type: ReferenceType | None = None) -> set[UUID]:
         """Get all references of a specific type for a chunk.
 
         Args:
@@ -173,7 +172,7 @@ class ReferenceManager:
         return chunk.all_references
 
     def remove_reference(
-        self, source_id: UUID, target_id: UUID, ref_type: Optional[ReferenceType] = None
+        self, source_id: UUID, target_id: UUID, ref_type: ReferenceType | None = None
     ) -> None:
         """Remove a reference between chunks.
 
@@ -188,21 +187,21 @@ class ReferenceManager:
         if (source_id, target_id) not in self._references:
             raise ValueError(f"No reference exists between {source_id} and {target_id}")
 
-        ref = self._references[(source_id, target_id)]
+        ref = self._references[source_id, target_id]
         if ref_type and ref.ref_type != ref_type:
             raise ValueError(f"Reference of type {ref_type} does not exist")
 
         # Remove reference
-        del self._references[(source_id, target_id)]
+        del self._references[source_id, target_id]
         self._chunks[source_id].references[ref.ref_type].remove(target_id)
 
         # Remove reverse reference if bidirectional
         if ref.bidirectional and (target_id, source_id) in self._references:
-            reverse_ref = self._references[(target_id, source_id)]
-            del self._references[(target_id, source_id)]
+            reverse_ref = self._references[target_id, source_id]
+            del self._references[target_id, source_id]
             self._chunks[target_id].references[reverse_ref.ref_type].remove(source_id)
 
-    def validate_references(self) -> List[str]:
+    def validate_references(self) -> list[str]:
         """Validate all references and return any issues found.
 
         Returns:

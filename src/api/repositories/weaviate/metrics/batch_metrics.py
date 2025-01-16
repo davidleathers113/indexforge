@@ -2,9 +2,9 @@
 
 from collections import Counter
 import logging
-from typing import Dict
 
 from .base import BaseMetrics, MetricCollector
+
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class BatchMetrics(BaseMetrics, MetricCollector):
         self.error_types[error_type] += count
         self.notify_observers("object_error_rate", self.failed_objects / self.total_objects)
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get summary of batch operation metrics.
 
         Returns:

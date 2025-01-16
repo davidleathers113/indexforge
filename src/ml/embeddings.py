@@ -6,8 +6,7 @@ sentence transformers.
 
 from dataclasses import asdict
 from datetime import datetime
-from enum import Enum
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import numpy.typing as npt
@@ -19,40 +18,16 @@ try:
 except ImportError:
     EMBEDDING_AVAILABLE = False
 
-from src.core import (
-    BaseService,
-    Chunk,
-    ChunkEmbedder,
-    ChunkMetadata,
-    ProcessedChunk,
+from src.core import BaseService, Chunk, ChunkEmbedder, ChunkMetadata, ProcessedChunk
+from src.ml.processing.models.service import (
+    ServiceInitializationError,
+    ServiceNotInitializedError,
+    ServiceState,
     ServiceStateError,
 )
 
 if TYPE_CHECKING:
     from src.core.settings import Settings
-
-
-class ServiceState(Enum):
-    """Service lifecycle states."""
-
-    CREATED = "created"
-    INITIALIZING = "initializing"
-    RUNNING = "running"
-    STOPPING = "stopping"
-    STOPPED = "stopped"
-    ERROR = "error"
-
-
-class ServiceInitializationError(ServiceStateError):
-    """Raised when service initialization fails."""
-
-    pass
-
-
-class ServiceNotInitializedError(ServiceStateError):
-    """Raised when attempting to use an uninitialized service."""
-
-    pass
 
 
 class EmbeddingGenerator(BaseService, ChunkEmbedder):
@@ -72,11 +47,19 @@ class EmbeddingGenerator(BaseService, ChunkEmbedder):
 
         Args:
             settings: Application settings
+
+        Raises:
+            ValueError: If required settings are missing
         """
+        if not settings.embedding_model:
+            raise ValueError("embedding_model setting is required")
+        if not settings.batch_size or settings.batch_size <= 0:
+            raise ValueError("batch_size must be a positive integer")
+
         BaseService.__init__(self)
         ChunkEmbedder.__init__(self, settings)
         self._settings = settings
-        self._model: Optional[SentenceTransformer] = None
+        self._model: SentenceTransformer | None = None
         self._batch_size = self._settings.batch_size
 
     async def initialize(self) -> None:
@@ -99,19 +82,21 @@ class EmbeddingGenerator(BaseService, ChunkEmbedder):
             self.add_metadata("batch_size", self._batch_size)
         except Exception as e:
             self._transition_state(ServiceState.ERROR)
-            raise ServiceInitializationError(
-                f"Failed to initialize embedding model: {str(e)}"
-            ) from e
+            raise ServiceInitializationError(f"Failed to initialize embedding model: {e!s}") from e
 
     async def cleanup(self) -> None:
-        """Clean up resources."""
+        """Clean up resources.
+
+        Raises:
+            ServiceStateError: If cleanup fails
+        """
         self._transition_state(ServiceState.STOPPING)
         try:
             self._model = None
             self._transition_state(ServiceState.STOPPED)
-        except Exception:
+        except Exception as e:
             self._transition_state(ServiceState.ERROR)
-            raise
+            raise ServiceStateError(f"Failed to cleanup: {e!s}") from e
 
     def _validate_semantic_chunk(self, chunk: Chunk) -> list[str]:
         """Validate semantic properties of the chunk.
@@ -142,19 +127,26 @@ class EmbeddingGenerator(BaseService, ChunkEmbedder):
 
         return errors
 
-    def _create_processed_chunk(self, chunk: Chunk, embedding: np.ndarray) -> ProcessedChunk:
+    def _create_processed_chunk(
+        self, chunk: Chunk, embedding: np.ndarray, metadata: dict[str, Any] | None = None
+    ) -> ProcessedChunk:
         """Create a ProcessedChunk from a Chunk and its embedding.
 
         Args:
             chunk: Source chunk
             embedding: Generated embedding
+            metadata: Optional processing metadata
 
         Returns:
             Processed chunk with embedding
 
         Raises:
             ValueError: If chunk validation fails
+            TypeError: If chunk is not of correct type
         """
+        if not isinstance(chunk, Chunk):
+            raise TypeError("Input must be a Chunk instance")
+
         # Validate chunk before processing
         validation_errors = self._validate_semantic_chunk(chunk)
         if validation_errors:
@@ -164,6 +156,12 @@ class EmbeddingGenerator(BaseService, ChunkEmbedder):
         chunk_dict = asdict(chunk)
         chunk_dict["embedding"] = embedding
 
+        # Add any additional metadata
+        if metadata:
+            if not isinstance(chunk_dict["metadata"], dict):
+                chunk_dict["metadata"] = {}
+            chunk_dict["metadata"].update(metadata)
+
         return ProcessedChunk(
             **chunk_dict,
             tokens=[],  # Embedding service doesn't handle tokenization
@@ -172,32 +170,81 @@ class EmbeddingGenerator(BaseService, ChunkEmbedder):
             topic_id=None,  # Not handled by embedding service
         )
 
-    def process_chunk(self, chunk: Chunk) -> ProcessedChunk:
-        """Process a single chunk.
+    def embed_chunk(
+        self, chunk: Chunk, metadata: dict[str, Any] | None = None
+    ) -> npt.NDArray[np.float32]:
+        """Generate embedding for a chunk.
 
         Args:
-            chunk: Chunk to process
+            chunk: Chunk to embed
+            metadata: Optional embedding metadata
 
         Returns:
-            Processed chunk with embedding
-        """
-        embedding = self.embed_chunk(chunk)
-        return self._create_processed_chunk(chunk, embedding)
+            Vector embedding of chunk content
 
-    def process_chunks(self, chunks: list[Chunk]) -> list[ProcessedChunk]:
-        """Process multiple chunks.
+        Raises:
+            ServiceStateError: If service is not initialized or not running
+            ValueError: If chunk is invalid
+            TypeError: If chunk is not of correct type
+        """
+        if not isinstance(chunk, Chunk):
+            raise TypeError("Input must be a Chunk instance")
+
+        self._check_running()
+        if self._model is None:
+            raise ServiceNotInitializedError("Model not initialized")
+
+        # Validate chunk
+        validation_errors = self.validate_chunk(chunk)
+        if validation_errors:
+            raise ValueError(f"Chunk validation failed: {'; '.join(validation_errors)}")
+
+        # Add metadata to service metrics if provided
+        if metadata:
+            self.add_metadata("last_embedding_metadata", metadata)
+
+        return self._model.encode(chunk.content, batch_size=self._batch_size)
+
+    def embed_chunks(
+        self, chunks: list[Chunk], metadata: dict[str, Any] | None = None
+    ) -> list[npt.NDArray[np.float32]]:
+        """Generate embeddings for multiple chunks.
 
         Args:
-            chunks: List of chunks to process
+            chunks: Chunks to embed
+            metadata: Optional embedding metadata
 
         Returns:
-            List of processed chunks with embeddings
+            List[np.ndarray]: List of vector embeddings
+
+        Raises:
+            ServiceStateError: If service is not initialized or not running
+            ValueError: If any chunk is invalid
+            TypeError: If any chunk is not of correct type
         """
-        embeddings = self.embed_chunks(chunks)
-        return [
-            self._create_processed_chunk(chunk, embedding)
-            for chunk, embedding in zip(chunks, embeddings)
-        ]
+        if not all(isinstance(chunk, Chunk) for chunk in chunks):
+            raise TypeError("All inputs must be Chunk instances")
+
+        self._check_running()
+        if self._model is None:
+            raise ServiceNotInitializedError("Model not initialized")
+
+        # Validate all chunks first
+        for chunk in chunks:
+            validation_errors = self.validate_chunk(chunk)
+            if validation_errors:
+                raise ValueError(
+                    f"Chunk validation failed for {chunk.id}: {'; '.join(validation_errors)}"
+                )
+
+        # Add metadata to service metrics if provided
+        if metadata:
+            self.add_metadata("last_batch_embedding_metadata", metadata)
+            self.add_metadata("last_batch_size", len(chunks))
+
+        # Optimize batch processing by encoding all texts at once
+        texts = [chunk.content for chunk in chunks]
+        return self._model.encode(texts, batch_size=self._batch_size)
 
     def validate_chunk(self, chunk: Chunk) -> list[str]:
         """Validate a chunk before processing.
@@ -207,7 +254,13 @@ class EmbeddingGenerator(BaseService, ChunkEmbedder):
 
         Returns:
             List of validation error messages
+
+        Raises:
+            TypeError: If chunk is not of correct type
         """
+        if not isinstance(chunk, Chunk):
+            raise TypeError("Input must be a Chunk instance")
+
         errors = []
 
         # Basic validation
@@ -220,40 +273,3 @@ class EmbeddingGenerator(BaseService, ChunkEmbedder):
         errors.extend(self._validate_semantic_chunk(chunk))
 
         return errors
-
-    def embed_chunk(self, chunk: Chunk) -> npt.NDArray[np.float32]:
-        """Generate embedding for a chunk.
-
-        Args:
-            chunk: Chunk to embed
-
-        Returns:
-            Vector embedding of chunk content
-
-        Raises:
-            ServiceNotInitializedError: If service is not initialized
-            ServiceStateError: If model is not running
-        """
-        self._check_running()
-        if self._model is None:
-            raise ServiceNotInitializedError("Model not initialized")
-        return self._model.encode(chunk.content, batch_size=self._batch_size)
-
-    def embed_chunks(self, chunks: List[Chunk]) -> List[npt.NDArray[np.float32]]:
-        """Generate embeddings for multiple chunks.
-
-        Args:
-            chunks: Chunks to embed
-
-        Returns:
-            List of vector embeddings
-
-        Raises:
-            ServiceNotInitializedError: If service is not initialized
-            ServiceStateError: If model is not running
-        """
-        self._check_running()
-        if self._model is None:
-            raise ServiceNotInitializedError("Model not initialized")
-        texts = [chunk.content for chunk in chunks]
-        return self._model.encode(texts, batch_size=self._batch_size)

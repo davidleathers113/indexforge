@@ -65,7 +65,6 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 import re
-from typing import Dict, List
 
 import spacy
 
@@ -133,7 +132,7 @@ class PIIDetector:
             name: re.compile(pattern, re.IGNORECASE) for name, pattern in self.patterns.items()
         }
 
-    def _find_regex_matches(self, text: str) -> List[PIIMatch]:
+    def _find_regex_matches(self, text: str) -> list[PIIMatch]:
         """Find PII using regex patterns."""
         matches = []
 
@@ -146,11 +145,11 @@ class PIIDetector:
                         )
                     )
             except Exception as e:
-                self.logger.error(f"Error matching pattern {pii_type}: {str(e)}")
+                self.logger.error(f"Error matching pattern {pii_type}: {e!s}")
 
         return matches
 
-    def _find_ner_matches(self, text: str) -> List[PIIMatch]:
+    def _find_ner_matches(self, text: str) -> list[PIIMatch]:
         """Find PII using named entity recognition with chunking."""
         matches = []
         chunks = chunk_text_by_chars(text, chunk_size=self.chunk_size)
@@ -173,13 +172,13 @@ class PIIDetector:
                             )
                         )
             except Exception as e:
-                self.logger.error(f"Error processing NER chunk: {str(e)}")
+                self.logger.error(f"Error processing NER chunk: {e!s}")
 
             offset += len(chunk)
 
         return matches
 
-    def detect(self, text: str) -> List[PIIMatch]:
+    def detect(self, text: str) -> list[PIIMatch]:
         """Detect all PII in the given text."""
         if not text:
             return []
@@ -204,7 +203,7 @@ class PIIDetector:
         return unique_matches
 
     def redact(
-        self, text: str, matches: List[PIIMatch] = None, custom_redaction: Dict[str, str] = None
+        self, text: str, matches: list[PIIMatch] = None, custom_redaction: dict[str, str] = None
     ) -> str:
         """Redact PII from text with custom redaction patterns."""
         if not text:
@@ -246,7 +245,7 @@ class PIIDetector:
 
         return "".join(chars)
 
-    def analyze_document(self, doc: Dict, custom_redaction: Dict[str, str] = None) -> Dict:
+    def analyze_document(self, doc: dict, custom_redaction: dict[str, str] = None) -> dict:
         """Analyze a document for PII and add results to metadata."""
         content = doc["content"]["body"]
         matches = self.detect(content)
@@ -263,7 +262,7 @@ class PIIDetector:
         }
 
         # Optionally redact content if specified
-        if doc.get("redact_pii", False):
+        if doc.get("redact_pii"):
             doc["content"]["body"] = self.redact(content, matches, custom_redaction)
             if doc["content"].get("summary"):
                 doc["content"]["summary"] = self.redact(

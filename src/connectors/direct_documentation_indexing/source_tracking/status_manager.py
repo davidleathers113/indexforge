@@ -46,18 +46,19 @@ Example:
     ```
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .enums import ProcessingStatus
 from .metrics import get_aggregated_metrics
 from .models import DocumentLineage, ProcessingStep
 
+
 logger = logging.getLogger(__name__)
 
 
-def get_latest_processing_step(lineage: DocumentLineage) -> Optional[ProcessingStep]:
+def get_latest_processing_step(lineage: DocumentLineage) -> ProcessingStep | None:
     """
     Get the most recent processing step for a document.
 
@@ -84,7 +85,7 @@ def get_latest_processing_step(lineage: DocumentLineage) -> Optional[ProcessingS
     return steps[-1] if steps else None
 
 
-def count_active_processes(lineage_data: Dict[str, DocumentLineage]) -> int:
+def count_active_processes(lineage_data: dict[str, DocumentLineage]) -> int:
     """
     Count the number of documents currently being processed.
 
@@ -119,7 +120,7 @@ def count_active_processes(lineage_data: Dict[str, DocumentLineage]) -> int:
     return active_count
 
 
-def get_real_time_status(lineage_data: Dict[str, DocumentLineage]) -> Dict[str, Any]:
+def get_real_time_status(lineage_data: dict[str, DocumentLineage]) -> dict[str, Any]:
     """
     Get real-time system status and performance metrics.
 
@@ -157,7 +158,7 @@ def get_real_time_status(lineage_data: Dict[str, DocumentLineage]) -> Dict[str, 
         print(f"Total processed: {history['total_processed']}")
         ```
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     last_hour = now - timedelta(hours=1)
 
     return {

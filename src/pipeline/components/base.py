@@ -10,7 +10,6 @@ Main Components:
 
 from abc import ABC, abstractmethod
 import logging
-from typing import Dict, List, Optional
 
 from src.pipeline.config.settings import PipelineConfig
 
@@ -32,7 +31,7 @@ class PipelineComponent(ABC):
         ...         return [self._process_doc(doc) for doc in documents]
     """
 
-    def __init__(self, config: PipelineConfig, logger: Optional[logging.Logger] = None):
+    def __init__(self, config: PipelineConfig, logger: logging.Logger | None = None):
         """Initialize pipeline component.
 
         Args:
@@ -44,7 +43,7 @@ class PipelineComponent(ABC):
         self.logger = logger or logging.getLogger(self.__class__.__name__)
 
     @abstractmethod
-    def process(self, documents: List[Dict], **kwargs) -> List[Dict]:
+    def process(self, documents: list[dict], **kwargs) -> list[dict]:
         """Process documents through this pipeline component.
 
         This method must be implemented by all subclasses to define their specific

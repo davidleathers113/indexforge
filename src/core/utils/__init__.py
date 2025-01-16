@@ -25,6 +25,7 @@ from .validation import (
     validate_reference_integrity,
 )
 
+
 __all__ = [
     # Similarity functions
     "compute_cosine_similarities",

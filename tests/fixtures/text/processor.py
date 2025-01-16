@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass, field
 import logging
-from typing import List
 from unittest.mock import MagicMock
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class TextState(BaseState):
     max_tokens: int = 1000
     encoding_name: str = "cl100k_base"
     error_mode: bool = False
-    processed_texts: List[str] = field(default_factory=list)
+    processed_texts: list[str] = field(default_factory=list)
 
     def reset(self):
         """Reset state to defaults."""
@@ -47,7 +47,7 @@ def mock_encoding(text_state):
     """Mock text encoding."""
     mock_enc = MagicMock()
 
-    def mock_encode(text: str) -> List[int]:
+    def mock_encode(text: str) -> list[int]:
         """Encode text to tokens."""
         try:
             if text_state.error_mode:
@@ -64,7 +64,7 @@ def mock_encoding(text_state):
             text_state.add_error(str(e))
             raise
 
-    def mock_decode(tokens: List[int]) -> str:
+    def mock_decode(tokens: list[int]) -> str:
         """Decode tokens to text."""
         try:
             if text_state.error_mode:

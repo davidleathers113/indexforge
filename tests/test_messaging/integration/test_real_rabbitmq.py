@@ -1,6 +1,5 @@
 """Integration tests for basic RabbitMQ connectivity."""
 
-from typing import Dict
 
 from aio_pika.abc import AbstractChannel, AbstractConnection
 import pytest
@@ -10,7 +9,7 @@ from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionMana
 
 @pytest.mark.asyncio
 async def test_real_connection_establishment(
-    integration_connection_manager: RabbitMQConnectionManager, integration_settings: Dict
+    integration_connection_manager: RabbitMQConnectionManager, integration_settings: dict
 ):
     """Test establishing a real connection to RabbitMQ.
 

@@ -1,7 +1,6 @@
 """Authentication router."""
 
 import secrets
-from typing import Optional
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Query, Request, status
@@ -20,6 +19,7 @@ from src.api.models.requests import (
     SignUpRequest,
 )
 from src.api.models.responses import AuthResponse, UserProfile
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
@@ -57,8 +57,8 @@ async def refresh_token(
 async def signup(
     request: SignUpRequest,
     supabase: AsyncClient = Depends(get_supabase_client),
-    csrf_token: Optional[str] = Cookie(None),
-    x_csrf_token: Optional[str] = Header(None),
+    csrf_token: str | None = Cookie(None),
+    x_csrf_token: str | None = Header(None),
 ) -> AuthResponse:
     """Sign up a new user."""
     if csrf_token and x_csrf_token:
@@ -206,7 +206,7 @@ async def oauth_signin(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"OAuth initialization failed: {str(exc)}",
+            detail=f"OAuth initialization failed: {exc!s}",
         ) from exc
 
 
@@ -216,7 +216,7 @@ async def oauth_callback(
     provider: OAuthProvider,
     code: str = Query(...),
     state: str = Query(...),
-    error: Optional[str] = Query(None),
+    error: str | None = Query(None),
     supabase: AsyncClient = Depends(get_supabase_client),
 ) -> RedirectResponse:
     """Handle OAuth callback."""
@@ -293,5 +293,5 @@ async def oauth_callback(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"OAuth callback failed: {str(exc)}",
+            detail=f"OAuth callback failed: {exc!s}",
         ) from exc

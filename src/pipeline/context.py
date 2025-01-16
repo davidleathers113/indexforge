@@ -41,10 +41,10 @@ Note:
     - Handles nested resources
 """
 
+from collections.abc import Generator
 from contextlib import contextmanager
 import logging
 import traceback
-from typing import Generator
 
 from .errors import ResourceError
 

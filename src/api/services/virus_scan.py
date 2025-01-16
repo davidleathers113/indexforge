@@ -1,10 +1,10 @@
 """Virus scanning service using ClamAV."""
 
 import logging
-from typing import Union
 
 import clamd
 from fastapi import HTTPException, UploadFile, status
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,14 +34,14 @@ class VirusScanService:
                 self._cd = clamd.ClamdAsyncNetworkSocket(host=self.host, port=self.port)
                 await self._cd.ping()
             except Exception as e:
-                logger.error(f"Failed to connect to ClamAV: {str(e)}")
+                logger.error(f"Failed to connect to ClamAV: {e!s}")
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail="Virus scanning service unavailable",
                 )
         return self._cd
 
-    async def scan_file(self, file: Union[UploadFile, bytes]) -> bool:
+    async def scan_file(self, file: UploadFile | bytes) -> bool:
         """Scan a file for viruses.
 
         Args:
@@ -80,7 +80,7 @@ class VirusScanService:
             )
 
         except Exception as e:
-            logger.error(f"Error during virus scan: {str(e)}")
+            logger.error(f"Error during virus scan: {e!s}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="File scanning failed"
             )

@@ -39,4 +39,5 @@ Note:
 from .direct_documentation_indexing import DocumentConnector
 from .notion_connector import NotionConnector
 
-__all__ = ["NotionConnector", "DocumentConnector"]
+
+__all__ = ["DocumentConnector", "NotionConnector"]

@@ -4,7 +4,6 @@ This module provides utility functions for computing similarities between
 vectors and performing clustering operations.
 """
 
-from typing import Dict, List, Tuple
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -39,7 +38,7 @@ def get_top_similar_indices(
     index: int,
     k: int = 5,
     threshold: float = 0.0,
-) -> List[int]:
+) -> list[int]:
     """Get indices of top-k most similar vectors.
 
     Args:
@@ -66,7 +65,7 @@ def perform_topic_clustering(
     n_topics: int,
     min_cluster_size: int = 2,
     random_state: int = 42,
-) -> Tuple[Dict[int, List[int]], KMeans]:
+) -> tuple[dict[int, list[int]], KMeans]:
     """Perform topic clustering on vectors.
 
     Args:
@@ -118,8 +117,8 @@ def predict_topic(vector: np.ndarray, clustering_model: KMeans) -> int:
 
 def compute_cluster_centroids(
     vectors: np.ndarray,
-    topic_groups: Dict[int, List[int]],
-) -> Dict[int, np.ndarray]:
+    topic_groups: dict[int, list[int]],
+) -> dict[int, np.ndarray]:
     """Compute centroids for topic clusters.
 
     Args:

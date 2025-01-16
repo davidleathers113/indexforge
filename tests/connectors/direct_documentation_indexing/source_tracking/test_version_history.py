@@ -1,7 +1,7 @@
 """Tests for version history tracking functionality."""
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 import json
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -16,15 +16,18 @@ def temp_history_dir(tmp_path):
     """Create a temporary directory for test history."""
     return tmp_path / 'history'
 
-@pytest.fixture
-def sample_change() -> Dict[str, Any]:
-    """Sample change data."""
-    return {'change_type': ChangeType.SCHEMA.value, 'description': 'Updated schema configuration', 'author': 'test_user', 'previous_value': {'class': 'OldClass'}, 'new_value': {'class': 'NewClass'}, 'timestamp': datetime.now(timezone.utc).isoformat()}
 
 @pytest.fixture
-def sample_tag() -> Dict[str, Any]:
+def sample_change() -> dict[str, Any]:
+    """Sample change data."""
+    return {'change_type': ChangeType.SCHEMA.value, 'description': 'Updated schema configuration', 'author': 'test_user', 'previous_value': {'class': 'OldClass'}, 'new_value': {'class': 'NewClass'}, 'timestamp': datetime.now(UTC).isoformat()}
+
+
+@pytest.fixture
+def sample_tag() -> dict[str, Any]:
     """Sample version tag data."""
-    return {'tag': 'v1.0.0', 'description': 'Initial release', 'author': 'test_user', 'change_type': ChangeType.CONFIG.value, 'timestamp': datetime.now(timezone.utc).isoformat(), 'reliability_score': 0.85}
+    return {'tag': 'v1.0.0', 'description': 'Initial release', 'author': 'test_user', 'change_type': ChangeType.CONFIG.value, 'timestamp': datetime.now(UTC).isoformat(), 'reliability_score': 0.85}
+
 
 @pytest.fixture
 def existing_history(temp_history_dir, sample_change, sample_tag):
@@ -38,6 +41,7 @@ def existing_history(temp_history_dir, sample_change, sample_tag):
         json.dump({'v1.0.0': sample_tag}, f)
     return {'changes': [sample_change], 'tags': {'v1.0.0': sample_tag}}
 
+
 def test_version_history_initialization():
     """Test basic initialization of VersionHistory."""
     history = VersionHistory('word', 'test_source')
@@ -46,6 +50,7 @@ def test_version_history_initialization():
     assert len(history.changes) == 0
     assert len(history.tags) == 0
 
+
 def test_load_existing_history(temp_history_dir, existing_history):
     """Test loading existing history from files."""
     history = VersionHistory('word', 'test_source', str(temp_history_dir))
@@ -53,6 +58,7 @@ def test_load_existing_history(temp_history_dir, existing_history):
     assert len(history.tags) == 1
     assert history.changes[0].change_type == ChangeType.SCHEMA
     assert 'v1.0.0' in history.tags
+
 
 def test_record_change(temp_history_dir):
     """Test recording a new change."""
@@ -65,6 +71,7 @@ def test_record_change(temp_history_dir):
     assert change.previous_value == {'old': 'value'}
     assert change.new_value == {'new': 'value'}
 
+
 def test_create_tag(temp_history_dir):
     """Test creating a version tag."""
     history = VersionHistory('word', 'test_source', str(temp_history_dir))
@@ -76,6 +83,7 @@ def test_create_tag(temp_history_dir):
     assert tag.reliability_score == 0.9
     assert history.changes[0].version_tag == 'v1.0.0'
 
+
 def test_get_changes_filtered(temp_history_dir):
     """Test getting filtered changes."""
     history = VersionHistory('word', 'test_source', str(temp_history_dir))
@@ -84,8 +92,9 @@ def test_get_changes_filtered(temp_history_dir):
     schema_changes = history.get_changes(change_type=ChangeType.SCHEMA)
     assert len(schema_changes) == 1
     assert schema_changes[0].change_type == ChangeType.SCHEMA
-    recent_changes = history.get_changes(start_time=datetime.now(timezone.utc) - timedelta(minutes=1))
+    recent_changes = history.get_changes(start_time=datetime.now(UTC) - timedelta(minutes=1))
     assert len(recent_changes) == 2
+
 
 def test_get_diff(temp_history_dir):
     """Test generating diffs between values."""
@@ -94,9 +103,10 @@ def test_get_diff(temp_history_dir):
     new = {'class': 'NewClass', 'properties': {'field1': 'value1', 'field2': 'value2'}}
     diff = history.get_diff(previous, new)
     assert len(diff) > 0
-    assert any(('-  "class": "OldClass"' in line for line in diff))
-    assert any(('+  "class": "NewClass"' in line for line in diff))
-    assert any(('+    "field2": "value2"' in line for line in diff))
+    assert any('-  "class": "OldClass"' in line for line in diff)
+    assert any('+  "class": "NewClass"' in line for line in diff)
+    assert any('+    "field2": "value2"' in line for line in diff)
+
 
 def test_version_tag_lookup(temp_history_dir):
     """Test looking up changes by version tag."""
@@ -108,16 +118,18 @@ def test_version_tag_lookup(temp_history_dir):
     assert change.description == 'Tagged change'
     assert change.version_tag == 'v1.0.0'
 
+
 def test_get_tags_between(temp_history_dir):
     """Test getting tags within a time range."""
     history = VersionHistory('word', 'test_source', str(temp_history_dir))
-    past_time = datetime.now(timezone.utc) - timedelta(days=1)
-    future_time = datetime.now(timezone.utc) + timedelta(days=1)
+    past_time = datetime.now(UTC) - timedelta(days=1)
+    future_time = datetime.now(UTC) + timedelta(days=1)
     history.record_change(change_type=ChangeType.SCHEMA, description='Old change', author='test_user', previous_value={}, new_value={})
     history.create_tag(tag='v1.0.0', description='Old version', author='test_user', change_type=ChangeType.SCHEMA)
     tags = history.get_tags_between(start_time=past_time, end_time=future_time)
     assert len(tags) == 1
     assert tags[0].tag == 'v1.0.0'
+
 
 def test_max_changes_limit(temp_history_dir):
     """Test that max_changes limit is enforced."""

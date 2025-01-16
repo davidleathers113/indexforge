@@ -1,7 +1,6 @@
 """Utility functions for Docker testing."""
 
 import time
-from typing import Dict, List, Optional
 
 import docker
 import psutil
@@ -9,7 +8,7 @@ import psutil
 
 class DockerTestUtils:
     @staticmethod
-    def check_logs(logs: List[str], patterns: List[str]) -> bool:
+    def check_logs(logs: list[str], patterns: list[str]) -> bool:
         """Check if all patterns exist in logs."""
         return all(any(pattern in log for log in logs) for pattern in patterns)
 
@@ -32,7 +31,7 @@ class DockerTestUtils:
     @staticmethod
     def get_container_resource_usage(
         container: docker.models.containers.Container,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Get container CPU and memory usage."""
         stats = container.stats(stream=False)
         cpu_stats = stats["cpu_stats"]
@@ -59,7 +58,7 @@ class DockerTestUtils:
         container: docker.models.containers.Container,
         path: str,
         expected_mode: str,
-        expected_user: Optional[str] = None,
+        expected_user: str | None = None,
     ) -> bool:
         """Verify file permissions inside container."""
         result = container.exec_run(f"stat -c '%a %U' {path}")
@@ -74,7 +73,7 @@ class DockerTestUtils:
     @staticmethod
     def check_process_isolation(
         container: docker.models.containers.Container,
-        expected_processes: List[str],
+        expected_processes: list[str],
     ) -> bool:
         """Check process isolation in container."""
         result = container.exec_run("ps aux")

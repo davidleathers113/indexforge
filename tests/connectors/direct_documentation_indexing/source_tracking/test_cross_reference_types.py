@@ -51,11 +51,11 @@ def test_semantic_references(reference_manager, sample_embeddings):
 
     # Check similar chunks are referenced
     refs = reference_manager.get_references("chunk_1", ReferenceType.SEMANTIC)
-    assert any((ref[0] == "chunk_2" for ref in refs)), "Similar chunks should be referenced"
+    assert any(ref[0] == "chunk_2" for ref in refs), "Similar chunks should be referenced"
 
     # Check reference is bidirectional
     refs = reference_manager.get_references("chunk_2", ReferenceType.SEMANTIC)
-    assert any((ref[0] == "chunk_1" for ref in refs)), "Semantic reference should be bidirectional"
+    assert any(ref[0] == "chunk_1" for ref in refs), "Semantic reference should be bidirectional"
 
 
 def test_topic_references(reference_manager, sample_embeddings):

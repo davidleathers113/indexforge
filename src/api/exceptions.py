@@ -91,8 +91,8 @@ class FileSizeLimitExceededError(DocumentException):
         """
         super().__init__(
             detail=(
-                f"File {filename} size ({size/1024/1024:.1f}MB) "
-                f"exceeds limit of {limit/1024/1024:.1f}MB"
+                f"File {filename} size ({size / 1024 / 1024:.1f}MB) "
+                f"exceeds limit of {limit / 1024 / 1024:.1f}MB"
             ),
             status_code=status.HTTP_400_BAD_REQUEST,
         )

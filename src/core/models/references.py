@@ -5,9 +5,10 @@ and documents. It provides enums for reference types and dataclasses for
 representing references.
 """
 
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional
 from uuid import UUID
 
 
@@ -39,7 +40,7 @@ class Reference:
     source_id: UUID  # ID of the source chunk
     target_id: UUID  # ID of the target chunk
     ref_type: ReferenceType  # Type of reference
-    metadata: Optional[Dict] = None  # Additional reference metadata
+    metadata: dict = field(default_factory=dict)  # Additional reference metadata
     bidirectional: bool = False  # Whether reference is bidirectional
 
 
@@ -47,14 +48,14 @@ class Reference:
 class CitationReference(Reference):
     """Represents a citation reference between chunks."""
 
-    text: str  # The cited text
-    start_pos: int  # Start position in source chunk
-    end_pos: int  # End position in source chunk
+    text: str = field(repr=True)  # The cited text
+    start_pos: int = field(repr=True)  # Start position in source chunk
+    end_pos: int = field(repr=True)  # End position in source chunk
 
 
 @dataclass
 class SemanticReference(Reference):
     """Represents a semantic reference between chunks."""
 
-    similarity_score: float  # Similarity score between chunks
-    topic_id: Optional[int] = None  # Optional topic cluster ID
+    similarity_score: float = field(repr=True)  # Similarity score between chunks
+    topic_id: int | None = None  # Optional topic cluster ID

@@ -46,10 +46,10 @@ Note:
     - Handles errors gracefully
 """
 
+from datetime import datetime
 import json
 import logging
-from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 import weaviate
 
@@ -135,8 +135,8 @@ class VectorIndex(NewVectorIndex):
         super().initialize()
 
     def time_range_search(
-        self, start_time: datetime, end_time: datetime, query_vector: List[float], limit: int = 10
-    ) -> List[Dict[str, Any]]:
+        self, start_time: datetime, end_time: datetime, query_vector: list[float], limit: int = 10
+    ) -> list[dict[str, Any]]:
         """Search documents within a time range.
 
         Args:
@@ -151,8 +151,8 @@ class VectorIndex(NewVectorIndex):
         return self.operations.search.time_range_search(start_time, end_time, query_vector, limit)
 
     def relationship_search(
-        self, parent_id: str, query_vector: List[float], limit: int = 10
-    ) -> List[Dict[str, Any]]:
+        self, parent_id: str, query_vector: list[float], limit: int = 10
+    ) -> list[dict[str, Any]]:
         """Search documents by relationship.
 
         Args:
@@ -165,7 +165,7 @@ class VectorIndex(NewVectorIndex):
         """
         return self.operations.search.relationship_search(parent_id, query_vector, limit)
 
-    def get_all_documents(self) -> List[str]:
+    def get_all_documents(self) -> list[str]:
         """Retrieve all document IDs from the index.
 
         Returns:
@@ -176,7 +176,7 @@ class VectorIndex(NewVectorIndex):
             document_ids = [doc["id"] for doc in result["objects"]]
             return document_ids
         except Exception as e:
-            self.logger.error(f"Error retrieving documents: {str(e)}")
+            self.logger.error(f"Error retrieving documents: {e!s}")
             return []
 
     def update_document(self, document_id, updates):
@@ -194,7 +194,7 @@ class VectorIndex(NewVectorIndex):
         try:
             return self.operations.update_document(document_id, updates)
         except Exception as e:
-            self.logger.error(f"Error updating document {document_id}: {str(e)}")
+            self.logger.error(f"Error updating document {document_id}: {e!s}")
             return False
 
     def add_documents(self, documents, deduplicate=False):
@@ -236,7 +236,7 @@ class VectorIndex(NewVectorIndex):
         doc_str = json.dumps(documents, sort_keys=True)
         return f"docs:{hash(doc_str)}"
 
-    def delete_documents(self, document_ids: List[str]) -> bool:
+    def delete_documents(self, document_ids: list[str]) -> bool:
         """Delete documents from the index.
 
         Args:
@@ -249,7 +249,7 @@ class VectorIndex(NewVectorIndex):
         try:
             return self.operations.delete_documents(doc_ids=document_ids)
         except Exception as e:
-            self.logger.error(f"Error deleting documents: {str(e)}")
+            self.logger.error(f"Error deleting documents: {e!s}")
             return False
 
     def cleanup(self):
@@ -264,12 +264,12 @@ class VectorIndex(NewVectorIndex):
             # Clean up any additional resources specific to the facade
             self.logger.info("VectorIndex facade resources cleaned up")
         except Exception as e:
-            self.logger.error(f"Error during cleanup: {str(e)}")
+            self.logger.error(f"Error during cleanup: {e!s}")
             raise
 
     def semantic_search(
-        self, query_vector: List[float], limit: int = 10, min_score: float = 0.0
-    ) -> List[Dict]:
+        self, query_vector: list[float], limit: int = 10, min_score: float = 0.0
+    ) -> list[dict]:
         """Search documents by semantic similarity.
 
         Args:
@@ -287,16 +287,16 @@ class VectorIndex(NewVectorIndex):
                 min_score=min_score,
             )
         except Exception as e:
-            self.logger.error(f"Error in semantic search: {str(e)}")
+            self.logger.error(f"Error in semantic search: {e!s}")
             return []
 
     def hybrid_search(
         self,
         text_query: str,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         alpha: float = 0.5,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Search documents using hybrid approach.
 
         Args:
@@ -311,7 +311,7 @@ class VectorIndex(NewVectorIndex):
         try:
             return self.operations.search.hybrid_search(text_query, query_vector, limit, alpha)
         except Exception as e:
-            self.logger.error(f"Error in hybrid search: {str(e)}")
+            self.logger.error(f"Error in hybrid search: {e!s}")
             return []
 
 

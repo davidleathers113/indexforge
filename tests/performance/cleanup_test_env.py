@@ -1,13 +1,12 @@
 """Script to clean up test environment for Weaviate performance testing."""
 
 import os
-from typing import Tuple
 
 import docker
 from loguru import logger
 
 
-def load_environment() -> Tuple[str, str]:
+def load_environment() -> tuple[str, str]:
     """Load environment IDs from file.
 
     Returns:

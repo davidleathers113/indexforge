@@ -14,6 +14,7 @@ from opentelemetry.sdk.trace.sampling import ParentBasedTraceIdRatio
 
 from src.api.config.settings import settings
 
+
 # Initialize optional OpenTelemetry components
 HAS_OTEL_INSTRUMENTATION = False
 OTLPSpanExporter = None

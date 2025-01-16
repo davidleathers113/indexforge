@@ -65,7 +65,6 @@ Error Handling:
 import argparse
 from pathlib import Path
 import sys
-from typing import Optional, Union
 
 from pipeline.context import managed_pipeline
 from pipeline.core import Pipeline
@@ -74,13 +73,13 @@ from pipeline.parameters import get_env_value, normalize_parameters, validate_pa
 
 
 def run_pipeline(
-    export_dir: Optional[Union[str, Path]] = None,
-    index_url: Optional[str] = None,
-    log_dir: Union[str, Path] = "logs",
-    batch_size: Union[int, str] = 100,
-    cache_host: Optional[str] = None,
-    cache_port: Optional[int] = None,
-    cache_ttl: Optional[int] = None,
+    export_dir: str | Path | None = None,
+    index_url: str | None = None,
+    log_dir: str | Path = "logs",
+    batch_size: int | str = 100,
+    cache_host: str | None = None,
+    cache_port: int | None = None,
+    cache_ttl: int | None = None,
 ) -> Pipeline:
     """Run pipeline with direct parameter input (for testing and programmatic use).
 
@@ -120,13 +119,13 @@ def run_pipeline(
 
 
 def main(
-    export_dir: Union[str, Path],
-    index_url: Optional[str] = None,
-    log_dir: Union[str, Path] = "logs",
-    batch_size: Union[int, str] = 100,
-    cache_host: Optional[str] = None,
-    cache_port: Optional[int] = None,
-    cache_ttl: Optional[int] = None,
+    export_dir: str | Path,
+    index_url: str | None = None,
+    log_dir: str | Path = "logs",
+    batch_size: int | str = 100,
+    cache_host: str | None = None,
+    cache_port: int | None = None,
+    cache_ttl: int | None = None,
 ) -> Pipeline:
     """Initialize and run the pipeline (backward compatibility).
 
@@ -162,13 +161,13 @@ def main(
 
 
 def init_pipeline(
-    export_dir: Union[str, Path],
-    index_url: Optional[str] = None,
-    log_dir: Union[str, Path] = "logs",
-    batch_size: Union[int, str] = 100,
-    cache_host: Optional[str] = None,
-    cache_port: Optional[int] = None,
-    cache_ttl: Optional[int] = None,
+    export_dir: str | Path,
+    index_url: str | None = None,
+    log_dir: str | Path = "logs",
+    batch_size: int | str = 100,
+    cache_host: str | None = None,
+    cache_port: int | None = None,
+    cache_ttl: int | None = None,
 ) -> Pipeline:
     """Initialize pipeline with validated parameters.
 
@@ -261,14 +260,14 @@ if __name__ == "__main__":
             p.process_documents()
 
     except ValidationError as e:
-        print(f"Configuration error: {str(e)}", file=sys.stderr)
+        print(f"Configuration error: {e!s}", file=sys.stderr)
         sys.exit(1)
     except PipelineError as e:
         if e.cause:
-            print(f"Pipeline error: {str(e)} caused by {str(e.cause)}", file=sys.stderr)
+            print(f"Pipeline error: {e!s} caused by {e.cause!s}", file=sys.stderr)
         else:
-            print(f"Pipeline error: {str(e)}", file=sys.stderr)
+            print(f"Pipeline error: {e!s}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"Unexpected error: {str(e)}", file=sys.stderr)
+        print(f"Unexpected error: {e!s}", file=sys.stderr)
         sys.exit(1)

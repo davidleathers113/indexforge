@@ -50,14 +50,14 @@ Example:
 """
 
 import logging
-from typing import Dict, List, Set
 
 from .models import DocumentLineage
+
 
 logger = logging.getLogger(__name__)
 
 
-def validate_circular_derivations(lineage_data: Dict[str, DocumentLineage]) -> List[str]:
+def validate_circular_derivations(lineage_data: dict[str, DocumentLineage]) -> list[str]:
     """
     Check for circular derivation relationships between documents.
 
@@ -98,7 +98,7 @@ def validate_circular_derivations(lineage_data: Dict[str, DocumentLineage]) -> L
     errors = []
     visited = set()
 
-    def check_derivation_chain(doc_id: str, chain: Set[str]) -> None:
+    def check_derivation_chain(doc_id: str, chain: set[str]) -> None:
         """
         Recursively check derivation chain for cycles.
 
@@ -127,7 +127,7 @@ def validate_circular_derivations(lineage_data: Dict[str, DocumentLineage]) -> L
     return errors
 
 
-def validate_chunk_references(lineage_data: Dict[str, DocumentLineage]) -> List[str]:
+def validate_chunk_references(lineage_data: dict[str, DocumentLineage]) -> list[str]:
     """
     Validate chunk references across all documents.
 
@@ -194,7 +194,7 @@ def validate_chunk_references(lineage_data: Dict[str, DocumentLineage]) -> List[
     return errors
 
 
-def validate_lineage_relationships(lineage_data: Dict[str, DocumentLineage]) -> List[str]:
+def validate_lineage_relationships(lineage_data: dict[str, DocumentLineage]) -> list[str]:
     """
     Validate relationships between documents in the lineage data.
 
@@ -266,7 +266,7 @@ def validate_lineage_relationships(lineage_data: Dict[str, DocumentLineage]) -> 
     return errors
 
 
-def validate_lineage(lineage_data: Dict[str, DocumentLineage]) -> List[str]:
+def validate_lineage(lineage_data: dict[str, DocumentLineage]) -> list[str]:
     """
     Validate the entire lineage data for consistency and correctness.
 

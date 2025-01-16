@@ -1,6 +1,6 @@
 """Test configuration for auth routes."""
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock
 
 from fastapi import FastAPI

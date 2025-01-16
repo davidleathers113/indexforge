@@ -1,6 +1,5 @@
 """URL parameter type implementation."""
 
-from typing import Optional
 
 from src.pipeline.parameters.base import Parameter
 from src.pipeline.parameters.normalizers.url import URLNormalizer
@@ -16,8 +15,8 @@ class URLParameter(Parameter):
         value: str,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
-        allowed_schemes: Optional[list[str]] = None,
+        description: str | None = None,
+        allowed_schemes: list[str] | None = None,
     ):
         super().__init__(name, value, required, allow_none, description)
         self.allowed_schemes = allowed_schemes or ["http", "https"]
@@ -30,7 +29,7 @@ class URLParameter(Parameter):
         if self._value is not None:
             self.validator.validate(self._value, self.name)
 
-    def normalize(self) -> Optional[str]:
+    def normalize(self) -> str | None:
         """Normalize the URL value."""
         if self._value is None:
             return None

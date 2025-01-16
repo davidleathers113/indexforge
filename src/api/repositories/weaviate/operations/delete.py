@@ -1,12 +1,12 @@
 """Weaviate deletion operations for v4.x."""
 
 import logging
-from typing import Dict, List
 
 from weaviate.collections import Collection
 
 from src.api.errors.weaviate_error_handling import with_weaviate_error_handling
 from src.api.repositories.weaviate.base import BaseWeaviateRepository
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class DeleteRepository(BaseWeaviateRepository):
         super().__init__(collection)
 
     @with_weaviate_error_handling
-    async def batch_delete_documents(self, document_ids: List[str]) -> List[Dict]:
+    async def batch_delete_documents(self, document_ids: list[str]) -> list[dict]:
         """Delete multiple documents using v4.x batch deletion.
 
         Args:
@@ -59,7 +59,7 @@ class DeleteRepository(BaseWeaviateRepository):
             return results
 
         except Exception as e:
-            logger.error(f"Batch deletion failed: {str(e)}")
+            logger.error(f"Batch deletion failed: {e!s}")
             # Add failure results for all documents
             results.extend(
                 [{"id": doc_id, "status": "error", "error": str(e)} for doc_id in document_ids]

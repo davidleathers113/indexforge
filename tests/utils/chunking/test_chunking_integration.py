@@ -18,13 +18,15 @@ def load_test_document(name: str) -> str:
     """Load a test document from the test data directory."""
     import os
     test_data_dir = os.path.join(os.path.dirname(__file__), 'test_data')
-    with open(os.path.join(test_data_dir, name), 'r', encoding='utf-8') as f:
+    with open(os.path.join(test_data_dir, name), encoding='utf-8') as f:
         return f.read()
+
 
 @pytest.fixture
 def markdown_document() -> str:
     """A complex markdown document with various content types."""
     return '# Test Document\n\n## Introduction\nThis is a test document that contains various types of content\nthat our chunking system needs to handle properly.\n\n## Code Examples\nHere\'s some Python code:\n```python\ndef hello_world():\n    print("Hello, World!")\n    return True\n```\n\nAnd some inline code: `print("inline")`.\n\n## Lists and Tables\nHere\'s a list:\n- Item 1\n  - Nested item A\n  - Nested item B\n- Item 2\n  - Nested item X\n    - Deep nest 1\n    - Deep nest 2\n\nAnd a table:\n| Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |\n| Cell 3   | Cell 4   |\n\n## Mixed Content\n1. First numbered item with `inline code`\n2. Second item with a table:\n   | A | B |\n   |---|---|\n   | 1 | 2 |\n\n## Conclusion\nThis document tests various markdown features and their interaction.\n'
+
 
 def test_end_to_end_token_chunking(markdown_document):
     """Test token-based chunking with a complete markdown document."""
@@ -40,6 +42,7 @@ def test_end_to_end_token_chunking(markdown_document):
     assert 'def hello_world():' in full_text
     assert '| Header 1 |' in full_text
 
+
 def test_end_to_end_paragraph_chunking(markdown_document):
     """Test paragraph-based chunking with a complete markdown document."""
     config = ChunkingConfig(use_advanced_chunking=True, min_chunk_size=25, max_chunk_size=100)
@@ -50,13 +53,14 @@ def test_end_to_end_paragraph_chunking(markdown_document):
         tokens = config.count_tokens(chunk)
         assert tokens >= config.min_chunk_size
         assert tokens <= config.max_chunk_size
-    code_chunk = next((chunk for chunk in chunks if '```python' in chunk))
+    code_chunk = next(chunk for chunk in chunks if '```python' in chunk)
     assert 'def hello_world():' in code_chunk
     assert 'print(' in code_chunk
-    list_chunk = next((chunk for chunk in chunks if '- Item 1' in chunk))
+    list_chunk = next(chunk for chunk in chunks if '- Item 1' in chunk)
     assert '- Nested item' in list_chunk
-    table_chunk = next((chunk for chunk in chunks if '| Header 1 |' in chunk))
+    table_chunk = next(chunk for chunk in chunks if '| Header 1 |' in chunk)
     assert '| Cell 1' in table_chunk
+
 
 def test_real_world_document_sizes():
     """Test chunking with realistic document sizes."""
@@ -79,6 +83,7 @@ def test_real_world_document_sizes():
             else:
                 assert config.count_tokens(chunk) <= config.chunk_size
 
+
 def test_cross_chunking_strategy_comparison(markdown_document):
     """Compare different chunking strategies on the same document."""
     token_config = ChunkingConfig(chunk_size=100, chunk_overlap=10)
@@ -97,6 +102,7 @@ def test_cross_chunking_strategy_comparison(markdown_document):
         assert '| Header 1 |' in full_text, f'{strategy} chunking lost tables'
         assert '- Item 1' in full_text, f'{strategy} chunking lost lists'
 
+
 def test_error_handling_and_recovery():
     """Test error handling and recovery in the chunking pipeline."""
     problematic_doc = '\n# Valid Section\n\n```python\nunclosed code block\n\n| Invalid | Table |\n| Missing | Cells |\n| Extra | Cells | Here |\n\n- Valid list item\n-- Invalid list marker\n- Valid item again\n'
@@ -107,6 +113,7 @@ def test_error_handling_and_recovery():
     assert '# Valid Section' in full_text
     assert '- Valid list item' in full_text
     assert '- Valid item again' in full_text
+
 
 def test_unicode_and_special_content_handling():
     """Test handling of Unicode and special content across chunking strategies."""

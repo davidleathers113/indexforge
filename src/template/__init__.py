@@ -16,6 +16,7 @@ from .models.settings import TemplateSettings
 from .services.context import ContextService
 from .services.environment import EnvironmentService
 
+
 __version__ = "0.1.0"
 
 # Configure logging
@@ -26,7 +27,7 @@ _context_service = ContextService()
 _environment_service = EnvironmentService(TemplateSettings.create_default())
 
 
-def create_environment(templates_dir: Union[str, Path]) -> Environment:
+def create_environment(templates_dir: str | Path) -> Environment:
     """Creates a configured template environment.
 
     This function is responsible for:
@@ -43,7 +44,7 @@ def create_environment(templates_dir: Union[str, Path]) -> Environment:
     return _environment_service.create_environment(templates_dir)
 
 
-def get_template_context(template_type: str, **kwargs) -> Dict[str, Any]:
+def get_template_context(template_type: str, **kwargs) -> dict[str, Any]:
     """Gets context for template rendering.
 
     This function is responsible for:
@@ -62,4 +63,4 @@ def get_template_context(template_type: str, **kwargs) -> Dict[str, Any]:
 
 
 # Only expose the high-level functions
-__all__ = ["create_environment", "get_template_context", "__version__"]
+__all__ = ["__version__", "create_environment", "get_template_context"]

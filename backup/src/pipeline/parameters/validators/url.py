@@ -1,7 +1,6 @@
 """URL value validator implementation."""
 
 import logging
-from typing import List, Optional
 from urllib.parse import urlparse, urlunparse
 
 from src.pipeline.errors import ValidationError
@@ -13,7 +12,7 @@ class URLValidator(Validator):
 
     def __init__(
         self,
-        allowed_schemes: Optional[List[str]] = None,
+        allowed_schemes: list[str] | None = None,
         require_path: bool = False,
         allow_query: bool = True,
         allow_fragment: bool = True,
@@ -69,7 +68,7 @@ class URLValidator(Validator):
         except Exception as e:
             if isinstance(e, ValidationError):
                 raise
-            raise ValidationError(f"Invalid URL format for {param_name}: {str(e)}")
+            raise ValidationError(f"Invalid URL format for {param_name}: {e!s}")
 
     def normalize(self, value: str) -> str:
         """Normalize a URL value.
@@ -88,5 +87,5 @@ class URLValidator(Validator):
             self.logger.debug(f"Normalized URL {value} to {normalized}")
             return normalized
         except Exception as e:
-            self.logger.warning(f"Failed to normalize URL {value}: {str(e)}")
+            self.logger.warning(f"Failed to normalize URL {value}: {e!s}")
             return value

@@ -12,7 +12,6 @@ The chunking strategy follows these principles:
 
 from dataclasses import dataclass
 import re
-from typing import List, Tuple
 
 from .base import ChunkingConfig
 
@@ -41,7 +40,7 @@ class ParagraphChunker:
             config.use_advanced_chunking = True
         self.config = config
 
-    def chunk_text(self, text: str) -> List[str]:
+    def chunk_text(self, text: str) -> list[str]:
         """Main entry point for paragraph-based text chunking."""
         # 1. Split into content blocks while preserving special blocks
         blocks = self._split_into_blocks(text)
@@ -49,7 +48,7 @@ class ParagraphChunker:
         # 2. Combine blocks into coherent chunks
         return self._combine_blocks(blocks)
 
-    def _split_into_blocks(self, text: str) -> List[ContentBlock]:
+    def _split_into_blocks(self, text: str) -> list[ContentBlock]:
         """Split text into content blocks while preserving special content."""
         blocks = []
         current_pos = 0
@@ -82,7 +81,7 @@ class ParagraphChunker:
 
         return blocks
 
-    def _extract_special_blocks(self, text: str) -> List[Tuple[int, int, str]]:
+    def _extract_special_blocks(self, text: str) -> list[tuple[int, int, str]]:
         """Extract positions and types of special content blocks."""
         special_blocks = []
 
@@ -98,7 +97,7 @@ class ParagraphChunker:
         # Sort blocks by start position
         return sorted(special_blocks, key=lambda x: x[0])
 
-    def _process_normal_text(self, text: str) -> List[ContentBlock]:
+    def _process_normal_text(self, text: str) -> list[ContentBlock]:
         """Process normal text into paragraph blocks."""
         blocks = []
 
@@ -132,7 +131,7 @@ class ParagraphChunker:
 
         return blocks
 
-    def _combine_blocks(self, blocks: List[ContentBlock]) -> List[str]:
+    def _combine_blocks(self, blocks: list[ContentBlock]) -> list[str]:
         """Combine blocks into coherent chunks respecting size constraints."""
         chunks = []
         current_chunk = []
@@ -173,7 +172,7 @@ class ParagraphChunker:
 
         return chunks
 
-    def _split_large_block(self, block: ContentBlock) -> List[str]:
+    def _split_large_block(self, block: ContentBlock) -> list[str]:
         """Split a large block into smaller chunks."""
         if block.block_type in ("code", "table"):
             # Don't split code or table blocks, return as is

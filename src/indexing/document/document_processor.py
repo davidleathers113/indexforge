@@ -7,7 +7,6 @@ merging updates, and computing document hashes for deduplication.
 
 from datetime import datetime
 import logging
-from typing import Dict, List, Tuple
 
 
 class DocumentProcessor:
@@ -25,7 +24,7 @@ class DocumentProcessor:
         """Initialize document processor with logging configuration."""
         self.logger = logging.getLogger(__name__)
 
-    def prepare_document(self, doc: Dict) -> Tuple[Dict, List[float]]:
+    def prepare_document(self, doc: dict) -> tuple[dict, list[float]]:
         """Prepare document properties and vector for indexing.
 
         Processes a raw document by extracting and organizing its properties
@@ -66,7 +65,7 @@ class DocumentProcessor:
         }
         return properties, vector
 
-    def validate_document(self, doc: Dict) -> bool:
+    def validate_document(self, doc: dict) -> bool:
         """Validate document structure and required fields.
 
         Checks if the document contains all required fields and validates
@@ -107,7 +106,7 @@ class DocumentProcessor:
 
         return True
 
-    def merge_document_updates(self, existing: Dict, updates: Dict) -> Dict:
+    def merge_document_updates(self, existing: dict, updates: dict) -> dict:
         """Merge updates into existing document properties.
 
         Creates a new document dictionary by merging update properties into
@@ -132,7 +131,7 @@ class DocumentProcessor:
         merged["last_updated"] = datetime.utcnow().isoformat()
         return merged
 
-    def compute_document_hash(self, doc: Dict) -> str:
+    def compute_document_hash(self, doc: dict) -> str:
         """Compute hash for document deduplication.
 
         Generates a stable hash of the document's content, metadata, and embeddings
@@ -169,5 +168,5 @@ class DocumentProcessor:
             content_str = "|".join(content)
             return str(hash(content_str))
         except Exception as e:
-            self.logger.error(f"Error computing document hash: {str(e)}")
+            self.logger.error(f"Error computing document hash: {e!s}")
             raise

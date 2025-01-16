@@ -7,7 +7,8 @@ management interface that all services must implement.
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, Optional, Protocol, TypeVar
+from typing import Any, Protocol, TypeVar
+
 
 T_co = TypeVar("T_co", covariant=True)
 
@@ -23,10 +24,10 @@ class AsyncContextManager(Protocol[T_co]):
     @abstractmethod
     async def __aexit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[Any],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any | None,
+    ) -> bool | None:
         """Exit the async context."""
         pass
 
@@ -63,7 +64,7 @@ class ServiceMetrics(Protocol):
         """Get service uptime."""
         pass
 
-    def get_resource_usage(self) -> Dict[str, Any]:
+    def get_resource_usage(self) -> dict[str, Any]:
         """Get current resource usage metrics."""
         pass
 
@@ -83,10 +84,10 @@ class BaseService(ABC, AsyncContextManager["BaseService"]):
     def __init__(self):
         """Initialize the base service."""
         self._state = ServiceState.CREATED
-        self._metadata: Dict[str, str] = {}
-        self._last_health_check: Optional[datetime] = None
-        self._start_time: Optional[datetime] = None
-        self._resource_usage: Dict[str, Any] = {}
+        self._metadata: dict[str, str] = {}
+        self._last_health_check: datetime | None = None
+        self._start_time: datetime | None = None
+        self._resource_usage: dict[str, Any] = {}
 
     @property
     def state(self) -> ServiceState:
@@ -150,10 +151,10 @@ class BaseService(ABC, AsyncContextManager["BaseService"]):
 
     async def __aexit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[Any],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any | None,
+    ) -> bool | None:
         """Exit async context manager."""
         await self.cleanup()
         return None
@@ -176,7 +177,7 @@ class BaseService(ABC, AsyncContextManager["BaseService"]):
         """
         self._metadata[key] = value
 
-    def get_metadata(self, key: str) -> Optional[str]:
+    def get_metadata(self, key: str) -> str | None:
         """Get metadata value.
 
         Args:
@@ -187,7 +188,7 @@ class BaseService(ABC, AsyncContextManager["BaseService"]):
         """
         return self._metadata.get(key)
 
-    def get_uptime(self) -> Optional[timedelta]:
+    def get_uptime(self) -> timedelta | None:
         """Get service uptime.
 
         Returns:
@@ -197,7 +198,7 @@ class BaseService(ABC, AsyncContextManager["BaseService"]):
             return datetime.now() - self._start_time
         return None
 
-    def get_resource_usage(self) -> Dict[str, Any]:
+    def get_resource_usage(self) -> dict[str, Any]:
         """Get current resource usage metrics.
 
         Returns:
@@ -218,7 +219,7 @@ class BaseService(ABC, AsyncContextManager["BaseService"]):
         except Exception:
             return False
 
-    def get_last_health_check(self) -> Optional[datetime]:
+    def get_last_health_check(self) -> datetime | None:
         """Get timestamp of last health check.
 
         Returns:

@@ -1,6 +1,6 @@
 """Tests for aggregated metrics functionality."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -91,7 +91,7 @@ def test_get_aggregated_metrics_time_filtered(storage):
     add_document(storage, doc_id=doc_id)
 
     # Create events at different times
-    one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+    one_hour_ago = datetime.now(UTC) - timedelta(hours=1)
     with patch("datetime.datetime") as mock_datetime:
         mock_datetime.now.return_value = one_hour_ago
         add_processing_step(
@@ -107,7 +107,7 @@ def test_get_aggregated_metrics_time_filtered(storage):
     assert recent_metrics["errors"]["total_errors"] == 1, "Should include errors from last hour"
 
     # Test future metrics
-    future_metrics = get_aggregated_metrics(storage, start_time=datetime.now(timezone.utc))
+    future_metrics = get_aggregated_metrics(storage, start_time=datetime.now(UTC))
     assert future_metrics["processing"]["completed_docs"] == 0, "Should exclude past events"
     assert future_metrics["errors"]["total_errors"] == 0, "Should exclude past errors"
 

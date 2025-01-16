@@ -4,8 +4,8 @@ This module contains tests that verify the proper handling of mismatches
 between document schemas and expected schemas.
 """
 from copy import deepcopy
-from datetime import datetime, timezone
-from typing import Any, Dict
+from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 
@@ -13,9 +13,10 @@ from src.connectors.direct_documentation_indexing.processors import BaseProcesso
 from src.indexing.schema import SchemaDefinition, SchemaValidator
 
 
-def create_valid_document() -> Dict[str, Any]:
+def create_valid_document() -> dict[str, Any]:
     """Create a valid test document."""
-    return {'content_body': 'Test content', 'content_summary': 'Summary', 'content_title': 'Title', 'schema_version': 1, 'timestamp_utc': datetime.now(timezone.utc).isoformat(), 'parent_id': None, 'chunk_ids': [], 'embedding': [0.1] * 384}
+    return {'content_body': 'Test content', 'content_summary': 'Summary', 'content_title': 'Title', 'schema_version': 1, 'timestamp_utc': datetime.now(UTC).isoformat(), 'parent_id': None, 'chunk_ids': [], 'embedding': [0.1] * 384}
+
 
 def test_incompatible_schema_versions():
     """Test handling of incompatible schema versions between systems."""
@@ -24,6 +25,7 @@ def test_incompatible_schema_versions():
     with pytest.raises(ValueError, match='incompatible.*version'):
         SchemaValidator.validate_object(doc)
 
+
 def test_field_definition_mismatch():
     """Test handling of mismatched field definitions."""
     doc = create_valid_document()
@@ -31,6 +33,7 @@ def test_field_definition_mismatch():
     doc['custom_field'] = 123
     with pytest.raises(ValueError, match='unknown.*field'):
         SchemaValidator.validate_object(doc, strict=True)
+
 
 def test_field_type_mismatch():
     """Test handling of mismatched field types."""
@@ -42,6 +45,7 @@ def test_field_type_mismatch():
         with pytest.raises(TypeError, match=f'{field}.*type'):
             SchemaValidator.validate_object(test_doc)
 
+
 def test_metadata_schema_mismatch():
     """Test handling of mismatched metadata schemas."""
     doc = create_valid_document()
@@ -51,6 +55,7 @@ def test_metadata_schema_mismatch():
         test_doc['metadata'] = metadata
         with pytest.raises((TypeError, ValueError)):
             SchemaValidator.validate_object(test_doc)
+
 
 def test_embedding_dimension_mismatch():
     """Test handling of mismatched embedding dimensions."""
@@ -62,12 +67,14 @@ def test_embedding_dimension_mismatch():
         with pytest.raises(ValueError, match='embedding.*dimension'):
             SchemaValidator.validate_object(test_doc)
 
+
 def test_processor_schema_mismatch():
     """Test handling of mismatches between processor and core schema."""
     processor = BaseProcessor()
     processor_doc = {'content': {'body': 'Test content', 'metadata': {'format': 'unknown'}}, 'source': {'type': 'unsupported', 'location': 'unknown'}}
     with pytest.raises(ValueError, match='processor.*schema'):
         processor.process_and_map(processor_doc)
+
 
 def test_relationship_schema_mismatch():
     """Test handling of mismatched relationship schemas."""
@@ -79,6 +86,7 @@ def test_relationship_schema_mismatch():
         with pytest.raises((TypeError, ValueError)):
             SchemaValidator.validate_object(test_doc)
 
+
 def test_timestamp_format_mismatch():
     """Test handling of mismatched timestamp formats."""
     doc = create_valid_document()
@@ -88,6 +96,7 @@ def test_timestamp_format_mismatch():
         test_doc['timestamp_utc'] = timestamp
         with pytest.raises(ValueError, match='timestamp.*format'):
             SchemaValidator.validate_object(test_doc)
+
 
 def test_content_format_mismatch():
     """Test handling of mismatched content formats."""

@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass, field
 import logging
-from typing import Dict, List
 from unittest.mock import MagicMock
 
 import pytest
@@ -11,6 +10,7 @@ from src.indexing.search.search_result import SearchResult
 
 from ..core.base import BaseState
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class SearchState(BaseState):
     """Search executor state."""
 
-    results: List[Dict] = field(default_factory=list)
+    results: list[dict] = field(default_factory=list)
     semantic_score: float = 0.9
     hybrid_score: float = 0.85
     vector_dimensions: int = 3
@@ -34,7 +34,7 @@ class SearchState(BaseState):
         self.error_mode = False
         logger.debug("Search state reset complete")
 
-    def add_result(self, result: Dict):
+    def add_result(self, result: dict):
         """Add a search result."""
         logger.debug(f"Adding search result: {result}")
         self.results.append(result)
@@ -61,7 +61,7 @@ def mock_search_executor():
     mock_executor = MagicMock(name="search_executor")
     state = SearchState()
 
-    def mock_semantic_search(*args, **kwargs) -> List[SearchResult]:
+    def mock_semantic_search(*args, **kwargs) -> list[SearchResult]:
         """Execute semantic search with error tracking."""
         logger.info(f"Executing semantic search with args={args}, kwargs={kwargs}")
         try:
@@ -81,12 +81,12 @@ def mock_search_executor():
             return state.results
 
         except Exception as e:
-            error_msg = f"Error in semantic search: {str(e)}"
+            error_msg = f"Error in semantic search: {e!s}"
             logger.error(error_msg, exc_info=True)
             state.add_error(error_msg)
             raise
 
-    def mock_hybrid_search(*args, **kwargs) -> List[SearchResult]:
+    def mock_hybrid_search(*args, **kwargs) -> list[SearchResult]:
         """Execute hybrid search with error tracking."""
         logger.info(f"Executing hybrid search with args={args}, kwargs={kwargs}")
         try:
@@ -108,7 +108,7 @@ def mock_search_executor():
             return state.results
 
         except Exception as e:
-            error_msg = f"Error in hybrid search: {str(e)}"
+            error_msg = f"Error in hybrid search: {e!s}"
             logger.error(error_msg, exc_info=True)
             state.add_error(error_msg)
             raise

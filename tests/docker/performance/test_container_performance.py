@@ -1,7 +1,7 @@
 import asyncio
+from collections.abc import Generator
 from pathlib import Path
 import time
-from typing import Dict, Generator
 
 import aiohttp
 import docker
@@ -11,7 +11,7 @@ import pytest
 
 @pytest.fixture(scope="function")
 async def running_app(
-    docker_client: docker.DockerClient, dockerfile: Path, test_environment: Dict[str, str]
+    docker_client: docker.DockerClient, dockerfile: Path, test_environment: dict[str, str]
 ) -> Generator[Container, None, None]:
     """Provide a running application container for performance testing."""
     # Build image

@@ -2,7 +2,6 @@
 
 import json
 import time
-from typing import Dict, List, Optional, Tuple
 
 from weaviate.classes.query import Filter
 
@@ -19,11 +18,11 @@ class FacetedRepository(BaseWeaviateRepository):
     async def faceted_search(
         self,
         query: FacetQuery,
-        facets: List[str],
-        cursor: Optional[str] = None,
-        sort_by: Optional[str] = None,
+        facets: list[str],
+        cursor: str | None = None,
+        sort_by: str | None = None,
         sort_order: str = "desc",
-    ) -> Tuple[SearchResponse, FacetResponse, Optional[str]]:
+    ) -> tuple[SearchResponse, FacetResponse, str | None]:
         """Perform faceted search with aggregations.
 
         Args:
@@ -94,7 +93,7 @@ class FacetedRepository(BaseWeaviateRepository):
             next_cursor,
         )
 
-    def _build_facet_filters(self, filters: Optional[Dict[str, List[str]]]) -> Optional[Filter]:
+    def _build_facet_filters(self, filters: dict[str, list[str]] | None) -> Filter | None:
         """Build filter from facet selections.
 
         Args:
@@ -114,8 +113,8 @@ class FacetedRepository(BaseWeaviateRepository):
         return self._build_filter(filter_conditions)
 
     async def _get_facet_aggregations(
-        self, facets: List[str], filters: Optional[Filter] = None
-    ) -> List[FacetResult]:
+        self, facets: list[str], filters: Filter | None = None
+    ) -> list[FacetResult]:
         """Get aggregations for faceted fields.
 
         Args:

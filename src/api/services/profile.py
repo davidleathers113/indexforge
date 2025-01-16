@@ -1,6 +1,5 @@
 """Profile service for managing user profiles."""
 
-from typing import Dict
 
 from fastapi import HTTPException, status
 from supabase.client import AsyncClient
@@ -19,7 +18,7 @@ class ProfileService:
         """
         self._supabase = supabase
 
-    async def create_profile(self, user_id: str, profile_data: Dict) -> Profile:
+    async def create_profile(self, user_id: str, profile_data: dict) -> Profile:
         """Create a new user profile.
 
         Args:

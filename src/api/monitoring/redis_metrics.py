@@ -21,6 +21,7 @@ from src.api.monitoring.metrics import (
     record_error,
 )
 
+
 logger = logging.getLogger(__name__)
 tracer = trace.get_tracer(__name__)
 

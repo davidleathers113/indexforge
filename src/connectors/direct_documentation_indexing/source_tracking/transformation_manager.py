@@ -5,12 +5,13 @@ This module provides functionality for recording and managing document transform
 including tracking transformation history and metadata.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from .enums import TransformationType
 from .models import DocumentLineage, Transformation
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +19,10 @@ logger = logging.getLogger(__name__)
 def record_transformation(
     storage: Any,
     doc_id: str,
-    transform_type: Union[TransformationType, str],
+    transform_type: TransformationType | str,
     description: str = "",
-    parameters: Optional[Dict] = None,
-    metadata: Optional[Dict] = None,
+    parameters: dict | None = None,
+    metadata: dict | None = None,
 ) -> None:
     """Record a transformation applied to a document."""
     logger.debug(
@@ -56,7 +57,7 @@ def record_transformation(
     logger.debug("Created transformation: %s", transformation)
 
     lineage.transformations.append(transformation)
-    lineage.last_modified = datetime.now(timezone.utc)
+    lineage.last_modified = datetime.now(UTC)
     storage.save_lineage(lineage)
     logger.debug(
         "Successfully recorded transformation. Total transformations: %d",
@@ -66,9 +67,9 @@ def record_transformation(
 
 def get_transformation_history(
     lineage: DocumentLineage,
-    transform_type: Optional[Union[TransformationType, str]] = None,
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
+    transform_type: TransformationType | str | None = None,
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
 ) -> list[Transformation]:
     """Get transformation history for a document with optional filters."""
     logger.debug(

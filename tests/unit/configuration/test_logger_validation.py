@@ -1,6 +1,6 @@
 """Validation utilities for logger tests."""
 import json
-from typing import Any, Dict, List, Optional, Set, Type
+from typing import Any
 
 from hypothesis import given, strategies as st
 import pytest
@@ -9,25 +9,29 @@ import pytest
 class LogValidationError(Exception):
     """Base class for log validation errors."""
 
-    def __init__(self, message: str, line_num: Optional[int]=None) -> None:
+    def __init__(self, message: str, line_num: int | None = None) -> None:
         self.line_num = line_num
         if line_num is not None:
             message = f'Line {line_num}: {message}'
         super().__init__(message)
 
+
 class LogFormatError(LogValidationError):
     """Error for malformed log entries."""
     pass
+
 
 class LogFieldError(LogValidationError):
     """Error for missing or invalid fields."""
     pass
 
+
 class LogTypeError(LogValidationError):
     """Error for incorrect field types."""
     pass
 
-def validate_log_entry(data: Dict[str, Any], required_fields: Set[str], field_types: Dict[str, Type], line_num: Optional[int]=None) -> None:
+
+def validate_log_entry(data: dict[str, Any], required_fields: set[str], field_types: dict[str, type], line_num: int | None = None) -> None:
     """Validate a single log entry.
 
     Thread-safe implementation for validating log entries, ensuring consistent
@@ -55,7 +59,8 @@ def validate_log_entry(data: Dict[str, Any], required_fields: Set[str], field_ty
             e.line_num = line_num
         raise
 
-def parse_log_line(line: str, line_num: Optional[int]=None) -> Dict[str, Any]:
+
+def parse_log_line(line: str, line_num: int | None = None) -> dict[str, Any]:
     """Parse a single log line as JSON.
 
     Args:
@@ -71,11 +76,12 @@ def parse_log_line(line: str, line_num: Optional[int]=None) -> Dict[str, Any]:
     try:
         return json.loads(line)
     except json.JSONDecodeError as e:
-        raise LogFormatError(f'Invalid JSON: {str(e)}', line_num) from e
+        raise LogFormatError(f'Invalid JSON: {e!s}', line_num) from e
     except TypeError as e:
-        raise LogFormatError(f'Malformed JSON data: {str(e)}', line_num) from e
+        raise LogFormatError(f'Malformed JSON data: {e!s}', line_num) from e
 
-def validate_log_file(log_lines: List[str], required_fields: Set[str], field_types: Dict[str, Type]) -> List[Dict[str, Any]]:
+
+def validate_log_file(log_lines: list[str], required_fields: set[str], field_types: dict[str, type]) -> list[dict[str, Any]]:
     """Validate all entries in a log file.
 
     Args:
@@ -101,8 +107,9 @@ def validate_log_file(log_lines: List[str], required_fields: Set[str], field_typ
         validated_entries.append(data)
     return validated_entries
 
+
 @given(message=st.text(min_size=1), thread_id=st.integers(), extra_fields=st.dictionaries(keys=st.text(min_size=1), values=st.one_of(st.text(), st.integers(), st.floats(allow_nan=False)), max_size=5))
-def test_property_validate_log_entry(message: str, thread_id: int, extra_fields: Dict[str, Any]) -> None:
+def test_property_validate_log_entry(message: str, thread_id: int, extra_fields: dict[str, Any]) -> None:
     """Property-based test for log entry validation.
 
     Tests that valid entries are accepted and invalid ones are rejected.
@@ -120,8 +127,9 @@ def test_property_validate_log_entry(message: str, thread_id: int, extra_fields:
         validate_log_entry(invalid_entry, required_fields={'message', 'thread_id'}, field_types={'message': str, 'thread_id': int})
     assert "Field 'thread_id' must be int" in str(exc_info.value)
 
+
 @given(st.lists(st.dictionaries(keys=st.sampled_from(['message', 'thread_id', 'extra']), values=st.one_of(st.text(min_size=1), st.integers(), st.lists(st.integers(), max_size=3)), min_size=2), min_size=1, max_size=10))
-def test_property_nested_json(entries: List[Dict[str, Any]]) -> None:
+def test_property_nested_json(entries: list[dict[str, Any]]) -> None:
     """Property-based test for nested JSON structures."""
     log_lines = [json.dumps(entry) + '\n' for entry in entries]
     try:
@@ -134,6 +142,7 @@ def test_property_nested_json(entries: List[Dict[str, Any]]) -> None:
             assert isinstance(entry['message'], str)
             assert isinstance(entry['thread_id'], int)
 
+
 @given(st.text(min_size=1).map(lambda s: s + '🚀'), st.integers(min_value=1, max_value=1000000))
 def test_property_unicode_handling(message: str, size: int) -> None:
     """Property-based test for Unicode handling in log messages."""
@@ -143,19 +152,21 @@ def test_property_unicode_handling(message: str, size: int) -> None:
     assert validated[0]['message'] == message * size
     assert validated[0]['size'] == size
 
+
 class MaxSizeValidator:
     """Validator for maximum field sizes."""
 
-    def __init__(self, max_sizes: Dict[str, int]) -> None:
+    def __init__(self, max_sizes: dict[str, int]) -> None:
         self.max_sizes = max_sizes
 
-    def __call__(self, data: Dict[str, Any], line_num: Optional[int]=None) -> None:
+    def __call__(self, data: dict[str, Any], line_num: int | None = None) -> None:
         """Validate field sizes."""
         for field, max_size in self.max_sizes.items():
             if field in data and len(str(data[field])) > max_size:
                 raise LogValidationError(f"Field '{field}' exceeds maximum size of {max_size} characters", line_num)
 
-def validate_log_file_with_streaming(log_file_path: str, required_fields: Set[str], field_types: Dict[str, Type], chunk_size: int=8192, max_sizes: Optional[Dict[str, int]]=None) -> List[Dict[str, Any]]:
+
+def validate_log_file_with_streaming(log_file_path: str, required_fields: set[str], field_types: dict[str, type], chunk_size: int = 8192, max_sizes: dict[str, int] | None = None) -> list[dict[str, Any]]:
     """Validate a log file using streaming to handle large files efficiently.
 
     Args:
@@ -180,7 +191,7 @@ def validate_log_file_with_streaming(log_file_path: str, required_fields: Set[st
     validated_entries = []
     size_validator = MaxSizeValidator(max_sizes) if max_sizes else None
     try:
-        with open(log_file_path, 'r', encoding='utf-8') as f:
+        with open(log_file_path, encoding='utf-8') as f:
             while True:
                 chunk = f.read(chunk_size)
                 if not chunk:
@@ -204,5 +215,5 @@ def validate_log_file_with_streaming(log_file_path: str, required_fields: Set[st
                     size_validator(data, line_num)
                 validated_entries.append(data)
             return validated_entries
-    except IOError as e:
-        raise LogValidationError(f'Error reading log file: {str(e)}')
+    except OSError as e:
+        raise LogValidationError(f'Error reading log file: {e!s}')

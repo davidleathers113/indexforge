@@ -1,11 +1,11 @@
 import re
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 import requests
 
 
-def test_cors_configuration(render_config: Dict[str, Any]) -> None:
+def test_cors_configuration(render_config: dict[str, Any]) -> None:
     """Test CORS configuration for web services."""
     for service in render_config["services"]:
         if service["type"] == "web_service":
@@ -24,7 +24,7 @@ def test_cors_configuration(render_config: Dict[str, Any]) -> None:
                     ), f"Insecure CORS origin {origin} in service {service['name']}"
 
 
-def test_ssl_tls_settings(render_config: Dict[str, Any]) -> None:
+def test_ssl_tls_settings(render_config: dict[str, Any]) -> None:
     """Test SSL/TLS configuration."""
     for service in render_config["services"]:
         if service["type"] == "web_service":
@@ -42,7 +42,7 @@ def test_ssl_tls_settings(render_config: Dict[str, Any]) -> None:
                 ), f"HSTS should be enabled for service {service['name']}"
 
 
-def test_secret_management(render_config: Dict[str, Any]) -> None:
+def test_secret_management(render_config: dict[str, Any]) -> None:
     """Test secret management configuration."""
     sensitive_patterns = [
         r"api[_-]key",
@@ -68,7 +68,7 @@ def test_secret_management(render_config: Dict[str, Any]) -> None:
                     ), f"Sensitive variable {env['key']} should not be synced"
 
 
-def test_authentication_configuration(render_config: Dict[str, Any]) -> None:
+def test_authentication_configuration(render_config: dict[str, Any]) -> None:
     """Test authentication mechanism configuration."""
     for service in render_config["services"]:
         if service["type"] == "web_service":
@@ -88,7 +88,7 @@ def test_authentication_configuration(render_config: Dict[str, Any]) -> None:
                 ), f"JWT algorithm not configured for service {service['name']}"
 
 
-def test_security_headers(render_config: Dict[str, Any]) -> None:
+def test_security_headers(render_config: dict[str, Any]) -> None:
     """Test security headers configuration."""
     required_headers = {
         "X-Frame-Options": "DENY",
@@ -109,7 +109,7 @@ def test_security_headers(render_config: Dict[str, Any]) -> None:
                 ), f"Security header {header} not configured for service {service['name']}"
 
 
-def test_rate_limiting(render_config: Dict[str, Any]) -> None:
+def test_rate_limiting(render_config: dict[str, Any]) -> None:
     """Test rate limiting configuration."""
     for service in render_config["services"]:
         if service["type"] == "web_service":
@@ -137,11 +137,11 @@ def test_dependency_scanning() -> None:
             if "High severity" in output:
                 pytest.fail("High severity vulnerabilities found in dependencies")
     except subprocess.CalledProcessError as e:
-        pytest.fail(f"Failed to run dependency security scan: {str(e)}")
+        pytest.fail(f"Failed to run dependency security scan: {e!s}")
 
 
 def test_render_service_security(
-    render_api_base: str, render_headers: Dict[str, str], render_service: Dict[str, Any]
+    render_api_base: str, render_headers: dict[str, str], render_service: dict[str, Any]
 ) -> None:
     """Test Render service security configuration."""
     service_id = render_service["id"]

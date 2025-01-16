@@ -31,7 +31,7 @@ Example:
 
 import logging
 import os
-from typing import Dict, List, Optional, Set
+
 
 # Set tokenizers parallelism to avoid deadlock warnings
 if "TOKENIZERS_PARALLELISM" not in os.environ:
@@ -56,14 +56,15 @@ from .errors import DirectoryError, PipelineError
 from .search import SearchOperations
 from .steps import PipelineStep
 
+
 # Re-export for test mocking
 PIIDetector = _PIIDetector
 
 # Re-export for test mocking
 __all__ = [
-    "Pipeline",
     "DocumentSummarizer",
     "EmbeddingGenerator",
+    "Pipeline",
     "TopicClusterer",
     "VectorIndex",
 ]
@@ -122,9 +123,9 @@ class Pipeline:
         log_dir: str = "logs",
         batch_size: int = 100,
         class_name: str = "Document",
-        cache_host: Optional[str] = "localhost",
-        cache_port: Optional[int] = 6379,
-        cache_ttl: Optional[int] = 86400,
+        cache_host: str | None = "localhost",
+        cache_port: int | None = 6379,
+        cache_ttl: int | None = 86400,
         debug: bool = False,
     ):
         """Initialize the pipeline with the specified configuration.
@@ -239,24 +240,24 @@ class Pipeline:
                 raise
 
             # Track processed files and errors
-            self.processed_files: Set[str] = set()
-            self.failed_files: Dict[str, str] = {}  # file_path -> error_message
+            self.processed_files: set[str] = set()
+            self.failed_files: dict[str, str] = {}  # file_path -> error_message
             self.logger.info("Pipeline initialized successfully")
 
         except Exception as e:
-            error_msg = f"Failed to initialize pipeline: {str(e)}"
+            error_msg = f"Failed to initialize pipeline: {e!s}"
             if hasattr(self, "logger"):
                 self.logger.error(error_msg, exc_info=True)
             raise PipelineError(error_msg) from e
 
     def process_documents(
         self,
-        steps: Optional[Set[PipelineStep]] = None,
-        summary_config: Optional[SummarizerConfig] = None,
-        cluster_config: Optional[ClusteringConfig] = None,
+        steps: set[PipelineStep] | None = None,
+        summary_config: SummarizerConfig | None = None,
+        cluster_config: ClusteringConfig | None = None,
         detect_pii: bool = True,
         deduplicate: bool = True,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Process documents through the specified pipeline steps.
 
         This method orchestrates the document processing workflow, executing the
@@ -352,11 +353,11 @@ class Pipeline:
             return documents
 
         except Exception as e:
-            error_msg = f"Pipeline execution failed: {str(e)}"
+            error_msg = f"Pipeline execution failed: {e!s}"
             self.logger.error(error_msg, exc_info=True)
             raise PipelineError(error_msg) from e
 
-    def search(self, query: str = None, **kwargs) -> List[Dict]:
+    def search(self, query: str = None, **kwargs) -> list[dict]:
         """Search for documents using the specified query.
 
         Performs a semantic search across indexed documents using the provided query
@@ -386,7 +387,7 @@ class Pipeline:
             kwargs["query"] = query
         return self.search_ops.search(**kwargs)
 
-    def update_document(self, doc_id: str, content: str = None, metadata: Dict = None) -> Dict:
+    def update_document(self, doc_id: str, content: str = None, metadata: dict = None) -> dict:
         """Update an existing document in the index.
 
         Updates the content and/or metadata of a document identified by doc_id.
@@ -406,7 +407,7 @@ class Pipeline:
         """
         return self.doc_ops.update_document(doc_id=doc_id, content=content, metadata=metadata)
 
-    def delete_documents(self, doc_ids: List[str]) -> bool:
+    def delete_documents(self, doc_ids: list[str]) -> bool:
         """Delete documents from the index.
 
         Removes the specified documents from the vector index.
@@ -493,6 +494,6 @@ class Pipeline:
                     )
             self.logger.info("Pipeline resources cleaned up successfully")
         except Exception as e:
-            error_msg = f"Error during cleanup: {str(e)}"
+            error_msg = f"Error during cleanup: {e!s}"
             self.logger.error(error_msg, exc_info=True)
             raise PipelineError(error_msg) from e

@@ -7,7 +7,7 @@ import weaviate
 from src.api.config.settings import settings
 
 
-@lru_cache()
+@lru_cache
 def get_weaviate_client() -> weaviate.Client:
     """Get or create Weaviate client instance.
 

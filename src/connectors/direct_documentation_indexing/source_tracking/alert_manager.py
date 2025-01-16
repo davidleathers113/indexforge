@@ -39,16 +39,17 @@ Example:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from email.mime.text import MIMEText
 from enum import Enum
 import json
 import logging
 from pathlib import Path
 import smtplib
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
+
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +155,8 @@ class AlertConfig:
     processing_time_critical: float = 600.0  # 10 minutes
     processing_time_warning: float = 300.0  # 5 minutes
     alert_cooldown: int = 300  # 5 minutes between similar alerts
-    email_config: Optional[Dict[str, str]] = None
-    webhook_urls: Dict[str, str] = field(default_factory=dict)
+    email_config: dict[str, str] | None = None
+    webhook_urls: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -194,8 +195,8 @@ class Alert:
     alert_type: AlertType
     severity: AlertSeverity
     message: str
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    metadata: dict[str, Any] = field(default_factory=dict)
     alert_id: str = field(init=False)
 
     def __post_init__(self):
@@ -249,8 +250,8 @@ class AlertManager:
 
     def __init__(
         self,
-        config_path: Optional[str] = None,
-        alert_config: Optional[AlertConfig] = None,
+        config_path: str | None = None,
+        alert_config: AlertConfig | None = None,
     ):
         """
         Initialize the AlertManager.
@@ -278,11 +279,11 @@ class AlertManager:
         """
         logger.debug("Initializing AlertManager with config: %s", alert_config)
         self.config = alert_config or self._load_config(config_path)
-        self.recent_alerts: Dict[str, datetime] = {}
-        self.alert_history: List[Alert] = []
+        self.recent_alerts: dict[str, datetime] = {}
+        self.alert_history: list[Alert] = []
         logger.debug("AlertManager initialized successfully")
 
-    def _load_config(self, config_path: Optional[str]) -> AlertConfig:
+    def _load_config(self, config_path: str | None) -> AlertConfig:
         """
         Load alert configuration from file or use defaults.
 
@@ -319,7 +320,7 @@ class AlertManager:
         """
         if config_path and Path(config_path).exists():
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config_data = json.load(f)
                 return AlertConfig(**config_data)
             except Exception as e:
@@ -332,7 +333,7 @@ class AlertManager:
         alert_type: AlertType,
         severity: AlertSeverity,
         message: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """
         Send an alert through configured channels.
@@ -452,7 +453,7 @@ class AlertManager:
             The cooldown period is configured in AlertConfig.alert_cooldown.
         """
         logger.debug("Checking alert cooldown for ID: %s", alert.alert_id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         cooldown = timedelta(seconds=self.config.alert_cooldown)
         logger.debug("Current cooldown period: %s seconds", cooldown.total_seconds())
 
@@ -617,7 +618,7 @@ class AlertManager:
 
         return success
 
-    def check_and_alert(self, health_check_result: Dict[str, Any]) -> None:
+    def check_and_alert(self, health_check_result: dict[str, Any]) -> None:
         """Check health status and send alerts if needed.
 
         Args:

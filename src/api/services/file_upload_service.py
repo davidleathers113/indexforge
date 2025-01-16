@@ -1,7 +1,6 @@
 """File upload service for handling file uploads and processing."""
 
 import logging
-from typing import List
 
 from fastapi import UploadFile
 
@@ -11,6 +10,7 @@ from src.api.services.connector_service import ConnectorService
 from src.api.services.virus_scan import VirusScanService
 from src.api.utils.file_processor import FileProcessor
 from src.api.utils.response_builder import ResponseBuilder
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,14 +82,14 @@ class FileUploadService:
             )
 
         except Exception as e:
-            logger.error(f"Failed to process upload {file.filename}: {str(e)}")
+            logger.error(f"Failed to process upload {file.filename}: {e!s}")
             return self._response_builder.document_upload_error(file.filename, str(e))
 
         finally:
             if temp_path and temp_path.exists():
                 temp_path.unlink()
 
-    async def process_batch_upload(self, files: List[UploadFile]) -> List[DocumentUploadResponse]:
+    async def process_batch_upload(self, files: list[UploadFile]) -> list[DocumentUploadResponse]:
         """Process multiple file uploads.
 
         Args:

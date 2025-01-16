@@ -49,7 +49,6 @@ Note:
     - Supports caching operations
 """
 
-from typing import Optional
 
 import weaviate
 
@@ -77,7 +76,7 @@ class DocumentManager(DocumentStorage):
         client: weaviate.Client,
         class_name: str,
         batch_size: int = 100,
-        cache_manager: Optional[CacheManager] = None,
+        cache_manager: CacheManager | None = None,
     ):
         """Initialize document manager.
 

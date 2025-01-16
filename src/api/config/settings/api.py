@@ -1,6 +1,5 @@
 """API server settings configuration."""
 
-from typing import List
 
 from pydantic import Field
 
@@ -25,7 +24,7 @@ class APISettings(BaseAppSettings):
     API_RELOAD: bool = Field(True, env="API_RELOAD")
 
     # CORS Settings
-    BACKEND_CORS_ORIGINS: List[str] = [
+    BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:3000",  # React default port
         "http://localhost:5173",  # Vite default port
         "http://127.0.0.1:3000",

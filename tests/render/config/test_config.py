@@ -1,9 +1,10 @@
 """Configuration constants for Render testing."""
 
-from typing import Any, Dict
+from typing import Any
+
 
 # Performance thresholds
-PERFORMANCE_THRESHOLDS: Dict[str, float] = {
+PERFORMANCE_THRESHOLDS: dict[str, float] = {
     "startup_time": 300.0,  # seconds
     "build_time": 600.0,  # seconds
     "cpu_usage": 80.0,  # percentage
@@ -11,7 +12,7 @@ PERFORMANCE_THRESHOLDS: Dict[str, float] = {
 }
 
 # Required environment variables
-REQUIRED_ENV_VARS: Dict[str, list] = {
+REQUIRED_ENV_VARS: dict[str, list] = {
     "base": ["PYTHON_VERSION", "POETRY_VERSION", "ENVIRONMENT"],
     "web": ["PORT", "HOST", "MAX_WORKERS"],
     "worker": ["CELERY_BROKER_URL", "CELERY_RESULT_BACKEND"],
@@ -28,7 +29,7 @@ REQUIRED_BUILD_STEPS: list = [
 ]
 
 # Security settings
-SECURITY_REQUIREMENTS: Dict[str, Any] = {
+SECURITY_REQUIREMENTS: dict[str, Any] = {
     "cors_settings": {
         "allowed_origins": ["https://*"],
         "allowed_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -45,7 +46,7 @@ SECURITY_REQUIREMENTS: Dict[str, Any] = {
 }
 
 # Resource limits
-SERVICE_LIMITS: Dict[str, Any] = {
+SERVICE_LIMITS: dict[str, Any] = {
     "web": {
         "memory": 512,  # MB
         "cpu": 1.0,
@@ -59,7 +60,7 @@ SERVICE_LIMITS: Dict[str, Any] = {
 }
 
 # Test timeouts
-TEST_TIMEOUTS: Dict[str, float] = {
+TEST_TIMEOUTS: dict[str, float] = {
     "deployment": 600.0,  # seconds
     "health_check": 60.0,  # seconds
     "build": 900.0,  # seconds
@@ -67,7 +68,7 @@ TEST_TIMEOUTS: Dict[str, float] = {
 }
 
 # Cache settings
-CACHE_CONFIG: Dict[str, Any] = {
+CACHE_CONFIG: dict[str, Any] = {
     "build_cache_enabled": True,
     "cache_warmup_builds": 2,
     "expected_cache_improvement": 0.3,  # 30% faster

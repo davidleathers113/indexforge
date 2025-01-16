@@ -10,6 +10,7 @@ def test_clustering_config_defaults():
     assert config.max_clusters == 20
     assert config.random_state == 42
 
+
 def test_clustering_config_custom_values():
     """Test ClusteringConfig with custom values"""
     config = ClusteringConfig(n_clusters=3, min_cluster_size=2, max_clusters=10, random_state=123)

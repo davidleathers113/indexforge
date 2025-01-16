@@ -7,7 +7,7 @@ error reporting with line numbers.
 """
 
 import json
-from typing import Any, Dict, List, Optional, Set, Type
+from typing import Any
 
 
 class LogValidationError(Exception):
@@ -73,7 +73,7 @@ class MaxSizeValidator:
             allowed sizes in characters.
     """
 
-    def __init__(self, max_sizes: Optional[Dict[str, int]]) -> None:
+    def __init__(self, max_sizes: dict[str, int] | None) -> None:
         """Initialize the size validator.
 
         Args:
@@ -90,7 +90,7 @@ class MaxSizeValidator:
         """
         self.max_sizes = max_sizes or {}
 
-    def __call__(self, data: Dict[str, Any], line_num: Optional[int] = None) -> None:
+    def __call__(self, data: dict[str, Any], line_num: int | None = None) -> None:
         """Validate field sizes in a log entry.
 
         Args:
@@ -114,7 +114,7 @@ class MaxSizeValidator:
                 )
 
 
-def parse_log_line(line: str, line_num: Optional[int] = None) -> Dict[str, Any]:
+def parse_log_line(line: str, line_num: int | None = None) -> dict[str, Any]:
     """Parse a single line of JSON log data.
 
     Attempts to parse a string as a JSON object, providing line number
@@ -142,15 +142,15 @@ def parse_log_line(line: str, line_num: Optional[int] = None) -> Dict[str, Any]:
     try:
         return json.loads(line)
     except json.JSONDecodeError as e:
-        raise LogFormatError(f"Invalid JSON: {str(e)}", line_num) from e
+        raise LogFormatError(f"Invalid JSON: {e!s}", line_num) from e
     except TypeError as e:
-        raise LogFormatError(f"Malformed JSON data: {str(e)}", line_num) from e
+        raise LogFormatError(f"Malformed JSON data: {e!s}", line_num) from e
 
 
 def validate_log_entry(
-    entry: Dict[str, Any],
-    required_fields: Set[str],
-    field_types: Dict[str, Type],
+    entry: dict[str, Any],
+    required_fields: set[str],
+    field_types: dict[str, type],
     line_number: int = None,
 ) -> None:
     """Validate a single log entry against schema requirements.
@@ -203,11 +203,11 @@ def validate_log_entry(
 
 def validate_log_file_with_streaming(
     file_path: str,
-    required_fields: Set[str],
-    field_types: Dict[str, Type],
+    required_fields: set[str],
+    field_types: dict[str, type],
     chunk_size: int = 8192,
-    max_sizes: Optional[Dict[str, int]] = None,
-) -> List[Dict[str, Any]]:
+    max_sizes: dict[str, int] | None = None,
+) -> list[dict[str, Any]]:
     """Validate a JSON log file using memory-efficient streaming.
 
     Processes and validates a log file in chunks to handle large files
@@ -260,7 +260,7 @@ def validate_log_file_with_streaming(
     size_validator = MaxSizeValidator(max_sizes) if max_sizes else None
 
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             while True:
                 chunk = f.read(chunk_size)
                 if not chunk:
@@ -280,7 +280,7 @@ def validate_log_file_with_streaming(
                                 size_validator(data, line_num)
                             validated_entries.append(data)
                         except json.JSONDecodeError as e:
-                            raise LogFormatError(f"Invalid JSON: {str(e)}", line_num) from e
+                            raise LogFormatError(f"Invalid JSON: {e!s}", line_num) from e
 
                 # Keep the last partial line
                 buffer = lines[-1]
@@ -295,9 +295,9 @@ def validate_log_file_with_streaming(
                         size_validator(data, line_num)
                     validated_entries.append(data)
                 except json.JSONDecodeError as e:
-                    raise LogFormatError(f"Invalid JSON: {str(e)}", line_num) from e
+                    raise LogFormatError(f"Invalid JSON: {e!s}", line_num) from e
 
             return validated_entries
 
-    except IOError as e:
-        raise LogValidationError(f"Error reading log file: {str(e)}")
+    except OSError as e:
+        raise LogValidationError(f"Error reading log file: {e!s}")

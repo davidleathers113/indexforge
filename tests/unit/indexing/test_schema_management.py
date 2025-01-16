@@ -6,14 +6,17 @@ import pytest
 
 from src.indexing.vector_index import VectorIndex
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
 
 @pytest.fixture
 def vector_index(mock_weaviate_client, mock_cache_manager, mock_schema_validator):
     """Create a VectorIndex instance with mocks"""
     with patch('weaviate.Client', return_value=mock_weaviate_client):
         yield VectorIndex(client_url='http://localhost:8080', class_name='Document', batch_size=100, schema_validator=mock_schema_validator)
+
 
 def test_schema_management_flow(vector_index, mock_weaviate_client, mock_schema_validator):
     """Test complete schema management flow:
@@ -57,5 +60,5 @@ def test_schema_management_flow(vector_index, mock_weaviate_client, mock_schema_
             logger.error('Expected ValueError was not raised')
             raise AssertionError('Expected ValueError was not raised')
         except ValueError as e:
-            logger.debug(f'Caught expected ValueError: {str(e)}')
+            logger.debug(f'Caught expected ValueError: {e!s}')
             assert str(e) == 'Invalid schema configuration'

@@ -2,11 +2,12 @@
 
 from abc import ABC, abstractmethod
 import logging
-from typing import Dict, List, Optional, Protocol
+from typing import Protocol
 
 from weaviate.collections import Collection
 
 from src.api.repositories.weaviate.metrics import BatchMetrics, BatchPerformanceTracker
+
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 class BatchOperationState(Protocol):
     """Protocol for batch operation states."""
 
-    def process(self, operation: "BatchOperation", items: List[Dict]) -> List[Dict]:
+    def process(self, operation: "BatchOperation", items: list[dict]) -> list[dict]:
         """Process batch items in current state."""
         ...
 
@@ -22,7 +23,7 @@ class BatchOperationState(Protocol):
 class BatchOperation(ABC):
     """Template for batch operations."""
 
-    def __init__(self, collection: Collection, batch_size: Optional[int] = None):
+    def __init__(self, collection: Collection, batch_size: int | None = None):
         """Initialize batch operation."""
         self.collection = collection
         self.batch_size = batch_size or 100
@@ -32,21 +33,21 @@ class BatchOperation(ABC):
         )
 
     @abstractmethod
-    def prepare_item(self, item: Dict) -> Dict:
+    def prepare_item(self, item: dict) -> dict:
         """Prepare an item for batch operation."""
         pass
 
     @abstractmethod
-    def validate_item(self, item: Dict) -> bool:
+    def validate_item(self, item: dict) -> bool:
         """Validate an item before processing."""
         pass
 
     @abstractmethod
-    def process_batch(self, batch: List[Dict]) -> List[Dict]:
+    def process_batch(self, batch: list[dict]) -> list[dict]:
         """Process a batch of items."""
         pass
 
-    def execute_batch(self, items: List[Dict]) -> List[Dict]:
+    def execute_batch(self, items: list[dict]) -> list[dict]:
         """Execute batch operation using template method."""
         results = []
         current_batch = []
@@ -73,11 +74,11 @@ class BatchOperation(ABC):
             return results
 
         except Exception as e:
-            logger.error(f"Batch operation failed: {str(e)}")
+            logger.error(f"Batch operation failed: {e!s}")
             for item in current_batch:
                 results.append(self._create_error_result(item, str(e)))
             raise
 
-    def _create_error_result(self, item: Dict, error: str) -> Dict:
+    def _create_error_result(self, item: dict, error: str) -> dict:
         """Create error result for failed operation."""
         return {"id": item.get("id", "unknown"), "status": "error", "error": error}

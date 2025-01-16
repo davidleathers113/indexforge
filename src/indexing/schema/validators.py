@@ -17,7 +17,6 @@ Example:
 """
 
 import re
-from typing import Dict, List
 
 from src.indexing.schema.exceptions import (
     ClassNameError,
@@ -25,6 +24,7 @@ from src.indexing.schema.exceptions import (
     PropertyValidationError,
     SchemaValidationError,
 )
+
 
 # Regex pattern for valid class names
 CLASS_NAME_PATTERN = r"^[A-Z][a-zA-Z0-9]*$"
@@ -58,7 +58,7 @@ def validate_class_name(class_name: str) -> None:
         )
 
 
-def validate_properties(properties: List[Dict]) -> None:
+def validate_properties(properties: list[dict]) -> None:
     """
     Validate schema properties.
 
@@ -115,7 +115,7 @@ def validate_properties(properties: List[Dict]) -> None:
             )
 
 
-def validate_configuration(config: Dict, config_name: str) -> None:
+def validate_configuration(config: dict, config_name: str) -> None:
     """
     Validate a configuration section.
 

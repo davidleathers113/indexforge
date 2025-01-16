@@ -1,6 +1,6 @@
 """Tests for document error logging functionality."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -71,7 +71,7 @@ def test_get_error_logs_time_filtered(storage):
     """Test filtering error logs by time range."""
     doc_id = "test_doc"
     add_document(storage, doc_id=doc_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     old_time = now - timedelta(hours=2)
     recent_time = now - timedelta(minutes=30)
     log_error_or_warning(

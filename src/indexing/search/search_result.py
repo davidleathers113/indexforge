@@ -24,7 +24,7 @@ Example:
 
 from dataclasses import dataclass
 import logging
-from typing import Dict, List, Optional
+
 
 logger = logging.getLogger(__name__)
 
@@ -59,14 +59,14 @@ class SearchResult:
     """
 
     id: str
-    content: Dict
-    metadata: Dict
+    content: dict
+    metadata: dict
     score: float
-    distance: Optional[float] = None
-    vector: Optional[List[float]] = None
+    distance: float | None = None
+    vector: list[float] | None = None
 
     @classmethod
-    def from_weaviate_result(cls, result: Dict) -> "SearchResult":
+    def from_weaviate_result(cls, result: dict) -> "SearchResult":
         """
         Create a SearchResult instance from a raw Weaviate response.
 
@@ -173,7 +173,7 @@ class ResultProcessor:
     """
 
     @staticmethod
-    def process_results(raw_results: Dict) -> List[SearchResult]:
+    def process_results(raw_results: dict) -> list[SearchResult]:
         """
         Process a raw search response from Weaviate into SearchResult objects.
 
@@ -216,7 +216,7 @@ class ResultProcessor:
                     results.append(result)
                 except Exception as e:
                     logger.error(
-                        f"Error processing individual result: {str(e)}",
+                        f"Error processing individual result: {e!s}",
                         exc_info=True,
                         extra={"document": doc},
                     )
@@ -229,7 +229,7 @@ class ResultProcessor:
 
         except Exception as e:
             logger.error(
-                f"Error processing search results: {str(e)}",
+                f"Error processing search results: {e!s}",
                 exc_info=True,
                 extra={"raw_results": raw_results},
             )

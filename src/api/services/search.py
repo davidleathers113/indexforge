@@ -1,11 +1,11 @@
 """Search service for document operations."""
 
 import logging
-from typing import Optional
 
 from src.api.models.requests import DocumentFilter, SearchQuery
 from src.api.models.responses import SearchResponse, Stats
 from src.api.repositories.weaviate_repo import WeaviateRepository
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class SearchService:
         self._repository = repository
 
     async def search_documents(
-        self, query: SearchQuery, filter_params: Optional[DocumentFilter] = None
+        self, query: SearchQuery, filter_params: DocumentFilter | None = None
     ) -> SearchResponse:
         """Search documents with optional filtering.
 
@@ -44,7 +44,7 @@ class SearchService:
             return await self._repository.search(query)
 
         except Exception as e:
-            logger.error(f"Search failed: {str(e)}")
+            logger.error(f"Search failed: {e!s}")
             raise
 
     async def get_stats(self) -> Stats:
@@ -56,5 +56,5 @@ class SearchService:
         try:
             return await self._repository.get_stats()
         except Exception as e:
-            logger.error(f"Failed to get stats: {str(e)}")
+            logger.error(f"Failed to get stats: {e!s}")
             raise

@@ -1,8 +1,9 @@
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import jsonschema
 import pytest
+
 
 # Schema for render.yaml validation
 RENDER_YAML_SCHEMA = {
@@ -62,15 +63,15 @@ def test_render_yaml_exists(project_root: Path) -> None:
     assert render_yaml.is_file(), "render.yaml is not a file"
 
 
-def test_render_yaml_valid(render_config: Dict[str, Any]) -> None:
+def test_render_yaml_valid(render_config: dict[str, Any]) -> None:
     """Test that render.yaml is valid according to schema."""
     try:
         jsonschema.validate(instance=render_config, schema=RENDER_YAML_SCHEMA)
     except jsonschema.exceptions.ValidationError as e:
-        pytest.fail(f"render.yaml validation failed: {str(e)}")
+        pytest.fail(f"render.yaml validation failed: {e!s}")
 
 
-def test_required_env_vars(render_config: Dict[str, Any]) -> None:
+def test_required_env_vars(render_config: dict[str, Any]) -> None:
     """Test that all required environment variables are defined."""
     required_vars = {
         "PYTHON_VERSION",
@@ -91,7 +92,7 @@ def test_required_env_vars(render_config: Dict[str, Any]) -> None:
         assert not missing_vars, f"Missing required environment variables: {missing_vars}"
 
 
-def test_health_check_paths(render_config: Dict[str, Any]) -> None:
+def test_health_check_paths(render_config: dict[str, Any]) -> None:
     """Test that health check paths are properly configured."""
     for service in render_config["services"]:
         if service["type"] == "web_service":
@@ -103,7 +104,7 @@ def test_health_check_paths(render_config: Dict[str, Any]) -> None:
             ), f"Health check path must start with / for service {service['name']}"
 
 
-def test_resource_allocation(render_config: Dict[str, Any]) -> None:
+def test_resource_allocation(render_config: dict[str, Any]) -> None:
     """Test that resource allocations are reasonable."""
     for service in render_config["services"]:
         if "plan" in service:
@@ -117,7 +118,7 @@ def test_resource_allocation(render_config: Dict[str, Any]) -> None:
             ), f"Disk size must be at least 1GB for service {service['name']}"
 
 
-def test_security_settings(render_config: Dict[str, Any]) -> None:
+def test_security_settings(render_config: dict[str, Any]) -> None:
     """Test security-related settings."""
     for service in render_config["services"]:
         # Check for secure environment variables
@@ -136,7 +137,7 @@ def test_security_settings(render_config: Dict[str, Any]) -> None:
             ), f"Auto-deploy should be disabled for production service {service['name']}"
 
 
-def test_build_commands(render_config: Dict[str, Any]) -> None:
+def test_build_commands(render_config: dict[str, Any]) -> None:
     """Test that build commands are properly configured."""
     for service in render_config["services"]:
         if service["env"] == "python":
@@ -149,7 +150,7 @@ def test_build_commands(render_config: Dict[str, Any]) -> None:
             assert start_cmd, f"Start command not configured for service {service['name']}"
 
 
-def test_dependencies_configuration(render_config: Dict[str, Any]) -> None:
+def test_dependencies_configuration(render_config: dict[str, Any]) -> None:
     """Test that service dependencies are properly configured."""
     service_names = {service["name"] for service in render_config["services"]}
 

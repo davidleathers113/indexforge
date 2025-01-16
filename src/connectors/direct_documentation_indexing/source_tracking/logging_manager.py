@@ -49,12 +49,13 @@ Example:
     ```
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from .enums import LogLevel, ProcessingStatus
 from .models import DocumentLineage, LogEntry, ProcessingStep
+
 
 if TYPE_CHECKING:
     from .storage import LineageStorage
@@ -66,11 +67,11 @@ def add_processing_step(
     storage: Any,
     doc_id: str,
     step_name: str,
-    status: Union[ProcessingStatus, str],
-    details: Optional[Dict] = None,
-    metrics: Optional[Dict] = None,
-    error_message: Optional[str] = None,
-    timestamp: Optional[datetime] = None,
+    status: ProcessingStatus | str,
+    details: dict | None = None,
+    metrics: dict | None = None,
+    error_message: str | None = None,
+    timestamp: datetime | None = None,
 ) -> None:
     """
     Add a processing step to a document's lineage.
@@ -119,21 +120,21 @@ def add_processing_step(
             "metrics": metrics or {},
             "error_message": error_message,
         },
-        timestamp=timestamp or datetime.now(timezone.utc),
+        timestamp=timestamp or datetime.now(UTC),
     )
 
     lineage.processing_steps.append(step)
-    lineage.last_modified = datetime.now(timezone.utc)
+    lineage.last_modified = datetime.now(UTC)
     storage.save_lineage(lineage)
 
 
 def get_processing_steps(
     storage_or_lineage: Union["LineageStorage", DocumentLineage],
-    doc_id: Optional[str] = None,
-    status: Optional[Union[ProcessingStatus, str]] = None,
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
-) -> List[ProcessingStep]:
+    doc_id: str | None = None,
+    status: ProcessingStatus | str | None = None,
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
+) -> list[ProcessingStep]:
     """Get processing steps with optional filtering.
 
     Args:
@@ -176,10 +177,10 @@ def get_processing_steps(
 def log_error_or_warning(
     storage: Any,
     doc_id: str,
-    level: Union[LogLevel, str],
+    level: LogLevel | str,
     message: str,
-    timestamp: Optional[datetime] = None,
-    details: Optional[Dict] = None,
+    timestamp: datetime | None = None,
+    details: dict | None = None,
 ) -> None:
     """
     Log an error or warning for a document.
@@ -214,22 +215,22 @@ def log_error_or_warning(
     log_entry = LogEntry(
         log_level=level,
         message=message,
-        timestamp=timestamp or datetime.now(timezone.utc),
+        timestamp=timestamp or datetime.now(UTC),
         metadata=details or {},
     )
 
     lineage.error_logs.append(log_entry)
-    lineage.last_modified = datetime.now(timezone.utc)
+    lineage.last_modified = datetime.now(UTC)
     storage.save_lineage(lineage)
 
 
 def get_error_logs(
     storage_or_lineage: Union["LineageStorage", DocumentLineage],
-    doc_id: Optional[str] = None,
-    log_level: Optional[Union[LogLevel, str]] = None,
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
-) -> List[LogEntry]:
+    doc_id: str | None = None,
+    log_level: LogLevel | str | None = None,
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
+) -> list[LogEntry]:
     """Get error logs with optional filtering.
 
     Args:
@@ -270,9 +271,9 @@ def get_error_logs(
 
 
 def get_recent_errors(
-    lineage_data: Dict[str, DocumentLineage],
+    lineage_data: dict[str, DocumentLineage],
     since: datetime,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Get recent errors and warnings across all documents.
 
@@ -323,7 +324,7 @@ def get_recent_errors(
     return sorted(recent_errors, key=lambda x: x["timestamp"], reverse=True)
 
 
-def get_log_entries(log_list: List[Dict], start_time: Optional[datetime] = None) -> List[Dict]:
+def get_log_entries(log_list: list[dict], start_time: datetime | None = None) -> list[dict]:
     """Get filtered log entries.
 
     Args:

@@ -46,13 +46,14 @@ Example:
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from difflib import unified_diff
 from enum import Enum
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +117,7 @@ class VersionTag:
     description: str
     author: str
     change_type: ChangeType
-    reliability_score: Optional[float] = None
+    reliability_score: float | None = None
 
 
 @dataclass
@@ -153,7 +154,7 @@ class Change:
     author: str
     previous_value: Any
     new_value: Any
-    version_tag: Optional[str] = None
+    version_tag: str | None = None
 
 
 class VersionHistory:
@@ -208,7 +209,7 @@ class VersionHistory:
         self,
         source_type: str,
         source_id: str,
-        history_dir: Optional[str] = None,
+        history_dir: str | None = None,
         max_changes: int = 1000,
     ):
         """
@@ -238,8 +239,8 @@ class VersionHistory:
         self.source_id = source_id
         self.history_dir = Path(history_dir) if history_dir else Path(__file__).parent / "history"
         self.max_changes = max_changes
-        self.changes: List[Change] = []
-        self.tags: Dict[str, VersionTag] = {}
+        self.changes: list[Change] = []
+        self.tags: dict[str, VersionTag] = {}
         self._load_history()
 
     def _get_history_path(self) -> Path:
@@ -287,7 +288,7 @@ class VersionHistory:
             tags_path = self._get_tags_path()
 
             if history_path.exists():
-                with open(history_path, "r") as f:
+                with open(history_path) as f:
                     data = json.load(f)
                 self.changes = [
                     Change(
@@ -303,7 +304,7 @@ class VersionHistory:
                 ]
 
             if tags_path.exists():
-                with open(tags_path, "r") as f:
+                with open(tags_path) as f:
                     data = json.load(f)
                 self.tags = {
                     tag: VersionTag(
@@ -376,12 +377,12 @@ class VersionHistory:
 
     def record_change(
         self,
-        change_type: Union[ChangeType, str],
+        change_type: ChangeType | str,
         description: str,
         author: str,
         previous_value: Any,
         new_value: Any,
-        reliability_score: Optional[float] = None,
+        reliability_score: float | None = None,
     ) -> None:
         """
         Record a change in the version history.
@@ -410,7 +411,7 @@ class VersionHistory:
             change_type = ChangeType(change_type)
 
         change = Change(
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             change_type=change_type,
             description=description,
             author=author,
@@ -431,8 +432,8 @@ class VersionHistory:
         tag: str,
         description: str,
         author: str,
-        change_type: Union[ChangeType, str],
-        reliability_score: Optional[float] = None,
+        change_type: ChangeType | str,
+        reliability_score: float | None = None,
     ) -> None:
         """
         Create a version tag.
@@ -466,7 +467,7 @@ class VersionHistory:
 
         version_tag = VersionTag(
             tag=tag,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             description=description,
             author=author,
             change_type=change_type,
@@ -483,11 +484,11 @@ class VersionHistory:
 
     def get_changes(
         self,
-        change_type: Optional[Union[ChangeType, str]] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
+        change_type: ChangeType | str | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
         tagged_only: bool = False,
-    ) -> List[Change]:
+    ) -> list[Change]:
         """
         Get changes matching specified criteria.
 
@@ -533,7 +534,7 @@ class VersionHistory:
 
         return filtered_changes
 
-    def get_diff(self, previous_value: Any, new_value: Any, context_lines: int = 3) -> List[str]:
+    def get_diff(self, previous_value: Any, new_value: Any, context_lines: int = 3) -> list[str]:
         """
         Generate a diff between two values.
 
@@ -573,7 +574,7 @@ class VersionHistory:
             )
         )
 
-    def get_version_at_tag(self, tag: str) -> Optional[Change]:
+    def get_version_at_tag(self, tag: str) -> Change | None:
         """
         Get the change associated with a specific tag.
 
@@ -598,9 +599,9 @@ class VersionHistory:
 
     def get_tags_between(
         self,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-    ) -> List[VersionTag]:
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+    ) -> list[VersionTag]:
         """
         Get version tags within a time range.
 

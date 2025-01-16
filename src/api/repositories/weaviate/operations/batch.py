@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional
 
 import psutil
 from weaviate.collections import Collection
@@ -12,13 +11,14 @@ from src.api.errors.weaviate_error_handling import with_weaviate_error_handling
 from src.api.repositories.weaviate.base import BaseWeaviateRepository
 from src.api.repositories.weaviate.metrics import BatchMetrics, BatchPerformanceTracker
 
+
 logger = logging.getLogger(__name__)
 
 
 class BatchRepository(BaseWeaviateRepository):
     """Repository for batch operations in Weaviate v4.x."""
 
-    def __init__(self, collection: Collection, batch_size: Optional[int] = None):
+    def __init__(self, collection: Collection, batch_size: int | None = None):
         """Initialize with collection and optional batch size."""
         super().__init__(collection)
         self.batch_size = batch_size or 100
@@ -34,8 +34,8 @@ class BatchRepository(BaseWeaviateRepository):
 
     @with_weaviate_error_handling
     async def batch_index_documents(
-        self, documents: List[Dict], batch_size: Optional[int] = None
-    ) -> List[Dict]:
+        self, documents: list[dict], batch_size: int | None = None
+    ) -> list[dict]:
         """Index multiple documents in batches.
 
         Args:
@@ -111,7 +111,7 @@ class BatchRepository(BaseWeaviateRepository):
             return results
 
         except Exception as e:
-            logger.error(f"Batch indexing failed: {str(e)}")
+            logger.error(f"Batch indexing failed: {e!s}")
             # Add failure results for remaining documents
             for item in current_batch:
                 results.append(
@@ -131,14 +131,14 @@ class BatchRepository(BaseWeaviateRepository):
                 )
             raise
 
-    def _on_batch_error(self, batch_results: List[Dict]) -> None:
+    def _on_batch_error(self, batch_results: list[dict]) -> None:
         """Handle batch operation errors with v4.x error format."""
         for result in batch_results:
             if "errors" in result:
                 self.logger.error(f"Batch error: {result['errors']}")
                 self.metrics.record_object_error()
 
-    async def _process_batch_results(self, batch_items: List[Dict], results: List[Dict]) -> None:
+    async def _process_batch_results(self, batch_items: list[dict], results: list[dict]) -> None:
         """Process results for a batch of documents with v4.x validation."""
         await asyncio.sleep(0)  # Allow batch processing
 
@@ -176,7 +176,7 @@ class BatchRepository(BaseWeaviateRepository):
                 )
                 self.metrics.record_object_error()
 
-    async def _get_document_by_id(self, document_id: str) -> Optional[Dict]:
+    async def _get_document_by_id(self, document_id: str) -> dict | None:
         """Get document by ID using v4.x collection API."""
         try:
             # Use v4.x collection API
@@ -188,5 +188,5 @@ class BatchRepository(BaseWeaviateRepository):
             )
             return result.objects[0] if result.objects else None
         except Exception as e:
-            logger.error(f"Error retrieving document {document_id}: {str(e)}")
+            logger.error(f"Error retrieving document {document_id}: {e!s}")
             return None

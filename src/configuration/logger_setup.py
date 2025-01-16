@@ -11,14 +11,13 @@ import logging
 import logging.handlers
 import os
 import threading
-from typing import Dict, Optional
 
 
 def setup_logger(
     name: str,
-    log_path: Optional[str] = None,
+    log_path: str | None = None,
     level: int = logging.INFO,
-    format_string: Optional[str] = None,
+    format_string: str | None = None,
     rotate: bool = True,
     max_bytes: int = 10 * 1024 * 1024,  # 10MB
     backup_count: int = 5,
@@ -212,7 +211,7 @@ def setup_json_logger(
 
 
 def log_with_context(
-    logger: logging.Logger, level: int, message: str, extra_fields: Optional[Dict] = None
+    logger: logging.Logger, level: int, message: str, extra_fields: dict | None = None
 ):
     """Log a message with additional context fields in JSON format.
 

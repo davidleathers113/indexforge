@@ -1,6 +1,6 @@
 """Response models for the API."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -8,11 +8,11 @@ from pydantic import BaseModel, EmailStr, Field
 class DocumentMetadata(BaseModel):
     """Document metadata model."""
 
-    created_at: Optional[str] = None
-    modified_at: Optional[str] = None
-    author: Optional[str] = None
-    size: Optional[int] = None
-    extra: Optional[Dict] = None
+    created_at: str | None = None
+    modified_at: str | None = None
+    author: str | None = None
+    size: int | None = None
+    extra: dict | None = None
 
 
 class SearchResult(BaseModel):
@@ -49,7 +49,7 @@ class SearchResult(BaseModel):
 class SearchResponse(BaseModel):
     """Search response model."""
 
-    results: List[SearchResult]
+    results: list[SearchResult]
     total: int = Field(..., description="Total number of results")
     took: float = Field(..., description="Search time in milliseconds")
 
@@ -61,7 +61,7 @@ class Stats(BaseModel):
     """API statistics model."""
 
     document_count: int = Field(..., description="Total number of documents")
-    file_types: Dict[str, int] = Field(..., description="Document count by file type")
+    file_types: dict[str, int] = Field(..., description="Document count by file type")
     status: str = Field(..., description="Collection status")
 
     class Config:
@@ -79,7 +79,7 @@ class AuthResponse(BaseModel):
 
     access_token: str = Field(..., description="JWT access token")
     token_type: str = Field("bearer", description="Token type")
-    user: Dict[str, Any] = Field(..., description="User data from Supabase")
+    user: dict[str, Any] = Field(..., description="User data from Supabase")
 
     class Config:
         json_schema_extra = {
@@ -101,7 +101,7 @@ class UserProfile(BaseModel):
 
     id: str = Field(..., description="User's unique identifier")
     email: EmailStr = Field(..., description="User's email address")
-    name: Optional[str] = Field(None, description="User's full name")
+    name: str | None = Field(None, description="User's full name")
     created_at: str = Field(..., description="Account creation timestamp")
 
     class Config:

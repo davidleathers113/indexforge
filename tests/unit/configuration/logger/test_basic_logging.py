@@ -42,7 +42,7 @@ def test_concurrent_logging(temp_log_file: str, cleanup_logger: Any) -> None:
     for thread in threads:
         thread.join()
     try:
-        with open(temp_log_file, "r", encoding="utf-8") as f:
+        with open(temp_log_file, encoding="utf-8") as f:
             log_lines = f.readlines()
             expected_count = 30
             if len(log_lines) != expected_count:
@@ -59,8 +59,8 @@ def test_concurrent_logging(temp_log_file: str, cleanup_logger: Any) -> None:
             assert len(thread_ids) == 3, "Expected logs from exactly 3 threads"
     except PermissionError as e:
         raise PermissionError("Permission denied accessing log file: %s" % str(e)) from e
-    except (IOError, OSError) as e:
-        raise IOError("Failed to read log file: %s" % str(e)) from e
+    except OSError as e:
+        raise OSError("Failed to read log file: %s" % str(e)) from e
 
 
 def test_large_messages(temp_log_file: str, cleanup_logger: Any) -> None:
@@ -81,7 +81,7 @@ def test_large_messages(temp_log_file: str, cleanup_logger: Any) -> None:
     large_message = "Large message " * 1000 + "🚀 💫 🌟"
     log_with_context(logger, logging.INFO, large_message, {"size": len(large_message)})
     try:
-        with open(temp_log_file, "r", encoding="utf-8") as f:
+        with open(temp_log_file, encoding="utf-8") as f:
             log_lines = f.readlines()
             validated_entries = validate_log_file(
                 log_lines,
@@ -93,8 +93,8 @@ def test_large_messages(temp_log_file: str, cleanup_logger: Any) -> None:
             assert entry["size"] == len(large_message)
     except PermissionError as e:
         raise PermissionError("Permission denied accessing log file: %s" % str(e)) from e
-    except (IOError, OSError) as e:
-        raise IOError("Failed to read log file: %s" % str(e)) from e
+    except OSError as e:
+        raise OSError("Failed to read log file: %s" % str(e)) from e
 
 
 def test_malformed_json(temp_log_file: str, cleanup_logger: Any) -> None:
@@ -109,7 +109,7 @@ def test_malformed_json(temp_log_file: str, cleanup_logger: Any) -> None:
         f.write('{"message": "incomplete"')
         f.write('{"message": 123, "thread_id": "invalid"}\n')
     with pytest.raises(LogFormatError) as exc_info:
-        with open(temp_log_file, "r", encoding="utf-8") as f:
+        with open(temp_log_file, encoding="utf-8") as f:
             validate_log_file(
                 f.readlines(),
                 required_fields={"message", "thread_id"},
@@ -129,7 +129,7 @@ def test_missing_fields(temp_log_file: str, cleanup_logger: Any) -> None:
         f.write('{"message": "test", "thread_id": 123}\n')
         f.write('{"message": "missing thread_id"}\n')
     with pytest.raises(LogFieldError) as exc_info:
-        with open(temp_log_file, "r", encoding="utf-8") as f:
+        with open(temp_log_file, encoding="utf-8") as f:
             validate_log_file(
                 f.readlines(),
                 required_fields={"message", "thread_id"},

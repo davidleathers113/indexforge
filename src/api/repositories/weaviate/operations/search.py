@@ -2,7 +2,6 @@
 
 import json
 import time
-from typing import Dict, List, Optional, Tuple
 
 from src.api.errors.weaviate_error_handling import with_weaviate_error_handling
 from src.api.models.requests import SearchQuery
@@ -17,10 +16,10 @@ class SearchRepository(BaseWeaviateRepository):
     async def search(
         self,
         query: SearchQuery,
-        cursor: Optional[str] = None,
-        vector: Optional[List[float]] = None,
-        bm25_config: Optional[Dict[str, float]] = None,
-    ) -> Tuple[SearchResponse, Optional[str]]:
+        cursor: str | None = None,
+        vector: list[float] | None = None,
+        bm25_config: dict[str, float] | None = None,
+    ) -> tuple[SearchResponse, str | None]:
         """Perform semantic search with advanced features.
 
         Args:

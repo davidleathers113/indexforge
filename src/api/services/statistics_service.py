@@ -4,6 +4,7 @@ import logging
 
 from src.api.repositories.weaviate_repo import WeaviateRepository
 
+
 logger = logging.getLogger(__name__)
 
 

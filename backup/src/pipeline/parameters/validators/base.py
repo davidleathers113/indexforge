@@ -1,7 +1,7 @@
 """Base validator implementation."""
 
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any
 
 from src.pipeline.errors import ValidationError
 
@@ -26,7 +26,7 @@ class Validator(ABC):
 class CompositeValidator(Validator):
     """Validator that combines multiple validators."""
 
-    def __init__(self, validators: Optional[List[Validator]] = None):
+    def __init__(self, validators: list[Validator] | None = None):
         self.validators = validators or []
 
     def add_validator(self, validator: Validator) -> None:

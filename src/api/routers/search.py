@@ -1,6 +1,5 @@
 """Search router for API endpoints."""
 
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -9,6 +8,7 @@ from src.api.models.requests import DocumentFilter, SearchQuery
 from src.api.models.responses import SearchResponse, Stats
 from src.api.repositories.weaviate_repo import WeaviateRepository
 from src.api.services.search import SearchService
+
 
 router = APIRouter(prefix="/search", tags=["search"])
 
@@ -24,7 +24,7 @@ def get_search_service(
 @router.post("", response_model=SearchResponse)
 async def search_documents(
     query: SearchQuery,
-    filter_params: Optional[DocumentFilter] = None,
+    filter_params: DocumentFilter | None = None,
     service: SearchService = Depends(get_search_service),
 ) -> SearchResponse:
     """Search documents with semantic search and optional filtering.

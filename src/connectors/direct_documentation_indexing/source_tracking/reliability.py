@@ -42,11 +42,12 @@ Example:
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ class ReliabilityMetrics:
     update_frequency: float  # Average updates per time period
     last_update: datetime  # Timestamp of last update
     total_updates: int  # Total number of updates
-    quality_checks: Dict[str, float]  # Results of various quality checks
+    quality_checks: dict[str, float]  # Results of various quality checks
     metadata_completeness: float  # 0-1 score for metadata completeness
 
 
@@ -130,7 +131,7 @@ class SourceReliability:
         ```
     """
 
-    def __init__(self, source_type: str, source_id: str, metrics_dir: Optional[str] = None):
+    def __init__(self, source_type: str, source_id: str, metrics_dir: str | None = None):
         """
         Initialize source reliability tracker.
 
@@ -159,7 +160,7 @@ class SourceReliability:
 
         try:
             if metrics_path.exists():
-                with open(metrics_path, "r") as f:
+                with open(metrics_path) as f:
                     data = json.load(f)
                     # Convert stored timestamp to datetime
                     data["last_update"] = datetime.fromisoformat(data["last_update"])
@@ -182,7 +183,7 @@ class SourceReliability:
             authority_score=0.5,  # Start with neutral authority
             content_quality_score=0.5,  # Start with neutral quality
             update_frequency=0.0,
-            last_update=datetime.now(timezone.utc),
+            last_update=datetime.now(UTC),
             total_updates=0,
             quality_checks={},
             metadata_completeness=0.0,
@@ -227,7 +228,7 @@ class SourceReliability:
             logger.error(f"Error saving metrics: {e}")
             raise
 
-    def update_content_quality(self, content_metrics: Union[float, Dict]) -> None:
+    def update_content_quality(self, content_metrics: float | dict) -> None:
         """Update content quality metrics.
 
         Args:
@@ -273,7 +274,7 @@ class SourceReliability:
             raise
 
     def update_metadata_completeness(
-        self, metadata_fields: List[str], required_fields: List[str]
+        self, metadata_fields: list[str], required_fields: list[str]
     ) -> None:
         """
         Update metadata completeness score.
@@ -301,7 +302,7 @@ class SourceReliability:
         self.metrics.metadata_completeness = completeness
         self._record_update()
 
-    def update_authority_score(self, authority_metrics: Dict[str, float]) -> None:
+    def update_authority_score(self, authority_metrics: dict[str, float]) -> None:
         """
         Update source authority score.
 
@@ -339,7 +340,7 @@ class SourceReliability:
             This is called automatically by update methods
             Updates last_update timestamp and recalculates frequency
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Calculate time since last update
         time_diff = now - self.metrics.last_update
@@ -397,7 +398,7 @@ class SourceReliability:
 
         return reliability_score
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         """
         Get summary of current reliability metrics.
 

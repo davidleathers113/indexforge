@@ -8,7 +8,8 @@ from src.api.config.sentry.integrations import get_sentry_integrations
 from src.api.config.sentry.sampling import traces_sampler
 from src.api.config.settings import settings
 
-__all__ = ["init_sentry", "before_send", "traces_sampler"]
+
+__all__ = ["before_send", "init_sentry", "traces_sampler"]
 
 
 def init_sentry() -> None:

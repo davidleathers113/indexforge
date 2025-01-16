@@ -6,7 +6,6 @@ This module provides utilities for cleaning up Python code files.
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Union
 
 from .config import Config
 from .file_io import FileIO
@@ -19,6 +18,7 @@ from .formatters import (
 )
 from .logging_config import setup_logging
 from .processors import AIProcessor, FileProcessor, TemplateDetector
+
 
 # Initialize logging
 logger = setup_logging()
@@ -46,7 +46,7 @@ class CleanupOrchestrator:
             config.BLACK_CONFIG.line_length,
         )
 
-    def process_file(self, filepath: Union[str, Path], use_ai: bool = False) -> bool:
+    def process_file(self, filepath: str | Path, use_ai: bool = False) -> bool:
         """Process a single file with all cleanup operations."""
         try:
             path = Path(filepath)
@@ -63,7 +63,7 @@ class CleanupOrchestrator:
             # Read file and detect if it's a template
             try:
                 content = self.file_io.read_file(path)
-            except IOError as e:
+            except OSError as e:
                 logger.error("Failed to read file %s: %s", path, str(e))
                 return False
 
@@ -80,7 +80,7 @@ class CleanupOrchestrator:
                     self.file_io.write_file(path, result.content)
                     logger.info("Successfully processed: %s", path)
                     return True
-                except IOError as e:
+                except OSError as e:
                     logger.error("Failed to write processed content to %s: %s", path, str(e))
                     return False
             else:
@@ -92,8 +92,8 @@ class CleanupOrchestrator:
             return False
 
     def process_directory(
-        self, directory_path: Union[str, Path], use_ai: bool = False
-    ) -> List[str]:
+        self, directory_path: str | Path, use_ai: bool = False
+    ) -> list[str]:
         """Process all Python files in a directory."""
         path = Path(directory_path)
         failed_files = []

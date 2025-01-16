@@ -1,6 +1,5 @@
 """OAuth-related authentication routes."""
 
-from typing import Optional
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
@@ -11,6 +10,7 @@ from src.api.dependencies.supabase import get_supabase_client
 from src.api.models.requests import OAuthProvider, OAuthRequest
 from src.api.utils.auth_helpers import get_oauth_settings
 from src.api.utils.cookie_manager import clear_oauth_cookies, set_auth_cookies, set_oauth_cookies
+
 
 router = APIRouter(tags=["auth"])
 
@@ -64,7 +64,7 @@ async def oauth_signin(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"OAuth initialization failed: {str(exc)}",
+            detail=f"OAuth initialization failed: {exc!s}",
         ) from exc
 
 
@@ -74,7 +74,7 @@ async def oauth_callback(
     provider: OAuthProvider,
     code: str = Query(...),
     state: str = Query(...),
-    error: Optional[str] = Query(None),
+    error: str | None = Query(None),
     supabase: AsyncClient = Depends(get_supabase_client),
 ) -> RedirectResponse:
     """Handle OAuth callback."""
@@ -140,5 +140,5 @@ async def oauth_callback(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"OAuth callback failed: {str(exc)}",
+            detail=f"OAuth callback failed: {exc!s}",
         ) from exc

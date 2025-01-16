@@ -2,19 +2,20 @@
 
 import json
 import pickle
-from typing import Any, Dict, Optional
+from typing import Any
 from unittest.mock import Mock
 
+
 __all__ = [
-    "create_mock_redis",
     "create_mock_logger",
+    "create_mock_redis",
     "create_mock_response",
     "setup_mock_cache",
 ]
 
 
 def create_mock_redis(
-    get_return: Optional[Any] = None,
+    get_return: Any | None = None,
     setex_return: bool = True,
     delete_return: int = 1,
 ) -> Mock:
@@ -37,8 +38,8 @@ def create_mock_logger() -> Mock:
 
 def create_mock_response(
     status_code: int = 200,
-    json_data: Optional[Dict[str, Any]] = None,
-    text: Optional[str] = None,
+    json_data: dict[str, Any] | None = None,
+    text: str | None = None,
 ) -> Mock:
     """Create a mock HTTP response."""
     response = Mock()
@@ -57,10 +58,10 @@ def create_mock_response(
     return response
 
 
-def setup_mock_cache(mock_redis: Mock, key_values: Dict[str, Any]) -> None:
+def setup_mock_cache(mock_redis: Mock, key_values: dict[str, Any]) -> None:
     """Set up a mock Redis cache with initial key-value pairs."""
 
-    def mock_get(key: str) -> Optional[bytes]:
+    def mock_get(key: str) -> bytes | None:
         return pickle.dumps(key_values[key]) if key in key_values else None
 
     def mock_setex(key: str, ttl: int, value: bytes) -> bool:

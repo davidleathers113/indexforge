@@ -5,6 +5,7 @@ This module defines all Prometheus metrics used throughout the application.
 
 from prometheus_client import Counter, Gauge, Histogram
 
+
 # HTTP metrics
 HTTP_REQUEST_DURATION = Histogram(
     "http_request_duration_seconds",

@@ -1,6 +1,6 @@
 """Weaviate query aggregations."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from weaviate.classes import Collection
 from weaviate.classes.query import Filter
@@ -18,7 +18,7 @@ class AggregationBuilder:
         self.collection = collection
         self.aggregation = collection.aggregate
 
-    def count(self, filter_obj: Optional[Filter] = None) -> int:
+    def count(self, filter_obj: Filter | None = None) -> int:
         """Get total count with optional filter.
 
         Args:
@@ -33,7 +33,7 @@ class AggregationBuilder:
         result = query.do()
         return result.total_count
 
-    def group_by(self, field: str, filter_obj: Optional[Filter] = None) -> List[Dict[str, Any]]:
+    def group_by(self, field: str, filter_obj: Filter | None = None) -> list[dict[str, Any]]:
         """Group by field with counts.
 
         Args:
@@ -49,7 +49,7 @@ class AggregationBuilder:
         result = query.do()
         return result.groups
 
-    def field_stats(self, field: str, filter_obj: Optional[Filter] = None) -> Dict[str, Any]:
+    def field_stats(self, field: str, filter_obj: Filter | None = None) -> dict[str, Any]:
         """Get statistics for numeric field.
 
         Args:
@@ -81,8 +81,8 @@ class AggregationBuilder:
         self,
         field: str,
         interval: str = "1d",
-        filter_obj: Optional[Filter] = None,
-    ) -> List[Dict[str, Any]]:
+        filter_obj: Filter | None = None,
+    ) -> list[dict[str, Any]]:
         """Create date histogram aggregation.
 
         Args:
@@ -112,8 +112,8 @@ class AggregationBuilder:
         field: str,
         size: int = 10,
         min_doc_count: int = 1,
-        filter_obj: Optional[Filter] = None,
-    ) -> List[Dict[str, Any]]:
+        filter_obj: Filter | None = None,
+    ) -> list[dict[str, Any]]:
         """Get most common terms for field.
 
         Args:

@@ -15,6 +15,7 @@ def search_mock():
     mock.hybrid_search.return_value = [result]
     return mock
 
+
 @pytest.fixture
 def vector_index(search_mock):
     """Create a VectorIndex instance with mocked search"""
@@ -22,6 +23,7 @@ def vector_index(search_mock):
     index.operations = MagicMock()
     index.operations.search = search_mock
     return index
+
 
 def test_hybrid_search(vector_index, search_mock):
     """Test hybrid search functionality"""

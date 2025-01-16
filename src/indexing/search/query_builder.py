@@ -20,7 +20,6 @@ Example:
 
 from datetime import datetime
 import logging
-from typing import Dict, List, Optional
 
 import weaviate
 
@@ -62,11 +61,11 @@ class QueryBuilder:
 
     def build_semantic_query(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         min_score: float = 0.7,
-        additional_props: Optional[List[str]] = None,
-    ) -> Dict:
+        additional_props: list[str] | None = None,
+    ) -> dict:
         """
         Build a semantic search query based on vector similarity.
 
@@ -111,11 +110,11 @@ class QueryBuilder:
     def build_hybrid_query(
         self,
         text_query: str,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         alpha: float = 0.5,
-        additional_props: Optional[List[str]] = None,
-    ) -> Dict:
+        additional_props: list[str] | None = None,
+    ) -> dict:
         """
         Build a hybrid search query combining text and vector similarity.
 
@@ -163,9 +162,9 @@ class QueryBuilder:
         self,
         start_time: datetime,
         end_time: datetime,
-        query_vector: Optional[List[float]] = None,
+        query_vector: list[float] | None = None,
         limit: int = 10,
-    ) -> Dict:
+    ) -> dict:
         """
         Build a query to search for documents within a specific time range.
 
@@ -217,8 +216,8 @@ class QueryBuilder:
         return query
 
     def build_relationship_query(
-        self, parent_id: str, query_vector: Optional[List[float]] = None, limit: int = 10
-    ) -> Dict:
+        self, parent_id: str, query_vector: list[float] | None = None, limit: int = 10
+    ) -> dict:
         """
         Build a query to search for documents related to a specific parent document.
 

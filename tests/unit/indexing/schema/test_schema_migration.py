@@ -11,6 +11,7 @@ def test_migrator_deletes_old_schema_when_version_mismatch(mock_weaviate_client,
     migrator._migrate_schema()
     mock_weaviate_client.schema.delete_class.assert_called_once_with('Document')
 
+
 def test_migrator_creates_new_schema_after_deletion(mock_weaviate_client, mock_schema_validator):
     """Test that migrator creates new schema after deleting old one."""
     migrator = SchemaMigrator(mock_weaviate_client, 'Document', mock_schema_validator)

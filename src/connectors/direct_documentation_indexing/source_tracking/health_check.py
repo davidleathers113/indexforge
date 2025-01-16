@@ -6,10 +6,9 @@ This module contains methods for:
 - Calculating health statuses based on metrics and resource usage
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
 import os
-from typing import Dict, Optional
 
 import psutil
 
@@ -17,14 +16,15 @@ from .enums import HealthStatus, LogLevel, ProcessingStatus
 from .models import HealthCheckResult
 from .storage import LineageStorage
 
+
 logger = logging.getLogger(__name__)
 
 
 def calculate_health_status(
     storage: "LineageStorage",
-    memory_info: Optional[Dict[str, int]] = None,
-    cpu_percent: Optional[float] = None,
-    memory_percent: Optional[float] = None,
+    memory_info: dict[str, int] | None = None,
+    cpu_percent: float | None = None,
+    memory_percent: float | None = None,
     error_threshold: float = 0.1,
     warning_threshold: float = 0.05,
     memory_critical: float = 90.0,
@@ -33,7 +33,7 @@ def calculate_health_status(
     cpu_warning: float = 80.0,
     processing_time_critical: float = 600.0,
     processing_time_warning: float = 300.0,
-    thresholds: Optional[Dict[str, float]] = None,
+    thresholds: dict[str, float] | None = None,
 ) -> HealthCheckResult:
     """Calculate detailed health status based on metrics and resource usage.
 
@@ -117,7 +117,7 @@ def calculate_health_status(
 
     issues = []
     status = HealthStatus.HEALTHY
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     try:
         # Check resource usage
@@ -285,7 +285,7 @@ def calculate_health_status(
             exc_info=True,
         )
         status = HealthStatus.CRITICAL
-        issues.append(f"Error calculating health status: {str(e)}")
+        issues.append(f"Error calculating health status: {e!s}")
 
     logger.info(
         "Health check complete - Status: %(status)s, Issues: %(issues)s",
@@ -316,7 +316,7 @@ def calculate_health_status(
 
 def perform_health_check(
     storage: "LineageStorage",
-    thresholds: Optional[Dict[str, float]] = None,
+    thresholds: dict[str, float] | None = None,
 ) -> HealthCheckResult:
     """Perform a health check of the system.
 
@@ -328,7 +328,7 @@ def perform_health_check(
         HealthCheckResult object containing status and metrics
     """
     logger.info("Starting health check...")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Get resource usage
     logger.debug("Getting resource usage...")

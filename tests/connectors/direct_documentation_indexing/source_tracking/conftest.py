@@ -1,7 +1,7 @@
 """Shared fixtures for document lineage testing."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict
+from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 
@@ -31,16 +31,16 @@ def storage(temp_lineage_dir):
 
 
 @pytest.fixture
-def sample_document(storage) -> Dict[str, Any]:
+def sample_document(storage) -> dict[str, Any]:
     """Create a sample document with basic metadata."""
     doc_id = "test_doc"
-    metadata = {"type": "pdf", "pages": 10, "created_at": datetime.now(timezone.utc).isoformat()}
+    metadata = {"type": "pdf", "pages": 10, "created_at": datetime.now(UTC).isoformat()}
     add_document(storage, doc_id=doc_id, metadata=metadata)
     return {"id": doc_id, "metadata": metadata}
 
 
 @pytest.fixture
-def processed_document(storage, sample_document) -> Dict[str, Any]:
+def processed_document(storage, sample_document) -> dict[str, Any]:
     """Create a sample document that has been processed successfully."""
     doc_id = sample_document["id"]
     add_processing_step(

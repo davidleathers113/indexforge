@@ -40,10 +40,10 @@ References:
 
 from dataclasses import dataclass, field
 import logging
-from typing import Dict, List, Optional
 from uuid import UUID, uuid4
 
 import tiktoken
+
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class Chunk:
 
     id: UUID
     content: str
-    metadata: Optional[Dict] = None
+    metadata: dict | None = None
 
     def __post_init__(self):
         """Initialize default values after creation."""
@@ -91,7 +91,7 @@ class ChunkingConfig:
     max_chunk_size: int = 100
 
     # Private field to store the token encoder
-    _encoder: Optional[tiktoken.Encoding] = field(init=False, repr=False, default=None)
+    _encoder: tiktoken.Encoding | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Initialize the encoder after creation."""
@@ -100,7 +100,7 @@ class ChunkingConfig:
             object.__setattr__(self, "_encoder", get_token_encoding(self.model_name))
         except Exception as e:
             # Log error but don't fail initialization - will try again when needed
-            logger.warning(f"Failed to initialize encoder: {str(e)}")
+            logger.warning(f"Failed to initialize encoder: {e!s}")
             object.__setattr__(self, "_encoder", None)
 
     def get_encoder(self) -> tiktoken.Encoding:
@@ -154,7 +154,7 @@ class ChunkingConfig:
         return self.__str__()
 
 
-def get_token_encoding(model_name: Optional[str] = None) -> tiktoken.Encoding:
+def get_token_encoding(model_name: str | None = None) -> tiktoken.Encoding:
     """Get the appropriate token encoding for a model.
 
     Args:
@@ -178,10 +178,10 @@ def get_token_encoding(model_name: Optional[str] = None) -> tiktoken.Encoding:
                 return tiktoken.get_encoding("cl100k_base")
         return tiktoken.get_encoding("cl100k_base")  # Default encoding
     except Exception as e:
-        raise ValueError(f"Failed to initialize token encoding: {str(e)}") from e
+        raise ValueError(f"Failed to initialize token encoding: {e!s}") from e
 
 
-def chunk_text_by_tokens(text: str, config: ChunkingConfig) -> List[str]:
+def chunk_text_by_tokens(text: str, config: ChunkingConfig) -> list[str]:
     """Split text into chunks based on token count.
 
     Args:
@@ -223,10 +223,10 @@ def chunk_text_by_tokens(text: str, config: ChunkingConfig) -> List[str]:
 
         return chunks
     except Exception as e:
-        raise ValueError(f"Failed to chunk text: {str(e)}") from e
+        raise ValueError(f"Failed to chunk text: {e!s}") from e
 
 
-def chunk_text_by_chars(text: str, chunk_size: int, overlap: int = 0) -> List[str]:
+def chunk_text_by_chars(text: str, chunk_size: int, overlap: int = 0) -> list[str]:
     """Split text into chunks based on character count.
 
     Args:
@@ -254,7 +254,7 @@ def chunk_text_by_chars(text: str, chunk_size: int, overlap: int = 0) -> List[st
     return chunks
 
 
-def chunk_text_by_words(text: str, chunk_size: int, overlap: int = 0) -> List[str]:
+def chunk_text_by_words(text: str, chunk_size: int, overlap: int = 0) -> list[str]:
     """Split text into chunks by word count.
 
     Args:

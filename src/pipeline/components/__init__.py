@@ -52,9 +52,10 @@ from .indexer import DocumentIndexer
 from .loader import DocumentLoader
 from .processor import DocumentProcessor
 
+
 __all__ = [
-    "PipelineComponent",
     "DocumentIndexer",
     "DocumentLoader",
     "DocumentProcessor",
+    "PipelineComponent",
 ]

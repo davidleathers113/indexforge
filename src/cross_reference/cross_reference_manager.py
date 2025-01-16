@@ -6,13 +6,13 @@ and managing various types of relationships between document chunks.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
 from .models import ChunkReference, ReferenceType
 from .utils.clustering import perform_topic_clustering, predict_topic
 from .utils.similarity import compute_cosine_similarities, get_top_similar_indices
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +51,8 @@ class CrossReferenceManager:
         self.similarity_threshold = similarity_threshold
         self.max_semantic_refs = max_semantic_refs
         self.n_topics = n_topics
-        self.embeddings: Dict[str, np.ndarray] = {}
-        self.references: Dict[str, List[ChunkReference]] = {}
+        self.embeddings: dict[str, np.ndarray] = {}
+        self.references: dict[str, list[ChunkReference]] = {}
         self.topic_clusters = None
         logger.debug("CrossReferenceManager initialized successfully")
 
@@ -68,7 +68,7 @@ class CrossReferenceManager:
             self.references[chunk_id] = []
         self.embeddings[chunk_id] = embedding
 
-    def establish_sequential_references(self, chunk_ids: List[str]) -> None:
+    def establish_sequential_references(self, chunk_ids: list[str]) -> None:
         """
         Establish sequential references between chunks.
 
@@ -133,7 +133,7 @@ class CrossReferenceManager:
                         topic_id=topic_id,
                     )
 
-    def get_topic_cluster(self, chunk_id: str) -> Optional[int]:
+    def get_topic_cluster(self, chunk_id: str) -> int | None:
         """
         Get the topic cluster ID for a chunk.
 
@@ -155,9 +155,9 @@ class CrossReferenceManager:
     def get_references(
         self,
         chunk_id: str,
-        ref_type: Optional[ReferenceType] = None,
+        ref_type: ReferenceType | None = None,
         include_metadata: bool = False,
-    ) -> List[Tuple[str, ReferenceType, Optional[Dict]]]:
+    ) -> list[tuple[str, ReferenceType, dict | None]]:
         """
         Get references for a chunk.
 
@@ -183,7 +183,7 @@ class CrossReferenceManager:
             return [(r.target_id, r.ref_type, r.metadata) for r in refs]
         return [(r.target_id, r.ref_type, None) for r in refs]
 
-    def validate_references(self) -> List[str]:
+    def validate_references(self) -> list[str]:
         """
         Validate all references for issues.
 
@@ -214,7 +214,7 @@ class CrossReferenceManager:
                         )
 
         # Check for circular references
-        def check_circular_refs(chunk_id: str, path: List[str]) -> None:
+        def check_circular_refs(chunk_id: str, path: list[str]) -> None:
             if chunk_id not in self.references:
                 return
 
@@ -236,8 +236,8 @@ class CrossReferenceManager:
         source_id: str,
         target_id: str,
         ref_type: ReferenceType,
-        similarity_score: Optional[float] = None,
-        topic_id: Optional[int] = None,
+        similarity_score: float | None = None,
+        topic_id: int | None = None,
     ) -> None:
         """
         Add bi-directional references between two chunks.

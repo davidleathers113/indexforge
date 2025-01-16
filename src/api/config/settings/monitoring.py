@@ -1,6 +1,5 @@
 """Monitoring and observability settings configuration."""
 
-from typing import Optional
 
 from pydantic import Field, field_validator
 
@@ -11,8 +10,8 @@ class MonitoringSettings(BaseAppSettings):
     """Monitoring and observability settings."""
 
     # Sentry Configuration
-    SENTRY_DSN: Optional[str] = Field(default=None, description="Sentry Data Source Name")
-    SENTRY_TRACES_SAMPLE_RATE: Optional[float] = Field(
+    SENTRY_DSN: str | None = Field(default=None, description="Sentry Data Source Name")
+    SENTRY_TRACES_SAMPLE_RATE: float | None = Field(
         default=None, description="Sample rate for performance monitoring"
     )
     SENTRY_PROFILES_SAMPLE_RATE: float = Field(
@@ -54,7 +53,7 @@ class MonitoringSettings(BaseAppSettings):
 
     @field_validator("SENTRY_TRACES_SAMPLE_RATE")
     @classmethod
-    def validate_sample_rate(cls, v: Optional[float]) -> Optional[float]:
+    def validate_sample_rate(cls, v: float | None) -> float | None:
         """Validate sample rate is between 0 and 1."""
         if v is not None and not 0.0 <= v <= 1.0:
             raise ValueError("SENTRY_TRACES_SAMPLE_RATE must be between 0 and 1")

@@ -6,13 +6,13 @@ generation, and management. These exceptions provide detailed error information
 and proper error handling for schema operations.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class SchemaError(Exception):
     """Base exception for all schema-related errors."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: dict[str, Any] | None = None):
         """
         Initialize the schema error.
 
@@ -30,8 +30,8 @@ class SchemaValidationError(SchemaError):
     def __init__(
         self,
         message: str,
-        validation_errors: Optional[List[str]] = None,
-        details: Optional[Dict[str, Any]] = None,
+        validation_errors: list[str] | None = None,
+        details: dict[str, Any] | None = None,
     ):
         """
         Initialize the validation error.
@@ -52,8 +52,8 @@ class PropertyValidationError(SchemaValidationError):
         self,
         property_name: str,
         message: str,
-        validation_errors: Optional[List[str]] = None,
-        details: Optional[Dict[str, Any]] = None,
+        validation_errors: list[str] | None = None,
+        details: dict[str, Any] | None = None,
     ):
         """
         Initialize the property validation error.
@@ -79,7 +79,7 @@ class ConfigurationError(SchemaError):
         self,
         config_key: str,
         message: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         """
         Initialize the configuration error.
@@ -103,7 +103,7 @@ class ClassNameError(SchemaValidationError):
         self,
         class_name: str,
         message: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         """
         Initialize the class name error.
@@ -125,10 +125,10 @@ class SchemaVersionError(SchemaError):
 
     def __init__(
         self,
-        current_version: Optional[int],
+        current_version: int | None,
         required_version: int,
-        message: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        message: str | None = None,
+        details: dict[str, Any] | None = None,
     ):
         """
         Initialize the schema version error.

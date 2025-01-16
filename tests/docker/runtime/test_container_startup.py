@@ -1,7 +1,7 @@
 """Test container startup behavior."""
 
 import time
-from typing import Any, Dict
+from typing import Any
 
 import docker
 import pytest
@@ -11,7 +11,7 @@ from ..utils.docker_test_utils import DockerTestUtils
 
 
 def test_container_starts_successfully(
-    docker_client: Any, running_container: Dict[str, Any]
+    docker_client: Any, running_container: dict[str, Any]
 ) -> None:
     """Test that container starts without errors."""
     assert running_container.status == "running", "Container failed to start"
@@ -45,7 +45,7 @@ def test_startup_time(docker_client: Any) -> None:
         container.stop()
 
 
-def test_entrypoint_execution(running_container: Dict[str, Any]) -> None:
+def test_entrypoint_execution(running_container: dict[str, Any]) -> None:
     """Test that container entrypoint executes correctly."""
     # Check process tree
     result = running_container.exec_run("ps -ef")

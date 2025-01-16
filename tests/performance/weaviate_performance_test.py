@@ -3,12 +3,10 @@
 from datetime import datetime
 import json
 import time
-from typing import Dict, List
 
 from loguru import logger
-import weaviate
-
 from tests.data.weaviate_test_dataset import generate_test_documents, load_test_dataset
+import weaviate
 
 
 class WeaviatePerformanceTest:
@@ -30,7 +28,7 @@ class WeaviatePerformanceTest:
         self.client = client
         self.class_name = class_name
         self.batch_size = batch_size
-        self.results: Dict = {}
+        self.results: dict = {}
 
     def setup_schema(self):
         """Set up test schema in Weaviate."""
@@ -59,7 +57,7 @@ class WeaviatePerformanceTest:
         except Exception as e:
             logger.warning(f"Schema creation failed: {e}")
 
-    def measure_batch_import(self, documents: List[Dict]) -> Dict:
+    def measure_batch_import(self, documents: list[dict]) -> dict:
         """Measure batch import performance.
 
         Args:
@@ -111,7 +109,7 @@ class WeaviatePerformanceTest:
         self,
         num_queries: int = 100,
         limit: int = 10,
-    ) -> Dict:
+    ) -> dict:
         """Measure search performance.
 
         Args:
@@ -188,7 +186,7 @@ class WeaviatePerformanceTest:
         self,
         num_docs: int = 1000,
         num_queries: int = 100,
-    ) -> Dict:
+    ) -> dict:
         """Run complete performance test suite.
 
         Args:

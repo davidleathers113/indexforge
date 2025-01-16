@@ -1,11 +1,12 @@
 """Metrics collection and aggregation for document processing."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from .enums import LogLevel, ProcessingStatus
 from .models import DocumentLineage, ProcessingStep
+
 
 if TYPE_CHECKING:
     from .storage import LineageStorage
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def normalize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+def normalize_datetime(dt: datetime | None) -> datetime | None:
     """Ensure datetime is timezone-aware (UTC).
 
     Args:
@@ -27,14 +28,14 @@ def normalize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
     try:
         if dt.tzinfo is None:
             logger.debug("Converting naive datetime to UTC: %s", dt)
-            return dt.replace(tzinfo=timezone.utc)
-        return dt.astimezone(timezone.utc)
+            return dt.replace(tzinfo=UTC)
+        return dt.astimezone(UTC)
     except (AttributeError, ValueError) as e:
         logger.error("Failed to normalize datetime %s: %s", dt, str(e))
         raise ValueError(f"Invalid datetime value: {dt}") from e
 
 
-def get_latest_processing_step(doc_id: str, lineage: DocumentLineage) -> Optional[ProcessingStep]:
+def get_latest_processing_step(doc_id: str, lineage: DocumentLineage) -> ProcessingStep | None:
     """Get the most recent processing step for a document.
 
     Args:
@@ -57,10 +58,10 @@ def get_latest_processing_step(doc_id: str, lineage: DocumentLineage) -> Optiona
 
 
 def get_aggregated_metrics(
-    lineage_data: Dict[str, DocumentLineage],
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
-) -> Dict[str, Any]:
+    lineage_data: dict[str, DocumentLineage],
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
+) -> dict[str, Any]:
     """Get aggregated metrics across all documents.
 
     Args:
@@ -291,7 +292,7 @@ def get_aggregated_metrics(
 def update_performance_metrics(
     lineage: DocumentLineage,
     metric_name: str,
-    value: Union[float, int, Dict],
+    value: float | int | dict,
     operation: str = "set",
 ) -> None:
     """Update performance metrics for a document.
@@ -332,7 +333,7 @@ def update_performance_metrics(
                 lineage.performance_metrics[metric_name],
             )
 
-        lineage.last_modified = datetime.now(timezone.utc)
+        lineage.last_modified = datetime.now(UTC)
 
     except Exception as e:
         logger.error(
@@ -345,9 +346,9 @@ def update_performance_metrics(
 
 
 def get_real_time_status(
-    storage_or_lineage: Union["LineageStorage", Dict[str, DocumentLineage]],
-    doc_id: Optional[str] = None,
-) -> Dict[str, Any]:
+    storage_or_lineage: Union["LineageStorage", dict[str, DocumentLineage]],
+    doc_id: str | None = None,
+) -> dict[str, Any]:
     """Get real-time status of document processing.
 
     Args:
@@ -374,7 +375,7 @@ def get_real_time_status(
         else:
             lineage_data = storage_or_lineage
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         active_docs = 0
         queued_docs = 0
         processing_docs = 0

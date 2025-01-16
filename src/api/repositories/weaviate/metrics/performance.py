@@ -4,9 +4,9 @@ from dataclasses import dataclass
 import logging
 from statistics import mean, median
 import time
-from typing import Dict, List, Optional
 
 from .base import BaseMetrics
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class BatchPerformanceMetrics:
     duration_seconds: float
     objects_per_second: float
     error_rate: float
-    memory_usage_mb: Optional[float] = None
+    memory_usage_mb: float | None = None
 
 
 class BatchPerformanceTracker(BaseMetrics):
@@ -37,9 +37,9 @@ class BatchPerformanceTracker(BaseMetrics):
         self.min_batch_size = min_batch_size
         self.max_batch_size = max_batch_size
         self.window_size = window_size
-        self.metrics_history: List[BatchPerformanceMetrics] = []
-        self.current_batch_start: Optional[float] = None
-        self.current_batch_size: Optional[int] = None
+        self.metrics_history: list[BatchPerformanceMetrics] = []
+        self.current_batch_start: float | None = None
+        self.current_batch_size: int | None = None
         self.optimal_batch_size: int = min_batch_size
 
     def start_batch(self, batch_size: int) -> None:
@@ -48,7 +48,7 @@ class BatchPerformanceTracker(BaseMetrics):
         self.current_batch_size = batch_size
 
     def end_batch(
-        self, successful_objects: int, failed_objects: int, memory_usage_mb: Optional[float] = None
+        self, successful_objects: int, failed_objects: int, memory_usage_mb: float | None = None
     ) -> None:
         """Record metrics for completed batch."""
         if self.current_batch_start is None or self.current_batch_size is None:
@@ -87,7 +87,7 @@ class BatchPerformanceTracker(BaseMetrics):
         """
         return self.optimal_batch_size
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get performance metrics summary."""
         if not self.metrics_history:
             return {"error": "No performance data available"}

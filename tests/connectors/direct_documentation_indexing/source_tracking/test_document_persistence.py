@@ -1,6 +1,6 @@
 """Tests for document persistence and storage functionality."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from src.connectors.direct_documentation_indexing.source_tracking import add_document
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
@@ -28,7 +28,7 @@ def test_document_timestamps(storage):
     add_document(storage, doc_id=doc_id)
 
     lineage = storage.get_lineage(doc_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     assert now - lineage.created_at < timedelta(seconds=1), "Created timestamp should be recent"
     assert now - lineage.last_modified < timedelta(seconds=1), "Modified timestamp should be recent"

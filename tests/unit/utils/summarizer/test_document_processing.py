@@ -11,12 +11,14 @@ def mock_pipeline():
     """Create a mock pipeline."""
     return Mock(return_value=[{'summary_text': 'Mocked summary'}])
 
+
 @pytest.fixture
 def summarizer(mock_pipeline):
     """Create a document summarizer instance with mocked pipeline."""
     summarizer = DocumentSummarizer()
     summarizer._pipeline = mock_pipeline
     return summarizer
+
 
 def test_process_documents(summarizer):
     """Test processing multiple documents."""
@@ -27,6 +29,7 @@ def test_process_documents(summarizer):
         assert doc['content']['summary'] is not None
         assert 'summarization' in doc['metadata']
         assert 'compression_ratio' in doc['metadata']['summarization']
+
 
 def test_process_documents_error_handling(mock_pipeline, summarizer):
     """Test error handling in document processing."""

@@ -24,7 +24,6 @@ Example:
 
 from datetime import datetime
 import logging
-from typing import Dict, List, Optional
 
 import weaviate
 
@@ -71,12 +70,12 @@ class SearchExecutor:
 
     def semantic_search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         min_score: float = 0.7,
-        additional_props: Optional[List[str]] = None,
+        additional_props: list[str] | None = None,
         with_vector: bool = False,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         Execute a semantic search using vector similarity.
 
@@ -172,7 +171,7 @@ class SearchExecutor:
             return search_results
         except Exception as e:
             self.logger.error(
-                f"Error in semantic search: {str(e)}",
+                f"Error in semantic search: {e!s}",
                 exc_info=True,
                 extra={
                     "vector_length": len(query_vector),
@@ -186,12 +185,12 @@ class SearchExecutor:
     def hybrid_search(
         self,
         text_query: str,
-        query_vector: List[float],
+        query_vector: list[float],
         limit: int = 10,
         alpha: float = 0.5,
-        additional_props: Optional[List[str]] = None,
+        additional_props: list[str] | None = None,
         with_vector: bool = False,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Execute a hybrid search combining text and vector similarity.
 
@@ -254,17 +253,17 @@ class SearchExecutor:
                 return []
             return result["data"]["Get"][self.class_name]
         except Exception as e:
-            self.logger.error(f"Error in hybrid search: {str(e)}")
+            self.logger.error(f"Error in hybrid search: {e!s}")
             return []
 
     def time_range_search(
         self,
         start_time: datetime,
         end_time: datetime,
-        query_vector: Optional[List[float]] = None,
+        query_vector: list[float] | None = None,
         limit: int = 10,
-        additional_props: Optional[List[str]] = None,
-    ) -> List[Dict]:
+        additional_props: list[str] | None = None,
+    ) -> list[dict]:
         """
         Execute a search within a specific time range.
 
@@ -343,16 +342,16 @@ class SearchExecutor:
                 return []
             return result["data"]["Get"][self.class_name]
         except Exception as e:
-            self.logger.error(f"Error in time range search: {str(e)}")
+            self.logger.error(f"Error in time range search: {e!s}")
             return []
 
     def relationship_search(
         self,
         parent_id: str,
-        query_vector: Optional[List[float]] = None,
+        query_vector: list[float] | None = None,
         limit: int = 10,
-        additional_props: Optional[List[str]] = None,
-    ) -> List[Dict]:
+        additional_props: list[str] | None = None,
+    ) -> list[dict]:
         """
         Execute a search for documents related to a specific parent.
 
@@ -417,5 +416,5 @@ class SearchExecutor:
                 return []
             return result["data"]["Get"][self.class_name]
         except Exception as e:
-            self.logger.error(f"Error in relationship search: {str(e)}")
+            self.logger.error(f"Error in relationship search: {e!s}")
             return []

@@ -9,7 +9,8 @@ This module is responsible for:
 from dataclasses import dataclass
 from enum import Enum, auto
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -55,7 +56,7 @@ class SerializationConfig:
 class SetupHelpers:
     """Helpers for generating test setup code."""
 
-    def setup_cache_mock(self, config: Optional[CacheConfig] = None) -> str:
+    def setup_cache_mock(self, config: CacheConfig | None = None) -> str:
         """Generates code for creating a cache mock.
 
         Args:
@@ -73,7 +74,7 @@ mock_cache = Mock()
 mock_cache.{config.method}.return_value = {config.return_value!r}
 """.strip()
 
-    def setup_serialization(self, config: Optional[SerializationConfig] = None) -> str:
+    def setup_serialization(self, config: SerializationConfig | None = None) -> str:
         """Generates code for creating a serialization mock.
 
         Args:
@@ -92,7 +93,7 @@ mock_serializer.dumps.return_value = {config.dumps_return!r}
 mock_serializer.loads.return_value = {config.loads_return!r}
 """.strip()
 
-    def setup_retry_mocks(self, config: Optional[RetryConfig] = None) -> str:
+    def setup_retry_mocks(self, config: RetryConfig | None = None) -> str:
         """Generates code for creating retry mocks.
 
         Args:
@@ -122,7 +123,7 @@ mock_retry.side_effect = retry_side_effect
 class VerificationHelpers:
     """Helpers for generating test verification code."""
 
-    def verify_result(self, actual: str, expected: Any, message: Optional[str] = None) -> str:
+    def verify_result(self, actual: str, expected: Any, message: str | None = None) -> str:
         """Generates code to verify a result.
 
         Args:
@@ -175,7 +176,7 @@ method_mock = {mock_name}.{config.method}
 assert method_mock.call_args == ({args}, {{}})
 """.strip()
 
-    def verify_serialization_calls(self, mock_name: str, calls: List[Dict[str, Any]]) -> str:
+    def verify_serialization_calls(self, mock_name: str, calls: list[dict[str, Any]]) -> str:
         """Generates code to verify serialization calls.
 
         Args:
@@ -232,7 +233,7 @@ class ContextService:
         self._setup = SetupHelpers()
         self._verify = VerificationHelpers()
 
-    def get_context(self, template_type: str, **kwargs) -> Dict[str, Any]:
+    def get_context(self, template_type: str, **kwargs) -> dict[str, Any]:
         """Gets context for template rendering.
 
         Args:
@@ -273,7 +274,7 @@ class ContextService:
         logger.debug(f"Generated context with keys: {list(context.keys())}")
         return context
 
-    def _create_base_context(self) -> Dict[str, Any]:
+    def _create_base_context(self) -> dict[str, Any]:
         """Creates base context with all helpers.
 
         Returns:
@@ -292,7 +293,7 @@ class ContextService:
             "verify_log": self._verify.verify_single_log,
         }
 
-    def _get_cache_context(self) -> Dict[str, Any]:
+    def _get_cache_context(self) -> dict[str, Any]:
         """Gets context for cache templates.
 
         Returns:
@@ -304,7 +305,7 @@ class ContextService:
             "default_value": "cached_value",
         }
 
-    def _get_retry_context(self) -> Dict[str, Any]:
+    def _get_retry_context(self) -> dict[str, Any]:
         """Gets context for retry templates.
 
         Returns:
@@ -316,7 +317,7 @@ class ContextService:
             "default_error": ValueError("Retry failed"),
         }
 
-    def _get_log_context(self) -> Dict[str, Any]:
+    def _get_log_context(self) -> dict[str, Any]:
         """Gets context for log templates.
 
         Returns:
@@ -328,7 +329,7 @@ class ContextService:
             "default_format": "%(levelname)s: %(message)s",
         }
 
-    def _get_mock_context(self) -> Dict[str, Any]:
+    def _get_mock_context(self) -> dict[str, Any]:
         """Gets context for mock templates.
 
         Returns:

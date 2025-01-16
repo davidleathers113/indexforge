@@ -1,150 +1,206 @@
 """Core reference management interfaces.
 
 This module defines the interfaces for managing references between chunks
-and documents. It provides abstract base classes for reference management,
-validation, and processing.
+and documents. It provides protocols for reference management, validation,
+and semantic relationship operations.
 """
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Protocol, Tuple
+from typing import TYPE_CHECKING, Any, Optional, Protocol, TypeVar
 from uuid import UUID
 
-from src.core.models.references import Reference, ReferenceType
+
+if TYPE_CHECKING:
+    import numpy as np
+
+    from src.core.models.references import Reference, ReferenceType
+    from src.core.settings import Settings
+
+T = TypeVar("T", bound="Reference")
 
 
 class ReferenceValidator(Protocol):
-    """Protocol for reference validation."""
+    """Protocol for reference validation operations."""
 
-    def validate_reference(self, ref: Reference) -> List[str]:
+    def validate_reference(self, ref: "Reference") -> list[str]:
         """Validate a single reference.
 
         Args:
-            ref: Reference to validate
+            ref (Reference): Reference to validate
 
         Returns:
-            List of validation error messages
+            List[str]: List of validation error messages, empty if valid
+
+        Raises:
+            ValueError: If reference is malformed
         """
         ...
 
-    def validate_references(self, refs: List[Reference]) -> List[str]:
+    def validate_references(self, refs: list["Reference"]) -> list[str]:
         """Validate multiple references.
 
         Args:
-            refs: References to validate
+            refs (List[Reference]): References to validate
 
         Returns:
-            List of validation error messages
+            List[str]: List of validation error messages, empty if all valid
+
+        Raises:
+            ValueError: If any reference is malformed
         """
         ...
 
 
-class ReferenceManager(ABC):
-    """Interface for reference management."""
+class ReferenceManager(Protocol):
+    """Protocol for reference management operations."""
 
-    @abstractmethod
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the reference manager.
+
+        Args:
+            settings (Settings): Application settings
+        """
+        ...
+
     def add_reference(
         self,
         source_id: UUID,
         target_id: UUID,
-        ref_type: ReferenceType,
-        metadata: Optional[Dict] = None,
+        ref_type: "ReferenceType",
+        metadata: dict[str, Any] | None = None,
         bidirectional: bool = False,
-    ) -> Reference:
+    ) -> T:
         """Add a reference between chunks.
 
         Args:
-            source_id: ID of the source chunk
-            target_id: ID of the target chunk
-            ref_type: Type of reference
-            metadata: Optional reference metadata
-            bidirectional: Whether to create bidirectional reference
+            source_id (UUID): ID of the source chunk
+            target_id (UUID): ID of the target chunk
+            ref_type (ReferenceType): Type of reference
+            metadata (Optional[Dict[str, Any]], optional): Reference metadata. Defaults to None.
+            bidirectional (bool, optional): Whether to create bidirectional reference.
+                Defaults to False.
 
         Returns:
-            Created reference
-        """
-        pass
+            T: Created reference
 
-    @abstractmethod
+        Raises:
+            ServiceStateError: If manager is not initialized
+            ValueError: If source_id or target_id is invalid
+        """
+        ...
+
     def get_references(
         self,
         chunk_id: UUID,
-        ref_type: Optional[ReferenceType] = None,
+        ref_type: Optional["ReferenceType"] = None,
         include_metadata: bool = False,
-    ) -> List[Reference]:
+    ) -> list[T]:
         """Get references for a chunk.
 
         Args:
-            chunk_id: ID of the chunk
-            ref_type: Optional filter by reference type
-            include_metadata: Whether to include reference metadata
+            chunk_id (UUID): ID of the chunk
+            ref_type (Optional[ReferenceType], optional): Filter by reference type.
+                Defaults to None.
+            include_metadata (bool, optional): Whether to include reference metadata.
+                Defaults to False.
 
         Returns:
-            List of references
-        """
-        pass
+            List[T]: List of references matching the criteria
 
-    @abstractmethod
-    def remove_reference(self, ref: Reference) -> None:
+        Raises:
+            ServiceStateError: If manager is not initialized
+            ValueError: If chunk_id is invalid
+        """
+        ...
+
+    def remove_reference(self, ref: T) -> None:
         """Remove a reference.
 
         Args:
-            ref: Reference to remove
-        """
-        pass
+            ref (T): Reference to remove
 
-    @abstractmethod
-    def validate_references(self) -> List[str]:
+        Raises:
+            ServiceStateError: If manager is not initialized
+            ValueError: If reference does not exist
+        """
+        ...
+
+    def validate_references(self) -> list[str]:
         """Validate all references.
 
         Returns:
-            List of validation error messages
+            List[str]: List of validation error messages, empty if all valid
+
+        Raises:
+            ServiceStateError: If manager is not initialized
         """
-        pass
+        ...
 
 
-class SemanticReferenceManager(ReferenceManager):
-    """Interface for semantic reference management."""
+class SemanticReferenceManager(Protocol):
+    """Protocol for semantic reference management operations."""
 
-    @abstractmethod
-    def add_chunk_embedding(self, chunk_id: UUID, embedding: Any) -> None:
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the semantic reference manager.
+
+        Args:
+            settings (Settings): Application settings
+        """
+        ...
+
+    def add_chunk_embedding(self, chunk_id: UUID, embedding: "np.ndarray") -> None:
         """Add a chunk embedding.
 
         Args:
-            chunk_id: ID of the chunk
-            embedding: Vector embedding of chunk content (numpy.ndarray)
-        """
-        pass
+            chunk_id (UUID): ID of the chunk
+            embedding (np.ndarray): Vector embedding of chunk content
 
-    @abstractmethod
+        Raises:
+            ServiceStateError: If manager is not initialized
+            ValueError: If chunk_id is invalid or embedding has wrong shape
+        """
+        ...
+
     def establish_semantic_references(
         self,
         similarity_threshold: float = 0.8,
         max_refs_per_chunk: int = 3,
-    ) -> List[Reference]:
+    ) -> list[T]:
         """Establish semantic references between chunks.
 
         Args:
-            similarity_threshold: Minimum similarity score (0-1)
-            max_refs_per_chunk: Maximum references per chunk
+            similarity_threshold (float, optional): Minimum similarity score (0-1).
+                Defaults to 0.8.
+            max_refs_per_chunk (int, optional): Maximum references per chunk.
+                Defaults to 3.
 
         Returns:
-            List of created references
-        """
-        pass
+            List[T]: List of created references
 
-    @abstractmethod
+        Raises:
+            ServiceStateError: If manager is not initialized
+            ValueError: If similarity_threshold not in [0,1] or max_refs_per_chunk < 1
+        """
+        ...
+
     def establish_topic_references(
         self,
         n_topics: int = 5,
         min_chunks_per_topic: int = 3,
-    ) -> Tuple[List[Reference], Dict[int, List[UUID]]]:
+    ) -> tuple[list[T], dict[int, list[UUID]]]:
         """Establish topic-based references between chunks.
 
         Args:
-            n_topics: Number of topics for clustering
-            min_chunks_per_topic: Minimum chunks per topic
+            n_topics (int, optional): Number of topics for clustering. Defaults to 5.
+            min_chunks_per_topic (int, optional): Minimum chunks per topic.
+                Defaults to 3.
 
         Returns:
-            Tuple of (created references, topic assignments)
+            Tuple[List[T], Dict[int, List[UUID]]]: Tuple containing:
+                - List of created references
+                - Dictionary mapping topic IDs to lists of chunk UUIDs
+
+        Raises:
+            ServiceStateError: If manager is not initialized
+            ValueError: If n_topics < 1 or min_chunks_per_topic < 1
         """
-        pass
+        ...

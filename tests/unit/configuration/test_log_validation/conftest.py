@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 import pytest
 
@@ -12,9 +12,9 @@ from src.configuration.logger_setup import setup_json_logger
 def create_test_log_entry(
     message: str,
     thread_id: int,
-    sequence: Optional[int] = None,
+    sequence: int | None = None,
     **extras: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create a standardized log entry for testing.
 
     Args:
@@ -37,9 +37,9 @@ def create_test_log_entry(
 
 
 def verify_log_structure(
-    entry: Dict[str, Any],
-    required_fields: Set[str],
-    optional_fields: Optional[Set[str]] = None,
+    entry: dict[str, Any],
+    required_fields: set[str],
+    optional_fields: set[str] | None = None,
 ) -> None:
     """Verify basic log entry structure.
 
@@ -84,12 +84,13 @@ def write_test_logs(temp_log_file: str) -> None:
         temp_log_file: Path to temporary log file
     """
 
-    def _write_logs(entries: List[Dict[str, Any]]) -> None:
+    def _write_logs(entries: list[dict[str, Any]]) -> None:
         with open(temp_log_file, "w", encoding="utf-8") as f:
             for entry in entries:
                 f.write(json.dumps(entry) + "\n")
 
     return _write_logs
+
 
 import tracemalloc
 
@@ -97,6 +98,7 @@ import tracemalloc
 def pytest_configure(config):
     """Configure pytest with enhanced exception handling."""
     tracemalloc.start()
+
 
 def pytest_unconfigure(config):
     """Cleanup pytest configuration."""

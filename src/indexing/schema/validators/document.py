@@ -36,16 +36,17 @@ Example:
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any
 
 import numpy as np
 
 from .embedding import validate_embedding
 
+
 logger = logging.getLogger(__name__)
 
 # Required fields that must be present and non-empty in all documents
-REQUIRED_FIELDS: Set[str] = {"content_body", "timestamp_utc", "schema_version", "embedding"}
+REQUIRED_FIELDS: set[str] = {"content_body", "timestamp_utc", "schema_version", "embedding"}
 
 # ISO 8601 datetime format with timezone
 ISO_DATETIME_PATTERN = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})$"
@@ -69,9 +70,9 @@ MAX_METADATA_FIELDS = 100
 
 
 def validate_document_fields(
-    doc: Dict[str, Any],
-    custom_fields: Optional[Dict[str, type]] = None,
-    doc_id: Optional[str] = None,
+    doc: dict[str, Any],
+    custom_fields: dict[str, type] | None = None,
+    doc_id: str | None = None,
     strict: bool = True,
 ) -> None:
     """
@@ -142,7 +143,7 @@ def validate_document_fields(
         raise
 
 
-def validate_required_fields(doc: Dict[str, Any]) -> None:
+def validate_required_fields(doc: dict[str, Any]) -> None:
     """
     Validate presence and non-emptiness of required fields.
 
@@ -198,7 +199,7 @@ def validate_required_fields(doc: Dict[str, Any]) -> None:
 
 
 def validate_field_types(
-    doc: Dict[str, Any], field_types: Dict[str, type], strict: bool = True
+    doc: dict[str, Any], field_types: dict[str, type], strict: bool = True
 ) -> None:
     """
     Validate data types of document fields.
@@ -287,7 +288,7 @@ def validate_field_types(
     logger.info("Field type validation successful")
 
 
-def get_dict_depth(d: Dict[str, Any], current_depth: int = 0) -> int:
+def get_dict_depth(d: dict[str, Any], current_depth: int = 0) -> int:
     """
     Calculate the maximum depth of a nested dictionary.
 
@@ -307,7 +308,7 @@ def get_dict_depth(d: Dict[str, Any], current_depth: int = 0) -> int:
     )
 
 
-def validate_size_constraints(doc: Dict[str, Any]) -> None:
+def validate_size_constraints(doc: dict[str, Any]) -> None:
     """
     Validate size constraints on document fields.
 
@@ -348,14 +349,14 @@ def validate_size_constraints(doc: Dict[str, Any]) -> None:
         raise ValueError("content_body.*size")
 
     # Validate chunk list size
-    if "chunk_ids" in doc and doc["chunk_ids"]:
+    if doc.get("chunk_ids"):
         chunk_count = len(doc["chunk_ids"])
         if chunk_count > MAX_CHUNKS:
             logger.error("Too many chunks: %d (max %d)", chunk_count, MAX_CHUNKS)
             raise ValueError("chunk_ids.*count")
 
     # Validate metadata if present
-    if "metadata" in doc and doc["metadata"]:
+    if doc.get("metadata"):
         metadata = doc["metadata"]
 
         # Check metadata depth
@@ -375,7 +376,7 @@ def validate_size_constraints(doc: Dict[str, Any]) -> None:
     logger.info("Size constraint validation successful")
 
 
-def _iter_dict_fields(d: Dict[str, Any]) -> Any:
+def _iter_dict_fields(d: dict[str, Any]) -> Any:
     """
     Recursively iterate through all fields in a nested dictionary.
 
@@ -392,7 +393,7 @@ def _iter_dict_fields(d: Dict[str, Any]) -> Any:
 
 
 def validate_batch(
-    docs: List[Dict[str, Any]], custom_fields: Optional[Dict[str, type]] = None, strict: bool = True
+    docs: list[dict[str, Any]], custom_fields: dict[str, type] | None = None, strict: bool = True
 ) -> None:
     """
     Validate a batch of documents.
@@ -417,12 +418,12 @@ def validate_batch(
             validate_document_fields(doc, custom_fields, strict=strict)
         except (ValueError, TypeError) as e:
             logger.error("Validation failed for document %d: %s", i, str(e))
-            raise ValueError(f"document[{i}].*{str(e)}")
+            raise ValueError(f"document[{i}].*{e!s}")
 
     logger.info("Batch validation successful")
 
 
-def validate_json(json_str: Union[str, bytes]) -> Dict[str, Any]:
+def validate_json(json_str: str | bytes) -> dict[str, Any]:
     """
     Validate and parse a JSON document.
 

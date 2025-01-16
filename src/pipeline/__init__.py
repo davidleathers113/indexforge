@@ -64,4 +64,5 @@ from .document_ops import DocumentOperations
 from .search import SearchOperations
 from .steps import PipelineStep
 
-__all__ = ["Pipeline", "PipelineStep", "SearchOperations", "DocumentOperations"]
+
+__all__ = ["DocumentOperations", "Pipeline", "PipelineStep", "SearchOperations"]

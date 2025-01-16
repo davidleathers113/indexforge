@@ -44,4 +44,5 @@ Note:
 
 from .processor import DocumentSummarizer
 
+
 __all__ = ["DocumentSummarizer"]

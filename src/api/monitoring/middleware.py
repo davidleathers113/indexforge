@@ -3,8 +3,8 @@
 This module provides middleware for monitoring HTTP requests and responses.
 """
 
+from collections.abc import Callable
 import time
-from typing import Callable
 
 from prometheus_client import REGISTRY, generate_latest
 

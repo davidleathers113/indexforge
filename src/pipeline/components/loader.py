@@ -14,7 +14,6 @@ Main Components:
     - DocumentLoader: Core class for loading and standardizing documents
 """
 
-from typing import Dict, List, Optional
 import uuid
 
 from src.connectors.notion_connector import NotionConnector
@@ -41,7 +40,7 @@ class DocumentLoader(PipelineComponent):
         >>> print(f"Loaded {len(documents)} documents")
     """
 
-    def __init__(self, notion_connector: Optional[NotionConnector] = None, *args, **kwargs):
+    def __init__(self, notion_connector: NotionConnector | None = None, *args, **kwargs):
         """Initialize document loader.
 
         Args:
@@ -63,7 +62,7 @@ class DocumentLoader(PipelineComponent):
             self.logger.error("Failed to initialize Notion connector: %s", str(e))
             raise LoaderError("Notion connector initialization failed") from e
 
-    def process(self, documents: Optional[List[Dict]] = None, **kwargs) -> List[Dict]:
+    def process(self, documents: list[dict] | None = None, **kwargs) -> list[dict]:
         """Process and standardize documents from the source.
 
         If documents are provided, processes those. Otherwise, loads documents
@@ -93,7 +92,7 @@ class DocumentLoader(PipelineComponent):
             self.logger.error("Failed to load documents: %s", str(e))
             raise LoaderError("Document loading failed") from e
 
-    def _process_documents(self, documents: List[Dict]) -> List[Dict]:
+    def _process_documents(self, documents: list[dict]) -> list[dict]:
         """Process a list of raw documents into standardized format.
 
         Args:
@@ -136,7 +135,7 @@ class DocumentLoader(PipelineComponent):
 
         return processed_docs
 
-    def _extract_body(self, doc: Dict) -> str:
+    def _extract_body(self, doc: dict) -> str:
         """Extract the main text content from a document.
 
         Args:
@@ -161,7 +160,7 @@ class DocumentLoader(PipelineComponent):
         # Default to raw content
         return str(doc.get("content", "")).strip()
 
-    def _load_documents(self) -> List[Dict]:
+    def _load_documents(self) -> list[dict]:
         """Load documents from the configured source directory.
 
         Returns:
@@ -185,9 +184,9 @@ class DocumentLoader(PipelineComponent):
             return documents
         except Exception as e:
             self.logger.error("Failed to load documents: %s", str(e))
-            raise LoaderError(f"Document loading failed: {str(e)}") from e
+            raise LoaderError(f"Document loading failed: {e!s}") from e
 
-    def _extract_metadata(self, doc: Dict) -> Dict:
+    def _extract_metadata(self, doc: dict) -> dict:
         """Extract and standardize metadata from a document.
 
         Args:

@@ -1,8 +1,8 @@
 """Tests for source reliability tracking functionality."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import json
 import time
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -18,25 +18,29 @@ def temp_metrics_dir(tmp_path):
     """Create a temporary directory for test metrics."""
     return tmp_path / 'metrics'
 
+
 @pytest.fixture
-def sample_content_metrics() -> Dict[str, float]:
+def sample_content_metrics() -> dict[str, float]:
     """Sample content quality metrics."""
     return {'completeness': 0.8, 'consistency': 0.7, 'readability': 0.9, 'accuracy': 0.85}
 
+
 @pytest.fixture
-def sample_authority_metrics() -> Dict[str, float]:
+def sample_authority_metrics() -> dict[str, float]:
     """Sample authority metrics."""
     return {'reputation': 0.9, 'verification': 0.8, 'expertise': 0.85, 'trust': 0.95}
 
+
 @pytest.fixture
-def existing_metrics(temp_metrics_dir) -> Dict[str, Any]:
+def existing_metrics(temp_metrics_dir) -> dict[str, Any]:
     """Create existing metrics file."""
-    metrics = {'authority_score': 0.75, 'content_quality_score': 0.8, 'update_frequency': 0.5, 'last_update': datetime.now(timezone.utc).isoformat(), 'total_updates': 10, 'quality_checks': {'completeness': 0.8, 'consistency': 0.7}, 'metadata_completeness': 0.9}
+    metrics = {'authority_score': 0.75, 'content_quality_score': 0.8, 'update_frequency': 0.5, 'last_update': datetime.now(UTC).isoformat(), 'total_updates': 10, 'quality_checks': {'completeness': 0.8, 'consistency': 0.7}, 'metadata_completeness': 0.9}
     temp_metrics_dir.mkdir(parents=True)
     metrics_path = temp_metrics_dir / 'word_test_source_metrics.json'
     with open(metrics_path, 'w') as f:
         json.dump(metrics, f)
     return metrics
+
 
 @pytest.fixture
 def storage():
@@ -44,6 +48,7 @@ def storage():
     mock_storage = Mock()
     mock_storage.get_lineage.return_value = None
     return mock_storage
+
 
 def test_source_reliability_initialization():
     """Test basic initialization of SourceReliability."""
@@ -54,12 +59,14 @@ def test_source_reliability_initialization():
     assert metrics.content_quality_score == 0.5
     assert metrics.total_updates == 0
 
+
 def test_load_existing_metrics(temp_metrics_dir, existing_metrics):
     """Test loading existing metrics from file."""
     tracker = SourceReliability('word', 'test_source', str(temp_metrics_dir))
     assert tracker.metrics.authority_score == existing_metrics['authority_score']
     assert tracker.metrics.content_quality_score == existing_metrics['content_quality_score']
     assert tracker.metrics.total_updates == existing_metrics['total_updates']
+
 
 def test_update_content_quality(temp_metrics_dir, sample_content_metrics):
     """Test updating content quality metrics."""
@@ -69,6 +76,7 @@ def test_update_content_quality(temp_metrics_dir, sample_content_metrics):
     assert tracker.metrics.quality_checks == sample_content_metrics
     assert tracker.metrics.total_updates == 1
 
+
 def test_update_metadata_completeness(temp_metrics_dir):
     """Test updating metadata completeness score."""
     tracker = SourceReliability('word', 'test_source', str(temp_metrics_dir))
@@ -77,11 +85,13 @@ def test_update_metadata_completeness(temp_metrics_dir):
     tracker.update_metadata_completeness(metadata_fields, required_fields)
     assert tracker.metrics.metadata_completeness == 0.75
 
+
 def test_update_authority_score(temp_metrics_dir, sample_authority_metrics):
     """Test updating authority score."""
     tracker = SourceReliability('word', 'test_source', str(temp_metrics_dir))
     tracker.update_authority_score(sample_authority_metrics)
     assert abs(tracker.metrics.authority_score - 0.87) < 0.001
+
 
 def test_update_frequency_calculation(storage):
     """Test calculation of source update frequency."""
@@ -94,6 +104,7 @@ def test_update_frequency_calculation(storage):
     assert tracker.metrics.update_frequency > 0
     assert tracker.metrics.update_frequency < 2.0
 
+
 def test_get_reliability_score(temp_metrics_dir):
     """Test overall reliability score calculation."""
     tracker = SourceReliability('word', 'test_source', str(temp_metrics_dir))
@@ -103,6 +114,7 @@ def test_get_reliability_score(temp_metrics_dir):
     tracker.metrics.update_frequency = 0.5
     assert abs(tracker.get_reliability_score() - 0.73) < 0.001
 
+
 def test_metrics_persistence(temp_metrics_dir, sample_content_metrics):
     """Test that metrics are properly saved to file."""
     tracker = SourceReliability('word', 'test_source', str(temp_metrics_dir))
@@ -110,6 +122,7 @@ def test_metrics_persistence(temp_metrics_dir, sample_content_metrics):
     new_tracker = SourceReliability('word', 'test_source', str(temp_metrics_dir))
     assert new_tracker.metrics.content_quality_score == tracker.metrics.content_quality_score
     assert new_tracker.metrics.quality_checks == tracker.metrics.quality_checks
+
 
 def test_get_metrics_summary(temp_metrics_dir):
     """Test metrics summary generation."""

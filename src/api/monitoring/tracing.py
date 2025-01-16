@@ -4,8 +4,9 @@ This module provides OpenTelemetry tracing setup and utilities for document
 processing operations, enabling end-to-end visibility of document flows.
 """
 
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Optional
+from typing import Any
 
 from opentelemetry import trace
 from opentelemetry.trace import Span, Status, StatusCode
@@ -24,7 +25,7 @@ class DocumentTracer:
 
     @contextmanager
     def start_processing(
-        self, document_id: str, stage: str, attributes: Optional[Dict[str, Any]] = None
+        self, document_id: str, stage: str, attributes: dict[str, Any] | None = None
     ) -> Generator[Span, None, None]:
         """Start a processing span for document operations.
 
@@ -54,7 +55,7 @@ class DocumentTracer:
 
     @contextmanager
     def start_validation(
-        self, document_id: str, validation_type: str, attributes: Optional[Dict[str, Any]] = None
+        self, document_id: str, validation_type: str, attributes: dict[str, Any] | None = None
     ) -> Generator[Span, None, None]:
         """Start a validation span for document checks.
 
@@ -87,7 +88,7 @@ class DocumentTracer:
 
     @contextmanager
     def start_enrichment(
-        self, document_id: str, enrichment_type: str, attributes: Optional[Dict[str, Any]] = None
+        self, document_id: str, enrichment_type: str, attributes: dict[str, Any] | None = None
     ) -> Generator[Span, None, None]:
         """Start an enrichment span for document enhancement.
 
@@ -124,7 +125,7 @@ class DocumentTracer:
         batch_id: str,
         operation: str,
         batch_size: int,
-        attributes: Optional[Dict[str, Any]] = None,
+        attributes: dict[str, Any] | None = None,
     ) -> Generator[Span, None, None]:
         """Start a batch processing span.
 

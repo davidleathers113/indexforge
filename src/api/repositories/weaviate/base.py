@@ -1,6 +1,5 @@
 """Base Weaviate repository."""
 
-from typing import Optional
 
 import weaviate.classes as wvc
 from weaviate.classes.query import Filter
@@ -31,7 +30,7 @@ class BaseWeaviateRepository:
         """
         return self.client.collections.get(self.collection)
 
-    def _build_filter(self, filters: list[Filter]) -> Optional[Filter]:
+    def _build_filter(self, filters: list[Filter]) -> Filter | None:
         """Build filter from list of conditions.
 
         Args:

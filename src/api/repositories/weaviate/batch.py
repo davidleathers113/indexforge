@@ -1,7 +1,6 @@
 """Batch operations for Weaviate."""
 
 import logging
-from typing import Dict, List
 
 import weaviate.classes as wvc
 
@@ -9,6 +8,7 @@ from .base import BaseWeaviateRepository
 from .metrics import BatchMetrics, BatchPerformanceTracker
 from .operations.deletion import DeleteOperation
 from .operations.indexing import IndexOperation
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class BatchRepository(BaseWeaviateRepository):
             min_batch_size=min_batch_size, max_batch_size=max_batch_size, window_size=10
         )
 
-    def index_documents(self, documents: List[Dict]) -> Dict:
+    def index_documents(self, documents: list[dict]) -> dict:
         """Index a batch of documents."""
         if not documents:
             return {"status": "success", "message": "No documents to process"}
@@ -54,10 +54,10 @@ class BatchRepository(BaseWeaviateRepository):
                 "metrics": self.metrics.get_summary(),
             }
         except Exception as e:
-            logger.error(f"Failed to index documents: {str(e)}")
+            logger.error(f"Failed to index documents: {e!s}")
             return {"status": "error", "message": str(e), "metrics": self.metrics.get_summary()}
 
-    def delete_documents(self, document_ids: List[Dict]) -> Dict:
+    def delete_documents(self, document_ids: list[dict]) -> dict:
         """Delete a batch of documents."""
         if not document_ids:
             return {"status": "success", "message": "No documents to delete"}
@@ -74,5 +74,5 @@ class BatchRepository(BaseWeaviateRepository):
                 "metrics": self.metrics.get_summary(),
             }
         except Exception as e:
-            logger.error(f"Failed to delete documents: {str(e)}")
+            logger.error(f"Failed to delete documents: {e!s}")
             return {"status": "error", "message": str(e), "metrics": self.metrics.get_summary()}

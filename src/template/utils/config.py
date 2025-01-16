@@ -4,12 +4,12 @@ from dataclasses import dataclass
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Optional, Set
 
 from dotenv import load_dotenv
 
 # Use absolute import instead of relative
 from src.template.utils.logging_config import LogConfig, LogLevel
+
 
 # Load environment variables
 load_dotenv()
@@ -25,7 +25,7 @@ class TemplateConfig:
     enable_async: bool = True
     encoding: str = "utf-8"
     newline_sequence: str = "\n"
-    template_dirs: Set[Path] = None
+    template_dirs: set[Path] = None
 
     def __post_init__(self):
         """Initialize template directories set."""
@@ -144,11 +144,11 @@ class Config:
     def __init__(
         self,
         python_indent: int = 4,
-        black_config: Optional[BlackConfig] = None,
-        isort_config: Optional[Dict] = None,
-        openai_config: Optional[OpenAIConfig] = None,
-        template_config: Optional[TemplateConfig] = None,
-        log_config: Optional[LogConfig] = None,
+        black_config: BlackConfig | None = None,
+        isort_config: dict | None = None,
+        openai_config: OpenAIConfig | None = None,
+        template_config: TemplateConfig | None = None,
+        log_config: LogConfig | None = None,
         dry_run: bool = False,
     ):
         """Initialize configuration with default values."""

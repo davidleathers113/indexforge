@@ -13,6 +13,7 @@ from src.api.routers import search_router
 from src.api.routers.auth import router as auth_router
 from src.api.routers.document import router as document_router
 
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

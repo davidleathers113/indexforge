@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import HTTPException
 import hvac
@@ -28,10 +28,10 @@ class VaultManager:
                 # In production, these should be securely stored and distributed
                 logger.info(f"Vault initialized with {len(init_result['keys'])} key shares")
         except Exception as e:
-            logger.error(f"Failed to initialize Vault: {str(e)}")
+            logger.error(f"Failed to initialize Vault: {e!s}")
             raise HTTPException(status_code=500, detail="Vault initialization failed")
 
-    async def get_secret(self, path: str) -> Optional[Dict[str, Any]]:
+    async def get_secret(self, path: str) -> dict[str, Any] | None:
         """Retrieve a secret from Vault.
 
         Args:
@@ -44,10 +44,10 @@ class VaultManager:
             secret = self.client.secrets.kv.v2.read_secret_version(path=path)
             return secret["data"]["data"] if secret else None
         except Exception as e:
-            logger.error(f"Failed to retrieve secret at {path}: {str(e)}")
+            logger.error(f"Failed to retrieve secret at {path}: {e!s}")
             return None
 
-    async def set_secret(self, path: str, secret: Dict[str, Any]) -> bool:
+    async def set_secret(self, path: str, secret: dict[str, Any]) -> bool:
         """Store a secret in Vault.
 
         Args:
@@ -68,10 +68,10 @@ class VaultManager:
             )
             return True
         except Exception as e:
-            logger.error(f"Failed to set secret at {path}: {str(e)}")
+            logger.error(f"Failed to set secret at {path}: {e!s}")
             return False
 
-    async def rotate_secret(self, path: str, new_secret: Dict[str, Any]) -> bool:
+    async def rotate_secret(self, path: str, new_secret: dict[str, Any]) -> bool:
         """Rotate a secret in Vault.
 
         Args:
@@ -95,10 +95,10 @@ class VaultManager:
                 return True
             return False
         except Exception as e:
-            logger.error(f"Failed to rotate secret at {path}: {str(e)}")
+            logger.error(f"Failed to rotate secret at {path}: {e!s}")
             return False
 
-    async def list_secrets(self, path: str) -> Optional[list]:
+    async def list_secrets(self, path: str) -> list | None:
         """List all secrets under a path.
 
         Args:
@@ -111,7 +111,7 @@ class VaultManager:
             result = self.client.secrets.kv.v2.list_secrets(path=path)
             return result["data"]["keys"] if result else None
         except Exception as e:
-            logger.error(f"Failed to list secrets at {path}: {str(e)}")
+            logger.error(f"Failed to list secrets at {path}: {e!s}")
             return None
 
     async def delete_secret(self, path: str) -> bool:
@@ -128,5 +128,5 @@ class VaultManager:
             logger.info(f"Successfully deleted secret at {path}")
             return True
         except Exception as e:
-            logger.error(f"Failed to delete secret at {path}: {str(e)}")
+            logger.error(f"Failed to delete secret at {path}: {e!s}")
             return False

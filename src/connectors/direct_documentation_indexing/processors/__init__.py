@@ -52,4 +52,5 @@ from .base_processor import BaseProcessor
 from .excel_processor import ExcelProcessor
 from .word_processor import WordProcessor
 
+
 __all__ = ["BaseProcessor", "ExcelProcessor", "WordProcessor"]

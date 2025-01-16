@@ -1,11 +1,11 @@
 """Test network isolation between containers."""
 
-from typing import Any, Dict
+from typing import Any
 
 from ...utils.docker_test_utils import DockerTestUtils
 
 
-def test_network_separation(docker_client: Any, docker_network: Dict[str, Any]) -> None:
+def test_network_separation(docker_client: Any, docker_network: dict[str, Any]) -> None:
     """Test containers in different networks cannot communicate."""
     # Start container in test network
     container1 = docker_client.containers.run(
@@ -37,7 +37,7 @@ def test_network_separation(docker_client: Any, docker_network: Dict[str, Any]) 
         container2.stop()
 
 
-def test_network_policy(docker_client: Any, docker_network: Dict[str, Any]) -> None:
+def test_network_policy(docker_client: Any, docker_network: dict[str, Any]) -> None:
     """Test network policy enforcement."""
     # Create network with internal flag
     internal_network = docker_client.networks.create(

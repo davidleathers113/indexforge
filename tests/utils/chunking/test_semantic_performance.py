@@ -4,7 +4,6 @@ These tests evaluate the system's performance with large-scale data,
 measuring execution time, memory usage, and scalability.
 """
 import time
-from typing import Set
 from uuid import UUID
 
 from memory_profiler import profile
@@ -12,7 +11,7 @@ import pytest
 
 
 @pytest.fixture
-def large_chunk_set(semantic_processor) -> Set[UUID]:
+def large_chunk_set(semantic_processor) -> set[UUID]:
     """Create a large set of chunks for performance testing."""
     topics = ['technology', 'science', 'art', 'history', 'business']
     subtopics = ['research', 'development', 'analysis', 'theory', 'practice']
@@ -25,6 +24,7 @@ def large_chunk_set(semantic_processor) -> Set[UUID]:
                 chunk_id = semantic_processor.ref_manager.add_chunk(content)
                 chunk_ids.add(chunk_id)
     return chunk_ids
+
 
 def test_embedding_cache_performance(semantic_processor, large_chunk_set):
     """Test embedding cache performance with large datasets."""
@@ -42,6 +42,7 @@ def test_embedding_cache_performance(semantic_processor, large_chunk_set):
     assert cache_hits == len(large_chunk_set)
     assert second_pass_time < first_pass_time * 0.1
 
+
 @profile
 def test_memory_usage_clustering(semantic_processor, large_chunk_set):
     """Test memory usage during topic clustering."""
@@ -52,6 +53,7 @@ def test_memory_usage_clustering(semantic_processor, large_chunk_set):
         chunk_id = semantic_processor.ref_manager.add_chunk(content)
         additional_chunks.add(chunk_id)
     _ = semantic_processor.analyze_topic_relationships(large_chunk_set | additional_chunks, num_topics=15)
+
 
 def test_clustering_performance_scaling(semantic_processor):
     """Test how clustering performance scales with dataset size."""
@@ -71,6 +73,7 @@ def test_clustering_performance_scaling(semantic_processor):
         time_ratio = timings[i + 1] / timings[i]
         assert time_ratio < size_ratio ** 2
 
+
 def test_parallel_reference_creation(semantic_processor, large_chunk_set):
     """Test performance of creating references for multiple chunks."""
     chunk_list = list(large_chunk_set)
@@ -83,7 +86,8 @@ def test_parallel_reference_creation(semantic_processor, large_chunk_set):
             semantic_processor.create_semantic_references(chunk_id)
         timings.append(time.time() - start_time)
     avg_time = sum(timings) / len(timings)
-    assert all((abs(t - avg_time) < avg_time * 0.5 for t in timings))
+    assert all(abs(t - avg_time) < avg_time * 0.5 for t in timings)
+
 
 def test_tfidf_performance(semantic_processor, large_chunk_set):
     """Test TF-IDF computation performance for topic labeling."""

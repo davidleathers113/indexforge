@@ -10,11 +10,12 @@ from .kmeans import KMeansState, mock_kmeans
 from .pii import PIIState, mock_pii_detector
 from .topic import TopicState, mock_topic_clusterer
 
+
 __all__ = [
+    "KMeansState",
     "PIIState",
     "TopicState",
-    "KMeansState",
+    "mock_kmeans",
     "mock_pii_detector",
     "mock_topic_clusterer",
-    "mock_kmeans",
 ]

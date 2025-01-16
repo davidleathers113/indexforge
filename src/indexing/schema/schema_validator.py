@@ -6,7 +6,6 @@ like multimodal data, PQ/BQ compression, and enhanced vector configurations.
 """
 
 import logging
-from typing import Dict, Optional, Union
 
 import weaviate
 from weaviate.collections import Collection
@@ -25,13 +24,13 @@ from .validators.schema import (
 class SchemaValidator:
     """Coordinates schema validation for Weaviate v4.x."""
 
-    def __init__(self, client: Union[weaviate.Client, Collection], class_name: str):
+    def __init__(self, client: weaviate.Client | Collection, class_name: str):
         """Initialize with either v3 Client or v4 Collection."""
         self.retriever = SchemaRetriever(client, class_name)
         self.version_checker = SchemaVersionChecker(self.retriever)
         self.logger = logging.getLogger(__name__)
 
-    def get_schema(self) -> Optional[Dict]:
+    def get_schema(self) -> dict | None:
         """Get current schema configuration."""
         return self.retriever.get_schema()
 
@@ -39,7 +38,7 @@ class SchemaValidator:
         """Check schema version compatibility."""
         return self.version_checker.check_schema_version()
 
-    def validate_schema(self, schema: Dict) -> bool:
+    def validate_schema(self, schema: dict) -> bool:
         """Validate complete schema configuration."""
         if not validate_schema(schema):
             return False
@@ -57,9 +56,9 @@ class SchemaValidator:
 
     @staticmethod
     def validate_object(
-        doc: Dict,
-        custom_fields: Optional[Dict] = None,
-        doc_id: Optional[str] = None,
+        doc: dict,
+        custom_fields: dict | None = None,
+        doc_id: str | None = None,
         strict: bool = True,
     ) -> None:
         """Validate a document object."""

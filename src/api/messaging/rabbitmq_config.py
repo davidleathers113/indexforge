@@ -5,7 +5,6 @@ exchanges, queues, and related functionality. It uses pydantic for validation
 and environment variable loading.
 """
 
-from typing import Dict, Optional
 
 from pydantic import AmqpDsn, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -52,8 +51,8 @@ class RabbitMQSettings(BaseSettings):
     # SSL/TLS settings
     ssl_enabled: bool = Field(default=False, description="Enable SSL/TLS")
     ssl_verify: bool = Field(default=True, description="Verify SSL certificates")
-    ssl_cert_file: Optional[str] = Field(default=None, description="Path to SSL certificate file")
-    ssl_key_file: Optional[str] = Field(default=None, description="Path to SSL key file")
+    ssl_cert_file: str | None = Field(default=None, description="Path to SSL certificate file")
+    ssl_key_file: str | None = Field(default=None, description="Path to SSL key file")
 
     # Monitoring settings
     enable_monitoring: bool = Field(
@@ -71,7 +70,7 @@ class RabbitMQSettings(BaseSettings):
         extra="ignore",
     )
 
-    def get_connection_parameters(self) -> Dict[str, any]:
+    def get_connection_parameters(self) -> dict[str, any]:
         """Get connection parameters for aio-pika."""
         params = {
             "url": str(self.broker_url),

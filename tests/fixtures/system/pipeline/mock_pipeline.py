@@ -1,6 +1,5 @@
 """Mock pipeline fixtures."""
 
-from typing import Dict, List
 from unittest.mock import MagicMock
 
 import pytest
@@ -11,7 +10,7 @@ def mock_pipeline(pipeline_state):
     """Mock pipeline with state management."""
     mock_pipe = MagicMock()
 
-    def mock_process_documents(docs: List[Dict], **kwargs) -> List[Dict]:
+    def mock_process_documents(docs: list[dict], **kwargs) -> list[dict]:
         """Process documents with error tracking."""
         try:
             if pipeline_state.error_mode:
@@ -29,7 +28,7 @@ def mock_pipeline(pipeline_state):
             return pipeline_state.processed_docs
 
         except Exception as e:
-            pipeline_state.add_error(f"Error processing documents: {str(e)}")
+            pipeline_state.add_error(f"Error processing documents: {e!s}")
             raise
 
     # Configure mock methods

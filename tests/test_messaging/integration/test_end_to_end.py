@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-from typing import Dict, List
 
 from aio_pika import Message
 from aio_pika.abc import AbstractIncomingMessage
@@ -61,7 +60,7 @@ async def test_message_persistence(
     2. Message order is preserved
     3. No messages are lost
     """
-    messages_received: List[Dict] = []
+    messages_received: list[dict] = []
 
     async def message_handler(message: AbstractIncomingMessage):
         async with message.process():

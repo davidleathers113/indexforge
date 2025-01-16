@@ -45,7 +45,8 @@ from dataclasses import dataclass
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -91,10 +92,10 @@ class SourceConfig:
         ```
     """
 
-    schema_variations: Dict[str, Any]  # Custom schema settings
-    custom_properties: Dict[str, Any]  # Source-specific properties
-    vectorizer_settings: Dict[str, Any]  # Custom vectorizer configuration
-    cross_source_mappings: Dict[str, str]  # Mappings to other sources
+    schema_variations: dict[str, Any]  # Custom schema settings
+    custom_properties: dict[str, Any]  # Source-specific properties
+    vectorizer_settings: dict[str, Any]  # Custom vectorizer configuration
+    cross_source_mappings: dict[str, str]  # Mappings to other sources
 
 
 class SourceTracker:
@@ -133,7 +134,7 @@ class SourceTracker:
         ```
     """
 
-    def __init__(self, source_type: str, config_dir: Optional[str] = None):
+    def __init__(self, source_type: str, config_dir: str | None = None):
         """
         Initialize source tracker for a specific source type.
 
@@ -181,7 +182,7 @@ class SourceTracker:
 
         try:
             if config_path.exists():
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config_data = json.load(f)
                     return SourceConfig(**config_data)
             else:
@@ -226,7 +227,7 @@ class SourceTracker:
             cross_source_mappings={},
         )
 
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """
         Get the complete schema for this source type.
 
@@ -269,7 +270,7 @@ class SourceTracker:
         }
         return base_schema
 
-    def get_custom_properties(self) -> Dict[str, Any]:
+    def get_custom_properties(self) -> dict[str, Any]:
         """
         Get custom properties for this source type.
 
@@ -286,7 +287,7 @@ class SourceTracker:
         """
         return self.config.custom_properties
 
-    def get_cross_source_mappings(self) -> Dict[str, str]:
+    def get_cross_source_mappings(self) -> dict[str, str]:
         """
         Get mappings to other source types.
 
@@ -303,7 +304,7 @@ class SourceTracker:
         """
         return self.config.cross_source_mappings
 
-    def validate_schema(self) -> List[str]:
+    def validate_schema(self) -> list[str]:
         """
         Validate the source schema configuration.
 
@@ -345,7 +346,7 @@ class SourceTracker:
 
         return errors
 
-    def update_config(self, config_updates: Dict[str, Any]) -> None:
+    def update_config(self, config_updates: dict[str, Any]) -> None:
         """
         Update source configuration.
 

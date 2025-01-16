@@ -7,6 +7,7 @@ from black import Mode, TargetVersion
 
 from .base_formatter import BaseFormatter
 
+
 logger = logging.getLogger(__name__)
 
 

@@ -5,10 +5,9 @@ This module provides utility functions for Sentry configuration and event proces
 
 import os
 import re
-from typing import Optional
 
 
-def get_git_commit() -> Optional[str]:
+def get_git_commit() -> str | None:
     """Get the current git commit hash."""
     try:
         with open(".git/HEAD") as f:
@@ -18,7 +17,7 @@ def get_git_commit() -> Optional[str]:
                 with open(ref_path) as f:
                     return f.read().strip()
             return ref
-    except (FileNotFoundError, IOError):
+    except (OSError, FileNotFoundError):
         return None
 
 

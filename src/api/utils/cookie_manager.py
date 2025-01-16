@@ -1,6 +1,5 @@
 """Cookie management utilities."""
 
-from typing import Optional
 
 from fastapi import Response
 from pydantic import HttpUrl
@@ -10,7 +9,7 @@ def set_auth_cookies(
     response: Response,
     access_token: str,
     refresh_token: str,
-    csrf_token: Optional[str] = None,
+    csrf_token: str | None = None,
 ) -> None:
     """Set authentication cookies on the response."""
     # Set access token cookie
@@ -48,7 +47,7 @@ def set_auth_cookies(
 def set_oauth_cookies(
     response: Response,
     state: str,
-    redirect_to: Optional[HttpUrl] = None,
+    redirect_to: HttpUrl | None = None,
 ) -> None:
     """Set OAuth-related cookies on the response."""
     # Set OAuth state cookie

@@ -1,5 +1,5 @@
 """Tests for performance metrics functionality."""
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -20,10 +20,12 @@ def temp_lineage_dir(tmp_path):
     """Create a temporary directory for test lineage data."""
     return tmp_path / 'lineage'
 
+
 @pytest.fixture
 def storage(temp_lineage_dir):
     """Create a LineageStorage instance."""
     return LineageStorage(str(temp_lineage_dir))
+
 
 def test_real_time_status(storage):
     """Test getting real-time status of document processing."""
@@ -37,6 +39,7 @@ def test_real_time_status(storage):
     assert status['completed_documents'] == 1
     assert status['active_documents'] == 1
 
+
 def test_aggregated_metrics(storage):
     """Test getting aggregated metrics for document processing."""
     doc_id = 'test_doc'
@@ -46,6 +49,7 @@ def test_aggregated_metrics(storage):
     metrics = get_aggregated_metrics(storage.get_all_lineage())
     assert metrics['processing']['average_time'] == 125
     assert metrics['resources']['peak_memory_mb'] == 600
+
 
 def test_real_time_status_with_errors(storage):
     """Test real-time status with error conditions."""
@@ -57,6 +61,7 @@ def test_real_time_status_with_errors(storage):
     assert status['error_rate'] > 0
     assert status['success_rate'] == 0
 
+
 def test_metrics_persistence(temp_lineage_dir):
     """Test persistence of performance metrics."""
     storage1 = LineageStorage(str(temp_lineage_dir))
@@ -66,6 +71,7 @@ def test_metrics_persistence(temp_lineage_dir):
     storage2 = LineageStorage(str(temp_lineage_dir))
     metrics = get_aggregated_metrics(storage2.get_all_lineage())
     assert metrics['processing']['average_time'] == 100
+
 
 def test_metrics_with_multiple_documents(storage):
     """Test metrics tracking for multiple documents."""
@@ -78,15 +84,17 @@ def test_metrics_with_multiple_documents(storage):
     assert metrics['processing']['average_time'] == 150
     assert metrics['resources']['peak_memory_mb'] == 700
 
+
 def test_metrics_with_time_range(storage):
     """Test metrics aggregation within time range."""
     doc_id = 'test_doc'
     add_document(storage, doc_id=doc_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     add_processing_step(storage, doc_id=doc_id, step_name='process1', status=ProcessingStatus.SUCCESS, details={'metrics': {'processing_time': 100}}, timestamp=now - timedelta(hours=2))
     add_processing_step(storage, doc_id=doc_id, step_name='process2', status=ProcessingStatus.SUCCESS, details={'metrics': {'processing_time': 200}}, timestamp=now - timedelta(hours=1))
     metrics = get_aggregated_metrics(storage.get_all_lineage(), start_time=now - timedelta(hours=1))
     assert metrics['processing']['average_time'] == 200
+
 
 def test_real_time_status_updates(storage):
     """Test real-time status updates during processing."""

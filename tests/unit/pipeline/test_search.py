@@ -12,6 +12,7 @@ def load_sample_documents():
         data = json.load(f)
     return list(data.values())
 
+
 def test_search_initialization(mock_search_components):
     """Test SearchOperations initialization"""
     search_ops = SearchOperations(**mock_search_components)
@@ -23,6 +24,7 @@ def test_search_initialization(mock_search_components):
     assert search_ops.vector_index == vector_index
     assert search_ops.topic_clusterer == topic_clust
     assert search_ops.logger == logger
+
 
 def test_text_only_search(mock_search_components):
     """Test search with text query only"""
@@ -39,6 +41,7 @@ def test_text_only_search(mock_search_components):
     vector_index.hybrid_search.assert_called_once_with(text_query=query_text, query_vector=query_vector, limit=10)
     assert results == expected_results
 
+
 def test_vector_only_search(mock_search_components):
     """Test search with vector query only"""
     search_ops = SearchOperations(**mock_search_components)
@@ -49,6 +52,7 @@ def test_vector_only_search(mock_search_components):
     results = search_ops.search(query_text='', query_vector=query_vector, use_hybrid=False)
     vector_index.semantic_search.assert_called_once_with(query_vector=query_vector, limit=10, min_score=0.7)
     assert results == expected_results
+
 
 def test_hybrid_search(mock_search_components):
     """Test hybrid search with both text and vector"""
@@ -62,6 +66,7 @@ def test_hybrid_search(mock_search_components):
     vector_index.hybrid_search.assert_called_once_with(text_query=query_text, query_vector=query_vector, limit=10)
     assert results == expected_results
 
+
 def test_search_with_custom_parameters(mock_search_components):
     """Test search with custom limit and min_score"""
     search_ops = SearchOperations(**mock_search_components)
@@ -73,6 +78,7 @@ def test_search_with_custom_parameters(mock_search_components):
     vector_index.semantic_search.assert_called_once_with(query_vector=query_vector, limit=5, min_score=0.8)
     assert results == expected_results
 
+
 def test_search_error_handling(mock_search_components):
     """Test error handling in search operations"""
     search_ops = SearchOperations(**mock_search_components)
@@ -83,6 +89,7 @@ def test_search_error_handling(mock_search_components):
     assert results == []
     logger.error.assert_called_once()
 
+
 def test_invalid_search_criteria(mock_search_components):
     """Test search with invalid criteria"""
     search_ops = SearchOperations(**mock_search_components)
@@ -90,6 +97,7 @@ def test_invalid_search_criteria(mock_search_components):
     results = search_ops.search(query_text='')
     assert results == []
     logger.error.assert_called_once_with('No valid search criteria provided')
+
 
 def test_find_similar_topics(mock_search_components):
     """Test finding similar topics"""
@@ -107,6 +115,7 @@ def test_find_similar_topics(mock_search_components):
     topic_clust.find_similar_topics.assert_called_once_with(query_vector=query_vector, documents=sample_documents, top_k=3)
     assert results == expected_results
 
+
 def test_find_similar_topics_error(mock_search_components):
     """Test error handling in topic similarity search"""
     search_ops = SearchOperations(**mock_search_components)
@@ -117,6 +126,7 @@ def test_find_similar_topics_error(mock_search_components):
     results = search_ops.find_similar_topics(query_text='test', documents=sample_documents)
     assert results == []
     logger.error.assert_called_once()
+
 
 def test_empty_documents_topic_search(mock_search_components):
     """Test topic search with empty document list"""

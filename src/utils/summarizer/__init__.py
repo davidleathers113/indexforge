@@ -61,9 +61,10 @@ Note:
 from .config.settings import CacheConfig, LoggingConfig, SummarizerConfig
 from .core.processor import DocumentSummarizer
 
+
 __all__ = [
     "CacheConfig",
+    "DocumentSummarizer",
     "LoggingConfig",
     "SummarizerConfig",
-    "DocumentSummarizer",
 ]

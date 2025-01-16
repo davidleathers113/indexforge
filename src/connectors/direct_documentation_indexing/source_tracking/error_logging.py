@@ -2,11 +2,11 @@
 Handles error and warning logging for document processing.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
-from typing import Dict, List, Optional, Union
 
 from .enums import LogLevel
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +19,14 @@ class LogEntry:
         message: str,
         log_level: LogLevel,
         timestamp: datetime,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ):
         self.message = message
         self.log_level = log_level
         self.timestamp = timestamp
         self.metadata = metadata or {}
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert the log entry to a dictionary for storage."""
         return {
             "message": self.message,
@@ -36,7 +36,7 @@ class LogEntry:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "LogEntry":
+    def from_dict(cls, data: dict) -> "LogEntry":
         """Create a LogEntry instance from a dictionary."""
         return cls(
             message=data["message"],
@@ -50,9 +50,9 @@ def log_error_or_warning(
     storage,
     doc_id: str,
     message: str,
-    level: Union[LogLevel, str],
-    timestamp: Optional[datetime] = None,
-    metadata: Optional[Dict] = None,
+    level: LogLevel | str,
+    timestamp: datetime | None = None,
+    metadata: dict | None = None,
 ) -> None:
     """Log an error or warning message for a document.
 
@@ -99,13 +99,13 @@ def log_error_or_warning(
         log_entry = LogEntry(
             message=message,
             log_level=level,
-            timestamp=timestamp or datetime.now(timezone.utc),
+            timestamp=timestamp or datetime.now(UTC),
             metadata=metadata,
         )
 
         # Add to error logs
         lineage.error_logs.append(log_entry)
-        lineage.last_modified = datetime.now(timezone.utc)
+        lineage.last_modified = datetime.now(UTC)
 
         # Save updated lineage
         storage.save_lineage(lineage)
@@ -119,10 +119,10 @@ def log_error_or_warning(
 def get_error_logs(
     storage,
     doc_id: str,
-    log_level: Optional[Union[LogLevel, str]] = None,
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
-) -> List[LogEntry]:
+    log_level: LogLevel | str | None = None,
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
+) -> list[LogEntry]:
     """Get error/warning logs for a document, optionally filtered by level and time range.
 
     Args:

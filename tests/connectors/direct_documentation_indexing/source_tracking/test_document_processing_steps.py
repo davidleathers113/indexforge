@@ -69,7 +69,7 @@ def test_get_processing_steps(storage):
         )
     steps = get_processing_steps(storage, doc_id)
     assert len(steps) == len(steps_data)
-    for step, (name, status, details) in zip(steps, steps_data):
+    for step, (name, status, details) in zip(steps, steps_data, strict=False):
         assert step.step_name == name
         assert step.status == status
         assert step.details == details

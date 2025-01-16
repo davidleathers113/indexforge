@@ -3,13 +3,13 @@
 import json
 import logging
 import time
-from typing import Dict, List, Optional
 
 import weaviate
 from weaviate.util import generate_uuid5
 
 from src.api.models.requests import DocumentFilter, SearchQuery
 from src.api.models.responses import SearchResponse, SearchResult, Stats
+
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ class WeaviateRepository:
             )
 
         except Exception as e:
-            logger.error(f"Search failed: {str(e)}")
+            logger.error(f"Search failed: {e!s}")
             raise
 
     async def get_stats(self) -> Stats:
@@ -131,7 +131,7 @@ class WeaviateRepository:
             )
 
         except Exception as e:
-            logger.error(f"Failed to get stats: {str(e)}")
+            logger.error(f"Failed to get stats: {e!s}")
             raise
 
     async def filter_documents(
@@ -207,11 +207,11 @@ class WeaviateRepository:
             )
 
         except Exception as e:
-            logger.error(f"Filter failed: {str(e)}")
+            logger.error(f"Filter failed: {e!s}")
             raise
 
     # New document operations
-    async def index_single_document(self, document: Dict) -> str:
+    async def index_single_document(self, document: dict) -> str:
         """Index a single document.
 
         Args:
@@ -233,12 +233,12 @@ class WeaviateRepository:
 
             return str(doc_id)
         except Exception as e:
-            logger.error(f"Failed to index document: {str(e)}")
+            logger.error(f"Failed to index document: {e!s}")
             raise
 
     async def list_documents(
-        self, file_type: Optional[str] = None, limit: int = 10, offset: int = 0
-    ) -> List[Dict]:
+        self, file_type: str | None = None, limit: int = 10, offset: int = 0
+    ) -> list[dict]:
         """List indexed documents with optional filtering.
 
         Args:
@@ -271,10 +271,10 @@ class WeaviateRepository:
             documents = result.get("data", {}).get("Get", {}).get(self.collection, [])
             return documents
         except Exception as e:
-            logger.error(f"Failed to list documents: {str(e)}")
+            logger.error(f"Failed to list documents: {e!s}")
             raise
 
-    async def get_document(self, document_id: str) -> Optional[Dict]:
+    async def get_document(self, document_id: str) -> dict | None:
         """Get a specific document by ID.
 
         Args:
@@ -298,7 +298,7 @@ class WeaviateRepository:
             documents = result.get("data", {}).get("Get", {}).get(self.collection, [])
             return documents[0] if documents else None
         except Exception as e:
-            logger.error(f"Failed to get document {document_id}: {str(e)}")
+            logger.error(f"Failed to get document {document_id}: {e!s}")
             raise
 
     async def delete_document(self, document_id: str) -> bool:
@@ -322,5 +322,5 @@ class WeaviateRepository:
             )
             return True
         except Exception as e:
-            logger.error(f"Failed to delete document {document_id}: {str(e)}")
+            logger.error(f"Failed to delete document {document_id}: {e!s}")
             raise

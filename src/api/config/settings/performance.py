@@ -1,6 +1,5 @@
 """Performance settings configuration."""
 
-from typing import Dict
 
 from pydantic import Field, field_validator
 
@@ -10,7 +9,7 @@ from src.api.config.settings import BaseAppSettings
 class PerformanceSettings(BaseAppSettings):
     """Performance thresholds and limits settings."""
 
-    PERFORMANCE_THRESHOLDS: Dict[str, float] = Field(
+    PERFORMANCE_THRESHOLDS: dict[str, float] = Field(
         default={
             "p95_latency_ms": 500.0,  # 95th percentile latency threshold in milliseconds
             "error_rate_threshold": 0.01,  # 1% error rate threshold
@@ -21,7 +20,7 @@ class PerformanceSettings(BaseAppSettings):
 
     @field_validator("PERFORMANCE_THRESHOLDS")
     @classmethod
-    def validate_performance_thresholds(cls, v: Dict[str, float]) -> Dict[str, float]:
+    def validate_performance_thresholds(cls, v: dict[str, float]) -> dict[str, float]:
         """Validate performance thresholds."""
         required_keys = {"p95_latency_ms", "error_rate_threshold", "apdex_threshold"}
 

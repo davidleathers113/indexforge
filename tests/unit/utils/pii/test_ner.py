@@ -22,17 +22,20 @@ def mock_spacy_model():
         mock_load.return_value = mock_nlp
         yield mock_nlp
 
+
 @pytest.fixture
 def pii_detector(mock_spacy_model):
     """Create a PIIDetector instance with mock spaCy model."""
     return PIIDetector(spacy_model='en_core_web_sm')
+
 
 def test_ner_detection(pii_detector, mock_spacy_model):
     """Test named entity recognition."""
     text = 'John Doe works at Apple Inc in New York'
     matches = pii_detector._find_ner_matches(text)
     assert matches
-    assert any((m.type == 'person' for m in matches))
+    assert any(m.type == 'person' for m in matches)
+
 
 def test_ner_chunking(pii_detector):
     """Test NER processing with text chunking."""
@@ -40,6 +43,7 @@ def test_ner_chunking(pii_detector):
     chunked_detector = PIIDetector(spacy_model='en_core_web_sm', chunk_size=1000)
     matches = chunked_detector._find_ner_matches(long_text)
     assert matches
+
 
 def test_combined_pii_detection(pii_detector):
     """Test combined regex and NER detection."""

@@ -1,6 +1,5 @@
 """Response builder utilities."""
 
-from typing import Optional
 
 from src.api.models.requests import DocumentUploadResponse
 
@@ -36,7 +35,7 @@ class ResponseBuilder:
 
     @staticmethod
     def document_upload_error(
-        filename: str, error_message: str, file_type: Optional[str] = None
+        filename: str, error_message: str, file_type: str | None = None
     ) -> DocumentUploadResponse:
         """Build an error document upload response.
 

@@ -5,6 +5,7 @@ from .numeric import NumericParameter
 from .string import StringParameter
 from .url import URLParameter
 
+
 __all__ = [
     "CacheConfig",
     "CacheParameter",

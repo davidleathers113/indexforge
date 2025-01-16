@@ -1,6 +1,5 @@
 """OAuth authentication router."""
 
-from typing import Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from supabase.client import AsyncClient
@@ -8,6 +7,7 @@ from supabase.client import AsyncClient
 from src.api.dependencies.supabase import get_supabase_client
 from src.api.middleware.rate_limit import rate_limit
 from src.api.services.profile import ProfileService
+
 
 router = APIRouter(prefix="/auth", tags=["oauth"])
 
@@ -18,7 +18,7 @@ async def google_oauth_init(
     request: Request,
     redirect_to: str = Query(..., description="URL to redirect after successful authentication"),
     supabase: AsyncClient = Depends(get_supabase_client),
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Initialize Google OAuth flow.
 
     Args:
@@ -42,7 +42,7 @@ async def google_oauth_init(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to initialize Google OAuth: {str(e)}",
+            detail=f"Failed to initialize Google OAuth: {e!s}",
         )
 
 
@@ -52,7 +52,7 @@ async def github_oauth_init(
     request: Request,
     redirect_to: str = Query(..., description="URL to redirect after successful authentication"),
     supabase: AsyncClient = Depends(get_supabase_client),
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Initialize GitHub OAuth flow.
 
     Args:
@@ -76,7 +76,7 @@ async def github_oauth_init(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to initialize GitHub OAuth: {str(e)}",
+            detail=f"Failed to initialize GitHub OAuth: {e!s}",
         )
 
 
@@ -85,11 +85,11 @@ async def github_oauth_init(
 async def oauth_callback(
     request: Request,
     code: str = Query(..., description="OAuth authorization code"),
-    state: Optional[str] = Query(None, description="OAuth state parameter"),
+    state: str | None = Query(None, description="OAuth state parameter"),
     provider: str = Query(..., description="OAuth provider (google or github)"),
     supabase: AsyncClient = Depends(get_supabase_client),
     profile_service: ProfileService = Depends(ProfileService),
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Handle OAuth callback.
 
     Args:
@@ -135,5 +135,5 @@ async def oauth_callback(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to process OAuth callback: {str(e)}",
+            detail=f"Failed to process OAuth callback: {e!s}",
         )

@@ -58,11 +58,12 @@ from datetime import datetime, timedelta
 import json
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 from prometheus_client import Counter, Gauge, Histogram
 import psutil
+
 
 logger = logging.getLogger(__name__)
 
@@ -126,13 +127,13 @@ class SystemMonitor:
         self.cpu_gauge = Gauge("cpu_usage_percent", "Current CPU usage percentage")
 
         # Performance tracking
-        self.performance_history: List[PerformanceMetrics] = []
-        self.error_history: List[Dict] = []
+        self.performance_history: list[PerformanceMetrics] = []
+        self.error_history: list[dict] = []
 
         # Resource monitoring
         self.process = psutil.Process()
 
-    def _get_system_metrics(self) -> Dict[str, float]:
+    def _get_system_metrics(self) -> dict[str, float]:
         """Get current system resource usage."""
         return {
             "memory_mb": self.process.memory_info().rss / 1024 / 1024,
@@ -153,15 +154,15 @@ class SystemMonitor:
                     try:
                         self.request_counter.inc()
                     except Exception as e:
-                        self.logger.error(f"Error incrementing request counter: {str(e)}")
+                        self.logger.error(f"Error incrementing request counter: {e!s}")
                     return result
                 except Exception as e:
                     error = e
                     try:
                         self.error_counter.inc()
                     except Exception as counter_error:
-                        self.logger.error(f"Error incrementing error counter: {str(counter_error)}")
-                    self.logger.error(f"Error in {operation_name}: {str(e)}", exc_info=True)
+                        self.logger.error(f"Error incrementing error counter: {counter_error!s}")
+                    self.logger.error(f"Error in {operation_name}: {e!s}", exc_info=True)
                     raise
                 finally:
                     end_time = time.time()
@@ -171,7 +172,7 @@ class SystemMonitor:
                     try:
                         metrics = self._get_system_metrics()
                     except Exception as e:
-                        self.logger.error(f"Error getting system metrics: {str(e)}")
+                        self.logger.error(f"Error getting system metrics: {e!s}")
                         metrics = {
                             "memory_mb": 0,
                             "cpu_percent": 0,
@@ -203,7 +204,7 @@ class SystemMonitor:
                             }
                         )
                     except Exception as e:
-                        self.logger.error(f"Error updating Prometheus metrics: {str(e)}")
+                        self.logger.error(f"Error updating Prometheus metrics: {e!s}")
 
                     # Log performance data
                     self.logger.info(
@@ -227,7 +228,7 @@ class SystemMonitor:
 
         return decorator
 
-    def get_performance_summary(self, hours: int = 24) -> Dict[str, Any]:
+    def get_performance_summary(self, hours: int = 24) -> dict[str, Any]:
         """Get performance summary for the last N hours."""
         cutoff = datetime.utcnow() - timedelta(hours=hours)
 
@@ -286,14 +287,14 @@ class SystemMonitor:
             },
         }
 
-    def _update_prometheus_metrics(self, metrics: Dict[str, float]):
+    def _update_prometheus_metrics(self, metrics: dict[str, float]):
         """Update Prometheus metrics with current values."""
         try:
             self.processing_time.observe(metrics["duration"])
             self.memory_gauge.set(metrics["memory_mb"] * 1024 * 1024)
             self.cpu_gauge.set(metrics["cpu_percent"])
         except Exception as e:
-            self.logger.error(f"Error updating Prometheus metrics: {str(e)}")
+            self.logger.error(f"Error updating Prometheus metrics: {e!s}")
             # Don't add to error history since this is an internal monitoring error
 
     def export_metrics(self, path: str):
@@ -317,6 +318,6 @@ class SystemMonitor:
 
             with open(path, "w") as f:
                 json.dump(metrics, f, indent=2)
-        except (IOError, OSError) as e:
-            self.logger.error(f"Failed to export metrics to {path}: {str(e)}")
+        except OSError as e:
+            self.logger.error(f"Failed to export metrics to {path}: {e!s}")
             raise

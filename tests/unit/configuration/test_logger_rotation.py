@@ -17,10 +17,12 @@ def test_log_rotation(temp_log_file, cleanup_logger):
     backup_files = [f for f in os.listdir(log_dir) if f.startswith(os.path.basename(temp_log_file))]
     assert len(backup_files) <= backup_count + 1
 
+
 def test_invalid_log_directory():
     """Test handling of invalid log directory"""
     with pytest.raises(Exception):
         setup_logger('test_logger', '/nonexistent/dir/test.log')
+
 
 def test_logger_cleanup(temp_log_file, cleanup_logger):
     """Test that logger handlers are properly cleaned up"""

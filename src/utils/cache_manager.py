@@ -45,12 +45,13 @@ Note:
     - Thread-safe operations
 """
 
+from collections.abc import Callable
 from functools import wraps
 import hashlib
 import json
 import logging
 import pickle
-from typing import Any, Callable, Optional
+from typing import Any
 
 import redis
 from redis.exceptions import RedisError
@@ -66,7 +67,7 @@ class CacheManager:
         port: int = 6379,
         prefix: str = "cache",
         default_ttl: int = 3600,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger | None = None,
         socket_timeout: int = 5,
         socket_connect_timeout: int = 2,
         retry_on_timeout: bool = True,
@@ -84,7 +85,7 @@ class CacheManager:
             )
             self.redis.ping()  # Test connection
         except RedisError as e:
-            self.logger.warning(f"Failed to connect to Redis: {str(e)}")
+            self.logger.warning(f"Failed to connect to Redis: {e!s}")
             self.redis = None
 
     def _get_full_key(self, key: str) -> str:
@@ -103,7 +104,7 @@ class CacheManager:
             # If value can't be JSON serialized, use its string representation
             return hashlib.sha256(str(value).encode()).hexdigest()
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Get a value from the cache."""
         if not self.redis:
             return None
@@ -117,15 +118,15 @@ class CacheManager:
                     self.logger.debug(f"Unpickled value: {result}")
                     return result
                 except (pickle.PickleError, TypeError, ValueError) as e:
-                    self.logger.warning(f"Failed to unpickle value: {str(e)}")
+                    self.logger.warning(f"Failed to unpickle value: {e!s}")
                     # Don't return raw bytes/invalid data
                     return None
             return None
         except Exception as e:
-            self.logger.error(f"Error getting from cache: {str(e)}")
+            self.logger.error(f"Error getting from cache: {e!s}")
             return None
 
-    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl: int | None = None) -> bool:
         """Set a value in the cache with optional TTL."""
         if not self.redis:
             return False
@@ -136,7 +137,7 @@ class CacheManager:
                 ttl = self.default_ttl
             return bool(self.redis.setex(full_key, ttl, serialized))
         except Exception as e:
-            self.logger.error(f"Error setting cache: {str(e)}")
+            self.logger.error(f"Error setting cache: {e!s}")
             return False
 
     def delete(self, key: str) -> bool:
@@ -147,7 +148,7 @@ class CacheManager:
             full_key = self._get_full_key(key)
             return bool(self.redis.delete(full_key))
         except Exception as e:
-            self.logger.error(f"Error deleting from cache: {str(e)}")
+            self.logger.error(f"Error deleting from cache: {e!s}")
             return False
 
     def cleanup(self):
@@ -156,9 +157,9 @@ class CacheManager:
             if self.redis:
                 self.redis.close()
         except Exception as e:
-            self.logger.error(f"Error cleaning up cache: {str(e)}")
+            self.logger.error(f"Error cleaning up cache: {e!s}")
 
-    def cache_decorator(self, key_prefix: str, ttl: Optional[int] = None):
+    def cache_decorator(self, key_prefix: str, ttl: int | None = None):
         """Decorator to cache function results.
 
         Args:
@@ -205,7 +206,7 @@ def create_retry_decorator(
     max_attempts: int = 3,
     min_wait: int = 4,
     max_wait: int = 10,
-    logger: Optional[logging.Logger] = None,
+    logger: logging.Logger | None = None,
 ):
     """Create a retry decorator with exponential backoff."""
     logger = logger or logging.getLogger(__name__)

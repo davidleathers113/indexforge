@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends
 
 from src.core import CacheService, Container, VectorService
 
+
 router = APIRouter(tags=["Health"])
 
 

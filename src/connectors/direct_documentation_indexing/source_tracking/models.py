@@ -42,8 +42,8 @@ Example:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from .enums import LogLevel, ProcessingStatus, ReferenceType, TransformationType
 
@@ -76,11 +76,11 @@ class ProcessingStep:
 
     step_name: str
     status: ProcessingStatus
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    details: Dict = field(default_factory=dict)
-    metadata: Dict = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    details: dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the processing step to a dictionary."""
         return {
             "step_name": self.step_name,
@@ -118,12 +118,12 @@ class Transformation:
     """
 
     transform_type: TransformationType
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     description: str = ""
-    parameters: Dict = field(default_factory=dict)
-    metadata: Dict = field(default_factory=dict)
+    parameters: dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the transformation to a dictionary."""
         return {
             "transform_type": self.transform_type.value,  # Convert enum to string
@@ -160,22 +160,22 @@ class LogEntry:
 
     log_level: LogLevel
     message: str
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Dict = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    metadata: dict = field(default_factory=dict)
 
     def __init__(
         self,
         log_level: LogLevel,
         message: str,
-        timestamp: Optional[datetime] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        timestamp: datetime | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         self.log_level = log_level
         self.message = message
-        self.timestamp = timestamp or datetime.now(timezone.utc)
+        self.timestamp = timestamp or datetime.now(UTC)
         self.metadata = metadata or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the log entry to a dictionary for serialization."""
         return {
             "level": self.log_level.value,
@@ -185,7 +185,7 @@ class LogEntry:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "LogEntry":
+    def from_dict(cls, data: dict[str, Any]) -> "LogEntry":
         """Create a log entry from a dictionary."""
         return cls(
             log_level=LogLevel(data["level"]),
@@ -253,38 +253,38 @@ class DocumentLineage:
     """
 
     doc_id: str
-    origin_id: Optional[str] = None
-    origin_source: Optional[str] = None
-    origin_type: Optional[str] = None
-    derived_from: Optional[str] = None
-    derived_documents: List[str] = field(default_factory=list)
-    transformations: List[Transformation] = field(default_factory=list)
-    processing_steps: List[ProcessingStep] = field(default_factory=list)
-    error_logs: List[LogEntry] = field(default_factory=list)
-    performance_metrics: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict = field(default_factory=dict)
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    last_modified: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    children: List[str] = field(default_factory=list)
-    parents: List[str] = field(default_factory=list)
+    origin_id: str | None = None
+    origin_source: str | None = None
+    origin_type: str | None = None
+    derived_from: str | None = None
+    derived_documents: list[str] = field(default_factory=list)
+    transformations: list[Transformation] = field(default_factory=list)
+    processing_steps: list[ProcessingStep] = field(default_factory=list)
+    error_logs: list[LogEntry] = field(default_factory=list)
+    performance_metrics: dict[str, Any] = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_modified: datetime = field(default_factory=lambda: datetime.now(UTC))
+    children: list[str] = field(default_factory=list)
+    parents: list[str] = field(default_factory=list)
 
     def __init__(
         self,
         doc_id: str,
-        origin_id: Optional[str] = None,
-        origin_source: Optional[str] = None,
-        origin_type: Optional[str] = None,
-        derived_from: Optional[str] = None,
-        derived_documents: Optional[List[str]] = None,
-        transformations: Optional[List[Transformation]] = None,
-        processing_steps: Optional[List[ProcessingStep]] = None,
-        error_logs: Optional[List[LogEntry]] = None,
-        performance_metrics: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        created_at: Optional[datetime] = None,
-        last_modified: Optional[datetime] = None,
-        children: Optional[List[str]] = None,
-        parents: Optional[List[str]] = None,
+        origin_id: str | None = None,
+        origin_source: str | None = None,
+        origin_type: str | None = None,
+        derived_from: str | None = None,
+        derived_documents: list[str] | None = None,
+        transformations: list[Transformation] | None = None,
+        processing_steps: list[ProcessingStep] | None = None,
+        error_logs: list[LogEntry] | None = None,
+        performance_metrics: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+        created_at: datetime | None = None,
+        last_modified: datetime | None = None,
+        children: list[str] | None = None,
+        parents: list[str] | None = None,
     ):
         self.doc_id = doc_id
         self.origin_id = origin_id
@@ -297,12 +297,12 @@ class DocumentLineage:
         self.error_logs = error_logs or []
         self.performance_metrics = performance_metrics or {}
         self.metadata = metadata or {}
-        self.created_at = created_at or datetime.now(timezone.utc)
-        self.last_modified = last_modified or datetime.now(timezone.utc)
+        self.created_at = created_at or datetime.now(UTC)
+        self.last_modified = last_modified or datetime.now(UTC)
         self.children = children or []  # Initialize children from parameter
         self.parents = parents or []  # Initialize parents from parameter
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the document lineage to a dictionary."""
         return {
             "doc_id": self.doc_id,
@@ -323,7 +323,7 @@ class DocumentLineage:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DocumentLineage":
+    def from_dict(cls, data: dict[str, Any]) -> "DocumentLineage":
         """Create a DocumentLineage instance from a dictionary."""
         # Convert datetime strings to datetime objects
         if isinstance(data.get("created_at"), str):
@@ -388,12 +388,12 @@ class ChunkReference:
     source_id: str
     target_id: str
     ref_type: ReferenceType
-    similarity_score: Optional[float] = None
-    topic_id: Optional[int] = None
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Dict = field(default_factory=dict)
+    similarity_score: float | None = None
+    topic_id: int | None = None
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    metadata: dict = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the chunk reference to a dictionary."""
         return {
             "source_id": self.source_id,
@@ -436,16 +436,16 @@ class HealthCheckResult:
     """
 
     status: str
-    issues: List[str]
+    issues: list[str]
     timestamp: datetime
-    metrics: Dict[str, Any]
-    resources: Dict[str, float]
+    metrics: dict[str, Any]
+    resources: dict[str, float]
 
     def __str__(self) -> str:
         """Convert the result to a string representation."""
         return str(self.status)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the health check result to a dictionary.
 

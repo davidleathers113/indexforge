@@ -5,7 +5,7 @@ This module provides the `SchemaBuilder` class, which offers a fluent
 interface for schema construction.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from src.indexing.schema.configuration_builder import ConfigurationBuilder
 from src.indexing.schema.configurations import (
@@ -25,7 +25,7 @@ class SchemaBuilder:
     def __init__(self, class_name: str) -> None:
         SchemaValidator.validate_class_name(class_name)
         self.class_name = class_name
-        self.properties: List[Dict[str, Any]] = []
+        self.properties: list[dict[str, Any]] = []
         self.vectorizer_config = ConfigurationBuilder.vectorizer_config("text2vec-transformers")
         self.inverted_index_config = ConfigurationBuilder.bm25_config()
         self.vector_index_config = ConfigurationBuilder.vector_index_config()
@@ -75,7 +75,7 @@ class SchemaBuilder:
         self.inverted_index_config = ConfigurationBuilder.bm25_config(**kwargs)
         return self
 
-    def build(self) -> Dict[str, Any]:
+    def build(self) -> dict[str, Any]:
         SchemaValidator.validate_properties(self.properties)
         SchemaValidator.validate_configurations(
             {
@@ -97,6 +97,6 @@ class SchemaBuilder:
             "properties": self.properties,
         }
 
-    def _create_property(self, name: str, data_type: str, **kwargs: Any) -> Dict[str, Any]:
+    def _create_property(self, name: str, data_type: str, **kwargs: Any) -> dict[str, Any]:
         property_def = {"name": name, "dataType": [data_type], **kwargs}
         return property_def

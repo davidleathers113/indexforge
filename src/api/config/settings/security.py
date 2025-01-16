@@ -1,6 +1,5 @@
 """Security and authentication settings configuration."""
 
-from typing import Optional
 
 from pydantic import AnyHttpUrl, Field, SecretStr, field_validator
 
@@ -19,7 +18,7 @@ class SecuritySettings(BaseAppSettings):
     SUPABASE_URL: str = Field(
         default="http://localhost:54321", env="SUPABASE_URL", description="Supabase instance URL"
     )
-    SUPABASE_DB_URL: Optional[str] = Field(
+    SUPABASE_DB_URL: str | None = Field(
         default=None, env="SUPABASE_DB_URL", description="PostgreSQL connection URL"
     )
     SUPABASE_KEY: SecretStr = Field(
@@ -32,19 +31,19 @@ class SecuritySettings(BaseAppSettings):
     )
 
     # OAuth Configuration
-    GOOGLE_CLIENT_ID: Optional[str] = Field(
+    GOOGLE_CLIENT_ID: str | None = Field(
         default=None, env="GOOGLE_CLIENT_ID", description="Google OAuth client ID"
     )
-    GOOGLE_CLIENT_SECRET: Optional[SecretStr] = Field(
+    GOOGLE_CLIENT_SECRET: SecretStr | None = Field(
         default=None, env="GOOGLE_CLIENT_SECRET", description="Google OAuth client secret"
     )
-    GITHUB_CLIENT_ID: Optional[str] = Field(
+    GITHUB_CLIENT_ID: str | None = Field(
         default=None, env="GITHUB_CLIENT_ID", description="GitHub OAuth client ID"
     )
-    GITHUB_CLIENT_SECRET: Optional[SecretStr] = Field(
+    GITHUB_CLIENT_SECRET: SecretStr | None = Field(
         default=None, env="GITHUB_CLIENT_SECRET", description="GitHub OAuth client secret"
     )
-    OAUTH_REDIRECT_URL: Optional[AnyHttpUrl] = Field(
+    OAUTH_REDIRECT_URL: AnyHttpUrl | None = Field(
         default=None, env="OAUTH_REDIRECT_URL", description="OAuth redirect URL"
     )
 
@@ -66,7 +65,7 @@ class SecuritySettings(BaseAppSettings):
 
     @field_validator("SUPABASE_DB_URL")
     @classmethod
-    def validate_supabase_db_url(cls, v: Optional[str]) -> Optional[str]:
+    def validate_supabase_db_url(cls, v: str | None) -> str | None:
         """Validate Supabase database URL format."""
         if v is not None and not v.startswith("postgresql://"):
             raise ValueError("SUPABASE_DB_URL must start with postgresql://")

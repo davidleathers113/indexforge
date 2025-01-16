@@ -54,12 +54,12 @@ Note:
 """
 
 import logging
-from typing import Dict, List, Optional
 
 from src.embeddings.embedding_generator import EmbeddingGenerator
 from src.indexing.vector_index import VectorIndex
 from src.utils.summarizer.config.settings import SummarizerConfig
 from src.utils.summarizer.core.processor import DocumentSummarizer
+
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class DocumentOperations:
         summarizer: DocumentSummarizer,
         embedding_generator: EmbeddingGenerator,
         vector_index: VectorIndex,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         """Initialize document operations.
 
@@ -96,8 +96,8 @@ class DocumentOperations:
         self,
         doc_id: str,
         content: str = None,
-        metadata: Dict = None,
-        summary_config: Optional[SummarizerConfig] = None,
+        metadata: dict = None,
+        summary_config: SummarizerConfig | None = None,
     ) -> bool:
         """Update a document in the vector index.
 
@@ -161,10 +161,10 @@ class DocumentOperations:
             return True
 
         except Exception as e:
-            self.logger.error(f"Error updating document: {str(e)}")
+            self.logger.error(f"Error updating document: {e!s}")
             return False
 
-    def delete_documents(self, doc_ids: List[str]) -> bool:
+    def delete_documents(self, doc_ids: list[str]) -> bool:
         """Delete documents from the vector index.
 
         Removes specified documents from the vector index, handling cleanup
@@ -189,5 +189,5 @@ class DocumentOperations:
             return True
 
         except Exception as e:
-            self.logger.error(f"Error deleting documents: {str(e)}")
+            self.logger.error(f"Error deleting documents: {e!s}")
             return False

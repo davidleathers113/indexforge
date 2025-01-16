@@ -5,15 +5,17 @@ metadata. It provides dataclasses for documents, document metadata, and
 document relationships.
 """
 
-# Standard library imports
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Set
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-# Local imports
-from src.core.models.chunks import Chunk
+
+if TYPE_CHECKING:
+    from .chunks import Chunk
 
 
 class DocumentStatus(Enum):
@@ -45,24 +47,24 @@ class DocumentMetadata:
     doc_type: DocumentType  # Document type
     created_at: datetime = field(default_factory=datetime.utcnow)  # Creation timestamp
     updated_at: datetime = field(default_factory=datetime.utcnow)  # Last update timestamp
-    source_path: Optional[str] = None  # Original file path
-    mime_type: Optional[str] = None  # MIME type
-    encoding: Optional[str] = None  # Character encoding
-    language: Optional[str] = None  # Document language
-    custom_metadata: Dict = field(default_factory=dict)  # Additional metadata
+    source_path: str | None = None  # Original file path
+    mime_type: str | None = None  # MIME type
+    encoding: str | None = None  # Character encoding
+    language: str | None = None  # Document language
+    custom_metadata: dict = field(default_factory=dict)  # Additional metadata
 
 
 @dataclass
 class Document:
     """Represents a document in the system."""
 
-    id: UUID = field(default_factory=uuid4)  # Unique document identifier
     metadata: DocumentMetadata  # Document metadata
-    chunks: List[Chunk] = field(default_factory=list)  # Document chunks
-    status: DocumentStatus = DocumentStatus.PENDING  # Processing status
-    parent_id: Optional[UUID] = None  # Parent document ID
-    child_ids: Set[UUID] = field(default_factory=set)  # Child document IDs
-    error_message: Optional[str] = None  # Error message if processing failed
+    id: UUID = field(default_factory=uuid4)  # Unique document identifier
+    chunks: list[Chunk] = field(default_factory=list)  # Document chunks
+    status: DocumentStatus = field(default=DocumentStatus.PENDING)  # Processing status
+    parent_id: UUID | None = None  # Parent document ID
+    child_ids: set[UUID] = field(default_factory=set)  # Child document IDs
+    error_message: str | None = None  # Error message if processing failed
 
 
 @dataclass
@@ -72,6 +74,6 @@ class ProcessingStep:
     step_name: str  # Name of the processing step
     status: DocumentStatus  # Step status
     started_at: datetime = field(default_factory=datetime.utcnow)  # Start timestamp
-    completed_at: Optional[datetime] = None  # Completion timestamp
-    error_message: Optional[str] = None  # Error message if step failed
-    metrics: Dict = field(default_factory=dict)  # Step metrics
+    completed_at: datetime | None = None  # Completion timestamp
+    error_message: str | None = None  # Error message if step failed
+    metrics: dict = field(default_factory=dict)  # Step metrics

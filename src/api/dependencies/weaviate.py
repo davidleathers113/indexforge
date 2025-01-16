@@ -1,7 +1,6 @@
 """Weaviate client dependency."""
 
 from functools import lru_cache
-from typing import Optional
 from urllib.parse import urlparse
 
 from weaviate.auth import AuthApiKey
@@ -11,6 +10,7 @@ from weaviate.exceptions import WeaviateConnectionError
 
 from src.api.config.settings import get_settings
 from src.api.errors.weaviate_error_handling import with_weaviate_error_handling
+
 
 settings = get_settings()
 
@@ -46,7 +46,7 @@ def create_additional_config() -> AdditionalConfig:
 def create_embedded_client(
     url: str,
     additional_config: AdditionalConfig,
-    auth: Optional[AuthApiKey] = None,
+    auth: AuthApiKey | None = None,
 ) -> wvc.WeaviateClient:
     """Create a Weaviate client for embedded/local instance.
 
@@ -70,14 +70,14 @@ def create_embedded_client(
         )
     except Exception as e:
         raise WeaviateConnectionError(
-            f"Failed to connect to embedded Weaviate instance: {str(e)}"
+            f"Failed to connect to embedded Weaviate instance: {e!s}"
         ) from e
 
 
 def create_custom_client(
     url: str,
     additional_config: AdditionalConfig,
-    auth: Optional[AuthApiKey] = None,
+    auth: AuthApiKey | None = None,
 ) -> wvc.WeaviateClient:
     """Create a Weaviate client for custom/remote instance.
 
@@ -99,7 +99,7 @@ def create_custom_client(
             auth_credentials=auth,
         )
     except Exception as e:
-        raise WeaviateConnectionError(f"Failed to connect to Weaviate at {url}: {str(e)}") from e
+        raise WeaviateConnectionError(f"Failed to connect to Weaviate at {url}: {e!s}") from e
 
 
 @lru_cache

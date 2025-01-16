@@ -7,6 +7,7 @@ import pytest
 from src.api.repositories.weaviate.exceptions import DocumentPreparationError
 from src.api.repositories.weaviate.operations.delete import DeleteOperation
 
+
 # Test data constants
 TEST_DOCUMENTS = [
     {"id": "550e8400-e29b-41d4-a716-446655440000"},

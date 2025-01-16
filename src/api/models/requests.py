@@ -1,7 +1,6 @@
 """Request models for the API."""
 
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, HttpUrl
 
@@ -17,7 +16,7 @@ class OAuthRequest(BaseModel):
     """OAuth request model."""
 
     provider: OAuthProvider = Field(..., description="OAuth provider")
-    redirect_to: Optional[HttpUrl] = Field(
+    redirect_to: HttpUrl | None = Field(
         None, description="URL to redirect to after authentication"
     )
 
@@ -31,7 +30,7 @@ class OAuthCallback(BaseModel):
     """OAuth callback model."""
 
     code: str = Field(..., description="OAuth authorization code")
-    state: Optional[str] = Field(None, description="State parameter for CSRF protection")
+    state: str | None = Field(None, description="State parameter for CSRF protection")
     provider: OAuthProvider = Field(..., description="OAuth provider")
 
     class Config:
@@ -44,8 +43,8 @@ class SearchQuery(BaseModel):
     """Search query model."""
 
     query: str = Field(..., description="Search query text")
-    limit: Optional[int] = Field(10, ge=1, le=100, description="Maximum number of results")
-    offset: Optional[int] = Field(0, ge=0, description="Number of results to skip")
+    limit: int | None = Field(10, ge=1, le=100, description="Maximum number of results")
+    offset: int | None = Field(0, ge=0, description="Number of results to skip")
 
     class Config:
         json_schema_extra = {"example": {"query": "machine learning", "limit": 10, "offset": 0}}
@@ -54,9 +53,9 @@ class SearchQuery(BaseModel):
 class DocumentFilter(BaseModel):
     """Document filter model."""
 
-    file_type: Optional[str] = Field(None, description="Filter by file type")
-    date_from: Optional[str] = Field(None, description="Filter by date from (ISO format)")
-    date_to: Optional[str] = Field(None, description="Filter by date to (ISO format)")
+    file_type: str | None = Field(None, description="Filter by file type")
+    date_from: str | None = Field(None, description="Filter by date from (ISO format)")
+    date_to: str | None = Field(None, description="Filter by date to (ISO format)")
 
     class Config:
         json_schema_extra = {
@@ -70,8 +69,8 @@ class DocumentUploadResponse(BaseModel):
     file_name: str = Field(..., description="Name of the uploaded file")
     file_type: str = Field(..., description="Type of the uploaded file")
     status: str = Field(..., description="Upload status (success/error)")
-    message: Optional[str] = Field(None, description="Additional status message or error details")
-    document_id: Optional[str] = Field(None, description="ID of the indexed document if successful")
+    message: str | None = Field(None, description="Additional status message or error details")
+    document_id: str | None = Field(None, description="ID of the indexed document if successful")
 
     class Config:
         json_schema_extra = {
@@ -90,7 +89,7 @@ class SignUpRequest(BaseModel):
 
     email: EmailStr = Field(..., description="User's email address")
     password: str = Field(..., min_length=8, description="User's password")
-    name: Optional[str] = Field(None, description="User's full name")
+    name: str | None = Field(None, description="User's full name")
 
     class Config:
         json_schema_extra = {

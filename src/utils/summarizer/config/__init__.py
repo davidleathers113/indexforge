@@ -46,4 +46,5 @@ Note:
 
 from .settings import CacheConfig, LoggingConfig, SummarizerConfig
 
+
 __all__ = ["CacheConfig", "LoggingConfig", "SummarizerConfig"]

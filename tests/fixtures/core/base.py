@@ -1,14 +1,13 @@
 """Base classes for fixtures."""
 
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
 class BaseState:
     """Base state management for fixtures."""
 
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     def reset(self):
         """Reset state to defaults."""
@@ -18,6 +17,6 @@ class BaseState:
         """Add an error with logging."""
         self.errors.append(error)
 
-    def get_errors(self) -> List[str]:
+    def get_errors(self) -> list[str]:
         """Get copy of current errors."""
         return self.errors.copy()

@@ -12,10 +12,12 @@ def mock_components():
     """Create mock components for document operations"""
     return {'summarizer': Mock(), 'embedding_generator': Mock(), 'vector_index': Mock(), 'logger': Mock(spec=logging.Logger)}
 
+
 @pytest.fixture
 def doc_ops(mock_components):
     """Create DocumentOperations instance with mock components"""
     return DocumentOperations(summarizer=mock_components['summarizer'], embedding_generator=mock_components['embedding_generator'], vector_index=mock_components['vector_index'], logger=mock_components['logger'])
+
 
 def test_document_ops_initialization(doc_ops, mock_components):
     """Test DocumentOperations initialization"""
@@ -23,6 +25,7 @@ def test_document_ops_initialization(doc_ops, mock_components):
     assert doc_ops.embedding_generator == mock_components['embedding_generator']
     assert doc_ops.vector_index == mock_components['vector_index']
     assert doc_ops.logger == mock_components['logger']
+
 
 def test_update_document_content_only(doc_ops, mock_components):
     """Test updating document content without metadata"""
@@ -39,6 +42,7 @@ def test_update_document_content_only(doc_ops, mock_components):
     mock_components['embedding_generator']._get_embedding.assert_called_once_with(content)
     mock_components['vector_index'].update_document.assert_called_once_with(doc_id=doc_id, updates={'content': {'body': content, 'summary': summary}}, vector=vector)
 
+
 def test_update_document_metadata_only(doc_ops, mock_components):
     """Test updating document metadata without content"""
     doc_id = 'test_doc'
@@ -49,6 +53,7 @@ def test_update_document_metadata_only(doc_ops, mock_components):
     mock_components['summarizer'].generate_summary.assert_not_called()
     mock_components['embedding_generator']._get_embedding.assert_not_called()
     mock_components['vector_index'].update_document.assert_called_once_with(doc_id=doc_id, updates={'metadata': metadata.__dict__}, vector=None)
+
 
 def test_update_document_both_content_and_metadata(doc_ops, mock_components):
     """Test updating both document content and metadata"""
@@ -64,6 +69,7 @@ def test_update_document_both_content_and_metadata(doc_ops, mock_components):
     assert result is True
     mock_components['vector_index'].update_document.assert_called_once_with(doc_id=doc_id, updates={'content': {'body': content, 'summary': summary}, 'metadata': metadata.__dict__}, vector=vector)
 
+
 def test_update_document_summary_failure(doc_ops, mock_components):
     """Test handling of summary generation failure"""
     doc_id = 'test_doc'
@@ -77,6 +83,7 @@ def test_update_document_summary_failure(doc_ops, mock_components):
     mock_components['vector_index'].update_document.assert_called_once()
     assert 'summary_error' in mock_components['vector_index'].update_document.call_args[1]['updates']['content']
     mock_components['logger'].error.assert_called_with(f'Error generating summary: {error_msg}')
+
 
 def test_update_document_embedding_failure(doc_ops, mock_components):
     """Test handling of embedding generation failure"""
@@ -92,6 +99,7 @@ def test_update_document_embedding_failure(doc_ops, mock_components):
     assert mock_components['vector_index'].update_document.call_args[1]['vector'] is None
     mock_components['logger'].error.assert_called_with(f'Error generating embedding: {error_msg}')
 
+
 def test_update_document_index_failure(doc_ops, mock_components):
     """Test handling of index update failure"""
     doc_id = 'test_doc'
@@ -102,6 +110,7 @@ def test_update_document_index_failure(doc_ops, mock_components):
     assert result is False
     mock_components['logger'].error.assert_called_with(f'Update error: {error_msg}')
 
+
 def test_delete_documents_success(doc_ops, mock_components):
     """Test successful document deletion"""
     doc_ids = ['doc1', 'doc2', 'doc3']
@@ -109,6 +118,7 @@ def test_delete_documents_success(doc_ops, mock_components):
     result = doc_ops.delete_documents(doc_ids)
     assert result is True
     mock_components['vector_index'].delete_documents.assert_called_once_with(doc_ids=doc_ids)
+
 
 def test_delete_documents_failure(doc_ops, mock_components):
     """Test handling of document deletion failure"""
@@ -118,6 +128,7 @@ def test_delete_documents_failure(doc_ops, mock_components):
     result = doc_ops.delete_documents(doc_ids)
     assert result is False
     mock_components['logger'].error.assert_called_with(f'Delete error: {error_msg}')
+
 
 def test_delete_documents_empty_list(doc_ops, mock_components):
     """Test deletion with empty document list"""

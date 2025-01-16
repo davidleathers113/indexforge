@@ -5,7 +5,7 @@ chunking, and similarity computation.
 """
 
 import re
-from typing import List, Tuple
+
 
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
@@ -37,7 +37,7 @@ def clean_text(text: str) -> str:
     return text
 
 
-def split_into_sentences(text: str) -> List[str]:
+def split_into_sentences(text: str) -> list[str]:
     """Split text into sentences based on punctuation.
 
     Args:
@@ -57,7 +57,7 @@ def split_into_sentences(text: str) -> List[str]:
 
 def chunk_text_by_sentences(
     text: str, min_chunk_size: int = 100, max_chunk_size: int = 1000, overlap: int = 50
-) -> List[Tuple[str, int, int]]:
+) -> list[tuple[str, int, int]]:
     """Split text into chunks by sentences with specified size constraints.
 
     Args:
@@ -104,7 +104,7 @@ def chunk_text_by_sentences(
 
 def find_text_boundaries(
     text: str, pattern: str, window_size: int = 100
-) -> List[Tuple[str, int, int]]:
+) -> list[tuple[str, int, int]]:
     """Find text boundaries around pattern matches with context window.
 
     Args:

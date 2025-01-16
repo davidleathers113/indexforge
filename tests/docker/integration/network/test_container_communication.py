@@ -1,11 +1,11 @@
 """Test container-to-container network communication."""
 
-from typing import Any, Dict
+from typing import Any
 
 from ...utils.docker_test_utils import DockerTestUtils
 
 
-def test_dns_resolution(docker_client: Any, docker_network: Dict[str, Any]) -> None:
+def test_dns_resolution(docker_client: Any, docker_network: dict[str, Any]) -> None:
     """Test DNS resolution between containers."""
     # Start first container
     container1 = docker_client.containers.run(
@@ -42,7 +42,7 @@ def test_dns_resolution(docker_client: Any, docker_network: Dict[str, Any]) -> N
         container2.stop()
 
 
-def test_service_communication(docker_client: Any, docker_network: Dict[str, Any]) -> None:
+def test_service_communication(docker_client: Any, docker_network: dict[str, Any]) -> None:
     """Test service-level communication between containers."""
     # Start Redis container
     redis = docker_client.containers.run(

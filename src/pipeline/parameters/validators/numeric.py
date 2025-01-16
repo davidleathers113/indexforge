@@ -1,6 +1,5 @@
 """Numeric value validator implementation."""
 
-from typing import Optional, Union
 
 from src.pipeline.errors import ValidationError
 from src.pipeline.parameters.validators.base import Validator
@@ -11,13 +10,13 @@ class NumericValidator(Validator):
 
     def __init__(
         self,
-        min_value: Optional[Union[int, float]] = None,
-        max_value: Optional[Union[int, float]] = None,
+        min_value: int | float | None = None,
+        max_value: int | float | None = None,
     ):
         self.min_value = min_value
         self.max_value = max_value
 
-    def validate(self, value: Union[int, float, str], param_name: str) -> None:
+    def validate(self, value: int | float | str, param_name: str) -> None:
         """Validate a numeric value.
 
         Args:
@@ -44,4 +43,4 @@ class NumericValidator(Validator):
                 )
 
         except (ValueError, TypeError) as e:
-            raise ValidationError(f"Invalid numeric value for {param_name}: {str(e)}")
+            raise ValidationError(f"Invalid numeric value for {param_name}: {e!s}")

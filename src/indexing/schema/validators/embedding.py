@@ -27,10 +27,11 @@ Example:
     ```
 """
 
+from collections.abc import Sequence
 import logging
-from typing import List, Sequence, Union
 
 import numpy as np
+
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ logger = logging.getLogger(__name__)
 EMBEDDING_DIM = 384
 
 
-def validate_embedding(embedding: Union[List[float], Sequence[float], np.ndarray]) -> None:
+def validate_embedding(embedding: list[float] | Sequence[float] | np.ndarray) -> None:
     """
     Validate vector embedding dimensions and values.
 
@@ -112,7 +113,7 @@ def validate_embedding(embedding: Union[List[float], Sequence[float], np.ndarray
     logger.info("Embedding validation successful")
 
 
-def validate_embedding_batch(embeddings: List[List[float]]) -> None:
+def validate_embedding_batch(embeddings: list[list[float]]) -> None:
     """
     Validate a batch of embeddings.
 
@@ -148,6 +149,6 @@ def validate_embedding_batch(embeddings: List[List[float]]) -> None:
             validate_embedding(embedding)
         except (ValueError, TypeError) as e:
             logger.error("Validation failed for embedding %d: %s", i, str(e))
-            raise ValueError(f"embedding[{i}].*{str(e)}")
+            raise ValueError(f"embedding[{i}].*{e!s}")
 
     logger.info("Batch embedding validation successful")

@@ -8,7 +8,7 @@ Tests:
 - Size boundaries
 """
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 from hypothesis import given, settings, strategies as st
 
@@ -26,7 +26,7 @@ from tests.unit.configuration.test_logger_validation import (
 
 
 @given(message=st.text(min_size=1), thread_id=st.integers(), extra_fields=st.dictionaries(keys=st.text(min_size=1), values=st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.booleans()), max_size=5))
-def test_property_valid_entries(message: str, thread_id: int, extra_fields: Dict[str, Any]) -> None:
+def test_property_valid_entries(message: str, thread_id: int, extra_fields: dict[str, Any]) -> None:
     """Test that valid entries are always accepted.
 
     Property: Any entry with correct types and required fields should validate.
@@ -37,8 +37,9 @@ def test_property_valid_entries(message: str, thread_id: int, extra_fields: Dict
     entry = create_test_log_entry(message, thread_id, **extra_fields)
     validate_log_entry(entry, required_fields={'message', 'thread_id'}, field_types={'message': str, 'thread_id': int})
 
+
 @given(st.lists(st.dictionaries(keys=st.sampled_from(['message', 'thread_id', 'level', 'extra']), values=st.one_of(st.text(min_size=1), st.integers(), st.lists(st.integers(), max_size=3)), min_size=2), min_size=1, max_size=10))
-def test_property_file_validation(entries: List[Dict[str, Any]]) -> None:
+def test_property_file_validation(entries: list[dict[str, Any]]) -> None:
     """Test file validation with various entry combinations.
 
     Property: File validation should handle any combination of valid entries.
@@ -55,6 +56,7 @@ def test_property_file_validation(entries: List[Dict[str, Any]]) -> None:
     except (LogFieldError, LogTypeError, LogFormatError):
         pass
 
+
 @given(st.text(min_size=1).map(lambda s: s + '🚀'), st.integers(min_value=1, max_value=1000))
 @settings(deadline=None)
 def test_property_unicode_handling(message: str, repeat: int) -> None:
@@ -70,8 +72,9 @@ def test_property_unicode_handling(message: str, repeat: int) -> None:
     validated = validate_log_file([log_line], required_fields={'message', 'thread_id'}, field_types={'message': str, 'thread_id': int})
     assert validated[0]['message'] == message * repeat
 
+
 @given(st.dictionaries(keys=st.text(min_size=1), values=st.one_of(st.none(), st.booleans(), st.integers(), st.floats(allow_nan=False, allow_infinity=False), st.text(), st.lists(st.integers(), max_size=3), st.dictionaries(keys=st.text(min_size=1), values=st.integers(), max_size=3)), min_size=1, max_size=10))
-def test_property_nested_structures(data: Dict[str, Any]) -> None:
+def test_property_nested_structures(data: dict[str, Any]) -> None:
     """Test validation of nested data structures.
 
     Property: Nested structures should be handled consistently.
@@ -81,6 +84,7 @@ def test_property_nested_structures(data: Dict[str, Any]) -> None:
     """
     entry = {'message': 'Test message', 'thread_id': 123, 'data': data}
     validate_log_entry(entry, required_fields={'message', 'thread_id'}, field_types={'message': str, 'thread_id': int})
+
 
 @given(message=st.text(min_size=1), thread_id=st.integers(), field_name=st.text(min_size=1).filter(lambda x: x not in {'message', 'thread_id'}), field_value=st.one_of(st.text(), st.integers(), st.floats(allow_nan=False, allow_infinity=False)))
 def test_property_extra_fields(message: str, thread_id: int, field_name: str, field_value: Any) -> None:

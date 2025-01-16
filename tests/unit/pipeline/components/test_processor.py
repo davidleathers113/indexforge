@@ -15,6 +15,7 @@ def config():
     """Create a test configuration."""
     return PipelineConfig(export_dir='test_dir', batch_size=2, max_document_length=100, max_retries=2)
 
+
 @pytest.fixture
 def mock_base_processor():
     """Create a mock base document processor."""
@@ -25,6 +26,7 @@ def mock_base_processor():
         instance.logger = logging.getLogger(__name__)
         yield instance
 
+
 @pytest.fixture
 def mock_pii_detector():
     """Create a mock PII detector."""
@@ -32,6 +34,7 @@ def mock_pii_detector():
         instance = mock.return_value
         instance.analyze_document.side_effect = lambda x: x
         yield instance
+
 
 @pytest.fixture
 def mock_summarizer():
@@ -41,6 +44,7 @@ def mock_summarizer():
         instance.process_documents.side_effect = lambda docs, _: docs
         yield instance
 
+
 @pytest.fixture
 def mock_embedding_generator():
     """Create a mock embedding generator."""
@@ -48,6 +52,7 @@ def mock_embedding_generator():
         instance = mock.return_value
         instance.generate_embeddings.side_effect = lambda docs: docs
         yield instance
+
 
 @pytest.fixture
 def mock_topic_clusterer():
@@ -57,10 +62,12 @@ def mock_topic_clusterer():
         instance.cluster_documents.side_effect = lambda docs, _: docs
         yield instance
 
+
 @pytest.fixture
 def processor(config, mock_base_processor, mock_pii_detector, mock_summarizer, mock_embedding_generator, mock_topic_clusterer):
     """Create a test processor."""
     return DocumentProcessor(config=config)
+
 
 def test_processor_initialization(config, mock_base_processor, mock_pii_detector, mock_summarizer, mock_embedding_generator, mock_topic_clusterer):
     """Test processor initialization."""
@@ -72,10 +79,12 @@ def test_processor_initialization(config, mock_base_processor, mock_pii_detector
     assert isinstance(processor.embedding_generator, MagicMock)
     assert isinstance(processor.topic_clusterer, MagicMock)
 
+
 def test_processor_process_empty(processor):
     """Test processing with no documents."""
     result = processor.process([])
     assert result == []
+
 
 def test_processor_process_deduplication(processor, mock_base_processor, mock_embedding_generator):
     """Test document deduplication."""
@@ -88,12 +97,14 @@ def test_processor_process_deduplication(processor, mock_base_processor, mock_em
     assert result[0]['id'] == '1'
     mock_base_processor.deduplicate_documents.assert_called_once_with(docs)
 
+
 def test_processor_process_pii_detection(processor, mock_pii_detector, mock_base_processor):
     """Test PII detection."""
     docs = [{'id': '1', 'content': {'body': 'test'}}]
     mock_base_processor.batch_documents.side_effect = lambda docs, _: [docs]
     processor.process(docs, detect_pii=True)
     mock_pii_detector.analyze_document.assert_called_once_with(docs[0])
+
 
 def test_processor_process_summarization(processor, mock_summarizer, mock_base_processor):
     """Test document summarization."""
@@ -103,12 +114,14 @@ def test_processor_process_summarization(processor, mock_summarizer, mock_base_p
     processor.process(docs, summary_config=summary_config)
     mock_summarizer.process_documents.assert_called_once_with(docs, summary_config)
 
+
 def test_processor_process_embedding_generation(processor, mock_embedding_generator, mock_base_processor):
     """Test embedding generation."""
     docs = [{'content': {'body': 'test'}}]
     mock_base_processor.batch_documents.side_effect = lambda docs, _: [docs]
     processor.process(docs)
     mock_embedding_generator.generate_embeddings.assert_called_once_with(docs)
+
 
 def test_processor_process_topic_clustering(processor, mock_topic_clusterer, mock_base_processor):
     """Test topic clustering."""
@@ -118,12 +131,14 @@ def test_processor_process_topic_clustering(processor, mock_topic_clusterer, moc
     processor.process(docs, cluster_config=cluster_config)
     mock_topic_clusterer.cluster_documents.assert_called_once_with(docs, cluster_config)
 
+
 def test_processor_document_length_truncation(processor, mock_base_processor):
     """Test document length truncation."""
     docs = [{'content': {'body': 'x' * 200}}]
     mock_base_processor.batch_documents.side_effect = lambda docs, _: [docs]
     result = processor.process(docs)
     assert len(result[0]['content']['body']) == processor.config.max_document_length
+
 
 def test_processor_embedding_generation_retries(processor, mock_embedding_generator, mock_base_processor):
     """Test embedding generation retries on failure."""
@@ -133,6 +148,7 @@ def test_processor_embedding_generation_retries(processor, mock_embedding_genera
     result = processor.process(docs)
     assert len(result) == 1
     assert mock_embedding_generator.generate_embeddings.call_count == 2
+
 
 def test_processor_cleanup(processor, mock_summarizer, mock_topic_clusterer):
     """Test processor cleanup."""

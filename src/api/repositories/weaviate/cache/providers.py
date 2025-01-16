@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 import json
-from typing import Any, Optional
+from typing import Any
 
 import aioredis
 from cachetools import TTLCache
@@ -12,7 +12,7 @@ class CacheProvider(ABC):
     """Abstract base class for cache providers."""
 
     @abstractmethod
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -24,7 +24,7 @@ class CacheProvider(ABC):
         pass
 
     @abstractmethod
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
         """Set value in cache.
 
         Args:
@@ -61,7 +61,7 @@ class MemoryCache(CacheProvider):
         """
         self.cache = TTLCache(maxsize=maxsize, ttl=ttl)
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -75,7 +75,7 @@ class MemoryCache(CacheProvider):
         except KeyError:
             return None
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
         """Set value in cache.
 
         Args:
@@ -118,7 +118,7 @@ class RedisCache(CacheProvider):
         """
         self.redis = redis
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -132,7 +132,7 @@ class RedisCache(CacheProvider):
             return None
         return json.loads(value)
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
         """Set value in cache.
 
         Args:
@@ -162,7 +162,7 @@ class RedisCache(CacheProvider):
 class NullCache(CacheProvider):
     """No-op cache provider."""
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -173,7 +173,7 @@ class NullCache(CacheProvider):
         """
         return None
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
         """Set value in cache.
 
         Args:

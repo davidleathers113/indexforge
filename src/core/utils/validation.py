@@ -5,7 +5,6 @@ and documents. It includes functions for detecting circular references,
 validating relationships, and ensuring data integrity.
 """
 
-from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 from src.core.models.chunks import Chunk
@@ -14,8 +13,8 @@ from src.core.models.references import Reference
 
 
 def detect_circular_references(
-    references: Dict[UUID, List[Reference]], start_id: UUID, visited: Optional[Set[UUID]] = None
-) -> List[str]:
+    references: dict[UUID, list[Reference]], start_id: UUID, visited: set[UUID] | None = None
+) -> list[str]:
     """Detect circular references in a reference graph.
 
     Args:
@@ -45,7 +44,7 @@ def detect_circular_references(
     return errors
 
 
-def validate_chunk_references(chunk: Chunk, all_chunks: Dict[UUID, Chunk]) -> List[str]:
+def validate_chunk_references(chunk: Chunk, all_chunks: dict[UUID, Chunk]) -> list[str]:
     """Validate references for a chunk.
 
     Args:
@@ -79,7 +78,7 @@ def validate_chunk_references(chunk: Chunk, all_chunks: Dict[UUID, Chunk]) -> Li
     return errors
 
 
-def validate_document_relationships(doc: Document, all_docs: Dict[UUID, Document]) -> List[str]:
+def validate_document_relationships(doc: Document, all_docs: dict[UUID, Document]) -> list[str]:
     """Validate relationships for a document.
 
     Args:
@@ -117,8 +116,8 @@ def validate_document_relationships(doc: Document, all_docs: Dict[UUID, Document
 
 
 def validate_reference_integrity(
-    chunks: Dict[UUID, Chunk], docs: Dict[UUID, Document]
-) -> List[str]:
+    chunks: dict[UUID, Chunk], docs: dict[UUID, Document]
+) -> list[str]:
     """Validate overall reference integrity.
 
     Args:

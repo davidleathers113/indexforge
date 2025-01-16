@@ -7,6 +7,7 @@ from .chunks import Chunk, ChunkMetadata, ProcessedChunk
 from .documents import Document, DocumentMetadata, DocumentStatus, DocumentType, ProcessingStep
 from .references import CitationReference, Reference, ReferenceType, SemanticReference
 
+
 __all__ = [
     # Chunk models
     "Chunk",

@@ -1,9 +1,10 @@
 """Base classes for parameter management."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from src.pipeline.errors import ValidationError
+
 
 T = TypeVar("T")
 
@@ -17,7 +18,7 @@ class Parameter(ABC):
         value: Any,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ):
         self.name = name
         self._value = value
@@ -61,19 +62,19 @@ class ParameterSet:
     """Container for a set of parameters."""
 
     def __init__(self):
-        self._parameters: Dict[str, Parameter] = {}
+        self._parameters: dict[str, Parameter] = {}
 
     def add_parameter(self, parameter: Parameter) -> None:
         """Add a parameter to the set."""
         self._parameters[parameter.name] = parameter
 
-    def get_parameter(self, name: str) -> Optional[Parameter]:
+    def get_parameter(self, name: str) -> Parameter | None:
         """Get a parameter by name."""
         return self._parameters.get(name)
 
     def validate_all(self) -> None:
         """Validate all parameters."""
-        errors: List[str] = []
+        errors: list[str] = []
         for param in self._parameters.values():
             try:
                 param.validate()
@@ -82,6 +83,6 @@ class ParameterSet:
         if errors:
             raise ValidationError("\n".join(errors))
 
-    def normalize_all(self) -> Dict[str, Any]:
+    def normalize_all(self) -> dict[str, Any]:
         """Normalize all parameters."""
         return {name: param.normalize() for name, param in self._parameters.items()}

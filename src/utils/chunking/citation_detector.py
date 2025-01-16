@@ -7,7 +7,6 @@ within and across chunks, supporting both explicit and implicit citations.
 from dataclasses import dataclass
 from enum import Enum
 import re
-from typing import Dict, List, Optional, Tuple
 from uuid import UUID
 
 from .references import ReferenceManager, ReferenceType
@@ -33,7 +32,7 @@ class Citation:
     text: str  # The cited text or reference
     start_pos: int  # Start position in chunk
     end_pos: int  # End position in chunk
-    metadata: Dict = None  # Additional citation metadata
+    metadata: dict = None  # Additional citation metadata
 
 
 class CitationDetector:
@@ -64,7 +63,7 @@ class CitationDetector:
             CitationType.URL: re.compile(r"https?://\S+|www\.\S+"),
         }
 
-    def detect_citations(self, chunk_id: UUID) -> List[Citation]:
+    def detect_citations(self, chunk_id: UUID) -> list[Citation]:
         """Detect all citations within a chunk.
 
         Args:
@@ -100,7 +99,7 @@ class CitationDetector:
 
         return citations
 
-    def create_citation_references(self, chunk_id: UUID) -> List[Tuple[UUID, ReferenceType, Dict]]:
+    def create_citation_references(self, chunk_id: UUID) -> list[tuple[UUID, ReferenceType, dict]]:
         """Create references for detected citations.
 
         Args:
@@ -136,7 +135,7 @@ class CitationDetector:
 
         return created_refs
 
-    def _find_citation_target(self, citation: Citation) -> Optional[UUID]:
+    def _find_citation_target(self, citation: Citation) -> UUID | None:
         """Find the target chunk for a citation.
 
         Args:
@@ -156,14 +155,14 @@ class CitationDetector:
         # For other types, we might need additional context or metadata
         return None
 
-    def _find_quote_target(self, quoted_text: str) -> Optional[UUID]:
+    def _find_quote_target(self, quoted_text: str) -> UUID | None:
         """Find a chunk containing the exact quoted text."""
         for chunk_id, chunk in self.ref_manager._chunks.items():
             if quoted_text in chunk.content:
                 return chunk_id
         return None
 
-    def _find_section_target(self, section_reference: str) -> Optional[UUID]:
+    def _find_section_target(self, section_reference: str) -> UUID | None:
         """Find a chunk based on section reference."""
         # This could be enhanced with more sophisticated section matching
         normalized_ref = section_reference.lower().strip()
@@ -172,7 +171,7 @@ class CitationDetector:
                 return chunk_id
         return None
 
-    def _find_url_target(self, url: str) -> Optional[UUID]:
+    def _find_url_target(self, url: str) -> UUID | None:
         """Find a chunk containing the URL reference."""
         for chunk_id, chunk in self.ref_manager._chunks.items():
             if url in chunk.content:

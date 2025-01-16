@@ -6,7 +6,7 @@ import re
 
 def update_imports(file_path):
     """Update imports in a file to use the new cross_reference module."""
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
 
     # Replace imports from old location to new location

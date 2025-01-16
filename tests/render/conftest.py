@@ -1,12 +1,14 @@
+from collections.abc import Generator
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Generator
+from typing import Any
 
 from dotenv import load_dotenv
 import pytest
 import requests
 import yaml
+
 
 # Load environment variables
 load_dotenv()
@@ -34,7 +36,7 @@ def project_root() -> Path:
 
 
 @pytest.fixture(scope="session")
-def render_config(project_root: Path) -> Dict[str, Any]:
+def render_config(project_root: Path) -> dict[str, Any]:
     """Load render.yaml configuration."""
     config_path = project_root / "render.yaml"
     if not config_path.exists():
@@ -44,7 +46,7 @@ def render_config(project_root: Path) -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="session")
-def render_headers(render_api_token: str) -> Dict[str, str]:
+def render_headers(render_api_token: str) -> dict[str, str]:
     """Create headers for Render API requests."""
     return {
         "Authorization": f"Bearer {render_api_token}",
@@ -54,8 +56,8 @@ def render_headers(render_api_token: str) -> Dict[str, str]:
 
 @pytest.fixture(scope="function")
 def render_service(
-    render_api_base: str, render_headers: Dict[str, str]
-) -> Generator[Dict[str, Any], None, None]:
+    render_api_base: str, render_headers: dict[str, str]
+) -> Generator[dict[str, Any], None, None]:
     """Create a test service on Render."""
     # Create service
     service_config = {
@@ -81,7 +83,7 @@ def render_service(
 
 @pytest.fixture(scope="function")
 def deployment_id(
-    render_api_base: str, render_headers: Dict[str, str], render_service: Dict[str, Any]
+    render_api_base: str, render_headers: dict[str, str], render_service: dict[str, Any]
 ) -> str:
     """Create a test deployment and return its ID."""
     response = requests.post(
@@ -93,12 +95,12 @@ def deployment_id(
 
 def wait_for_deployment(
     render_api_base: str,
-    render_headers: Dict[str, str],
+    render_headers: dict[str, str],
     service_id: str,
     deployment_id: str,
     timeout: int = 600,
     interval: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Wait for deployment to complete and return status."""
     import time
 
@@ -120,7 +122,7 @@ def wait_for_deployment(
 
 
 @pytest.fixture(scope="session")
-def performance_thresholds() -> Dict[str, Any]:
+def performance_thresholds() -> dict[str, Any]:
     """Define performance test thresholds."""
     return {
         "startup_time": 30,  # seconds
@@ -140,14 +142,14 @@ def test_data_dir(project_root: Path) -> Path:
     return data_dir
 
 
-def save_test_results(results: Dict[str, Any], test_data_dir: Path, test_name: str) -> None:
+def save_test_results(results: dict[str, Any], test_data_dir: Path, test_name: str) -> None:
     """Save test results to JSON file."""
     results_file = test_data_dir / f"{test_name}_results.json"
     with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
 
 
-def load_test_results(test_data_dir: Path, test_name: str) -> Dict[str, Any]:
+def load_test_results(test_data_dir: Path, test_name: str) -> dict[str, Any]:
     """Load test results from JSON file."""
     results_file = test_data_dir / f"{test_name}_results.json"
     if not results_file.exists():

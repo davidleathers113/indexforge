@@ -3,7 +3,7 @@
 import json
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from hypothesis import given, settings, strategies as st
 import pytest
@@ -73,7 +73,7 @@ def test_streaming_validation_with_size_limits(temp_log_file: str, cleanup_logge
 )
 @settings(max_examples=100)
 def test_streaming_with_data(
-    temp_log_file: str, cleanup_logger: Any, entries: List[Dict[str, Any]]
+    temp_log_file: str, cleanup_logger: Any, entries: list[dict[str, Any]]
 ) -> None:
     """Property-based test for streaming validation.
 
@@ -86,7 +86,7 @@ def test_streaming_with_data(
         for entry in entries:
             f.write(json.dumps(entry) + "\n")
     try:
-        with open(temp_log_file, "r", encoding="utf-8") as f:
+        with open(temp_log_file, encoding="utf-8") as f:
             standard_result = validate_log_file(
                 f.readlines(),
                 required_fields={"message", "thread_id"},
@@ -98,7 +98,7 @@ def test_streaming_with_data(
             field_types={"message": str, "thread_id": int},
         )
         assert len(standard_result) == len(streaming_result)
-        for std_entry, stream_entry in zip(standard_result, streaming_result):
+        for std_entry, stream_entry in zip(standard_result, streaming_result, strict=False):
             assert std_entry == stream_entry
     except Exception as e:
-        pytest.fail(f"Validation failed: {str(e)}")
+        pytest.fail(f"Validation failed: {e!s}")

@@ -5,7 +5,6 @@ This module provides functions for clustering document chunks into topics
 using k-means clustering on their embeddings.
 """
 
-from typing import Dict, List, Tuple
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -13,7 +12,7 @@ from sklearn.cluster import KMeans
 
 def perform_topic_clustering(
     embeddings: np.ndarray, n_topics: int, random_state: int = 42
-) -> Tuple[Dict[int, List[int]], KMeans]:
+) -> tuple[dict[int, list[int]], KMeans]:
     """
     Perform k-means clustering on embeddings to group them into topics.
 
@@ -50,7 +49,7 @@ def perform_topic_clustering(
     topics = kmeans.fit_predict(embeddings)
 
     # Group chunk indices by topic
-    topic_groups: Dict[int, List[int]] = {}
+    topic_groups: dict[int, list[int]] = {}
     for chunk_idx, topic_id in enumerate(topics):
         if topic_id not in topic_groups:
             topic_groups[topic_id] = []

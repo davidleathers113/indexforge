@@ -1,12 +1,13 @@
 """Factory for creating service instances."""
 
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from src.core.interfaces import CacheService, VectorService
 from src.core.settings import Settings
 from src.services.base import BaseService, ServiceInitializationError
 from src.services.redis import RedisService
 from src.services.weaviate import WeaviateClient
+
 
 T = TypeVar("T", bound=BaseService)
 
@@ -19,7 +20,7 @@ class ServiceFactory:
     """
 
     @classmethod
-    async def create_service(cls, settings: Settings, service_type: Type[T], **kwargs) -> T:
+    async def create_service(cls, settings: Settings, service_type: type[T], **kwargs) -> T:
         """Create and initialize a service instance.
 
         Args:
@@ -39,12 +40,12 @@ class ServiceFactory:
             return service
         except Exception as e:
             raise ServiceInitializationError(
-                f"Failed to initialize {service_type.__name__}: {str(e)}"
+                f"Failed to initialize {service_type.__name__}: {e!s}"
             )
 
     @classmethod
     async def create_cache_service(
-        cls, settings: Settings, service_type: Type[CacheService] = RedisService, **kwargs
+        cls, settings: Settings, service_type: type[CacheService] = RedisService, **kwargs
     ) -> CacheService:
         """Create a cache service instance.
 
@@ -60,7 +61,7 @@ class ServiceFactory:
 
     @classmethod
     async def create_vector_service(
-        cls, settings: Settings, service_type: Type[VectorService] = WeaviateClient, **kwargs
+        cls, settings: Settings, service_type: type[VectorService] = WeaviateClient, **kwargs
     ) -> VectorService:
         """Create a vector service instance.
 

@@ -16,7 +16,6 @@ Main Components:
 """
 
 # Standard library imports
-from typing import Dict, List, Optional
 
 # Local application imports
 from src.embeddings.embedding_generator import EmbeddingGenerator
@@ -35,6 +34,7 @@ from src.utils.pii_detector import PIIDetector
 from src.utils.summarizer.config.settings import SummarizerConfig
 from src.utils.summarizer.core.processor import DocumentSummarizer
 from src.utils.topic_clustering import TopicClusterer
+
 
 # Re-export for test mocking
 SummarizerProcessor = DocumentSummarizer
@@ -133,7 +133,7 @@ class DocumentProcessor(PipelineComponent):
 
         self.logger.debug("All document processor sub-components initialized successfully")
 
-    def _validate_document(self, doc: Dict) -> bool:
+    def _validate_document(self, doc: dict) -> bool:
         """Validate a document for processing.
 
         Args:
@@ -157,13 +157,13 @@ class DocumentProcessor(PipelineComponent):
 
     def process(
         self,
-        documents: List[Dict],
+        documents: list[dict],
         detect_pii: bool = True,
         deduplicate: bool = True,
-        summary_config: Optional[SummarizerConfig] = None,
-        cluster_config: Optional[ClusteringConfig] = None,
+        summary_config: SummarizerConfig | None = None,
+        cluster_config: ClusteringConfig | None = None,
         **kwargs,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Process documents through various transformation steps.
 
         This method orchestrates the document processing pipeline, applying each
@@ -281,7 +281,7 @@ class DocumentProcessor(PipelineComponent):
                             except KeyError as e:
                                 self.logger.error("Document missing required field: %s", str(e))
                                 raise EmbeddingError(
-                                    f"Document missing required field: {str(e)}"
+                                    f"Document missing required field: {e!s}"
                                 ) from e
 
                             # Generate embedding with retries

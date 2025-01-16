@@ -15,6 +15,7 @@ def error_tracker():
     """Create an error tracker for testing."""
     return ErrorTracker(max_recent_errors=10, error_window_seconds=60)
 
+
 def test_record_error(error_tracker):
     """Test recording individual errors."""
     error_tracker.record_error(ErrorCategory.REFERENCE_VALIDATION, 'ValidationError', 'Invalid reference format', {'ref_id': '123'})
@@ -24,12 +25,14 @@ def test_record_error(error_tracker):
     assert len(stats.recent_errors) == 1
     assert stats.recent_errors[0].error_type == 'ValidationError'
 
+
 def test_error_window(error_tracker):
     """Test error statistics respect time window."""
     error_tracker.error_events.append(error_tracker.ErrorEvent(category=ErrorCategory.CACHE_OPERATION, error_type='CacheError', message='Old error', timestamp=time.time() - 120))
     error_tracker.record_error(ErrorCategory.CACHE_OPERATION, 'CacheError', 'Recent error')
     stats = error_tracker.get_error_stats(window_seconds=60)
     assert stats.total_errors == 1
+
 
 def test_error_rates(error_tracker):
     """Test error rate calculation."""
@@ -40,6 +43,7 @@ def test_error_rates(error_tracker):
     stats = error_tracker.get_error_stats()
     assert stats.error_rates[ErrorCategory.CLASSIFICATION] == 20.0
 
+
 def test_error_trends(error_tracker):
     """Test error trend analysis."""
     current_time = time.time()
@@ -48,6 +52,7 @@ def test_error_trends(error_tracker):
     trends = error_tracker.get_error_trends(num_periods=3, period_seconds=300)
     assert sum(trends[ErrorCategory.METADATA_VALIDATION]) == 3
     assert trends[ErrorCategory.METADATA_VALIDATION] == [1, 1, 1]
+
 
 def test_frequent_errors(error_tracker):
     """Test frequent error analysis."""
@@ -59,6 +64,7 @@ def test_frequent_errors(error_tracker):
     assert frequent[0][0] == (ErrorCategory.REFERENCE_VALIDATION, 'ValidationError')
     assert frequent[0][1] == 3
 
+
 def test_error_summary(error_tracker):
     """Test error summary generation."""
     error_tracker.record_error(ErrorCategory.REFERENCE_VALIDATION, 'ValidationError', 'Test error 1')
@@ -69,12 +75,14 @@ def test_error_summary(error_tracker):
     assert 'REFERENCE_VALIDATION' in summary
     assert 'CACHE_OPERATION' in summary
 
+
 def test_max_recent_errors(error_tracker):
     """Test maximum recent errors limit."""
     for i in range(15):
         error_tracker.record_error(ErrorCategory.BATCH_OPERATION, 'BatchError', f'Error {i}')
     assert len(error_tracker.error_events) == 10
     assert error_tracker.error_events[-1].message == 'Error 14'
+
 
 def test_error_tracking_decorator(error_tracker):
     """Test error tracking decorator."""
@@ -95,6 +103,7 @@ def test_error_tracking_decorator(error_tracker):
     assert error_tracker.operation_counts[ErrorCategory.CLASSIFICATION] == 2
     assert stats.total_errors == 1
     assert stats.error_counts[ErrorCategory.CLASSIFICATION] == 1
+
 
 def test_clear_error_tracker(error_tracker):
     """Test clearing error tracking data."""

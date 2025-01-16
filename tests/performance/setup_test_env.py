@@ -1,7 +1,6 @@
 """Script to set up test environment for Weaviate performance testing."""
 
 import time
-from typing import List
 
 import docker
 from loguru import logger
@@ -65,7 +64,7 @@ def setup_network() -> str:
     return network.id
 
 
-def cleanup_environment(container_ids: List[str], network_id: str):
+def cleanup_environment(container_ids: list[str], network_id: str):
     """Clean up test environment.
 
     Args:

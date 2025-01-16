@@ -1,6 +1,6 @@
 """Test container process management."""
 
-from typing import Any, Dict
+from typing import Any
 
 import docker
 
@@ -8,7 +8,7 @@ from ..config.test_config import REQUIRED_PROCESSES, SECURITY_REQUIREMENTS
 from ..utils.docker_test_utils import DockerTestUtils
 
 
-def test_process_hierarchy(running_container: Dict[str, Any]) -> None:
+def test_process_hierarchy(running_container: dict[str, Any]) -> None:
     """Test that process hierarchy is correctly established."""
     result = running_container.exec_run("ps -ef --forest")
     assert result.exit_code == 0, "Failed to check process hierarchy"
@@ -26,7 +26,7 @@ def test_process_hierarchy(running_container: Dict[str, Any]) -> None:
     ), "Python process is not a child of tini"
 
 
-def test_required_processes(running_container: Dict[str, Any]) -> None:
+def test_required_processes(running_container: dict[str, Any]) -> None:
     """Test that all required processes are running."""
     container_type = running_container.labels.get("container.type", "base")
     required = REQUIRED_PROCESSES[container_type]
@@ -36,7 +36,7 @@ def test_required_processes(running_container: Dict[str, Any]) -> None:
     ), f"Not all required processes for {container_type} are running"
 
 
-def test_process_user(running_container: Dict[str, Any]) -> None:
+def test_process_user(running_container: dict[str, Any]) -> None:
     """Test that processes run as the correct user."""
     result = running_container.exec_run("ps -eo uid,cmd")
     assert result.exit_code == 0, "Failed to check process users"
@@ -57,7 +57,7 @@ def test_process_user(running_container: Dict[str, Any]) -> None:
             assert uid != 0, f"Process '{cmd}' running as root"
 
 
-def test_process_isolation(running_container: Dict[str, Any]) -> None:
+def test_process_isolation(running_container: dict[str, Any]) -> None:
     """Test process isolation and namespace separation."""
     # Check process namespace isolation
     result = running_container.exec_run("readlink /proc/1/ns/pid")

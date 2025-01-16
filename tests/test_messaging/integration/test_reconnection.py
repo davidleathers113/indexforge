@@ -1,7 +1,6 @@
 """Integration tests for RabbitMQ reconnection scenarios."""
 
 import asyncio
-from typing import Dict
 
 from docker.models.containers import Container
 import pytest
@@ -13,7 +12,7 @@ from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionMana
 async def test_reconnection_after_broker_restart(
     integration_connection_manager: RabbitMQConnectionManager,
     rabbitmq_container: Container,
-    integration_settings: Dict,
+    integration_settings: dict,
 ):
     """Test reconnection after broker restart.
 

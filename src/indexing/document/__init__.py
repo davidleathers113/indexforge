@@ -44,4 +44,5 @@ from .batch_manager import BatchManager
 from .document_processor import DocumentProcessor
 from .document_storage import DocumentStorage
 
-__all__ = ["DocumentStorage", "DocumentProcessor", "BatchManager"]
+
+__all__ = ["BatchManager", "DocumentProcessor", "DocumentStorage"]

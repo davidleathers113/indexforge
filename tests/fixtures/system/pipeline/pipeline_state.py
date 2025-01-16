@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import pytest
 
@@ -15,12 +14,12 @@ from .logger import logger
 class PipelineState(BaseState):
     """Pipeline state management."""
 
-    export_dir: Optional[Path] = None
+    export_dir: Path | None = None
     index_url: str = "http://localhost:8080"
-    log_dir: Optional[Path] = None
+    log_dir: Path | None = None
     batch_size: int = 100
     error_mode: bool = False
-    processed_docs: List[Dict] = field(default_factory=list)
+    processed_docs: list[dict] = field(default_factory=list)
 
     def reset(self):
         """Reset state to defaults."""
@@ -29,7 +28,7 @@ class PipelineState(BaseState):
         self.error_mode = False
         self._errors = []  # Initialize errors list
 
-    def add_processed_doc(self, doc: Dict):
+    def add_processed_doc(self, doc: dict):
         """Add a processed document."""
         logger.debug(f"Adding processed doc: {doc}")
         self.processed_docs.append(doc)
@@ -39,7 +38,7 @@ class PipelineState(BaseState):
         """Add an error message."""
         self._errors.append(error)
 
-    def get_errors(self) -> List[str]:
+    def get_errors(self) -> list[str]:
         """Get list of errors."""
         return self._errors
 

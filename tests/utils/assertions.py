@@ -1,16 +1,17 @@
 """Common test assertions."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 
 __all__ = [
-    "assert_dict_subset",
     "assert_called_with_subset",
+    "assert_dict_subset",
     "assert_logs_contain",
     "assert_redis_operations",
 ]
 
 
-def assert_dict_subset(subset: Dict[str, Any], full_dict: Dict[str, Any]) -> None:
+def assert_dict_subset(subset: dict[str, Any], full_dict: dict[str, Any]) -> None:
     """Assert that all key-value pairs in subset exist in full_dict."""
     for key, value in subset.items():
         assert key in full_dict, f"Key {key} not found in dict"
@@ -24,7 +25,7 @@ def assert_called_with_subset(mock: Any, **expected_kwargs: Any) -> None:
     assert_dict_subset(expected_kwargs, kwargs)
 
 
-def assert_logs_contain(caplog: Any, message: str, level: Optional[str] = None) -> None:
+def assert_logs_contain(caplog: Any, message: str, level: str | None = None) -> None:
     """Assert that logs contain a specific message at an optional level."""
     for record in caplog.records:
         if message in record.message:
@@ -37,9 +38,9 @@ def assert_logs_contain(caplog: Any, message: str, level: Optional[str] = None) 
 
 def assert_redis_operations(
     mock_redis: Any,
-    expected_gets: Optional[List[str]] = None,
-    expected_sets: Optional[List[tuple[str, Any, int]]] = None,
-    expected_deletes: Optional[List[str]] = None,
+    expected_gets: list[str] | None = None,
+    expected_sets: list[tuple[str, Any, int]] | None = None,
+    expected_deletes: list[str] | None = None,
 ) -> None:
     """Assert Redis operations were called with expected arguments."""
     if expected_gets:

@@ -7,7 +7,7 @@ This module is responsible for:
 """
 
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any
 
 from jinja2 import Environment
 
@@ -30,7 +30,7 @@ class TemplateFacade:
         self._environment_service = EnvironmentService(self._settings)
         self._context_service = ContextService()
 
-    def create_environment(self, templates_dir: Union[str, Path]) -> Environment:
+    def create_environment(self, templates_dir: str | Path) -> Environment:
         """Creates a template environment.
 
         Args:
@@ -41,7 +41,7 @@ class TemplateFacade:
         """
         return self._environment_service.create_environment(templates_dir)
 
-    def get_template_context(self, template_type: str, **kwargs) -> Dict[str, Any]:
+    def get_template_context(self, template_type: str, **kwargs) -> dict[str, Any]:
         """Gets context for template rendering.
 
         Args:

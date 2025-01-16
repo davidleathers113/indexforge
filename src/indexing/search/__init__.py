@@ -48,4 +48,5 @@ Note:
 from .search_executor import SearchExecutor
 from .search_result import SearchResult
 
+
 __all__ = ["SearchExecutor", "SearchResult"]

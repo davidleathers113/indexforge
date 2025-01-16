@@ -56,15 +56,17 @@ Note:
     - Provides detailed error tracking
 """
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 import logging
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any
 
 from transformers import pipeline
 
 from ..caching.decorators import with_cache
 from ..config.settings import CacheConfig, SummarizerConfig
 from ..pipeline.summarizer import SummarizationPipeline
+
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +76,9 @@ class DocumentSummarizer:
 
     def __init__(
         self,
-        summarizer_config: Optional[SummarizerConfig] = None,
-        cache_config: Optional[CacheConfig] = None,
-        cache_manager: Optional[Any] = None,
+        summarizer_config: SummarizerConfig | None = None,
+        cache_config: CacheConfig | None = None,
+        cache_manager: Any | None = None,
     ) -> None:
         """Initialize the document processor.
 
@@ -138,8 +140,8 @@ class DocumentSummarizer:
                 self._summarizer = None
 
     def process_documents(
-        self, documents: List[Dict], summary_config: Optional[SummarizerConfig] = None
-    ) -> List[Dict]:
+        self, documents: list[dict], summary_config: SummarizerConfig | None = None
+    ) -> list[dict]:
         """Process a batch of documents.
 
         Args:
@@ -191,7 +193,7 @@ class DocumentSummarizer:
                 processed_docs.append(doc)
 
             except Exception as e:
-                logger.error(f"Error processing document: {str(e)}")
+                logger.error(f"Error processing document: {e!s}")
                 doc["summary"] = doc["content"]["body"]
                 doc["summary_status"] = "error"
                 doc["summary_error"] = str(e)
@@ -201,8 +203,8 @@ class DocumentSummarizer:
 
     def _process_single_document(
         self,
-        document: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        document: dict[str, Any],
+    ) -> dict[str, Any]:
         """Process a single document.
 
         Args:
@@ -218,8 +220,8 @@ class DocumentSummarizer:
     @with_cache(key_prefix="doc_sum")
     def _process_single_document_with_cache(
         self,
-        document: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        document: dict[str, Any],
+    ) -> dict[str, Any]:
         """Process a single document with caching.
 
         Args:
@@ -232,8 +234,8 @@ class DocumentSummarizer:
 
     def _process_single_document_without_cache(
         self,
-        document: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        document: dict[str, Any],
+    ) -> dict[str, Any]:
         """Process a single document without caching.
 
         Args:

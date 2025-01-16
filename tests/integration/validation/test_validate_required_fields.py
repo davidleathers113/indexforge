@@ -23,6 +23,7 @@ def test_content_body_required(valid_document):
     with pytest.raises(ValueError, match='content_body.*empty'):
         SchemaValidator.validate_object(doc)
 
+
 def test_timestamp_utc_required(valid_document):
     """Test that timestamp_utc is required and must be in valid ISO format."""
     doc = deepcopy(valid_document)
@@ -32,6 +33,7 @@ def test_timestamp_utc_required(valid_document):
     doc['timestamp_utc'] = '2024-01-20'
     with pytest.raises(ValueError, match='timestamp_utc.*ISO'):
         SchemaValidator.validate_object(doc)
+
 
 def test_schema_version_required(valid_document):
     """Test that schema_version is required and must be a positive integer."""
@@ -45,6 +47,7 @@ def test_schema_version_required(valid_document):
     doc['schema_version'] = -1
     with pytest.raises(ValueError, match='schema_version.*positive'):
         SchemaValidator.validate_object(doc)
+
 
 def test_embedding_required(valid_document):
     """Test that embedding is required and must be a list of correct dimension."""

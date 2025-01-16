@@ -8,6 +8,7 @@ import pytest
 from src.api.repositories.weaviate.exceptions import VectorEncodingError
 from src.api.repositories.weaviate.operations.index import IndexOperation
 
+
 # Test data constants
 TEST_DOCUMENT = {
     "id": "1",

@@ -61,7 +61,6 @@ Note:
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -138,4 +137,4 @@ class LoggingConfig:
 
     level: str = "INFO"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    file_path: Optional[str] = None
+    file_path: str | None = None

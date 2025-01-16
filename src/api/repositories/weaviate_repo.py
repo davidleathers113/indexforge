@@ -3,7 +3,6 @@
 import json
 import logging
 import time
-from typing import Dict, List, Optional, Tuple
 
 import weaviate.classes as wvc
 from weaviate.classes.query import Filter
@@ -13,6 +12,7 @@ from weaviate.util import generate_uuid5
 from src.api.errors.weaviate_error_handling import with_weaviate_error_handling
 from src.api.models.requests import DocumentFilter, SearchQuery
 from src.api.models.responses import SearchResponse, SearchResult
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +34,10 @@ class WeaviateRepository:
     async def search(
         self,
         query: SearchQuery,
-        cursor: Optional[str] = None,
-        vector: Optional[List[float]] = None,
-        bm25_config: Optional[Dict[str, float]] = None,
-    ) -> Tuple[SearchResponse, Optional[str]]:
+        cursor: str | None = None,
+        vector: list[float] | None = None,
+        bm25_config: dict[str, float] | None = None,
+    ) -> tuple[SearchResponse, str | None]:
         """Perform semantic search with advanced features.
 
         Args:
@@ -135,7 +135,7 @@ class WeaviateRepository:
             )
 
         except Exception as e:
-            logger.error(f"Search failed: {str(e)}")
+            logger.error(f"Search failed: {e!s}")
             raise
 
     @with_weaviate_error_handling
@@ -143,10 +143,10 @@ class WeaviateRepository:
         self,
         filter_params: DocumentFilter,
         limit: int = 10,
-        cursor: Optional[str] = None,
-        sort_by: Optional[str] = None,
+        cursor: str | None = None,
+        sort_by: str | None = None,
         sort_order: str = "desc",
-    ) -> Tuple[SearchResponse, Optional[str]]:
+    ) -> tuple[SearchResponse, str | None]:
         """Filter documents with advanced options.
 
         Args:
@@ -232,12 +232,12 @@ class WeaviateRepository:
             )
 
         except Exception as e:
-            logger.error(f"Filter failed: {str(e)}")
+            logger.error(f"Filter failed: {e!s}")
             raise
 
     # New document operations
     @with_weaviate_error_handling
-    async def index_single_document(self, document: Dict) -> str:
+    async def index_single_document(self, document: dict) -> str:
         """Index a single document.
 
         Args:
@@ -260,8 +260,8 @@ class WeaviateRepository:
 
     @with_weaviate_error_handling
     async def list_documents(
-        self, file_type: Optional[str] = None, limit: int = 10, offset: int = 0
-    ) -> List[Dict]:
+        self, file_type: str | None = None, limit: int = 10, offset: int = 0
+    ) -> list[dict]:
         """List indexed documents with optional filtering.
 
         Args:
@@ -294,7 +294,7 @@ class WeaviateRepository:
         return documents
 
     @with_weaviate_error_handling
-    async def get_document(self, document_id: str) -> Optional[Dict]:
+    async def get_document(self, document_id: str) -> dict | None:
         """Get a specific document by ID.
 
         Args:

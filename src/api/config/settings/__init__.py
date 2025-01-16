@@ -21,7 +21,7 @@ class BaseAppSettings(BaseSettings):
         """Check if running in test environment."""
         return os.getenv("ENVIRONMENT", "").lower() in ("test", "testing")
 
-    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
         """Override dict to include nested settings."""
         base_dict = super().dict(*args, **kwargs)
         for key, value in base_dict.items():

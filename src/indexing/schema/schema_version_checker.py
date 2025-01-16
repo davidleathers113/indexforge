@@ -33,5 +33,5 @@ class SchemaVersionChecker:
             self.logger.warning("Schema version property not found")
             return False
         except Exception as e:
-            self.logger.error(f"Error checking schema version: {str(e)}", exc_info=True)
+            self.logger.error(f"Error checking schema version: {e!s}", exc_info=True)
             raise

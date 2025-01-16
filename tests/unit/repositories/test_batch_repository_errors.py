@@ -10,6 +10,7 @@ from src.api.repositories.weaviate.exceptions import (
 )
 from src.api.repositories.weaviate.repository import BatchRepository
 
+
 # Test data constants
 TEST_CONFIG = {
     "url": "http://localhost:8080",

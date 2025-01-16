@@ -1,7 +1,6 @@
 """Weaviate cache factory."""
 
 from functools import lru_cache
-from typing import Optional
 
 import aioredis
 
@@ -63,7 +62,7 @@ def create_cache_provider(provider_type: str = "memory") -> CacheProvider:
 def create_cache_strategy(
     strategy_type: str = "simple",
     provider_type: str = "memory",
-    namespace: Optional[str] = None,
+    namespace: str | None = None,
 ) -> CacheStrategy:
     """Create cache strategy instance.
 

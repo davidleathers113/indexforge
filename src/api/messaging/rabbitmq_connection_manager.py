@@ -10,10 +10,10 @@ This module provides a robust connection manager for RabbitMQ with features incl
 """
 
 import asyncio
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 import logging
 import time
-from typing import AsyncGenerator, Dict, Optional
 from uuid import uuid4
 
 import aio_pika
@@ -24,6 +24,7 @@ from opentelemetry.trace import Status, StatusCode
 
 from src.api.messaging.rabbitmq_config import rabbitmq_settings
 from src.api.monitoring.metrics import record_error
+
 
 # Configure module logger
 logger = logging.getLogger(__name__)
@@ -47,12 +48,12 @@ class RabbitMQConnectionManager:
 
     def __init__(self) -> None:
         """Initialize the connection manager."""
-        self._connection_pool: Optional[Pool[AbstractConnection]] = None
-        self._channel_pools: Dict[str, Pool[AbstractChannel]] = {}
-        self._health_check_task: Optional[asyncio.Task] = None
+        self._connection_pool: Pool[AbstractConnection] | None = None
+        self._channel_pools: dict[str, Pool[AbstractChannel]] = {}
+        self._health_check_task: asyncio.Task | None = None
         self._closing = False
         self._connection_attempts = 0
-        self._last_connection_error: Optional[Exception] = None
+        self._last_connection_error: Exception | None = None
         logger.info("Initialized RabbitMQ connection manager")
 
     async def _create_connection(self) -> AbstractConnection:

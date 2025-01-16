@@ -30,14 +30,14 @@ Example:
 
 import logging
 from pathlib import Path
-from typing import Dict
 
 import psutil
+
 
 logger = logging.getLogger(__name__)
 
 
-def get_storage_usage(storage_path: Path) -> Dict[str, float]:
+def get_storage_usage(storage_path: Path) -> dict[str, float]:
     """
     Get storage usage information for the lineage data directory.
 

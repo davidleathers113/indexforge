@@ -9,6 +9,7 @@ def pii_detector():
     """Create a PIIDetector instance."""
     return PIIDetector(spacy_model='en_core_web_sm')
 
+
 def test_basic_redaction(pii_detector):
     """Test basic PII redaction."""
     text = 'Contact john.doe@email.com or call +1-555-123-4567'
@@ -18,6 +19,7 @@ def test_basic_redaction(pii_detector):
     assert 'john.doe@email.com' not in redacted
     assert '+1-555-123-4567' not in redacted
 
+
 def test_custom_redaction_patterns(pii_detector):
     """Test redaction with custom patterns."""
     text = 'Email: test@example.com'
@@ -25,6 +27,7 @@ def test_custom_redaction_patterns(pii_detector):
     redacted = pii_detector.redact(text, custom_redaction=custom_patterns)
     assert '<<EMAIL REMOVED>>' in redacted
     assert '[EMAIL]' not in redacted
+
 
 def test_redaction_with_provided_matches(pii_detector):
     """Test redaction using pre-computed matches."""

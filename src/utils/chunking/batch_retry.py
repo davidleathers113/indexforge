@@ -4,14 +4,16 @@ This module provides tools for retrying failed batch operations with configurabl
 retry policies, exponential backoff, and detailed retry metrics.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 import logging
 import random
 import time
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from .progress_tracking import OperationType, ProgressTracker
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +37,8 @@ class RetryConfig:
     max_delay: float = 60.0  # Maximum delay between retries
     strategy: RetryStrategy = RetryStrategy.EXPONENTIAL
     jitter: float = 0.1  # Random jitter factor (0-1)
-    timeout: Optional[float] = None  # Overall timeout for all retries
-    failure_callback: Optional[Callable[[Any, Exception], None]] = (
+    timeout: float | None = None  # Overall timeout for all retries
+    failure_callback: Callable[[Any, Exception], None] | None = (
         None  # Callback for persistent failures
     )
 
@@ -49,9 +51,9 @@ class RetryMetrics:
     successful_retries: int = 0
     failed_retries: int = 0
     total_retry_time: float = 0.0
-    retry_delays: List[float] = field(default_factory=list)
-    retry_timestamps: List[float] = field(default_factory=list)
-    error_types: Dict[str, int] = field(default_factory=lambda: {})
+    retry_delays: list[float] = field(default_factory=list)
+    retry_timestamps: list[float] = field(default_factory=list)
+    error_types: dict[str, int] = field(default_factory=lambda: {})
 
 
 @dataclass
@@ -60,7 +62,7 @@ class BatchItem:
 
     data: Any
     attempt: int = 0
-    last_error: Optional[Exception] = None
+    last_error: Exception | None = None
     next_retry_time: float = 0.0
 
 
@@ -71,7 +73,7 @@ class BatchRetryManager:
         self,
         operation_type: OperationType,
         config: RetryConfig,
-        progress_tracker: Optional[ProgressTracker] = None,
+        progress_tracker: ProgressTracker | None = None,
     ):
         """Initialize batch retry manager.
 
@@ -85,7 +87,7 @@ class BatchRetryManager:
         self.progress_tracker = progress_tracker
         self.metrics = RetryMetrics()
         self._start_time = time.time()
-        self._fib_cache: Dict[int, int] = {0: 0, 1: 1}  # Cache for Fibonacci numbers
+        self._fib_cache: dict[int, int] = {0: 0, 1: 1}  # Cache for Fibonacci numbers
 
     def _fibonacci(self, n: int) -> int:
         """Calculate nth Fibonacci number using dynamic programming.
@@ -194,10 +196,10 @@ class BatchRetryManager:
 
     def process_batch(
         self,
-        items: List[Any],
+        items: list[Any],
         operation: Callable[[Any], T],
-        should_retry_error: Optional[Callable[[Exception], bool]] = None,
-    ) -> List[T]:
+        should_retry_error: Callable[[Exception], bool] | None = None,
+    ) -> list[T]:
         """Process a batch of items with retry logic.
 
         Args:
@@ -216,7 +218,7 @@ class BatchRetryManager:
         )
 
         batch_items = [BatchItem(data=item) for item in items]
-        results: List[Optional[T]] = [None] * len(items)
+        results: list[T | None] = [None] * len(items)
         pending_items = list(range(len(items)))
 
         while pending_items and (
@@ -335,7 +337,7 @@ class BatchRetryManager:
 
         return [r for r in results if r is not None]
 
-    def get_metrics_summary(self) -> Dict:
+    def get_metrics_summary(self) -> dict:
         """Get summary of retry metrics.
 
         Returns:

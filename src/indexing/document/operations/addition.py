@@ -6,7 +6,6 @@ the complete lifecycle of document addition from validation to storage.
 """
 
 import logging
-from typing import Dict, List, Optional, Set
 import uuid
 
 import weaviate
@@ -41,7 +40,7 @@ class DocumentAddition:
         batch_size: int,
         batch_manager: BatchManager,
         processor: DocumentProcessor,
-        cache_manager: Optional[CacheManager] = None,
+        cache_manager: CacheManager | None = None,
         test_mode: bool = False,
     ):
         """Initialize the document addition handler.
@@ -81,7 +80,7 @@ class DocumentAddition:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
 
-    def add_documents(self, documents: List[Dict], deduplicate: bool = True) -> List[str]:
+    def add_documents(self, documents: list[dict], deduplicate: bool = True) -> list[str]:
         """Add multiple documents to the storage system.
 
         Processes and adds a batch of documents to storage, with optional
@@ -141,10 +140,10 @@ class DocumentAddition:
 
             return doc_ids
         except Exception as e:
-            self.logger.error(f"Error adding documents: {str(e)}", exc_info=True)
+            self.logger.error(f"Error adding documents: {e!s}", exc_info=True)
             raise
 
-    def _add_documents_impl(self, documents: List[Dict], deduplicate: bool) -> List[str]:
+    def _add_documents_impl(self, documents: list[dict], deduplicate: bool) -> list[str]:
         """Internal implementation of document addition process.
 
         Handles the core logic of adding documents, including validation,
@@ -166,7 +165,7 @@ class DocumentAddition:
         """
         try:
             doc_ids = []
-            seen_hashes: Set[str] = set()
+            seen_hashes: set[str] = set()
 
             for doc in documents:
                 self.logger.debug(
@@ -193,7 +192,7 @@ class DocumentAddition:
                     doc_id = str(uuid.UUID(doc_id))
                 except ValueError as ve:
                     self.logger.error(f"Invalid UUID format: {doc_id}")
-                    self.logger.debug(f"UUID validation error: {str(ve)}")
+                    self.logger.debug(f"UUID validation error: {ve!s}")
                     continue
 
                 # Check for duplicates if deduplication is enabled
@@ -217,16 +216,16 @@ class DocumentAddition:
                     self.logger.debug(f"Successfully processed document {doc_id}")
                 except Exception as e:
                     self.logger.error(
-                        f"Error processing document {doc_id}: {str(e)}", exc_info=True
+                        f"Error processing document {doc_id}: {e!s}", exc_info=True
                     )
                     continue
 
             return doc_ids
         except Exception as e:
-            self.logger.error(f"Error in document addition: {str(e)}", exc_info=True)
+            self.logger.error(f"Error in document addition: {e!s}", exc_info=True)
             raise
 
-    def _process_batch(self, batch: List[tuple[Dict, List[float], str]]) -> None:
+    def _process_batch(self, batch: list[tuple[dict, list[float], str]]) -> None:
         """Process a batch of prepared documents.
 
         Adds a batch of prepared documents to storage and updates the cache
@@ -255,5 +254,5 @@ class DocumentAddition:
 
             self.logger.info(f"Successfully processed batch of {len(batch)} documents")
         except Exception as e:
-            self.logger.error(f"Error processing batch: {str(e)}")
+            self.logger.error(f"Error processing batch: {e!s}")
             raise

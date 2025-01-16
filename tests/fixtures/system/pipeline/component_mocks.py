@@ -169,7 +169,7 @@ def pipeline_with_mocks(pipeline_state, request):
     }
 
     with patch.multiple(
-        "src.pipeline.core", **{cls: DEFAULT for cls in component_classes}
+        "src.pipeline.core", **dict.fromkeys(component_classes, DEFAULT)
     ) as mocks:
         # Configure component mocks
         for name, mock in mocks.items():

@@ -45,4 +45,5 @@ Note:
 
 from .summarizer import SummarizationPipeline
 
+
 __all__ = ["SummarizationPipeline"]

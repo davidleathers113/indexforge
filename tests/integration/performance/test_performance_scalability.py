@@ -5,14 +5,14 @@ of schema operations under various load conditions.
 """
 from copy import deepcopy
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
 from src.indexing.schema import SchemaDefinition, SchemaValidator
 
 
-def generate_large_document_set(count: int) -> List[Dict[str, Any]]:
+def generate_large_document_set(count: int) -> list[dict[str, Any]]:
     """Generate a large set of test documents."""
     base_doc = {'schema_version': 1, 'timestamp_utc': '2024-01-20T12:00:00Z', 'parent_id': None, 'chunk_ids': []}
     docs = []
@@ -22,6 +22,7 @@ def generate_large_document_set(count: int) -> List[Dict[str, Any]]:
         doc['embedding'] = [0.1] * 384
         docs.append(doc)
     return docs
+
 
 @pytest.mark.performance
 def test_batch_validation_performance():
@@ -38,6 +39,7 @@ def test_batch_validation_performance():
         if size > 100:
             expected_time = times[100] * (size / 100)
             assert times[size] < expected_time * 1.5
+
 
 @pytest.mark.performance
 def test_vector_cache_performance(base_schema):
@@ -56,6 +58,7 @@ def test_vector_cache_performance(base_schema):
         if cache_size > 100:
             assert times[cache_size] <= times[100]
 
+
 @pytest.mark.performance
 def test_index_construction_performance():
     """Test performance of index construction with different parameters."""
@@ -70,6 +73,7 @@ def test_index_construction_performance():
         times[ef] = end_time - start_time
         if ef > 64:
             assert times[ef] > times[64]
+
 
 @pytest.mark.performance
 def test_memory_usage_under_load():
@@ -86,6 +90,7 @@ def test_memory_usage_under_load():
     memory_increase = final_memory - initial_memory
     assert memory_increase < 10 * 1024 * 1024
 
+
 @pytest.mark.performance
 def test_concurrent_query_performance(base_schema):
     """Test performance with concurrent search queries."""
@@ -93,7 +98,7 @@ def test_concurrent_query_performance(base_schema):
     docs = generate_large_document_set(1000)
     queries = ['test query 1', 'test query 2', 'test query 3', 'test query 4']
 
-    def search_query(query: str) -> List[Dict[str, Any]]:
+    def search_query(query: str) -> list[dict[str, Any]]:
         return base_schema.search(query=query, documents=docs, hybrid_alpha=0.5)
     start_time = time.time()
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
@@ -107,5 +112,5 @@ def test_concurrent_query_performance(base_schema):
     end_time = time.time()
     total_time = end_time - start_time
     assert len(results) == len(queries)
-    sequential_time = sum((len(base_schema.search(q, docs, 0.5)) for q in queries))
+    sequential_time = sum(len(base_schema.search(q, docs, 0.5)) for q in queries)
     assert total_time < sequential_time

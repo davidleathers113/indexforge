@@ -2,13 +2,13 @@
 
 from dataclasses import dataclass
 import logging
-from typing import Optional
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class KMeansState(BaseState):
     random_state: int = 42
     max_iter: int = 100
     error_mode: bool = False
-    labels: Optional[np.ndarray] = None
+    labels: np.ndarray | None = None
 
     def reset(self):
         """Reset state to defaults."""

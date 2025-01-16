@@ -7,7 +7,7 @@ including file type validation, content extraction, and metadata collection.
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class BaseProcessor(ABC):
@@ -22,7 +22,7 @@ class BaseProcessor(ABC):
         config (Dict[str, Any]): Configuration dictionary for the processor.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the document processor.
 
         Sets up the processor with optional configuration parameters that can
@@ -64,7 +64,7 @@ class BaseProcessor(ABC):
         pass
 
     @abstractmethod
-    def process(self, file_path: Path) -> Dict[str, Any]:
+    def process(self, file_path: Path) -> dict[str, Any]:
         """Process a file and extract its content and metadata.
 
         Processes the file at the given path, extracting text content,
@@ -95,7 +95,7 @@ class BaseProcessor(ABC):
         """
         pass
 
-    def _get_file_metadata(self, file_path: Path) -> Dict[str, Any]:
+    def _get_file_metadata(self, file_path: Path) -> dict[str, Any]:
         """Extract basic file metadata.
 
         Collects standard file system metadata for the given file, including

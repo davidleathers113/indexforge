@@ -4,7 +4,6 @@ This module configures various Sentry integrations for monitoring and logging.
 """
 
 import logging
-from typing import List
 
 from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
 from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -15,7 +14,7 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from src.api.config.sentry.utils import get_transaction_name
 
 
-def get_sentry_integrations() -> List:
+def get_sentry_integrations() -> list:
     """Get configured Sentry integrations."""
     # Initialize logging integration
     logging_integration = LoggingIntegration(

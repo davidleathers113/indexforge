@@ -1,7 +1,7 @@
+from collections.abc import Generator
 import os
 from pathlib import Path
 import subprocess
-from typing import Dict, Generator
 
 import docker
 import pytest
@@ -32,7 +32,7 @@ def dockerfile(project_root: Path) -> Path:
 
 
 @pytest.fixture(scope="function")
-def test_environment() -> Generator[Dict[str, str], None, None]:
+def test_environment() -> Generator[dict[str, str], None, None]:
     """Provide test environment variables."""
     original_env = dict(os.environ)
     test_env = {

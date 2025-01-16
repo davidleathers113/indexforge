@@ -2,7 +2,6 @@
 
 import hmac
 import secrets
-from typing import Optional
 
 from fastapi import Cookie, HTTPException, Request, Response, status
 from fastapi.security import HTTPBearer
@@ -76,8 +75,8 @@ class CSRFBearer(HTTPBearer):
     async def __call__(
         self,
         request: Request,
-        csrf_token: Optional[str] = Cookie(None, alias="csrf_token"),
-    ) -> Optional[str]:
+        csrf_token: str | None = Cookie(None, alias="csrf_token"),
+    ) -> str | None:
         """Validate the CSRF token.
 
         Args:

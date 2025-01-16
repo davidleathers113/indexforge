@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 
@@ -12,12 +12,12 @@ class RenderTestUtils:
     @staticmethod
     def wait_for_deployment(
         api_base: str,
-        headers: Dict[str, str],
+        headers: dict[str, str],
         service_id: str,
         deployment_id: str,
         timeout: int = 300,
         check_interval: float = 5.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Wait for deployment to complete and return status."""
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -38,8 +38,8 @@ class RenderTestUtils:
     def save_build_logs(
         test_data_dir: Path,
         deployment_id: str,
-        logs: List[str],
-        metadata: Optional[Dict[str, Any]] = None,
+        logs: list[str],
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Save build logs and metadata to file."""
         log_file = test_data_dir / f"build_logs_{deployment_id}.json"
@@ -55,7 +55,7 @@ class RenderTestUtils:
             json.dump(data, f, indent=2)
 
     @staticmethod
-    def check_build_steps(logs: List[str], required_steps: List[str]) -> Dict[str, bool]:
+    def check_build_steps(logs: list[str], required_steps: list[str]) -> dict[str, bool]:
         """Check build steps completion status."""
         return {
             step: any(step in log and "error" not in log.lower() for log in logs)
@@ -65,10 +65,10 @@ class RenderTestUtils:
     @staticmethod
     def get_deployment_metrics(
         api_base: str,
-        headers: Dict[str, str],
+        headers: dict[str, str],
         service_id: str,
         deployment_id: str,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Get deployment metrics."""
         response = requests.get(
             f"{api_base}/services/{service_id}/deploys/{deployment_id}/metrics",
@@ -79,9 +79,9 @@ class RenderTestUtils:
 
     @staticmethod
     def validate_environment_config(
-        service_config: Dict[str, Any],
-        required_vars: List[str],
-    ) -> Dict[str, bool]:
+        service_config: dict[str, Any],
+        required_vars: list[str],
+    ) -> dict[str, bool]:
         """Validate environment configuration."""
         env_vars = {env["key"]: env["value"] for env in service_config.get("envVars", [])}
         return {var: var in env_vars for var in required_vars}
@@ -89,9 +89,9 @@ class RenderTestUtils:
     @staticmethod
     def analyze_build_performance(
         build_duration: float,
-        metrics: Dict[str, Any],
-        thresholds: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        metrics: dict[str, Any],
+        thresholds: dict[str, Any],
+    ) -> dict[str, Any]:
         """Analyze build performance against thresholds."""
         return {
             "duration_within_limit": build_duration <= thresholds["startup_time"],

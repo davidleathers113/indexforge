@@ -19,8 +19,8 @@ The core functionality is tested separately in:
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from run_pipeline import main, parse_steps
+
 from src.pipeline import PipelineStep
 
 

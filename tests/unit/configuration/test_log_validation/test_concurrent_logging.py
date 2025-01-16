@@ -1,4 +1,4 @@
-'Test concurrent logging operations.\n\nTests:\n- Multi-threaded logging\n- Race conditions\n- Thread ID tracking\n- Log ordering\n- Thread safety of validation\n'
+"""Test concurrent logging operations.\n\nTests:\n- Multi-threaded logging\n- Race conditions\n- Thread ID tracking\n- Log ordering\n- Thread safety of validation\n"""
 import logging
 import threading
 import time
@@ -31,7 +31,7 @@ def test_concurrent_logging(json_logger: logging.Logger, temp_log_file: str) -> 
         thread.start()
     for thread in threads:
         thread.join()
-    with open(temp_log_file, 'r', encoding='utf-8') as f:
+    with open(temp_log_file, encoding='utf-8') as f:
         log_lines = f.readlines()
         expected_count = thread_count * messages_per_thread
         assert len(log_lines) == expected_count, f'Expected {expected_count} log entries, got {len(log_lines)}'
@@ -42,6 +42,7 @@ def test_concurrent_logging(json_logger: logging.Logger, temp_log_file: str) -> 
             thread_messages = [entry for entry in validated if entry['thread_id'] == thread_id]
             sequences = {entry['sequence'] for entry in thread_messages}
             assert sequences == set(range(messages_per_thread)), f'Missing sequences for thread {thread_id}'
+
 
 def test_concurrent_validation(write_test_logs: Any, temp_log_file: str) -> None:
     """Test concurrent validation of log entries.
@@ -55,7 +56,7 @@ def test_concurrent_validation(write_test_logs: Any, temp_log_file: str) -> None
     write_test_logs(entries)
 
     def validate_logs() -> None:
-        with open(temp_log_file, 'r', encoding='utf-8') as f:
+        with open(temp_log_file, encoding='utf-8') as f:
             validated = validate_log_file(f.readlines(), required_fields={'message', 'thread_id'}, field_types={'message': str, 'thread_id': int})
             assert len(validated) == len(entries)
     threads = [threading.Thread(target=validate_logs) for _ in range(3)]
@@ -63,6 +64,7 @@ def test_concurrent_validation(write_test_logs: Any, temp_log_file: str) -> None
         thread.start()
     for thread in threads:
         thread.join()
+
 
 def test_log_ordering(json_logger: logging.Logger, temp_log_file: str) -> None:
     """Test ordering of log entries from multiple threads.
@@ -83,11 +85,12 @@ def test_log_ordering(json_logger: logging.Logger, temp_log_file: str) -> None:
         thread.start()
     for thread in threads:
         thread.join()
-    with open(temp_log_file, 'r', encoding='utf-8') as f:
+    with open(temp_log_file, encoding='utf-8') as f:
         validated = validate_log_file(f.readlines(), required_fields={'message', 'thread_id', 'timestamp'}, field_types={'message': str, 'thread_id': int, 'timestamp': float})
         timestamps = [entry['timestamp'] for entry in validated]
         for i in range(1, len(timestamps)):
             assert timestamps[i] >= timestamps[i - 1], f'Timestamps not monotonically increasing at index {i}'
+
 
 def test_concurrent_error_handling(json_logger: logging.Logger, temp_log_file: str) -> None:
     """Test error handling during concurrent logging.
@@ -112,7 +115,7 @@ def test_concurrent_error_handling(json_logger: logging.Logger, temp_log_file: s
     for thread in threads:
         thread.join()
     with pytest.raises(LogTypeError) as exc_info:
-        with open(temp_log_file, 'r', encoding='utf-8') as f:
+        with open(temp_log_file, encoding='utf-8') as f:
             validate_log_file(f.readlines(), required_fields={'message', 'thread_id'}, field_types={'message': str, 'thread_id': int})
     error_msg = str(exc_info.value)
     assert 'thread_id' in error_msg

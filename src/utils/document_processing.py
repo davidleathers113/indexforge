@@ -67,7 +67,6 @@ from dataclasses import dataclass
 from datetime import datetime
 import hashlib
 import logging
-from typing import Dict, List, Optional
 import uuid
 
 
@@ -106,14 +105,14 @@ class DocumentMetadata:
     title: str
     source: str
     timestamp_utc: str
-    last_modified_utc: Optional[str] = None
-    author: Optional[str] = None
-    tags: List[str] = None
+    last_modified_utc: str | None = None
+    author: str | None = None
+    tags: list[str] = None
     language: str = "en"
 
 
 class DocumentProcessor:
-    def __init__(self, logger: Optional[logging.Logger] = None):
+    def __init__(self, logger: logging.Logger | None = None):
         self.logger = logger or logging.getLogger(__name__)
         self.chunk_size = 100  # Default chunk size
         self.transformers = []
@@ -121,7 +120,7 @@ class DocumentProcessor:
         self.validation_rules = []
         self.max_content_length = None
 
-    def _get_document_hash(self, doc: Dict) -> str:
+    def _get_document_hash(self, doc: dict) -> str:
         """Generate a stable hash for document content."""
         content = doc["content"]["body"]
         metadata = doc.get("metadata", {})
@@ -136,7 +135,7 @@ class DocumentProcessor:
 
         return hashlib.sha256(hash_content.encode()).hexdigest()
 
-    def ensure_document_id(self, document: Dict) -> Dict:
+    def ensure_document_id(self, document: dict) -> dict:
         """Ensure document has a UUID.
 
         Args:
@@ -150,7 +149,7 @@ class DocumentProcessor:
             self.logger.debug(f"Generated UUID for document: {document['id']}")
         return document
 
-    def deduplicate_documents(self, documents: List[Dict]) -> List[Dict]:
+    def deduplicate_documents(self, documents: list[dict]) -> list[dict]:
         """Remove duplicate documents.
 
         Args:
@@ -173,7 +172,7 @@ class DocumentProcessor:
                 self.logger.debug(f"Skipping duplicate document: {doc.get('id', 'unknown')}")
         return unique_docs
 
-    def validate(self, doc: Dict) -> bool:
+    def validate(self, doc: dict) -> bool:
         """Validate document against all rules.
 
         Args:
@@ -260,7 +259,7 @@ class DocumentProcessor:
         """
         self.validation_rules.append((rule, message))
 
-    def create_document(self, content: str, metadata: DocumentMetadata) -> Dict:
+    def create_document(self, content: str, metadata: DocumentMetadata) -> dict:
         """Create a new document with standard structure."""
         return {
             "content": {"body": content, "summary": None},
@@ -277,7 +276,7 @@ class DocumentProcessor:
             "relationships": {"parent_id": None, "references": []},
         }
 
-    def batch_documents(self, documents: List[Dict], batch_size: int) -> List[List[Dict]]:
+    def batch_documents(self, documents: list[dict], batch_size: int) -> list[list[dict]]:
         """Split documents into batches.
 
         Args:
@@ -293,8 +292,8 @@ class DocumentProcessor:
         return [documents[i : i + batch_size] for i in range(0, len(documents), batch_size)]
 
     def merge_document_updates(
-        self, original: Dict, updates: Dict, overwrite: bool = False
-    ) -> Dict:
+        self, original: dict, updates: dict, overwrite: bool = False
+    ) -> dict:
         """Merge updates into original document."""
         merged = original.copy()
 
@@ -330,7 +329,7 @@ class DocumentProcessor:
 
         return merged
 
-    def process(self, doc: Dict) -> Dict:
+    def process(self, doc: dict) -> dict:
         """Process a single document.
 
         Args:
@@ -408,7 +407,7 @@ class DocumentProcessor:
             raise ValueError("Chunk size must be positive")
         self.chunk_size = size
 
-    def process_batch(self, documents: List[Dict]) -> List[Dict]:
+    def process_batch(self, documents: list[dict]) -> list[dict]:
         """Process multiple documents.
 
         Args:
@@ -424,7 +423,7 @@ class DocumentProcessor:
                 if processed:
                     results.append(processed)
             except Exception as e:
-                self.logger.error(f"Error processing document: {str(e)}")
+                self.logger.error(f"Error processing document: {e!s}")
                 continue
         return results
 

@@ -5,12 +5,12 @@ This module provides core document management functionality like adding new docu
 and managing their basic metadata.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
-from typing import Dict, List, Optional
 
 from .lineage_operations import _would_create_circular_reference
 from .models import DocumentLineage
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 def add_document(
     storage,
     doc_id: str,
-    parent_ids: Optional[List[str]] = None,
-    origin_id: Optional[str] = None,
-    origin_source: Optional[str] = None,
-    origin_type: Optional[str] = None,
-    metadata: Optional[Dict] = None,
+    parent_ids: list[str] | None = None,
+    origin_id: str | None = None,
+    origin_source: str | None = None,
+    origin_type: str | None = None,
+    metadata: dict | None = None,
 ) -> None:
     """Add a new document to lineage tracking.
 
@@ -97,8 +97,8 @@ def add_document(
             origin_source=origin_source,
             origin_type=origin_type,
             metadata=metadata or {},
-            created_at=datetime.now(timezone.utc),
-            last_modified=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
+            last_modified=datetime.now(UTC),
         )
         logger.debug("Created lineage object: %s", lineage)
 
@@ -111,7 +111,7 @@ def add_document(
                     logger.debug("Adding %s to parent %s's children list", doc_id, parent_id)
                     parent.children.append(doc_id)
                     parent.derived_documents.append(doc_id)
-                    parent.last_modified = datetime.now(timezone.utc)
+                    parent.last_modified = datetime.now(UTC)
                     storage.save_lineage(parent)
                     logger.debug(
                         "Updated parent %s - Children: %s, Derived: %s",

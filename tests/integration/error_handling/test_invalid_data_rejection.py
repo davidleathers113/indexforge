@@ -4,17 +4,18 @@ This module contains tests that verify the proper rejection of invalid
 data during schema validation and processing.
 """
 from copy import deepcopy
-from datetime import datetime, timezone
-from typing import Any, Dict
+from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 
 from src.indexing.schema import SchemaValidator
 
 
-def create_valid_document() -> Dict[str, Any]:
+def create_valid_document() -> dict[str, Any]:
     """Create a valid test document."""
-    return {'content_body': 'Test content', 'content_summary': 'Summary', 'content_title': 'Title', 'schema_version': 1, 'timestamp_utc': datetime.now(timezone.utc).isoformat(), 'parent_id': None, 'chunk_ids': [], 'embedding': [0.1] * 384}
+    return {'content_body': 'Test content', 'content_summary': 'Summary', 'content_title': 'Title', 'schema_version': 1, 'timestamp_utc': datetime.now(UTC).isoformat(), 'parent_id': None, 'chunk_ids': [], 'embedding': [0.1] * 384}
+
 
 def test_invalid_field_types():
     """Test rejection of documents with invalid field types."""
@@ -31,6 +32,7 @@ def test_invalid_field_types():
     with pytest.raises(TypeError, match='chunk_ids.*list'):
         SchemaValidator.validate_object(doc)
 
+
 def test_invalid_field_values():
     """Test rejection of documents with invalid field values."""
     doc = create_valid_document()
@@ -46,6 +48,7 @@ def test_invalid_field_values():
     with pytest.raises(TypeError, match='embedding.*numeric'):
         SchemaValidator.validate_object(doc)
 
+
 def test_missing_required_fields():
     """Test rejection of documents with missing required fields."""
     doc = create_valid_document()
@@ -55,6 +58,7 @@ def test_missing_required_fields():
         del test_doc[field]
         with pytest.raises(ValueError, match=f'{field}.*required'):
             SchemaValidator.validate_object(test_doc)
+
 
 def test_empty_required_fields():
     """Test rejection of documents with empty required fields."""
@@ -67,6 +71,7 @@ def test_empty_required_fields():
     with pytest.raises(ValueError, match='embedding.*empty'):
         SchemaValidator.validate_object(doc)
 
+
 def test_invalid_metadata_values():
     """Test rejection of documents with invalid metadata values."""
     doc = create_valid_document()
@@ -76,6 +81,7 @@ def test_invalid_metadata_values():
     doc['metadata'] = {'numeric_field': 'not_a_number', 'date_field': 'not_a_date'}
     with pytest.raises(TypeError, match='metadata.*type'):
         SchemaValidator.validate_object(doc)
+
 
 def test_invalid_relationship_references():
     """Test rejection of documents with invalid relationship references."""
@@ -88,6 +94,7 @@ def test_invalid_relationship_references():
     with pytest.raises(TypeError, match='chunk_ids.*string'):
         SchemaValidator.validate_object(doc)
 
+
 def test_schema_version_mismatch():
     """Test rejection of documents with mismatched schema versions."""
     doc = create_valid_document()
@@ -98,6 +105,7 @@ def test_schema_version_mismatch():
     with pytest.raises(ValueError, match='schema_version.*positive'):
         SchemaValidator.validate_object(doc)
 
+
 def test_malformed_json():
     """Test rejection of malformed JSON input."""
     invalid_json = "{'not': 'valid', json}"
@@ -106,6 +114,7 @@ def test_malformed_json():
     partial_json = '{"content_body": "test"'
     with pytest.raises(ValueError, match='invalid.*JSON'):
         SchemaValidator.validate_json(partial_json)
+
 
 def test_invalid_utf8_content():
     """Test rejection of content with invalid UTF-8 encoding."""

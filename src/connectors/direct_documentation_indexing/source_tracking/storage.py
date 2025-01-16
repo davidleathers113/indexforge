@@ -24,15 +24,15 @@ Example:
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from .enums import LogLevel, ProcessingStatus, TransformationType
 from .models import DocumentLineage, LogEntry, ProcessingStep, Transformation
 from .utils import load_json
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class LineageStorageBase(ABC):
     """Abstract base class defining the interface for lineage storage."""
 
     @abstractmethod
-    def get_lineage(self, doc_id: str) -> Optional[DocumentLineage]:
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
         """Get document lineage by ID."""
         pass
 
@@ -51,7 +51,7 @@ class LineageStorageBase(ABC):
         pass
 
     @abstractmethod
-    def get_all_lineages(self) -> Dict[str, DocumentLineage]:
+    def get_all_lineages(self) -> dict[str, DocumentLineage]:
         """Get all document lineages."""
         pass
 
@@ -62,13 +62,13 @@ class LineageStorageBase(ABC):
 
     @abstractmethod
     def get_lineages_by_time(
-        self, start_time: Optional[datetime] = None, end_time: Optional[datetime] = None
-    ) -> Dict[str, DocumentLineage]:
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> dict[str, DocumentLineage]:
         """Get document lineages within a time range."""
         pass
 
     @abstractmethod
-    def get_lineages_by_status(self, status: str) -> Dict[str, DocumentLineage]:
+    def get_lineages_by_status(self, status: str) -> dict[str, DocumentLineage]:
         """Get document lineages by processing status."""
         pass
 
@@ -107,7 +107,7 @@ class LineageStorage(LineageStorageBase):
         ```
     """
 
-    def __init__(self, storage_dir: Optional[str] = None):
+    def __init__(self, storage_dir: str | None = None):
         """
         Initialize the storage manager.
 
@@ -126,7 +126,7 @@ class LineageStorage(LineageStorageBase):
         """
         self.storage_dir = Path(storage_dir) if storage_dir else Path(__file__).parent / "lineage"
         logger.debug(f"Initializing LineageStorage with directory: {self.storage_dir}")
-        self.lineage_data: Dict[str, DocumentLineage] = {}
+        self.lineage_data: dict[str, DocumentLineage] = {}
         self._load_lineage_data()
 
     def _get_storage_path(self) -> Path:
@@ -260,7 +260,7 @@ class LineageStorage(LineageStorageBase):
         self.save_lineage_data()
         logger.debug(f"Successfully added document lineage for {doc_id}")
 
-    def get_lineage(self, doc_id: str) -> Optional[DocumentLineage]:
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
         """Get document lineage by ID."""
         logger.debug(f"Retrieving lineage for document {doc_id}")
         lineage = self.lineage_data.get(doc_id)
@@ -270,7 +270,7 @@ class LineageStorage(LineageStorageBase):
             logger.debug(f"No lineage found for document {doc_id}")
         return lineage
 
-    def get_all_lineage(self) -> Dict[str, DocumentLineage]:
+    def get_all_lineage(self) -> dict[str, DocumentLineage]:
         """
         Get all lineage data.
 
@@ -287,7 +287,7 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Retrieving all lineage data ({len(self.lineage_data)} documents)")
         return self.lineage_data
 
-    def update_document_lineage(self, doc_id: str, updates: Dict) -> None:
+    def update_document_lineage(self, doc_id: str, updates: dict) -> None:
         """
         Update document lineage with new data.
 
@@ -353,7 +353,7 @@ class LineageStorage(LineageStorageBase):
                     logger.debug("Adding %s to parent %s's children list", doc_id, parent_id)
                     parent_lineage.children.append(doc_id)
                     parent_lineage.derived_documents.append(doc_id)
-                    parent_lineage.last_modified = datetime.now(timezone.utc)
+                    parent_lineage.last_modified = datetime.now(UTC)
                     self.save_lineage(parent_lineage)
                     logger.debug(
                         "Updated parent %s - New Children: %s, New Derived Documents: %s",
@@ -367,7 +367,7 @@ class LineageStorage(LineageStorageBase):
             logger.debug("Setting %s = %s for document %s", key, value, doc_id)
             setattr(lineage, key, value)
 
-        lineage.last_modified = datetime.now(timezone.utc)
+        lineage.last_modified = datetime.now(UTC)
         logger.debug(
             "Final document state - ID: %s, Parents: %s, Children: %s, Derived From: %s",
             doc_id,
@@ -403,8 +403,8 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Successfully deleted document {doc_id}")
 
     def get_lineages_by_time(
-        self, start_time: Optional[datetime] = None, end_time: Optional[datetime] = None
-    ) -> Dict[str, DocumentLineage]:
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> dict[str, DocumentLineage]:
         """
         Get document lineages within a time range.
 
@@ -427,7 +427,7 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Found {len(filtered)} documents in time range")
         return filtered
 
-    def get_lineages_by_status(self, status: str) -> Dict[str, DocumentLineage]:
+    def get_lineages_by_status(self, status: str) -> dict[str, DocumentLineage]:
         """
         Get document lineages by processing status.
 
@@ -449,7 +449,7 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Found {len(filtered)} documents with status {status}")
         return filtered
 
-    def get_lineages_by_type(self, doc_type: str) -> Dict[str, DocumentLineage]:
+    def get_lineages_by_type(self, doc_type: str) -> dict[str, DocumentLineage]:
         """
         Get document lineages by document type.
 
@@ -468,7 +468,7 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Found {len(filtered)} documents of type {doc_type}")
         return filtered
 
-    def get_lineages_by_source(self, source: str) -> Dict[str, DocumentLineage]:
+    def get_lineages_by_source(self, source: str) -> dict[str, DocumentLineage]:
         """
         Get document lineages by source.
 
@@ -487,7 +487,7 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Found {len(filtered)} documents from source {source}")
         return filtered
 
-    def get_derived_documents(self, doc_id: str) -> List[str]:
+    def get_derived_documents(self, doc_id: str) -> list[str]:
         """
         Get IDs of documents derived from the specified document.
 
@@ -509,7 +509,7 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Found {len(derived)} derived documents")
         return derived
 
-    def get_parent_documents(self, doc_id: str) -> List[str]:
+    def get_parent_documents(self, doc_id: str) -> list[str]:
         """
         Get IDs of parent documents for the specified document.
 
@@ -535,7 +535,7 @@ class LineageStorage(LineageStorageBase):
         logger.debug(f"Found {len(parents)} parent documents")
         return parents
 
-    def get_all_lineages(self) -> Dict[str, DocumentLineage]:
+    def get_all_lineages(self) -> dict[str, DocumentLineage]:
         """
         Get all document lineages.
 
@@ -589,8 +589,8 @@ class LineageStorage(LineageStorageBase):
     def add_metrics(
         self,
         doc_id: str,
-        metrics: Dict,
-        timestamp: Optional[datetime] = None,
+        metrics: dict,
+        timestamp: datetime | None = None,
     ) -> None:
         """Add performance metrics for a document.
 
@@ -622,7 +622,7 @@ class LineageStorage(LineageStorageBase):
         lineage = self.lineage_data[doc_id]
         metrics_entry = {
             "timestamp": (
-                timestamp.isoformat() if timestamp else datetime.now(timezone.utc).isoformat()
+                timestamp.isoformat() if timestamp else datetime.now(UTC).isoformat()
             ),
             "metrics": metrics,
         }
@@ -631,7 +631,7 @@ class LineageStorage(LineageStorageBase):
             lineage.metadata["performance_metrics"] = []
         lineage.metadata["performance_metrics"].append(metrics_entry)
 
-        lineage.last_modified = datetime.now(timezone.utc)
+        lineage.last_modified = datetime.now(UTC)
         self.save_lineage_data()
         logger.debug(f"Successfully added metrics for document {doc_id}")
 

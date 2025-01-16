@@ -13,6 +13,7 @@ from src.api.monitoring.database.handlers import register_query_listeners
 from src.api.monitoring.database.pool import start_pool_stats_logging
 from src.api.monitoring.metrics import record_error
 
+
 logger = logging.getLogger(__name__)
 
 

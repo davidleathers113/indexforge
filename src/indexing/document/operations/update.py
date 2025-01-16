@@ -5,7 +5,6 @@ handling both metadata updates and vector updates while maintaining cache consis
 """
 
 import logging
-from typing import Dict, List, Optional
 import uuid
 
 import weaviate
@@ -35,7 +34,7 @@ class DocumentUpdate:
         client: weaviate.Client,
         class_name: str,
         processor: DocumentProcessor,
-        cache_manager: Optional[CacheManager] = None,
+        cache_manager: CacheManager | None = None,
         test_mode: bool = False,
     ):
         """Initialize document update handler.
@@ -66,7 +65,7 @@ class DocumentUpdate:
         self.logger = logging.getLogger(__name__)
 
     def update_document(
-        self, doc_id: str, updates: Dict, vector: Optional[List[float]] = None
+        self, doc_id: str, updates: dict, vector: list[float] | None = None
     ) -> bool:
         """Update an existing document in storage.
 
@@ -99,7 +98,7 @@ class DocumentUpdate:
             try:
                 uuid_obj = uuid.UUID(doc_id)
             except ValueError as ve:
-                self.logger.error(f"Invalid UUID format for document {doc_id}: {str(ve)}")
+                self.logger.error(f"Invalid UUID format for document {doc_id}: {ve!s}")
                 return False
 
             # Prepare update properties
@@ -130,5 +129,5 @@ class DocumentUpdate:
 
             return True
         except Exception as e:
-            self.logger.error(f"Error updating document {doc_id}: {str(e)}")
+            self.logger.error(f"Error updating document {doc_id}: {e!s}")
             return False

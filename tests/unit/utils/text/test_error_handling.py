@@ -10,10 +10,12 @@ def test_clean_text():
     assert '  ' not in cleaned
     assert '\n' not in cleaned
 
+
 def test_clean_text_empty():
     """Test cleaning empty text."""
     assert clean_text('') == ''
     assert clean_text(None) == ''
+
 
 def test_clean_text_whitespace_only():
     """Test cleaning whitespace-only text."""

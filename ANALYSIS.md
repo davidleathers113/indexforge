@@ -102,11 +102,21 @@ src/
    ```
 
 3. Local type definitions for service states:
+
    ```python
    class ServiceState(Enum):
        CREATED = "created"
        INITIALIZING = "initializing"
        # ...
+   ```
+
+4. Optional dependency handling:
+   ```python
+   try:
+       from sklearn.metrics.pairwise import cosine_similarity
+       SKLEARN_AVAILABLE = True
+   except ImportError:
+       SKLEARN_AVAILABLE = False
    ```
 
 ## Recommended Directory Structure
@@ -225,10 +235,28 @@ src/
   - Resolved settings imports using TYPE_CHECKING
   - Implemented proper service state management
   - Centralized error class definitions
-  - Fixed NLTK dependency handling
+  - Fixed NLTK and scikit-learn dependency handling
+  - Implemented consistent service initialization pattern
+  - Added proper type hints for external dependencies
 
 ### In Progress
 
-- Remaining ML module imports (search.py)
+- Interface imports refinement (VectorSearcher)
 - Service layer implementation
 - Container dependency injection
+- Remaining interface implementations
+
+### Identified Patterns
+
+1. **Service Implementation Pattern**:
+
+   - BaseService inheritance
+   - Interface implementation
+   - State management
+   - Resource cleanup
+   - Error handling
+
+2. **Dependency Management**:
+   - Optional dependency checks
+   - Graceful fallbacks
+   - Clear error messages

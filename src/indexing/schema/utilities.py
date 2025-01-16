@@ -6,12 +6,11 @@ and manipulation. These utilities support the schema definition and
 migration processes.
 """
 
-from typing import Dict, List, Optional, Set
 
 from src.indexing.schema.configurations import CURRENT_SCHEMA_VERSION
 
 
-def validate_schema_version(schema: Dict) -> bool:
+def validate_schema_version(schema: dict) -> bool:
     """
     Validate that a schema has a valid version number.
 
@@ -32,7 +31,7 @@ def validate_schema_version(schema: Dict) -> bool:
         return False
 
 
-def get_schema_properties(schema: Dict) -> Set[str]:
+def get_schema_properties(schema: dict) -> set[str]:
     """
     Get a set of property names from a schema.
 
@@ -48,7 +47,7 @@ def get_schema_properties(schema: Dict) -> Set[str]:
         return set()
 
 
-def compare_schemas(schema1: Dict, schema2: Dict) -> List[str]:
+def compare_schemas(schema1: dict, schema2: dict) -> list[str]:
     """
     Compare two schemas and return a list of differences.
 
@@ -81,7 +80,7 @@ def compare_schemas(schema1: Dict, schema2: Dict) -> List[str]:
     return differences
 
 
-def get_schema_version(schema: Dict) -> Optional[int]:
+def get_schema_version(schema: dict) -> int | None:
     """
     Get the version number from a schema.
 
@@ -100,7 +99,7 @@ def get_schema_version(schema: Dict) -> Optional[int]:
         return None
 
 
-def needs_migration(schema: Dict) -> bool:
+def needs_migration(schema: dict) -> bool:
     """
     Check if a schema needs migration to the current version.
 

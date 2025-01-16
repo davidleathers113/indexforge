@@ -11,6 +11,7 @@ def test_generate_summary_empty_text(mock_cache_manager):
     assert result['summary'] == ''
     assert result['chunks'] == []
 
+
 def test_generate_summary(mock_cache_manager, large_document):
     """Test complete summary generation process."""
     summarizer = DocumentSummarizer(model_name='facebook/bart-large-cnn', device=-1, batch_size=4, cache_manager=mock_cache_manager)
@@ -21,6 +22,7 @@ def test_generate_summary(mock_cache_manager, large_document):
     assert 'chunks' in result
     assert 'metadata' in result
     assert result['metadata']['num_chunks'] > 0
+
 
 def test_generate_summary_with_config(mock_cache_manager, sample_document):
     """Test summary generation with custom config."""

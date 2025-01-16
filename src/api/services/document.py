@@ -1,7 +1,6 @@
 """Document service for orchestrating document operations."""
 
 import logging
-from typing import Dict, List, Optional
 
 from fastapi import UploadFile
 from fastapi.responses import StreamingResponse
@@ -11,6 +10,7 @@ from src.api.repositories.weaviate_repo import WeaviateRepository
 from src.api.services.document_retrieval_service import DocumentRetrievalService
 from src.api.services.file_upload_service import FileUploadService
 from src.api.services.statistics_service import StatisticsService
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class DocumentService:
         """
         return await self._upload_service.process_upload(file)
 
-    async def process_batch_upload(self, files: List[UploadFile]) -> List[DocumentUploadResponse]:
+    async def process_batch_upload(self, files: list[UploadFile]) -> list[DocumentUploadResponse]:
         """Process multiple file uploads.
 
         Args:
@@ -52,8 +52,8 @@ class DocumentService:
         return await self._upload_service.process_batch_upload(files)
 
     async def list_documents(
-        self, file_type: Optional[str] = None, limit: int = 10, offset: int = 0
-    ) -> List[Dict]:
+        self, file_type: str | None = None, limit: int = 10, offset: int = 0
+    ) -> list[dict]:
         """List indexed documents with optional filtering.
 
         Args:
@@ -66,7 +66,7 @@ class DocumentService:
         """
         return await self._retrieval_service.list_documents(file_type, limit, offset)
 
-    async def get_document(self, document_id: str) -> Optional[Dict]:
+    async def get_document(self, document_id: str) -> dict | None:
         """Get a specific document by ID.
 
         Args:

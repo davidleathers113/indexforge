@@ -5,7 +5,7 @@ for document processing operations, including metrics and tracing integration.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any
 
 from src.api.monitoring.collectors.document_metrics import DocumentMetrics
 from src.api.monitoring.tracing import DocumentTracer
@@ -27,7 +27,7 @@ class BaseDocumentProcessor(ABC):
         self.processor_name = processor_name
 
     @abstractmethod
-    def process(self, document: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+    def process(self, document: dict[str, Any], **kwargs) -> dict[str, Any]:
         """Process a document.
 
         Args:
@@ -43,7 +43,7 @@ class BaseDocumentProcessor(ABC):
         raise NotImplementedError
 
     def _record_processing_start(
-        self, document_id: str, attributes: Optional[Dict[str, Any]] = None
+        self, document_id: str, attributes: dict[str, Any] | None = None
     ) -> None:
         """Record start of document processing.
 
@@ -57,7 +57,7 @@ class BaseDocumentProcessor(ABC):
         self.metrics.processing_total.labels(stage=self.processor_name, status="started").inc()
 
     def _record_processing_success(
-        self, document_id: str, duration: float, attributes: Optional[Dict[str, Any]] = None
+        self, document_id: str, duration: float, attributes: dict[str, Any] | None = None
     ) -> None:
         """Record successful document processing.
 
@@ -74,7 +74,7 @@ class BaseDocumentProcessor(ABC):
         )
 
     def _record_processing_error(
-        self, document_id: str, error: Exception, attributes: Optional[Dict[str, Any]] = None
+        self, document_id: str, error: Exception, attributes: dict[str, Any] | None = None
     ) -> None:
         """Record document processing error.
 
@@ -89,7 +89,7 @@ class BaseDocumentProcessor(ABC):
         error_type = error.__class__.__name__
         self.metrics.record_error(error_type=error_type, stage=self.processor_name)
 
-    def _get_document_id(self, document: Dict[str, Any]) -> str:
+    def _get_document_id(self, document: dict[str, Any]) -> str:
         """Extract document identifier.
 
         Args:
@@ -106,7 +106,7 @@ class BaseDocumentProcessor(ABC):
             raise ValueError("Document must have 'id' or 'document_id' field")
         return str(doc_id)
 
-    def _get_document_size(self, document: Dict[str, Any]) -> int:
+    def _get_document_size(self, document: dict[str, Any]) -> int:
         """Calculate document size.
 
         Args:
@@ -118,7 +118,7 @@ class BaseDocumentProcessor(ABC):
         # Simple size estimation using string representation
         return len(str(document).encode("utf-8"))
 
-    def _validate_document_structure(self, document: Dict[str, Any]) -> None:
+    def _validate_document_structure(self, document: dict[str, Any]) -> None:
         """Validate basic document structure.
 
         Args:

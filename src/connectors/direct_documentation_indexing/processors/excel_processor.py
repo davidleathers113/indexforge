@@ -7,11 +7,12 @@ It handles multiple sheets, data validation, and basic statistics collection.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pandas as pd
 
 from .base_processor import BaseProcessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class ExcelProcessor(BaseProcessor):
 
     SUPPORTED_EXTENSIONS = {".xlsx", ".csv", ".xls"}
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the Excel processor with configuration.
 
         Sets up the processor with optional configuration parameters that
@@ -91,7 +92,7 @@ class ExcelProcessor(BaseProcessor):
         """
         return file_path.suffix.lower() in self.SUPPORTED_EXTENSIONS
 
-    def process(self, file_path: Path) -> Dict[str, Any]:
+    def process(self, file_path: Path) -> dict[str, Any]:
         """Process an Excel or CSV file and extract its content.
 
         Processes the file, extracting content from all sheets (for Excel)
@@ -132,10 +133,10 @@ class ExcelProcessor(BaseProcessor):
             return {"status": "success", "content": {"sheets": sheets_data, "metadata": metadata}}
 
         except Exception as e:
-            logger.error(f"Error processing Excel file {file_path}: {str(e)}")
+            logger.error(f"Error processing Excel file {file_path}: {e!s}")
             return {"status": "error", "error": str(e), "content": {"metadata": metadata}}
 
-    def _process_csv(self, file_path: Path) -> Dict[str, Any]:
+    def _process_csv(self, file_path: Path) -> dict[str, Any]:
         """Process a CSV file and extract its content.
 
         Reads and processes a CSV file, applying row limits and column validation
@@ -156,7 +157,7 @@ class ExcelProcessor(BaseProcessor):
         df = pd.read_csv(file_path, nrows=self.max_rows, low_memory=False)
         return self._process_dataframe(df)
 
-    def _process_excel(self, file_path: Path) -> Dict[str, Dict[str, Any]]:
+    def _process_excel(self, file_path: Path) -> dict[str, dict[str, Any]]:
         """Process an Excel workbook with multiple sheets.
 
         Reads and processes each sheet in the Excel workbook, skipping
@@ -183,7 +184,7 @@ class ExcelProcessor(BaseProcessor):
 
         return sheets_data
 
-    def _process_dataframe(self, df: pd.DataFrame) -> Dict[str, Any]:
+    def _process_dataframe(self, df: pd.DataFrame) -> dict[str, Any]:
         """Process a pandas DataFrame and extract information.
 
         Processes a DataFrame, validating required columns, collecting

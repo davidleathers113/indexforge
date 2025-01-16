@@ -3,13 +3,12 @@
 from datetime import datetime
 import json
 import os
-from typing import Dict
 
 from loguru import logger
 import pandas as pd
 
 
-def load_results(filename: str) -> Dict:
+def load_results(filename: str) -> dict:
     """Load test results from file.
 
     Args:
@@ -22,7 +21,7 @@ def load_results(filename: str) -> Dict:
         return json.load(f)
 
 
-def compare_metrics(v3_results: Dict, v4_results: Dict) -> pd.DataFrame:
+def compare_metrics(v3_results: dict, v4_results: dict) -> pd.DataFrame:
     """Compare metrics between v3 and v4 results.
 
     Args:
@@ -133,7 +132,7 @@ def compare_metrics(v3_results: Dict, v4_results: Dict) -> pd.DataFrame:
 
 
 def generate_report(
-    comparison_df: pd.DataFrame, v3_results: Dict, v4_results: Dict, output_file: str
+    comparison_df: pd.DataFrame, v3_results: dict, v4_results: dict, output_file: str
 ):
     """Generate performance comparison report."""
     with open(output_file, "w") as f:

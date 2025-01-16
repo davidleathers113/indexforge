@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass, field
 import logging
-from typing import Dict, List
 from unittest.mock import MagicMock
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 class TopicState(BaseState):
     """Topic clusterer state."""
 
-    clusters: Dict[str, List[str]] = field(default_factory=dict)
-    topics: Dict[str, List[str]] = field(default_factory=dict)
+    clusters: dict[str, list[str]] = field(default_factory=dict)
+    topics: dict[str, list[str]] = field(default_factory=dict)
     error_mode: bool = False
     min_word_length: int = 3
     max_topics_per_text: int = 3
@@ -45,7 +45,7 @@ def mock_topic_clusterer(topic_state):
     """Mock topic clusterer for testing."""
     mock_clusterer = MagicMock()
 
-    def mock_cluster(texts: List[str]) -> Dict[str, List[str]]:
+    def mock_cluster(texts: list[str]) -> dict[str, list[str]]:
         """Cluster texts into topics."""
         try:
             if topic_state.error_mode:
@@ -68,7 +68,7 @@ def mock_topic_clusterer(topic_state):
             topic_state.add_error(str(e))
             raise
 
-    def mock_extract_topics(texts: List[str]) -> Dict[str, List[str]]:
+    def mock_extract_topics(texts: list[str]) -> dict[str, list[str]]:
         """Extract topics from texts."""
         try:
             if topic_state.error_mode:
@@ -93,7 +93,7 @@ def mock_topic_clusterer(topic_state):
             topic_state.add_error(str(e))
             raise
 
-    def cluster_documents(documents: List[Dict], config=None) -> List[Dict]:
+    def cluster_documents(documents: list[dict], config=None) -> list[dict]:
         """Mock document clustering."""
         try:
             if topic_state.error_mode:
@@ -107,7 +107,7 @@ def mock_topic_clusterer(topic_state):
             clusters = mock_cluster(texts)
             
             # Add cluster info to documents
-            for doc, text in zip(documents, texts):
+            for doc, text in zip(documents, texts, strict=False):
                 for cluster_id, cluster_texts in clusters.items():
                     if text in cluster_texts:
                         doc.setdefault("metadata", {})["clustering"] = {

@@ -1,6 +1,5 @@
 """Document router for API endpoints."""
 
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, UploadFile
 from fastapi.responses import StreamingResponse
@@ -9,6 +8,7 @@ from src.api.dependencies.weaviate import get_weaviate_client
 from src.api.models.requests import DocumentUploadResponse
 from src.api.repositories.weaviate_repo import WeaviateRepository
 from src.api.services.document import DocumentService
+
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -21,13 +21,13 @@ def get_document_service(
     return DocumentService(repository)
 
 
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=list[dict])
 async def list_documents(
-    file_type: Optional[str] = Query(None, description="Filter by file type (e.g., docx, pdf)"),
+    file_type: str | None = Query(None, description="Filter by file type (e.g., docx, pdf)"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of documents to return"),
     offset: int = Query(0, ge=0, description="Number of documents to skip"),
     service: DocumentService = Depends(get_document_service),
-) -> List[dict]:
+) -> list[dict]:
     """List indexed documents with optional filtering.
 
     Args:
@@ -90,11 +90,11 @@ async def upload_document(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/upload/batch", response_model=List[DocumentUploadResponse])
+@router.post("/upload/batch", response_model=list[DocumentUploadResponse])
 async def upload_documents(
-    files: List[UploadFile] = File(...),
+    files: list[UploadFile] = File(...),
     service: DocumentService = Depends(get_document_service),
-) -> List[DocumentUploadResponse]:
+) -> list[DocumentUploadResponse]:
     """Upload and index multiple documents.
 
     Args:

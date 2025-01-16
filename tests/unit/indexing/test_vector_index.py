@@ -16,11 +16,13 @@ def vector_index():
         index = VectorIndex(client_url='http://localhost:8080', class_name='Document', batch_size=100)
         yield index
 
+
 def test_initialization():
     """Test VectorIndex initialization."""
     index = VectorIndex(client_url='http://localhost:8080', class_name='TestClass', batch_size=50)
     assert index.class_name == 'TestClass'
     assert index.batch_size == 50
+
 
 def test_batch_size_property():
     """Test batch size getter and setter."""
@@ -28,6 +30,7 @@ def test_batch_size_property():
     assert index.batch_size == 50
     index.batch_size = 100
     assert index.batch_size == 100
+
 
 def test_add_documents(vector_index):
     """Test adding documents."""
@@ -37,6 +40,7 @@ def test_add_documents(vector_index):
     assert len(doc_ids) == 1
     vector_index.operations.add_documents.assert_called_once_with([doc])
 
+
 def test_update_document(vector_index):
     """Test updating a document."""
     updates = {'content': {'body': 'Updated'}}
@@ -45,12 +49,14 @@ def test_update_document(vector_index):
     assert success is True
     vector_index.operations.update_document.assert_called_once_with('test-id', updates)
 
+
 def test_delete_documents(vector_index):
     """Test deleting documents."""
     vector_index.operations.delete_documents.return_value = True
     success = vector_index.delete_documents(['test-id'])
     assert success is True
     vector_index.operations.delete_documents.assert_called_once_with(['test-id'])
+
 
 def test_search_operations(vector_index):
     """Test search operations."""
@@ -59,6 +65,7 @@ def test_search_operations(vector_index):
     results = vector_index.semantic_search(query_vector=[0.1] * 1536)
     assert results == mock_results
     vector_index.operations.search.semantic_search.assert_called_once()
+
 
 def test_batch_processing_workflow(vector_index):
     """Test batch processing workflow with multiple documents."""

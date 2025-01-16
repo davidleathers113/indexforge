@@ -1,7 +1,6 @@
 """Weaviate client factory."""
 
 from functools import lru_cache
-from typing import Optional
 from urllib.parse import urlparse
 
 from weaviate.auth import AuthApiKey
@@ -46,7 +45,7 @@ class WeaviateClientFactory:
         )
 
     @classmethod
-    def create_auth_config(cls) -> Optional[AuthApiKey]:
+    def create_auth_config(cls) -> AuthApiKey | None:
         """Create authentication configuration.
 
         Returns:
@@ -72,7 +71,7 @@ class WeaviateClientFactory:
                 additional_config=cls.create_additional_config(),
             )
         except Exception as e:
-            raise WeaviateConnectionError(f"Failed to connect to embedded instance: {str(e)}")
+            raise WeaviateConnectionError(f"Failed to connect to embedded instance: {e!s}")
 
     @classmethod
     def create_custom_client(cls) -> wvc.WeaviateClient:
@@ -95,10 +94,10 @@ class WeaviateClientFactory:
                 additional_config=cls.create_additional_config(),
             )
         except Exception as e:
-            raise WeaviateConnectionError(f"Failed to connect to custom instance: {str(e)}")
+            raise WeaviateConnectionError(f"Failed to connect to custom instance: {e!s}")
 
 
-@lru_cache()
+@lru_cache
 def get_weaviate_client() -> wvc.WeaviateClient:
     """Get or create Weaviate client instance.
 
@@ -120,4 +119,4 @@ def get_weaviate_client() -> wvc.WeaviateClient:
     except WeaviateConnectionError:
         raise
     except Exception as e:
-        raise WeaviateConnectionError(f"Failed to create Weaviate client: {str(e)}")
+        raise WeaviateConnectionError(f"Failed to create Weaviate client: {e!s}")

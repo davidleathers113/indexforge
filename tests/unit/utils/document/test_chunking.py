@@ -11,7 +11,8 @@ def test_document_chunking(mock_doc_processor):
     result = processor.process(doc)
     assert 'chunks' in result['content']
     assert len(result['content']['chunks']) > 1
-    assert all((len(chunk) <= 100 for chunk in result['content']['chunks']))
+    assert all(len(chunk) <= 100 for chunk in result['content']['chunks'])
+
 
 def test_chunk_overlap(mock_doc_processor):
     """Test chunk overlap in document processing."""
@@ -24,6 +25,7 @@ def test_chunk_overlap(mock_doc_processor):
     for i in range(len(chunks) - 1):
         assert chunks[i][-10:] in chunks[i + 1][:20]
 
+
 def test_small_document_chunking(mock_doc_processor):
     """Test chunking of small documents."""
     processor = DocumentProcessor()
@@ -33,6 +35,7 @@ def test_small_document_chunking(mock_doc_processor):
     assert len(result['content']['chunks']) == 1
     assert result['content']['chunks'][0] == 'small document'
 
+
 def test_custom_chunk_size(mock_doc_processor):
     """Test custom chunk size configuration."""
     processor = DocumentProcessor()
@@ -41,7 +44,8 @@ def test_custom_chunk_size(mock_doc_processor):
     for size in sizes:
         processor.set_chunk_size(size)
         result = processor.process({'content': {'body': content}})
-        assert all((len(chunk) <= size for chunk in result['content']['chunks']))
+        assert all(len(chunk) <= size for chunk in result['content']['chunks'])
+
 
 def test_empty_chunk_handling(mock_doc_processor):
     """Test handling of potential empty chunks."""
@@ -49,7 +53,8 @@ def test_empty_chunk_handling(mock_doc_processor):
     processor.set_chunk_size(10)
     doc = {'content': {'body': 'word    word    word'}}
     result = processor.process(doc)
-    assert all((chunk.strip() for chunk in result['content']['chunks']))
+    assert all(chunk.strip() for chunk in result['content']['chunks'])
+
 
 def test_chunk_boundary_words(mock_doc_processor):
     """Test that words are not split across chunk boundaries."""
@@ -59,5 +64,5 @@ def test_chunk_boundary_words(mock_doc_processor):
     result = processor.process(doc)
     for chunk in result['content']['chunks']:
         words = chunk.split()
-        assert all((len(word) > 0 for word in words))
-        assert not any((word.startswith(' ') or word.endswith(' ') for word in words))
+        assert all(len(word) > 0 for word in words)
+        assert not any(word.startswith(' ') or word.endswith(' ') for word in words)

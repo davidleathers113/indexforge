@@ -8,6 +8,7 @@ from src.api.middleware.rate_limit import rate_limit
 from src.api.models.profiles import Profile, ProfileUpdate
 from src.api.services.profile import ProfileService
 
+
 router = APIRouter(prefix="/profiles", tags=["profiles"])
 
 

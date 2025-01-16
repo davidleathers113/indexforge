@@ -1,7 +1,6 @@
 """Metric reporting functionality."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List
 
 from .base import MetricObserver
 
@@ -10,17 +9,17 @@ class MetricReportBuilder(ABC):
     """Abstract base class for metric report builders."""
 
     @abstractmethod
-    def add_batch_metrics(self, metrics: Dict) -> None:
+    def add_batch_metrics(self, metrics: dict) -> None:
         """Add batch metrics to report."""
         pass
 
     @abstractmethod
-    def add_performance_metrics(self, metrics: Dict) -> None:
+    def add_performance_metrics(self, metrics: dict) -> None:
         """Add performance metrics to report."""
         pass
 
     @abstractmethod
-    def build(self) -> Dict:
+    def build(self) -> dict:
         """Build the final report."""
         pass
 
@@ -30,18 +29,18 @@ class DetailedReportBuilder(MetricReportBuilder):
 
     def __init__(self):
         """Initialize report builder."""
-        self.batch_metrics: Dict = {}
-        self.performance_metrics: Dict = {}
+        self.batch_metrics: dict = {}
+        self.performance_metrics: dict = {}
 
-    def add_batch_metrics(self, metrics: Dict) -> None:
+    def add_batch_metrics(self, metrics: dict) -> None:
         """Add batch metrics to report."""
         self.batch_metrics = metrics
 
-    def add_performance_metrics(self, metrics: Dict) -> None:
+    def add_performance_metrics(self, metrics: dict) -> None:
         """Add performance metrics to report."""
         self.performance_metrics = metrics
 
-    def build(self) -> Dict:
+    def build(self) -> dict:
         """Build detailed report."""
         return {
             "batch_operations": self.batch_metrics,
@@ -49,7 +48,7 @@ class DetailedReportBuilder(MetricReportBuilder):
             "summary": self._build_summary(),
         }
 
-    def _build_summary(self) -> Dict:
+    def _build_summary(self) -> dict:
         """Build summary section of report."""
         return {
             "total_operations": self.batch_metrics.get("batches", {}).get("total", 0),
@@ -65,13 +64,13 @@ class MetricReporter(MetricObserver):
     def __init__(self, report_builder: MetricReportBuilder):
         """Initialize reporter with builder."""
         self.builder = report_builder
-        self.metric_updates: List[Dict] = []
+        self.metric_updates: list[dict] = []
 
     def on_metric_update(self, metric_type: str, value: float) -> None:
         """Handle metric update."""
         self.metric_updates.append({"type": metric_type, "value": value})
 
-    def generate_report(self, batch_metrics: Dict, performance_metrics: Dict) -> Dict:
+    def generate_report(self, batch_metrics: dict, performance_metrics: dict) -> dict:
         """Generate metric report.
 
         Args:

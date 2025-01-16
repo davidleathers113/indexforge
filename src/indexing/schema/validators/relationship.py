@@ -31,12 +31,13 @@ Example:
 """
 
 import logging
-from typing import Any, Optional, Set
+from typing import Any
+
 
 logger = logging.getLogger(__name__)
 
 
-def validate_relationships(doc: dict, doc_id: Optional[str] = None) -> None:
+def validate_relationships(doc: dict, doc_id: str | None = None) -> None:
     """
     Validate document relationships and references.
 
@@ -95,7 +96,7 @@ def validate_relationships(doc: dict, doc_id: Optional[str] = None) -> None:
     )
 
 
-def validate_parent_id(parent_id: Any, doc_id: Optional[str] = None) -> None:
+def validate_parent_id(parent_id: Any, doc_id: str | None = None) -> None:
     """
     Validate parent document reference.
 
@@ -174,7 +175,7 @@ def validate_chunk_references(chunk_ids: Any) -> None:
 
 
 def detect_circular_reference(
-    doc_id: str, parent_id: str, visited: Optional[Set[str]] = None
+    doc_id: str, parent_id: str, visited: set[str] | None = None
 ) -> None:
     """
     Detect circular references in document hierarchy.

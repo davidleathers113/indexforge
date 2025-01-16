@@ -41,20 +41,20 @@ Example:
 
 from datetime import datetime
 import logging
-from typing import Optional, Union
 
 from .enums import TransformationType
 from .models import Transformation
 from .storage import LineageStorage
+
 
 logger = logging.getLogger(__name__)
 
 
 def _get_transformation_history(
     lineage: dict,
-    transform_type: Optional[Union[TransformationType, str]] = None,
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
+    transform_type: TransformationType | str | None = None,
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
 ) -> list[Transformation]:
     """Get transformation history for a document with optional filters."""
     logger.debug(
@@ -88,7 +88,7 @@ class DocumentLineageManager:
         storage (LineageStorage): Storage manager for persisting lineage data.
     """
 
-    def __init__(self, storage_dir: Optional[str] = None):
+    def __init__(self, storage_dir: str | None = None):
         """Initialize the document lineage manager."""
         logger.debug(f"Initializing DocumentLineageManager with storage dir: {storage_dir}")
         self.storage = LineageStorage(storage_dir)
@@ -96,9 +96,9 @@ class DocumentLineageManager:
     def get_transformation_history(
         self,
         doc_id: str,
-        transform_type: Optional[Union[TransformationType, str]] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
+        transform_type: TransformationType | str | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
     ) -> list[Transformation]:
         """Get transformation history for a document with optional filters."""
         logger.debug(f"Getting transformation history for document {doc_id}")

@@ -23,6 +23,7 @@ def test_parent_id_format(valid_document):
     with pytest.raises(TypeError, match='parent_id.*string'):
         SchemaValidator.validate_object(doc)
 
+
 def test_chunk_ids_format(valid_document):
     """Test that chunk_ids must be a list of valid string IDs."""
     doc = deepcopy(valid_document)
@@ -37,6 +38,7 @@ def test_chunk_ids_format(valid_document):
     with pytest.raises(TypeError, match='chunk_ids.*string'):
         SchemaValidator.validate_object(doc)
 
+
 def test_self_reference_prevention(valid_document):
     """Test that a document cannot reference itself as parent or chunk."""
     doc = deepcopy(valid_document)
@@ -48,6 +50,7 @@ def test_self_reference_prevention(valid_document):
     doc['chunk_ids'] = [str(uuid4()), doc_id, str(uuid4())]
     with pytest.raises(ValueError, match='self-reference'):
         SchemaValidator.validate_object(doc, doc_id=doc_id)
+
 
 def test_duplicate_chunk_prevention(valid_document):
     """Test that chunk_ids cannot contain duplicates."""

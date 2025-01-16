@@ -1,200 +1,362 @@
 """Core chunk processing interfaces.
 
 This module defines the interfaces for processing document chunks. It provides
-abstract base classes for chunk processing, validation, and transformation.
+protocols for chunk processing, validation, transformation, and text processing
+operations.
 """
 
-from abc import ABC, abstractmethod
-from typing import List, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
-import numpy as np
 
-from src.core.models.chunks import Chunk, ProcessedChunk
-from src.core.models.documents import ProcessingStep
+if TYPE_CHECKING:
+    import numpy as np
 
-T = TypeVar("T", bound=Chunk)
-P = TypeVar("P", bound=ProcessedChunk)
+    from src.core.models.chunks import Chunk, ProcessedChunk
+    from src.core.models.documents import ProcessingStep
+    from src.core.settings import Settings
+
+T = TypeVar("T", bound="Chunk")
+P = TypeVar("P", bound="ProcessedChunk")
 
 
 class ChunkValidator(Protocol):
-    """Protocol for chunk validation."""
+    """Protocol for chunk validation operations."""
 
-    def validate_chunk(self, chunk: Chunk) -> List[str]:
+    def validate_chunk(self, chunk: "Chunk") -> list[str]:
         """Validate a single chunk.
 
         Args:
-            chunk: Chunk to validate
+            chunk (Chunk): Chunk to validate
 
         Returns:
-            List of validation error messages
+            List[str]: List of validation error messages, empty if valid
+
+        Raises:
+            ValueError: If chunk is malformed
+            TypeError: If chunk is not of correct type
         """
         ...
 
-    def validate_chunks(self, chunks: List[Chunk]) -> List[str]:
+    def validate_chunks(self, chunks: list["Chunk"]) -> list[str]:
         """Validate multiple chunks.
 
         Args:
-            chunks: Chunks to validate
+            chunks (List[Chunk]): Chunks to validate
 
         Returns:
-            List of validation error messages
+            List[str]: List of validation error messages, empty if all valid
+
+        Raises:
+            ValueError: If any chunk is malformed
+            TypeError: If any chunk is not of correct type
         """
         ...
 
 
-class ChunkProcessor(ABC):
-    """Interface for chunk processing."""
+class ChunkProcessor(Protocol):
+    """Protocol for chunk processing operations."""
 
-    @abstractmethod
-    def process_chunk(self, chunk: T) -> P:
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the processor.
+
+        Args:
+            settings (Settings): Application settings
+
+        Raises:
+            ValueError: If required settings are missing
+        """
+        ...
+
+    def process_chunk(self, chunk: T, metadata: dict[str, Any] | None = None) -> P:
         """Process a chunk.
 
         Args:
-            chunk: Chunk to process
+            chunk (T): Chunk to process
+            metadata (Optional[Dict[str, Any]], optional): Processing metadata.
+                Defaults to None.
 
         Returns:
-            Processed chunk
-        """
-        pass
+            P: Processed chunk
 
-    @abstractmethod
-    def process_chunks(self, chunks: List[T]) -> List[P]:
+        Raises:
+            ServiceStateError: If processor is not initialized
+            ValueError: If chunk is invalid
+            TypeError: If chunk is not of correct type
+        """
+        ...
+
+    def process_chunks(self, chunks: list[T], metadata: dict[str, Any] | None = None) -> list[P]:
         """Process multiple chunks.
 
         Args:
-            chunks: Chunks to process
+            chunks (List[T]): Chunks to process
+            metadata (Optional[Dict[str, Any]], optional): Processing metadata.
+                Defaults to None.
 
         Returns:
-            List of processed chunks
-        """
-        pass
+            List[P]: List of processed chunks
 
-    @abstractmethod
-    def validate_chunk(self, chunk: T) -> List[str]:
+        Raises:
+            ServiceStateError: If processor is not initialized
+            ValueError: If any chunk is invalid
+            TypeError: If any chunk is not of correct type
+        """
+        ...
+
+    def validate_chunk(self, chunk: T) -> list[str]:
         """Validate a chunk before processing.
 
         Args:
-            chunk: Chunk to validate
+            chunk (T): Chunk to validate
 
         Returns:
-            List of validation error messages
+            List[str]: List of validation error messages, empty if valid
+
+        Raises:
+            TypeError: If chunk is not of correct type
         """
-        pass
+        ...
+
+    def get_processing_steps(self) -> list["ProcessingStep"]:
+        """Get processing steps applied by this processor.
+
+        Returns:
+            List[ProcessingStep]: List of processing steps
+        """
+        ...
 
 
-class ChunkEmbedder(ChunkProcessor):
-    """Interface for chunk embedding."""
+class ChunkEmbedder(Protocol):
+    """Protocol for chunk embedding operations."""
 
-    @abstractmethod
-    def embed_chunk(self, chunk: T) -> np.ndarray:
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the embedder.
+
+        Args:
+            settings (Settings): Application settings
+
+        Raises:
+            ValueError: If required settings are missing
+        """
+        ...
+
+    def embed_chunk(self, chunk: T, metadata: dict[str, Any] | None = None) -> "np.ndarray":
         """Generate embedding for a chunk.
 
         Args:
-            chunk: Chunk to embed
+            chunk (T): Chunk to embed
+            metadata (Optional[Dict[str, Any]], optional): Embedding metadata.
+                Defaults to None.
 
         Returns:
-            Vector embedding of chunk content
-        """
-        pass
+            np.ndarray: Vector embedding of chunk content
 
-    @abstractmethod
-    def embed_chunks(self, chunks: List[T]) -> List[np.ndarray]:
+        Raises:
+            ServiceStateError: If embedder is not initialized
+            ValueError: If chunk is invalid
+            TypeError: If chunk is not of correct type
+        """
+        ...
+
+    def embed_chunks(
+        self, chunks: list[T], metadata: dict[str, Any] | None = None
+    ) -> list["np.ndarray"]:
         """Generate embeddings for multiple chunks.
 
         Args:
-            chunks: Chunks to embed
+            chunks (List[T]): Chunks to embed
+            metadata (Optional[Dict[str, Any]], optional): Embedding metadata.
+                Defaults to None.
 
         Returns:
-            List of vector embeddings
+            List[np.ndarray]: List of vector embeddings
+
+        Raises:
+            ServiceStateError: If embedder is not initialized
+            ValueError: If any chunk is invalid
+            TypeError: If any chunk is not of correct type
         """
-        pass
+        ...
+
+    def validate_chunk(self, chunk: T) -> list[str]:
+        """Validate a chunk before embedding.
+
+        Args:
+            chunk (T): Chunk to validate
+
+        Returns:
+            List[str]: List of validation error messages, empty if valid
+
+        Raises:
+            TypeError: If chunk is not of correct type
+        """
+        ...
 
 
-class ChunkTransformer(ChunkProcessor):
-    """Interface for chunk transformation."""
+class ChunkTransformer(Protocol):
+    """Protocol for chunk transformation operations."""
 
-    @abstractmethod
-    def transform_chunk(self, chunk: T, **kwargs) -> P:
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the transformer.
+
+        Args:
+            settings (Settings): Application settings
+
+        Raises:
+            ValueError: If required settings are missing
+        """
+        ...
+
+    def transform_chunk(self, chunk: T, metadata: dict[str, Any] | None = None) -> P:
         """Transform a chunk.
 
         Args:
-            chunk: Chunk to transform
-            **kwargs: Additional transformation parameters
+            chunk (T): Chunk to transform
+            metadata (Optional[Dict[str, Any]], optional): Transformation metadata.
+                Defaults to None.
 
         Returns:
-            Transformed chunk
-        """
-        pass
+            P: Transformed chunk
 
-    @abstractmethod
-    def transform_chunks(self, chunks: List[T], **kwargs) -> List[P]:
+        Raises:
+            ServiceStateError: If transformer is not initialized
+            ValueError: If chunk is invalid
+            TypeError: If chunk is not of correct type
+        """
+        ...
+
+    def transform_chunks(
+        self, chunks: list[T], metadata: dict[str, Any] | None = None
+    ) -> list[P]:
         """Transform multiple chunks.
 
         Args:
-            chunks: Chunks to transform
-            **kwargs: Additional transformation parameters
+            chunks (List[T]): Chunks to transform
+            metadata (Optional[Dict[str, Any]], optional): Transformation metadata.
+                Defaults to None.
 
         Returns:
-            List of transformed chunks
-        """
-        pass
+            List[P]: List of transformed chunks
 
-    @abstractmethod
-    def get_transformation_steps(self) -> List[ProcessingStep]:
+        Raises:
+            ServiceStateError: If transformer is not initialized
+            ValueError: If any chunk is invalid
+            TypeError: If any chunk is not of correct type
+        """
+        ...
+
+    def get_transformation_steps(self) -> list["ProcessingStep"]:
         """Get transformation processing steps.
 
         Returns:
-            List of processing steps
+            List[ProcessingStep]: List of processing steps applied during transformation
         """
-        pass
+        ...
+
+    def validate_chunk(self, chunk: T) -> list[str]:
+        """Validate a chunk before transformation.
+
+        Args:
+            chunk (T): Chunk to validate
+
+        Returns:
+            List[str]: List of validation error messages, empty if valid
+
+        Raises:
+            TypeError: If chunk is not of correct type
+        """
+        ...
 
 
-class TextProcessor(ABC):
-    """Interface for text processing operations."""
+class TextProcessor(Protocol):
+    """Protocol for text processing operations."""
 
-    @abstractmethod
-    def clean_text(self, text: str) -> str:
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the processor.
+
+        Args:
+            settings (Settings): Application settings
+
+        Raises:
+            ValueError: If required settings are missing
+        """
+        ...
+
+    def clean_text(self, text: str, metadata: dict[str, Any] | None = None) -> str:
         """Clean and normalize text.
 
         Args:
-            text: Input text to clean
+            text (str): Input text to clean
+            metadata (Optional[Dict[str, Any]], optional): Cleaning metadata.
+                Defaults to None.
 
         Returns:
-            Cleaned text
+            str: Cleaned and normalized text
 
         Raises:
-            ServiceStateError: If service is not initialized
+            ServiceStateError: If processor is not initialized
+            ValueError: If text is empty or invalid
+            TypeError: If text is not a string
         """
-        pass
+        ...
 
-    @abstractmethod
-    def split_into_sentences(self, text: str) -> List[str]:
+    def split_into_sentences(
+        self, text: str, metadata: dict[str, Any] | None = None
+    ) -> list[str]:
         """Split text into sentences.
 
         Args:
-            text: Input text to split
+            text (str): Input text to split
+            metadata (Optional[Dict[str, Any]], optional): Splitting metadata.
+                Defaults to None.
 
         Returns:
-            List of sentences
+            List[str]: List of sentences
 
         Raises:
-            ServiceStateError: If service is not initialized
+            ServiceStateError: If processor is not initialized
+            ValueError: If text is empty or invalid
+            TypeError: If text is not a string
         """
-        pass
+        ...
 
-    @abstractmethod
-    def chunk_text(self, text: str, max_chunk_size: int = 1000, overlap: int = 100) -> List[str]:
+    def chunk_text(
+        self,
+        text: str,
+        max_chunk_size: int = 1000,
+        overlap: int = 100,
+        metadata: dict[str, Any] | None = None,
+    ) -> list[str]:
         """Split text into overlapping chunks.
 
         Args:
-            text: Input text to chunk
-            max_chunk_size: Maximum size of each chunk
-            overlap: Number of characters to overlap between chunks
+            text (str): Input text to chunk
+            max_chunk_size (int, optional): Maximum size of each chunk. Defaults to 1000.
+            overlap (int, optional): Number of characters to overlap between chunks.
+                Defaults to 100.
+            metadata (Optional[Dict[str, Any]], optional): Chunking metadata.
+                Defaults to None.
 
         Returns:
-            List of text chunks
+            List[str]: List of text chunks
 
         Raises:
-            ServiceStateError: If service is not initialized
+            ServiceStateError: If processor is not initialized
+            ValueError: If text is empty, max_chunk_size <= 0, or overlap < 0
+            TypeError: If text is not a string
         """
-        pass
+        ...
+
+    def validate_text(self, text: str) -> list[str]:
+        """Validate text before processing.
+
+        Args:
+            text (str): Text to validate
+
+        Returns:
+            List[str]: List of validation error messages, empty if valid
+
+        Raises:
+            TypeError: If text is not a string
+        """
+        ...

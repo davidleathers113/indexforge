@@ -1,13 +1,13 @@
 """Performance benchmarks for document validation."""
 
 import time
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
 
 @pytest.fixture
-def large_document(valid_document) -> Dict[str, Any]:
+def large_document(valid_document) -> dict[str, Any]:
     """Create a large test document."""
     # Create a document with 1MB of content
     content = "x" * (1024 * 1024)  # 1MB of content
@@ -16,7 +16,7 @@ def large_document(valid_document) -> Dict[str, Any]:
 
 
 @pytest.fixture
-def document_with_max_metadata(valid_document) -> Dict[str, Any]:
+def document_with_max_metadata(valid_document) -> dict[str, Any]:
     """Create a document with maximum allowed metadata."""
     valid_document["metadata"] = {
         f"key{i}": f"value{i}" for i in range(3)  # max_metadata_keys is 3

@@ -26,20 +26,24 @@ def ref_manager():
     manager.add_reference(chunk1, chunk3, ReferenceType.RELATED)
     return manager
 
+
 @pytest.fixture
 def reference_cache(ref_manager):
     """Create a reference cache with test reference manager."""
     return ReferenceCache(ref_manager, maxsize=100)
+
 
 @pytest.fixture
 def reference_classifier(ref_manager):
     """Create a reference classifier with test reference manager."""
     return ReferenceClassifier(ref_manager)
 
+
 @pytest.fixture
 def monitor(ref_manager, reference_cache, reference_classifier):
     """Create a reference monitor with test components."""
     return ReferenceMonitor(ref_manager, reference_cache, reference_classifier)
+
 
 def test_health_check_normal(monitor):
     """Test health check with normal references."""
@@ -50,6 +54,7 @@ def test_health_check_normal(monitor):
     assert metrics.invalid_references == 0
     assert metrics.bidirectional_mismatches == 0
 
+
 def test_health_check_orphaned_references(monitor):
     """Test health check with orphaned references."""
     source_id = next(iter(monitor.ref_manager._chunks.keys()))
@@ -58,6 +63,7 @@ def test_health_check_orphaned_references(monitor):
     del monitor.ref_manager._chunks[target_id]
     metrics = monitor.check_reference_health()
     assert metrics.orphaned_references > 0
+
 
 def test_health_check_circular_references(monitor):
     """Test health check with circular references."""
@@ -70,6 +76,7 @@ def test_health_check_circular_references(monitor):
     metrics = monitor.check_reference_health()
     assert metrics.circular_references > 0
 
+
 def test_health_check_invalid_metadata(monitor):
     """Test health check with invalid reference metadata."""
     chunk1 = monitor.ref_manager.add_chunk('Chunk 1')
@@ -77,6 +84,7 @@ def test_health_check_invalid_metadata(monitor):
     monitor.ref_manager.add_reference(chunk1, chunk2, ReferenceType.SIMILAR, metadata={'similarity_score': 1.5})
     metrics = monitor.check_reference_health()
     assert metrics.invalid_references > 0
+
 
 def test_health_check_bidirectional_mismatch(monitor):
     """Test health check with bidirectional reference mismatches."""
@@ -87,6 +95,7 @@ def test_health_check_bidirectional_mismatch(monitor):
     ref.bidirectional = False
     metrics = monitor.check_reference_health()
     assert metrics.bidirectional_mismatches > 0
+
 
 def test_cache_metrics(monitor):
     """Test cache metrics collection."""
@@ -101,6 +110,7 @@ def test_cache_metrics(monitor):
     assert metrics['total_requests'] == 3
     assert metrics['hits'] == 2
     assert metrics['misses'] == 1
+
 
 def test_performance_metrics(monitor):
     """Test performance metrics collection."""
@@ -117,6 +127,7 @@ def test_performance_metrics(monitor):
     assert metrics['test_operation'].avg_time_ms >= 100
     assert metrics['test_operation'].min_time_ms <= metrics['test_operation'].max_time_ms
 
+
 def test_log_metrics(monitor, caplog):
     """Test metrics logging."""
     with caplog.at_level(logging.INFO):
@@ -129,6 +140,7 @@ def test_log_metrics(monitor, caplog):
     assert 'requests=' in caplog.text
     assert 'Performance Metrics' not in caplog.text
 
+
 def test_monitor_without_cache():
     """Test monitor functionality without cache component."""
     manager = ReferenceManager()
@@ -137,6 +149,7 @@ def test_monitor_without_cache():
     assert metrics.total_references == 0
     assert monitor.get_cache_metrics() is None
     monitor.log_metrics()
+
 
 def test_time_operation_decorator():
     """Test time_operation decorator."""

@@ -1,11 +1,11 @@
 """Test volume security and permissions."""
 
-from typing import Any, Dict
+from typing import Any
 
 from ...utils.docker_test_utils import DockerTestUtils
 
 
-def test_volume_permissions(docker_client: Any, test_volume: Dict[str, Any]) -> None:
+def test_volume_permissions(docker_client: Any, test_volume: dict[str, Any]) -> None:
     """Test volume mount permissions."""
     mount_point = "/data"
 
@@ -33,7 +33,7 @@ def test_volume_permissions(docker_client: Any, test_volume: Dict[str, Any]) -> 
         container.stop()
 
 
-def test_readonly_mount(docker_client: Any, test_volume: Dict[str, Any]) -> None:
+def test_readonly_mount(docker_client: Any, test_volume: dict[str, Any]) -> None:
     """Test read-only volume mount."""
     mount_point = "/data"
 
@@ -55,7 +55,7 @@ def test_readonly_mount(docker_client: Any, test_volume: Dict[str, Any]) -> None
         container.stop()
 
 
-def test_volume_isolation(docker_client: Any, test_volume: Dict[str, Any]) -> None:
+def test_volume_isolation(docker_client: Any, test_volume: dict[str, Any]) -> None:
     """Test volume mount isolation."""
     container = docker_client.containers.run(
         "test-image:latest",

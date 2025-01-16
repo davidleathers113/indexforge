@@ -6,7 +6,6 @@ document insertion by grouping multiple documents into batches for better perfor
 """
 
 import logging
-from typing import Dict, List
 
 import weaviate
 
@@ -64,7 +63,7 @@ class BatchManager:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
 
-    def add_document(self, properties: Dict, vector: List[float], doc_id: str) -> None:
+    def add_document(self, properties: dict, vector: list[float], doc_id: str) -> None:
         """Add a document to the current batch for processing.
 
         Adds a document with its properties and vector to the current batch. If no
@@ -112,15 +111,15 @@ class BatchManager:
             )
             self.logger.debug(f"Successfully added document {doc_id} to batch")
         except ValueError as ve:
-            self.logger.error(f"UUID validation error for document {doc_id}: {str(ve)}")
+            self.logger.error(f"UUID validation error for document {doc_id}: {ve!s}")
             self.logger.error(f"UUID type: {type(doc_id)}, value: {doc_id}")
             raise
         except Exception as e:
-            self.logger.error(f"Error adding document {doc_id}: {str(e)}", exc_info=True)
+            self.logger.error(f"Error adding document {doc_id}: {e!s}", exc_info=True)
             self.logger.error(f"Document properties that caused error: {properties}")
             raise
 
-    def _on_batch_error(self, batch_results: List[Dict]) -> None:
+    def _on_batch_error(self, batch_results: list[dict]) -> None:
         """Handle errors that occur during batch operations.
 
         Processes batch operation results and logs any errors that occurred
@@ -156,4 +155,4 @@ class BatchManager:
                 self.logger.debug("Cleaning up batch context")
                 self._current_batch.__exit__(None, None, None)
         except Exception as e:
-            self.logger.error(f"Error cleaning up batch context: {str(e)}", exc_info=True)
+            self.logger.error(f"Error cleaning up batch context: {e!s}", exc_info=True)

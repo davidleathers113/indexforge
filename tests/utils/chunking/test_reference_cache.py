@@ -23,10 +23,12 @@ def ref_manager():
     manager.add_reference(chunk1, chunk3, ReferenceType.RELATED)
     return manager
 
+
 @pytest.fixture
 def reference_cache(ref_manager):
     """Create a reference cache with test reference manager."""
     return ReferenceCache(ref_manager, maxsize=100)
+
 
 def test_cache_hit(reference_cache):
     """Test successful cache hits."""
@@ -42,6 +44,7 @@ def test_cache_hit(reference_cache):
     assert reference_cache.stats.misses == 1
     assert ref1 is ref2
 
+
 def test_cache_miss(reference_cache):
     """Test cache misses for non-existent references."""
     unknown_id = uuid4()
@@ -49,6 +52,7 @@ def test_cache_miss(reference_cache):
     assert ref is None
     assert reference_cache.stats.hits == 0
     assert reference_cache.stats.misses == 1
+
 
 def test_cache_invalidation(reference_cache):
     """Test reference invalidation."""
@@ -62,6 +66,7 @@ def test_cache_invalidation(reference_cache):
     assert ref2 is not None
     assert reference_cache.stats.misses == 2
 
+
 def test_chunk_reference_invalidation(reference_cache):
     """Test invalidation of all references for a chunk."""
     source_id = next(iter(reference_cache.ref_manager._chunks.keys()))
@@ -70,6 +75,7 @@ def test_chunk_reference_invalidation(reference_cache):
     reference_cache.invalidate_chunk_references(source_id)
     assert source_id not in reference_cache.forward_index
     assert source_id not in reference_cache.reverse_index
+
 
 def test_bidirectional_reference_caching(reference_cache):
     """Test caching of bidirectional references."""
@@ -83,6 +89,7 @@ def test_bidirectional_reference_caching(reference_cache):
     assert ref2 is not None
     assert reference_cache.stats.hits == 1
 
+
 def test_cache_size_limit():
     """Test cache respects maximum size limit."""
     manager = ReferenceManager()
@@ -93,6 +100,7 @@ def test_cache_size_limit():
     for i in range(3):
         cache.get_reference(chunk_ids[i], chunk_ids[i + 1])
     assert len(cache.reference_cache) <= 2
+
 
 def test_cache_stats(reference_cache):
     """Test cache statistics tracking."""
@@ -108,6 +116,7 @@ def test_cache_stats(reference_cache):
     assert stats.invalidations == 1
     assert stats.total_requests == 3
     assert 0 <= stats.hit_rate <= 100
+
 
 def test_clear_cache(reference_cache):
     """Test clearing the cache."""

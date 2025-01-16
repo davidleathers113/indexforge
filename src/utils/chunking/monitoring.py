@@ -7,12 +7,12 @@ and system metrics.
 from dataclasses import dataclass
 import logging
 import time
-from typing import Dict, Optional, Set
 from uuid import UUID
 
 from .reference_cache import ReferenceCache
 from .reference_classifier import ReferenceClassifier
 from .references import ReferenceManager, ReferenceType
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +45,8 @@ class ReferenceMonitor:
     def __init__(
         self,
         ref_manager: ReferenceManager,
-        cache: Optional[ReferenceCache] = None,
-        classifier: Optional[ReferenceClassifier] = None,
+        cache: ReferenceCache | None = None,
+        classifier: ReferenceClassifier | None = None,
     ):
         """Initialize reference monitor.
 
@@ -58,7 +58,7 @@ class ReferenceMonitor:
         self.ref_manager = ref_manager
         self.cache = cache
         self.classifier = classifier
-        self.performance_metrics: Dict[str, PerformanceMetrics] = {}
+        self.performance_metrics: dict[str, PerformanceMetrics] = {}
 
     def check_reference_health(self) -> ReferenceHealthMetrics:
         """Check health of reference system.
@@ -70,10 +70,10 @@ class ReferenceMonitor:
         metrics.total_references = len(self.ref_manager._references)
 
         # Track processed references to detect cycles
-        processed: Set[UUID] = set()
-        component: Set[UUID] = set()
+        processed: set[UUID] = set()
+        component: set[UUID] = set()
 
-        def check_circular_references(chunk_id: UUID, path: Set[UUID]) -> None:
+        def check_circular_references(chunk_id: UUID, path: set[UUID]) -> None:
             """Check for circular references starting from chunk.
 
             Args:
@@ -149,7 +149,7 @@ class ReferenceMonitor:
             if "citation_type" not in ref.metadata:
                 raise ValueError("Missing citation type for citation reference")
 
-    def get_cache_metrics(self) -> Optional[Dict]:
+    def get_cache_metrics(self) -> dict | None:
         """Get cache performance metrics.
 
         Returns:
@@ -187,7 +187,7 @@ class ReferenceMonitor:
         metrics.max_time_ms = max(metrics.max_time_ms, time_ms)
         metrics.min_time_ms = min(metrics.min_time_ms, time_ms)
 
-    def get_performance_metrics(self) -> Dict[str, PerformanceMetrics]:
+    def get_performance_metrics(self) -> dict[str, PerformanceMetrics]:
         """Get performance metrics for all operations.
 
         Returns:

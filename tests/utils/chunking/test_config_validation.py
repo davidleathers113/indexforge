@@ -13,12 +13,14 @@ def test_default_config_is_valid():
     assert config.min_chunk_size == 25
     assert config.max_chunk_size == 100
 
+
 def test_invalid_chunk_size():
     """Test that invalid chunk sizes raise appropriate errors."""
     with pytest.raises(ValueError, match='chunk_size must be positive'):
         ChunkingConfig(chunk_size=0)
     with pytest.raises(ValueError, match='chunk_size must be positive'):
         ChunkingConfig(chunk_size=-100)
+
 
 def test_invalid_chunk_overlap():
     """Test that invalid chunk overlap values raise appropriate errors."""
@@ -28,6 +30,7 @@ def test_invalid_chunk_overlap():
         ChunkingConfig(chunk_size=100, chunk_overlap=100)
     with pytest.raises(ValueError, match='chunk_overlap must be less than chunk_size'):
         ChunkingConfig(chunk_size=100, chunk_overlap=150)
+
 
 def test_invalid_min_max_chunk_size():
     """Test validation of min/max chunk size relationships."""
@@ -40,12 +43,14 @@ def test_invalid_min_max_chunk_size():
     with pytest.raises(ValueError, match='max_chunk_size must be greater than min_chunk_size'):
         ChunkingConfig(min_chunk_size=100, max_chunk_size=100)
 
+
 def test_model_name_validation():
     """Test model name handling."""
     config = ChunkingConfig(model_name='text-embedding-3-small')
     assert config.model_name == 'text-embedding-3-small'
     config = ChunkingConfig(model_name=None)
     assert config.model_name is None
+
 
 def test_advanced_chunking_parameter():
     """Test advanced chunking parameter behavior."""
@@ -56,12 +61,14 @@ def test_advanced_chunking_parameter():
     config = ChunkingConfig()
     assert not config.use_advanced_chunking
 
+
 def test_chunk_size_relationships():
     """Test relationships between different size parameters."""
     with pytest.raises(ValueError):
         ChunkingConfig(chunk_size=50, min_chunk_size=100, max_chunk_size=200)
     with pytest.raises(ValueError):
         ChunkingConfig(chunk_size=1000, min_chunk_size=50, max_chunk_size=500)
+
 
 def test_parameter_types():
     """Test that parameters are of correct type."""
@@ -76,6 +83,7 @@ def test_parameter_types():
     with pytest.raises(TypeError):
         ChunkingConfig(max_chunk_size=100.0)
 
+
 def test_immutability():
     """Test that configuration is immutable after creation."""
     config = ChunkingConfig()
@@ -89,6 +97,7 @@ def test_immutability():
         config.min_chunk_size = 30
     with pytest.raises(AttributeError):
         config.max_chunk_size = 150
+
 
 def test_config_string_representation():
     """Test that configuration has meaningful string representation."""

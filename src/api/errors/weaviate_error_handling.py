@@ -1,7 +1,7 @@
 """Weaviate error handling module for consistent error management."""
 
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable, Optional, Type
 
 import weaviate
 
@@ -9,7 +9,7 @@ import weaviate
 class WeaviateError(Exception):
     """Base class for Weaviate errors."""
 
-    def __init__(self, message: str, original_error: Optional[Exception] = None):
+    def __init__(self, message: str, original_error: Exception | None = None):
         """Initialize WeaviateError.
 
         Args:
@@ -53,7 +53,7 @@ def handle_weaviate_error(error: Exception) -> WeaviateError:
     Returns:
         WeaviateError: Mapped custom exception
     """
-    error_mapping: dict[Type[Exception], Type[WeaviateError]] = {
+    error_mapping: dict[type[Exception], type[WeaviateError]] = {
         weaviate.exceptions.WeaviateConnectionError: WeaviateConnectionFailure,
         weaviate.exceptions.WeaviateQueryError: WeaviateQueryFailure,
         weaviate.exceptions.WeaviateTimeoutError: WeaviateTimeoutFailure,

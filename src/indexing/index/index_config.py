@@ -32,7 +32,6 @@ Example:
 
 from dataclasses import dataclass
 import logging
-from typing import Optional
 
 import weaviate
 
@@ -128,7 +127,7 @@ class IndexInitializer:
         self.config = config
         self.logger = logging.getLogger(__name__)
 
-    def initialize(self) -> tuple[weaviate.Client, Optional[CacheManager]]:
+    def initialize(self) -> tuple[weaviate.Client, CacheManager | None]:
         """
         Initialize and configure all index infrastructure components.
 
@@ -162,7 +161,7 @@ class IndexInitializer:
             cache_manager = self._create_cache_manager()
             return client, cache_manager
         except Exception as e:
-            msg = f"Failed to initialize index: {str(e)}"
+            msg = f"Failed to initialize index: {e!s}"
             self.logger.error(msg)
             raise ConnectionError(msg)
 
@@ -186,11 +185,11 @@ class IndexInitializer:
         try:
             return weaviate.Client(self.config.client_url)
         except Exception as e:
-            msg = f"Failed to connect to Weaviate: {str(e)}"
+            msg = f"Failed to connect to Weaviate: {e!s}"
             self.logger.error(msg)
             raise ConnectionError(msg)
 
-    def _create_cache_manager(self) -> Optional[CacheManager]:
+    def _create_cache_manager(self) -> CacheManager | None:
         """
         Create and configure the Redis cache manager.
 
@@ -214,5 +213,5 @@ class IndexInitializer:
                 default_ttl=self.config.cache_ttl,
             )
         except Exception as e:
-            self.logger.warning(f"Failed to initialize cache manager: {str(e)}")
+            self.logger.warning(f"Failed to initialize cache manager: {e!s}")
             return None

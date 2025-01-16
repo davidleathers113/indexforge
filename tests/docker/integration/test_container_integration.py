@@ -1,6 +1,6 @@
+from collections.abc import Generator
 from pathlib import Path
 import time
-from typing import Dict, Generator, List
 
 import docker
 from docker.models.containers import Container
@@ -22,9 +22,9 @@ def service_containers(
     docker_client: docker.DockerClient,
     dockerfile: Path,
     docker_compose_file: Path,
-    test_environment: Dict[str, str],
+    test_environment: dict[str, str],
     docker_network: Network,
-) -> Generator[List[Container], None, None]:
+) -> Generator[list[Container], None, None]:
     """Start all required service containers."""
     containers = []
     try:
@@ -85,7 +85,7 @@ def wait_for_container_healthy(container: Container, timeout: int = 30) -> None:
     pytest.fail(f"Container {container.name} failed to become healthy within {timeout} seconds")
 
 
-def test_network_connectivity(service_containers: List[Container], docker_network: Network) -> None:
+def test_network_connectivity(service_containers: list[Container], docker_network: Network) -> None:
     """Test network connectivity between containers."""
     app_container = next(c for c in service_containers if c.name == "test_app")
 
@@ -132,7 +132,7 @@ def test_volume_persistence(docker_client: docker.DockerClient, docker_network: 
         volume.remove(force=True)
 
 
-def test_environment_variables(service_containers: List[Container]) -> None:
+def test_environment_variables(service_containers: list[Container]) -> None:
     """Test environment variable handling."""
     app_container = next(c for c in service_containers if c.name == "test_app")
 
@@ -146,7 +146,7 @@ def test_environment_variables(service_containers: List[Container]) -> None:
         ), f"Required environment variable {var} not set"
 
 
-def test_container_communication(service_containers: List[Container]) -> None:
+def test_container_communication(service_containers: list[Container]) -> None:
     """Test inter-container communication via API calls."""
     app_container = next(c for c in service_containers if c.name == "test_app")
 

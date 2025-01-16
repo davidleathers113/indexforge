@@ -8,13 +8,14 @@ This module is responsible for:
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any
 
 from jinja2 import Environment
 
 from .models.settings import TemplateSettings
 from .services.context import ContextService
 from .services.environment import EnvironmentService
+
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ _context_service = ContextService()
 _environment_service = EnvironmentService(TemplateSettings.create_default())
 
 
-def create_environment(templates_dir: Union[str, Path]) -> Environment:
+def create_environment(templates_dir: str | Path) -> Environment:
     """Creates a Jinja2 environment for template rendering.
 
     This function is responsible for:
@@ -49,7 +50,7 @@ def create_environment(templates_dir: Union[str, Path]) -> Environment:
     return _environment_service.create_environment(templates_dir)
 
 
-def get_template_context(template_type: str, **kwargs) -> Dict[str, Any]:
+def get_template_context(template_type: str, **kwargs) -> dict[str, Any]:
     """Gets context dictionary for template rendering.
 
     This function provides helpers for:

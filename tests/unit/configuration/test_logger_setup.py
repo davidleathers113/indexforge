@@ -1,4 +1,4 @@
-'Integration tests for the complete logging system.\n\nThis module contains integration tests that verify different logging components\nwork together correctly, including:\n- Basic and JSON logging\n- Log rotation\n- Contextual logging\n- Performance under load\n'
+"""Integration tests for the complete logging system.\n\nThis module contains integration tests that verify different logging components\nwork together correctly, including:\n- Basic and JSON logging\n- Log rotation\n- Contextual logging\n- Performance under load\n"""
 import json
 import logging
 import os
@@ -12,19 +12,20 @@ def test_complete_logging_workflow(temp_log_file, cleanup_logger):
     basic_logger = setup_logger('basic_logger', temp_log_file, level=logging.DEBUG)
     basic_logger.debug('Debug message')
     basic_logger.info('Info message')
-    with open(temp_log_file, 'r') as f:
+    with open(temp_log_file) as f:
         log_content = f.read()
         assert 'Debug message' in log_content
         assert 'Info message' in log_content
     json_logger = setup_json_logger('json_logger', temp_log_file)
     context = {'user': 'test_user', 'action': 'integration_test'}
     log_with_context(json_logger, logging.INFO, 'JSON test message', context)
-    with open(temp_log_file, 'r') as f:
+    with open(temp_log_file) as f:
         last_line = f.readlines()[-1].strip()
         log_data = json.loads(last_line)
         assert log_data['message'] == 'JSON test message'
         assert log_data['user'] == 'test_user'
         assert log_data['action'] == 'integration_test'
+
 
 def test_rotation_with_mixed_logging(temp_log_file, cleanup_logger):
     """Test log rotation works with both basic and JSON logging"""
@@ -41,9 +42,10 @@ def test_rotation_with_mixed_logging(temp_log_file, cleanup_logger):
     backup_files = [f for f in os.listdir(log_dir) if f.startswith(os.path.basename(temp_log_file))]
     assert len(backup_files) <= backup_count + 1
     for backup_file in backup_files:
-        with open(os.path.join(log_dir, backup_file), 'r') as f:
+        with open(os.path.join(log_dir, backup_file)) as f:
             content = f.read()
             assert content.strip()
+
 
 def test_concurrent_mixed_logging(temp_log_file, cleanup_logger):
     """Test concurrent logging with mix of basic and JSON formats"""
@@ -59,7 +61,7 @@ def test_concurrent_mixed_logging(temp_log_file, cleanup_logger):
         thread.start()
     for thread in threads:
         thread.join()
-    with open(temp_log_file, 'r') as f:
+    with open(temp_log_file) as f:
         log_lines = f.readlines()
         basic_logs = [line for line in log_lines if 'Basic message' in line]
         json_logs = [line for line in log_lines if 'JSON message' in line]

@@ -1,10 +1,10 @@
 """Test volume data persistence."""
 
-from typing import Any, Dict
+from typing import Any
 import uuid
 
 
-def test_data_persistence(docker_client: Any, test_volume: Dict[str, Any]) -> None:
+def test_data_persistence(docker_client: Any, test_volume: dict[str, Any]) -> None:
     """Test data persistence across container restarts."""
     test_data = "test data " + uuid.uuid4().hex
     mount_point = "/data"
@@ -43,7 +43,7 @@ def test_data_persistence(docker_client: Any, test_volume: Dict[str, Any]) -> No
         container2.stop()
 
 
-def test_concurrent_access(docker_client: Any, test_volume: Dict[str, Any]) -> None:
+def test_concurrent_access(docker_client: Any, test_volume: dict[str, Any]) -> None:
     """Test concurrent access to volume data."""
     mount_point = "/data"
     test_file = f"{mount_point}/concurrent.txt"

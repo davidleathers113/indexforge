@@ -2,40 +2,15 @@
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
-
-class ServiceError(Exception):
-    """Base exception for service-related errors."""
-
-    pass
-
-
-class ServiceNotInitializedError(ServiceError):
-    """Raised when attempting to use a service that hasn't been initialized."""
-
-    pass
-
-
-class ServiceInitializationError(ServiceError):
-    """Raised when a service fails to initialize."""
-
-    pass
-
-
-class ServiceStateError(ServiceError):
-    """Raised when a service operation fails due to invalid state.
-
-    This exception indicates that a service operation could not be completed
-    due to the current state of the service. This could be due to:
-    - Connection failures
-    - Resource unavailability
-    - Invalid operation sequences
-    - Timeout conditions
-    - Resource exhaustion
-    """
-
-    pass
+from src.core.errors import (
+    ServiceError,
+    ServiceInitializationError,
+    ServiceNotInitializedError,
+    ServiceState,
+    ServiceStateError,
+)
 
 
 class BaseService(ABC):
@@ -47,7 +22,7 @@ class BaseService(ABC):
 
     def __init__(self) -> None:
         self._initialized: bool = False
-        self._metadata: Dict[str, Any] = {}
+        self._metadata: dict[str, Any] = {}
 
     @property
     def is_initialized(self) -> bool:
@@ -55,7 +30,7 @@ class BaseService(ABC):
         return self._initialized
 
     @property
-    def metadata(self) -> Dict[str, Any]:
+    def metadata(self) -> dict[str, Any]:
         """Get service metadata."""
         return self._metadata.copy()
 
@@ -103,7 +78,7 @@ class BaseService(ABC):
         """
         self._metadata[key] = value
 
-    def get_metadata(self, key: str) -> Optional[Any]:
+    def get_metadata(self, key: str) -> Any | None:
         """Get metadata value by key.
 
         Args:
@@ -121,3 +96,14 @@ class BaseService(ABC):
             str: Current time in ISO format
         """
         return datetime.utcnow().isoformat()
+
+
+# Re-export service errors for backward compatibility
+__all__ = [
+    "BaseService",
+    "ServiceError",
+    "ServiceInitializationError",
+    "ServiceNotInitializedError",
+    "ServiceState",
+    "ServiceStateError",
+]

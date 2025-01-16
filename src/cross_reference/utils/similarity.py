@@ -5,7 +5,6 @@ This module provides functions for computing similarities between document
 chunk embeddings, primarily using cosine similarity.
 """
 
-from typing import List
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -42,7 +41,7 @@ def compute_cosine_similarities(embeddings: np.ndarray) -> np.ndarray:
 
 def get_top_similar_indices(
     similarities: np.ndarray, index: int, k: int, threshold: float = 0.0
-) -> List[int]:
+) -> list[int]:
     """
     Get indices of top-k most similar items for a given item.
 

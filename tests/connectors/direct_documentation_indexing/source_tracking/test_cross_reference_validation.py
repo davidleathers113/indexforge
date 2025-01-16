@@ -24,7 +24,7 @@ def test_validate_references_circular(reference_manager):
     reference_manager._add_bidirectional_reference("chunk_2", "chunk_0", ReferenceType.SEQUENTIAL)
 
     errors = reference_manager.validate_references()
-    assert any(("Circular reference detected" in error for error in errors))
+    assert any("Circular reference detected" in error for error in errors)
 
 
 def test_validate_references_orphaned(reference_manager):
@@ -38,7 +38,7 @@ def test_validate_references_orphaned(reference_manager):
     )
 
     errors = reference_manager.validate_references()
-    assert any(("Orphaned reference" in error for error in errors))
+    assert any("Orphaned reference" in error for error in errors)
 
 
 def test_validate_references_missing_backref(reference_manager):
@@ -52,7 +52,7 @@ def test_validate_references_missing_backref(reference_manager):
     )
 
     errors = reference_manager.validate_references()
-    assert any(("Missing back-reference" in error for error in errors))
+    assert any("Missing back-reference" in error for error in errors)
 
 
 def test_validate_references_valid(reference_manager):

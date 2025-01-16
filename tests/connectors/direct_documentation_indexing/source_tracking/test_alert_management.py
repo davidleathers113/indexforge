@@ -1,6 +1,6 @@
 """Tests for alert history and management functionality."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 from src.connectors.direct_documentation_indexing.source_tracking.alert_manager import (
@@ -26,7 +26,7 @@ def test_alert_id_generation():
 
 def test_alert_history(alert_manager):
     """Test alert history tracking."""
-    metadata = {"test_key": "test_value", "timestamp": datetime.now(timezone.utc)}
+    metadata = {"test_key": "test_value", "timestamp": datetime.now(UTC)}
 
     with patch.object(alert_manager, "_send_webhook_alerts", return_value=True):
         alert_manager.send_alert(

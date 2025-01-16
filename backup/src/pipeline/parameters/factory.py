@@ -1,6 +1,6 @@
 """Parameter factory implementation."""
 
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from src.pipeline.parameters.types.cache import CacheConfig, CacheParameter
 from src.pipeline.parameters.types.numeric import NumericParameter
@@ -14,13 +14,13 @@ class ParameterFactory:
     @staticmethod
     def create_string_parameter(
         name: str,
-        value: Union[str, bytes],
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
+        value: str | bytes,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> StringParameter:
         """Create a string parameter."""
         return StringParameter(
@@ -37,12 +37,12 @@ class ParameterFactory:
     @staticmethod
     def create_numeric_parameter(
         name: str,
-        value: Union[int, float, str],
-        min_value: Optional[Union[int, float]] = None,
-        max_value: Optional[Union[int, float]] = None,
+        value: int | float | str,
+        min_value: int | float | None = None,
+        max_value: int | float | None = None,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> NumericParameter:
         """Create a numeric parameter."""
         return NumericParameter(
@@ -59,10 +59,10 @@ class ParameterFactory:
     def create_url_parameter(
         name: str,
         value: str,
-        allowed_schemes: Optional[list[str]] = None,
+        allowed_schemes: list[str] | None = None,
         required: bool = True,
         allow_none: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> URLParameter:
         """Create a URL parameter."""
         return URLParameter(
@@ -77,9 +77,9 @@ class ParameterFactory:
     @staticmethod
     def create_cache_parameter(
         name: str = "cache",
-        value: Optional[Union[CacheConfig, Dict[str, Any]]] = None,
+        value: CacheConfig | dict[str, Any] | None = None,
         required: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> CacheParameter:
         """Create a cache parameter."""
         return CacheParameter(

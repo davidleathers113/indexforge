@@ -4,12 +4,12 @@ from argparse import Namespace
 from dataclasses import dataclass, field
 import logging
 import sys
-from typing import List, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 class CLIState(BaseState):
     """CLI state management."""
 
-    argv: List[str] = field(default_factory=lambda: sys.argv.copy())
-    args_namespace: Optional[Namespace] = None
+    argv: list[str] = field(default_factory=lambda: sys.argv.copy())
+    args_namespace: Namespace | None = None
     module_name: str = "__main__"
     error_mode: bool = False
 
@@ -31,7 +31,7 @@ class CLIState(BaseState):
         self.module_name = "__main__"
         self.error_mode = False
 
-    def set_argv(self, new_argv: List[str]):
+    def set_argv(self, new_argv: list[str]):
         """Set new argv values."""
         self.argv = new_argv
 
@@ -66,7 +66,7 @@ def mock_argparse_parse_args(mock_cli_state):
             return mock_cli_state.args_namespace
 
         except Exception as e:
-            mock_cli_state.add_error(f"Error parsing arguments: {str(e)}")
+            mock_cli_state.add_error(f"Error parsing arguments: {e!s}")
             raise
 
     mock_parse = MagicMock(side_effect=mock_parse_args)
@@ -82,7 +82,7 @@ def mock_argparse_parse_args(mock_cli_state):
 def mock_sys_argv(mock_cli_state):
     """Mock for sys.argv with state management."""
 
-    def update_argv(new_argv: List[str]):
+    def update_argv(new_argv: list[str]):
         """Update argv values."""
         mock_cli_state.set_argv(new_argv)
         sys.argv = mock_cli_state.argv

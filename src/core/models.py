@@ -6,7 +6,6 @@ and references used throughout the application.
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -45,15 +44,15 @@ class DocumentMetadata(BaseModel):
     """Metadata for a document."""
 
     title: str
-    author: Optional[str] = None
+    author: str | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     modified_at: datetime = Field(default_factory=datetime.utcnow)
-    mime_type: Optional[str] = None
+    mime_type: str | None = None
     size_bytes: int
-    page_count: Optional[int] = None
-    language: Optional[str] = None
-    source_path: Optional[str] = None
-    custom_metadata: Dict[str, str] = Field(default_factory=dict)
+    page_count: int | None = None
+    language: str | None = None
+    source_path: str | None = None
+    custom_metadata: dict[str, str] = Field(default_factory=dict)
 
 
 class Document(BaseModel):
@@ -64,8 +63,8 @@ class Document(BaseModel):
     status: DocumentStatus = Field(default=DocumentStatus.PENDING)
     metadata: DocumentMetadata
     content: str
-    processing_history: List[ProcessingStep] = Field(default_factory=list)
-    error_message: Optional[str] = None
+    processing_history: list[ProcessingStep] = Field(default_factory=list)
+    error_message: str | None = None
 
 
 class ChunkMetadata(BaseModel):
@@ -75,9 +74,9 @@ class ChunkMetadata(BaseModel):
     sequence_number: int
     start_offset: int
     end_offset: int
-    page_number: Optional[int] = None
-    section_title: Optional[str] = None
-    custom_metadata: Dict[str, str] = Field(default_factory=dict)
+    page_number: int | None = None
+    section_title: str | None = None
+    custom_metadata: dict[str, str] = Field(default_factory=dict)
 
 
 class Chunk(BaseModel):
@@ -86,17 +85,17 @@ class Chunk(BaseModel):
     id: UUID
     content: str
     metadata: ChunkMetadata
-    embedding: Optional[List[float]] = None
+    embedding: list[float] | None = None
 
 
 class ProcessedChunk(Chunk):
     """Processed chunk with additional attributes."""
 
     processed_content: str
-    tokens: List[str] = Field(default_factory=list)
-    named_entities: Dict[str, str] = Field(default_factory=dict)
-    sentiment_score: Optional[float] = None
-    importance_score: Optional[float] = None
+    tokens: list[str] = Field(default_factory=list)
+    named_entities: dict[str, str] = Field(default_factory=dict)
+    sentiment_score: float | None = None
+    importance_score: float | None = None
 
 
 class ReferenceType(str, Enum):
@@ -115,20 +114,20 @@ class Reference(BaseModel):
     target_id: UUID
     type: ReferenceType
     confidence: float = Field(default=1.0)
-    metadata: Dict[str, str] = Field(default_factory=dict)
+    metadata: dict[str, str] = Field(default_factory=dict)
 
 
 class CitationReference(Reference):
     """Citation reference with additional attributes."""
 
     citation_text: str
-    page_number: Optional[int] = None
-    style: Optional[str] = None
+    page_number: int | None = None
+    style: str | None = None
 
 
 class SemanticReference(Reference):
     """Semantic reference with additional attributes."""
 
     similarity_score: float
-    context_window: Optional[str] = None
-    embedding_model: Optional[str] = None
+    context_window: str | None = None
+    embedding_model: str | None = None

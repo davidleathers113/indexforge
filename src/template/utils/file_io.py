@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Union
+
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class FileIO:
     """Handles all file I/O operations."""
 
-    def read_file(self, filepath: Union[str, Path]) -> str:
+    def read_file(self, filepath: str | Path) -> str:
         """Read content from a file.
 
         Args:
@@ -26,15 +26,15 @@ class FileIO:
         logger.debug("Reading file: %s", path)
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 content = f.read()
             logger.debug("Successfully read %s", path)
             return content
         except Exception as e:
             logger.error("Failed to read %s: %s", path, str(e))
-            raise IOError(f"Failed to read {path}: {str(e)}")
+            raise OSError(f"Failed to read {path}: {e!s}")
 
-    def write_file(self, filepath: Union[str, Path], content: str) -> None:
+    def write_file(self, filepath: str | Path, content: str) -> None:
         """Write content to a file.
 
         Args:
@@ -53,9 +53,9 @@ class FileIO:
             logger.debug("Successfully wrote to %s", path)
         except Exception as e:
             logger.error("Failed to write to %s: %s", path, str(e))
-            raise IOError(f"Failed to write to {path}: {str(e)}")
+            raise OSError(f"Failed to write to {path}: {e!s}")
 
-    def read_binary_file(self, filepath: Union[str, Path]) -> bytes:
+    def read_binary_file(self, filepath: str | Path) -> bytes:
         """Read binary content from a file.
 
         Args:
@@ -77,4 +77,4 @@ class FileIO:
             return content
         except Exception as e:
             logger.error("Failed to read binary file %s: %s", path, str(e))
-            raise IOError(f"Failed to read binary file {path}: {str(e)}")
+            raise OSError(f"Failed to read binary file {path}: {e!s}")

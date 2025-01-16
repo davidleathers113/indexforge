@@ -7,7 +7,7 @@ Includes base message types, priorities, statuses, and processing results.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
@@ -40,10 +40,10 @@ class Message(BaseModel, Generic[T]):
     message_id: UUID = Field(default_factory=uuid4)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     priority: MessagePriority = Field(default=MessagePriority.NORMAL)
-    correlation_id: Optional[str] = None
-    reply_to: Optional[str] = None
+    correlation_id: str | None = None
+    reply_to: str | None = None
     content_type: str = "application/json"
-    headers: Dict[str, Any] = Field(default_factory=dict)
+    headers: dict[str, Any] = Field(default_factory=dict)
     payload: T
 
     class Config:
@@ -58,7 +58,7 @@ class ErrorDetail(BaseModel):
     error_type: str
     error_message: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    traceback: Optional[str] = None
+    traceback: str | None = None
 
 
 class ProcessingResult(BaseModel, Generic[T]):
@@ -66,7 +66,7 @@ class ProcessingResult(BaseModel, Generic[T]):
 
     message_id: UUID
     status: MessageStatus
-    result: Optional[T] = None
-    error: Optional[ErrorDetail] = None
+    result: T | None = None
+    error: ErrorDetail | None = None
     processing_time: float
     timestamp: datetime = Field(default_factory=datetime.utcnow)

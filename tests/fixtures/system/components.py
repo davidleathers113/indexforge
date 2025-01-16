@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass, field
 import logging
-from typing import Dict, Optional
 from unittest.mock import MagicMock
 
 import pytest
 
 from ..core.base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class ComponentState(BaseState):
     """Component collection state."""
 
-    components: Dict[str, MagicMock] = field(default_factory=dict)
+    components: dict[str, MagicMock] = field(default_factory=dict)
     error_mode: bool = False
 
     def reset(self):
@@ -29,7 +29,7 @@ class ComponentState(BaseState):
         """Add a component to the collection."""
         self.components[name] = component
 
-    def get_component(self, name: str) -> Optional[MagicMock]:
+    def get_component(self, name: str) -> MagicMock | None:
         """Get a component by name."""
         return self.components.get(name)
 
@@ -63,10 +63,13 @@ def mock_components(
 
     # Create NotionConnector mock with test documents
     notion_mock = MagicMock(name="notionconnector")
+
     def load_csv_files():
         return [doc_state.create_document(content="Test CSV content")]
+
     def load_html_files():
         return [doc_state.create_document(content="Test HTML content")]
+
     def load_markdown_files():
         return [doc_state.create_document(content="Test Markdown content")]
     notion_mock.load_csv_files = MagicMock(side_effect=load_csv_files)

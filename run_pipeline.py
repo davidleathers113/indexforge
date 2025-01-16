@@ -24,7 +24,6 @@ Example:
 
 import argparse
 import sys
-from typing import Set
 
 from src.models.settings import ClusteringConfig, SummarizerConfig
 from src.pipeline import Pipeline, PipelineStep
@@ -89,7 +88,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def parse_steps(steps_str: str) -> Set[PipelineStep]:
+def parse_steps(steps_str: str) -> set[PipelineStep]:
     """Parse pipeline steps from a comma-separated string.
 
     Converts a comma-separated string of step names into a set of PipelineStep
@@ -174,7 +173,7 @@ def main():
         print(f"Check {args.log_dir}/pipeline.json for detailed logs")
         return 0
     except Exception as e:
-        print(f"Error: {str(e)}", file=sys.stderr)
+        print(f"Error: {e!s}", file=sys.stderr)
         raise SystemExit(1)
 
 

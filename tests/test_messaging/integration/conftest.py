@@ -1,8 +1,8 @@
 """Fixtures for RabbitMQ integration tests."""
 
 import asyncio
+from collections.abc import AsyncGenerator
 import socket
-from typing import AsyncGenerator, Dict
 
 import docker
 from docker.models.containers import Container
@@ -18,7 +18,7 @@ def is_port_available(port: int) -> bool:
         try:
             s.bind(("localhost", port))
             return True
-        except socket.error:
+        except OSError:
             return False
 
 
@@ -82,7 +82,7 @@ def rabbitmq_container(docker_client: docker.DockerClient, rabbitmq_port: int) -
 
 
 @pytest.fixture(scope="session")
-def integration_settings(rabbitmq_container: Container, rabbitmq_port: int) -> Dict:
+def integration_settings(rabbitmq_container: Container, rabbitmq_port: int) -> dict:
     """Configure RabbitMQ settings for integration tests."""
     # Store original settings
     original_broker_url = rabbitmq_settings.broker_url
@@ -103,7 +103,7 @@ def integration_settings(rabbitmq_container: Container, rabbitmq_port: int) -> D
 
 
 @pytest_asyncio.fixture(scope="function")
-async def integration_connection_manager(integration_settings: Dict) -> AsyncGenerator:
+async def integration_connection_manager(integration_settings: dict) -> AsyncGenerator:
     """Create a RabbitMQConnectionManager instance for integration tests."""
     from src.api.messaging.rabbitmq_connection_manager import RabbitMQConnectionManager
 

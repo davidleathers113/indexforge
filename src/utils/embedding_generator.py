@@ -14,7 +14,6 @@ Example:
     ```
 """
 
-from typing import List, Optional
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -32,7 +31,7 @@ class EmbeddingGenerator:
         """
         self.model = SentenceTransformer(model_name)
 
-    def generate_embeddings(self, texts: List[str], batch_size: Optional[int] = None) -> np.ndarray:
+    def generate_embeddings(self, texts: list[str], batch_size: int | None = None) -> np.ndarray:
         """Generate embeddings for a list of texts.
 
         Args:

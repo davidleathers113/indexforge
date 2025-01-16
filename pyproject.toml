@@ -51,6 +51,8 @@ aiormq = "^6.8.1"
 aiohttp = "^3.11.11"
 asyncio = ">=3.4.3,<4.0.0"
 structlog = ">=24.4.0,<25.0.0"
+spacy = "^3.7.4"
+nltk = "^3.8.1"
 
 # Storage dependencies
 redis = {version = "^5.2.1", extras = ["hiredis"]}
@@ -79,12 +81,18 @@ huggingface-hub = "^0.27.1"
 accelerate = "^1.2.1"
 transformers = "^4.48.0"
 
+# Statistical analysis dependencies
+scipy = "^1.12.0"
+statsmodels = "^0.14.1"
+scikit-learn = "^1.4.1"
+
 # Additional dependencies
 hvac = "^1.2.1"
 loguru = "^0.7.2"
 pillow = "^11.1.0"
 dependency-injector = "^4.45.0"
 backoff = "^2.2.1"
+poetry = "^2.0.1"
 
 [tool.poetry.group.storage]
 optional = true
@@ -118,6 +126,30 @@ tiktoken = "^0.5.2"
 tqdm = "^4.67.1"
 spacy = "^3.8.3"
 faiss-cpu = "^1.7.4"
+langdetect = "^1.0.9"
+
+[tool.poetry.group.docker]
+optional = true
+
+[tool.poetry.group.docker.dependencies]
+pytest-asyncio = "^0.23.5"
+aiohttp = "^3.11.11"
+psutil = "^5.9.6"
+types-psutil = "^5.9.5.17"
+
+[tool.poetry.group.render]
+optional = true
+
+[tool.poetry.group.render.dependencies]
+pyyaml = "^6.0.2"
+jsonschema = "^4.23.0"
+python-dotenv = "^1.0.1"
+requests = {version = "^2.32.3", extras = ["security"]}
+pytest-timeout = "^2.3.1"
+pytest-rerunfailures = "^15.0"
+opentelemetry-api = "^1.29.0"
+opentelemetry-sdk = "^1.29.0"
+opentelemetry-instrumentation-fastapi = "^0.50b0"
 
 [tool.poetry.group.parsing]
 optional = true
@@ -290,39 +322,42 @@ name = "pytorch"
 url = "https://download.pytorch.org/whl/cpu"
 priority = "supplemental"
 
-[tool.poetry.group.docker]
-optional = true
-
-[tool.poetry.group.docker.dependencies]
-pytest-asyncio = "^0.23.5"
-aiohttp = "^3.11.11"
-psutil = "^5.9.6"
-types-psutil = "^5.9.5.17"
-
-# Note: docker is already in ci group
-# Note: pytest and other testing dependencies are already in dev group
-
-[tool.poetry.group.render]
-optional = true
-
-[tool.poetry.group.render.dependencies]
-pyyaml = "^6.0.2"
-jsonschema = "^4.23.0"
-python-dotenv = "^1.0.1"
-requests = {version = "^2.32.3", extras = ["security"]}
-pytest-timeout = "^2.3.1"
-pytest-rerunfailures = "^15.0"
-opentelemetry-api = "^1.29.0"
-opentelemetry-sdk = "^1.29.0"
-opentelemetry-instrumentation-fastapi = "^0.50b0"
-
 [tool.ruff]
+# Base configuration
 line-length = 100
 target-version = "py311"
-extend-exclude = [".git", ".tox", ".venv", "venv", "__pycache__", "build", "dist"]
 src = ["src"]
+preview = true
+
+# File selection
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "__pycache__",
+]
+extend-exclude = [".git", ".tox", ".venv", "venv", "__pycache__", "build", "dist"]
 
 [tool.ruff.lint]
+# Rule selection
 select = [
     "E",    # pycodestyle errors
     "W",    # pycodestyle warnings
@@ -332,8 +367,61 @@ select = [
     "C4",   # flake8-comprehensions
     "UP",   # pyupgrade
     "RUF",  # ruff-specific rules
+    "N",    # pep8-naming
+    "D",    # pydocstyle
+    "TCH",  # type-checking
+    "ERA",  # eradicate
+    "PL",   # pylint
+    "TRY",  # tryceratops
+    "S",    # flake8-bandit security checks
+    "ASYNC", # flake8-async async/await rules
+    "ARG",  # flake8-unused-arguments
 ]
-ignore = []
+
+# Allow unused variables when underscore-prefixed
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Rule configuration
+ignore = [
+    "D203",  # one-blank-line-before-class (conflicts with D211)
+    "D212",  # multi-line-summary-first-line (conflicts with D213)
+    "TRY003",  # long-exception-message
+    "PLR0913",  # too-many-arguments
+    "S101",   # Use of assert detected (acceptable in tests)
+]
+
+# Fix configuration
+fixable = ["A", "B", "C", "D", "E", "F", "I", "N", "UP", "RUF", "TCH", "ERA", "S", "ARG"]
+unfixable = ["PLR", "TRY", "ASYNC"]
+
+# Task tags
+task-tags = ["TODO", "FIXME", "XXX", "HACK"]
+typing-modules = ["typing", "typing_extensions"]
+
+# Per-file ignores
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "D104"]
+"tests/*" = ["D100", "D101", "D102", "D103", "D104", "S101"]
+"src/migrations/*" = ["D", "ERA", "RUF012"]
+"src/config/*" = ["D100", "D104"]
+
+# Plugin configurations
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "fastapi.Body"]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = [
+    "classmethod",
+    "pydantic.validator",
+    "pydantic.root_validator",
+    "pydantic.field_validator"
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
@@ -369,3 +457,8 @@ known-third-party = [
     "weaviate",
     "weaviate_client"
 ]
+lines-after-imports = 2
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "double"

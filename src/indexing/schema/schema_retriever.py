@@ -6,7 +6,6 @@ a Weaviate database instance.
 """
 
 import logging
-from typing import Dict, Optional
 
 import weaviate
 
@@ -19,7 +18,7 @@ class SchemaRetriever:
         self.class_name = class_name
         self.logger = logging.getLogger(__name__)
 
-    def get_schema(self) -> Optional[Dict]:
+    def get_schema(self) -> dict | None:
         """Retrieve the current schema configuration from Weaviate."""
         try:
             schema = self.client.schema.get()
@@ -34,5 +33,5 @@ class SchemaRetriever:
             self.logger.warning(f"Class {self.class_name} not found in schema")
             return None
         except Exception as e:
-            self.logger.error(f"Error getting schema: {str(e)}", exc_info=True)
+            self.logger.error(f"Error getting schema: {e!s}", exc_info=True)
             raise

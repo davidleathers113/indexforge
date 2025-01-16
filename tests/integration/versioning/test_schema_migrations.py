@@ -3,16 +3,17 @@
 This module contains tests that verify the migration process between
 different schema versions, including rollback scenarios and partial updates.
 """
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
 from src.indexing.schema import SchemaMigrator
 
 
-def create_v1_document() -> Dict[str, Any]:
+def create_v1_document() -> dict[str, Any]:
     """Create a document using schema version 1 format."""
     return {'content': 'Legacy content without body/summary split', 'timestamp': '2024-01-20T12:00:00Z', 'version': 1, 'parent': None, 'chunks': [], 'vector': [0.1] * 384}
+
 
 def test_migrate_v1_to_latest(base_schema):
     """Test migration from version 1 to latest schema version."""
@@ -28,6 +29,7 @@ def test_migrate_v1_to_latest(base_schema):
     assert 'content_summary' in migrated_doc
     assert migrated_doc['schema_version'] == base_schema['version']
 
+
 def test_migrate_batch_documents(base_schema):
     """Test migration of multiple documents in batch."""
     old_docs = [create_v1_document() for _ in range(5)]
@@ -41,6 +43,7 @@ def test_migrate_batch_documents(base_schema):
     assert 'extra_field' in migrated_docs[1]
     assert len(migrated_docs[3]['chunk_ids']) == 2
 
+
 def test_migration_rollback(base_schema):
     """Test rollback scenario when migration fails."""
     old_docs = [create_v1_document(), {'invalid': 'document'}, create_v1_document()]
@@ -50,6 +53,7 @@ def test_migration_rollback(base_schema):
     assert 'invalid' in old_docs[1]
     assert 'content' in old_docs[2]
 
+
 def test_partial_schema_update(base_schema):
     """Test migration where only some fields need updating."""
     doc = {'content_body': 'Already in new format', 'timestamp': '2024-01-20T12:00:00Z', 'schema_version': base_schema['version'] - 1, 'parent_id': None, 'chunk_ids': [], 'embedding': [0.1] * 384}
@@ -57,6 +61,7 @@ def test_partial_schema_update(base_schema):
     assert 'timestamp_utc' in migrated_doc
     assert migrated_doc['schema_version'] == base_schema['version']
     assert migrated_doc['content_body'] == doc['content_body']
+
 
 def test_migrate_with_custom_fields(base_schema):
     """Test migration with custom metadata fields."""

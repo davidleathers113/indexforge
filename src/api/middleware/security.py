@@ -1,6 +1,6 @@
 """Security middleware for adding security headers."""
 
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import FastAPI
 from starlette.middleware.base import BaseHTTPMiddleware

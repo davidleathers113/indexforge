@@ -1,6 +1,6 @@
 """Weaviate query builder."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from weaviate.classes import Collection
 from weaviate.classes.query import Filter
@@ -22,13 +22,13 @@ class QueryBuilder:
         self.query = collection.query.fetch_objects(
             properties=["title", "content", "file_path", "file_type", "metadata_json"]
         )
-        self._filters: List[Filter] = []
+        self._filters: list[Filter] = []
         self._include_vector = False
-        self._limit: Optional[int] = None
-        self._cursor: Optional[str] = None
-        self._sort: Optional[Dict[str, str]] = None
+        self._limit: int | None = None
+        self._cursor: str | None = None
+        self._sort: dict[str, str] | None = None
 
-    def with_vector_search(self, vector: List[float], certainty: float = 0.7) -> "QueryBuilder":
+    def with_vector_search(self, vector: list[float], certainty: float = 0.7) -> "QueryBuilder":
         """Add vector search to query.
 
         Args:
@@ -45,7 +45,7 @@ class QueryBuilder:
         self,
         query: str,
         alpha: float = 0.5,
-        properties: Optional[List[str]] = None,
+        properties: list[str] | None = None,
         fusion_type: str = "relative_score",
     ) -> "QueryBuilder":
         """Add hybrid search to query.
@@ -93,7 +93,7 @@ class QueryBuilder:
         return self
 
     def with_pagination(
-        self, limit: Optional[int] = None, cursor: Optional[str] = None
+        self, limit: int | None = None, cursor: str | None = None
     ) -> "QueryBuilder":
         """Add pagination to query.
 

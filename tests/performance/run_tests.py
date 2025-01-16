@@ -7,9 +7,8 @@ import time
 
 import docker
 from loguru import logger
-import weaviate
-
 from tests.performance.weaviate_performance_test import WeaviatePerformanceTest
+import weaviate
 
 
 def wait_for_weaviate(url: str, timeout: int = 300):

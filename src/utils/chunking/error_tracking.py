@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 import logging
 import time
-from typing import Dict, List, Optional, Tuple
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class ErrorEvent:
     error_type: str
     message: str
     timestamp: float
-    context: Dict = field(default_factory=dict)
+    context: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -40,10 +40,10 @@ class ErrorStats:
     """Statistics for error tracking."""
 
     total_errors: int = 0
-    error_counts: Dict[ErrorCategory, int] = field(default_factory=lambda: defaultdict(int))
-    error_rates: Dict[ErrorCategory, float] = field(default_factory=dict)
-    recent_errors: List[ErrorEvent] = field(default_factory=list)
-    error_trends: Dict[Tuple[ErrorCategory, str], int] = field(
+    error_counts: dict[ErrorCategory, int] = field(default_factory=lambda: defaultdict(int))
+    error_rates: dict[ErrorCategory, float] = field(default_factory=dict)
+    recent_errors: list[ErrorEvent] = field(default_factory=list)
+    error_trends: dict[tuple[ErrorCategory, str], int] = field(
         default_factory=lambda: defaultdict(int)
     )
 
@@ -60,16 +60,16 @@ class ErrorTracker:
         """
         self.max_recent_errors = max_recent_errors
         self.error_window_seconds = error_window_seconds
-        self.error_events: List[ErrorEvent] = []
+        self.error_events: list[ErrorEvent] = []
         self.start_time = time.time()
-        self.operation_counts: Dict[ErrorCategory, int] = defaultdict(int)
+        self.operation_counts: dict[ErrorCategory, int] = defaultdict(int)
 
     def record_error(
         self,
         category: ErrorCategory,
         error_type: str,
         message: str,
-        context: Optional[Dict] = None,
+        context: dict | None = None,
     ) -> None:
         """Record an error event.
 
@@ -107,7 +107,7 @@ class ErrorTracker:
         """
         self.operation_counts[category] += 1
 
-    def get_error_stats(self, window_seconds: Optional[float] = None) -> ErrorStats:
+    def get_error_stats(self, window_seconds: float | None = None) -> ErrorStats:
         """Get error statistics for the specified time window.
 
         Args:
@@ -130,7 +130,7 @@ class ErrorTracker:
         # Calculate error counts and trends
         for event in recent_events:
             stats.error_counts[event.category] += 1
-            stats.error_trends[(event.category, event.error_type)] += 1
+            stats.error_trends[event.category, event.error_type] += 1
 
         # Calculate error rates
         for category in ErrorCategory:
@@ -145,7 +145,7 @@ class ErrorTracker:
 
     def get_error_trends(
         self, num_periods: int = 6, period_seconds: float = 600
-    ) -> Dict[ErrorCategory, List[int]]:
+    ) -> dict[ErrorCategory, list[int]]:
         """Get error count trends over time periods.
 
         Args:
@@ -155,7 +155,7 @@ class ErrorTracker:
         Returns:
             Dictionary mapping categories to lists of error counts per period
         """
-        trends: Dict[ErrorCategory, List[int]] = {
+        trends: dict[ErrorCategory, list[int]] = {
             category: [0] * num_periods for category in ErrorCategory
         }
 
@@ -170,7 +170,7 @@ class ErrorTracker:
 
         return trends
 
-    def get_frequent_errors(self, limit: int = 5) -> List[Tuple[Tuple[ErrorCategory, str], int]]:
+    def get_frequent_errors(self, limit: int = 5) -> list[tuple[tuple[ErrorCategory, str], int]]:
         """Get most frequent error types.
 
         Args:
@@ -179,9 +179,9 @@ class ErrorTracker:
         Returns:
             List of (category, error_type) tuples with their counts
         """
-        error_counts: Dict[Tuple[ErrorCategory, str], int] = defaultdict(int)
+        error_counts: dict[tuple[ErrorCategory, str], int] = defaultdict(int)
         for event in self.error_events:
-            error_counts[(event.category, event.error_type)] += 1
+            error_counts[event.category, event.error_type] += 1
 
         return sorted(error_counts.items(), key=lambda x: x[1], reverse=True)[:limit]
 

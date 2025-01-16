@@ -1,165 +1,232 @@
 """Core storage interfaces.
 
 This module defines the interfaces for storage operations. It provides
-abstract base classes for document storage, chunk storage, and reference
-storage.
+protocols for document storage, chunk storage, reference storage, and
+storage metrics collection.
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol, TypeVar
 from uuid import UUID
 
-from src.core.models.chunks import Chunk
-from src.core.models.documents import Document
-from src.core.models.references import Reference
 
-T = TypeVar("T", bound=Document)
-C = TypeVar("C", bound=Chunk)
+if TYPE_CHECKING:
+    from src.core.models.chunks import Chunk
+    from src.core.models.documents import Document
+    from src.core.models.references import Reference
+    from src.core.settings import Settings
+
+T = TypeVar("T", bound="Document")
+C = TypeVar("C", bound="Chunk")
+R = TypeVar("R", bound="Reference")
 
 
 class StorageMetrics(Protocol):
-    """Protocol for storage metrics."""
+    """Protocol for storage metrics collection."""
 
-    def get_storage_usage(self) -> Dict[str, int]:
+    def get_storage_usage(self) -> dict[str, int]:
         """Get storage usage metrics.
 
         Returns:
-            Dictionary of storage metrics
+            Dict[str, int]: Dictionary containing:
+                - total_bytes: Total storage used in bytes
+                - document_count: Number of stored documents
+                - chunk_count: Number of stored chunks
+                - reference_count: Number of stored references
         """
         ...
 
-    def get_operation_counts(self) -> Dict[str, int]:
+    def get_operation_counts(self) -> dict[str, int]:
         """Get operation count metrics.
 
         Returns:
-            Dictionary of operation counts
+            Dict[str, int]: Dictionary containing counts for:
+                - reads: Number of read operations
+                - writes: Number of write operations
+                - updates: Number of update operations
+                - deletes: Number of delete operations
         """
         ...
 
 
-class DocumentStorage(ABC):
-    """Interface for document storage."""
+class DocumentStorage(Protocol):
+    """Protocol for document storage operations."""
 
-    @abstractmethod
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the document storage.
+
+        Args:
+            settings (Settings): Application settings
+        """
+        ...
+
     def store_document(self, document: T) -> UUID:
         """Store a document.
 
         Args:
-            document: Document to store
+            document (T): Document to store
 
         Returns:
-            Document ID
-        """
-        pass
+            UUID: Generated document ID
 
-    @abstractmethod
-    def get_document(self, doc_id: UUID) -> Optional[T]:
+        Raises:
+            ServiceStateError: If storage is not initialized
+            ValueError: If document is invalid
+        """
+        ...
+
+    def get_document(self, doc_id: UUID) -> T | None:
         """Get a document by ID.
 
         Args:
-            doc_id: Document ID
+            doc_id (UUID): Document ID
 
         Returns:
-            Document if found, None otherwise
-        """
-        pass
+            Optional[T]: Document if found, None otherwise
 
-    @abstractmethod
+        Raises:
+            ServiceStateError: If storage is not initialized
+        """
+        ...
+
     def update_document(self, doc_id: UUID, document: T) -> None:
         """Update a document.
 
         Args:
-            doc_id: Document ID
-            document: Updated document
-        """
-        pass
+            doc_id (UUID): Document ID
+            document (T): Updated document
 
-    @abstractmethod
+        Raises:
+            ServiceStateError: If storage is not initialized
+            ValueError: If document is invalid
+            KeyError: If document does not exist
+        """
+        ...
+
     def delete_document(self, doc_id: UUID) -> None:
         """Delete a document.
 
         Args:
-            doc_id: Document ID
+            doc_id (UUID): Document ID
+
+        Raises:
+            ServiceStateError: If storage is not initialized
+            KeyError: If document does not exist
         """
-        pass
+        ...
 
 
-class ChunkStorage(ABC):
-    """Interface for chunk storage."""
+class ChunkStorage(Protocol):
+    """Protocol for chunk storage operations."""
 
-    @abstractmethod
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the chunk storage.
+
+        Args:
+            settings (Settings): Application settings
+        """
+        ...
+
     def store_chunk(self, chunk: C) -> UUID:
         """Store a chunk.
 
         Args:
-            chunk: Chunk to store
+            chunk (C): Chunk to store
 
         Returns:
-            Chunk ID
-        """
-        pass
+            UUID: Generated chunk ID
 
-    @abstractmethod
-    def get_chunk(self, chunk_id: UUID) -> Optional[C]:
+        Raises:
+            ServiceStateError: If storage is not initialized
+            ValueError: If chunk is invalid
+        """
+        ...
+
+    def get_chunk(self, chunk_id: UUID) -> C | None:
         """Get a chunk by ID.
 
         Args:
-            chunk_id: Chunk ID
+            chunk_id (UUID): Chunk ID
 
         Returns:
-            Chunk if found, None otherwise
-        """
-        pass
+            Optional[C]: Chunk if found, None otherwise
 
-    @abstractmethod
+        Raises:
+            ServiceStateError: If storage is not initialized
+        """
+        ...
+
     def update_chunk(self, chunk_id: UUID, chunk: C) -> None:
         """Update a chunk.
 
         Args:
-            chunk_id: Chunk ID
-            chunk: Updated chunk
-        """
-        pass
+            chunk_id (UUID): Chunk ID
+            chunk (C): Updated chunk
 
-    @abstractmethod
+        Raises:
+            ServiceStateError: If storage is not initialized
+            ValueError: If chunk is invalid
+            KeyError: If chunk does not exist
+        """
+        ...
+
     def delete_chunk(self, chunk_id: UUID) -> None:
         """Delete a chunk.
 
         Args:
-            chunk_id: Chunk ID
+            chunk_id (UUID): Chunk ID
+
+        Raises:
+            ServiceStateError: If storage is not initialized
+            KeyError: If chunk does not exist
         """
-        pass
+        ...
 
 
-class ReferenceStorage(ABC):
-    """Interface for reference storage."""
+class ReferenceStorage(Protocol):
+    """Protocol for reference storage operations."""
 
-    @abstractmethod
-    def store_reference(self, ref: Reference) -> None:
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize the reference storage.
+
+        Args:
+            settings (Settings): Application settings
+        """
+        ...
+
+    def store_reference(self, ref: R) -> None:
         """Store a reference.
 
         Args:
-            ref: Reference to store
-        """
-        pass
+            ref (R): Reference to store
 
-    @abstractmethod
-    def get_references(self, chunk_id: UUID) -> List[Reference]:
+        Raises:
+            ServiceStateError: If storage is not initialized
+            ValueError: If reference is invalid
+        """
+        ...
+
+    def get_references(self, chunk_id: UUID) -> list[R]:
         """Get references for a chunk.
 
         Args:
-            chunk_id: Chunk ID
+            chunk_id (UUID): Chunk ID
 
         Returns:
-            List of references
-        """
-        pass
+            List[R]: List of references associated with the chunk
 
-    @abstractmethod
-    def delete_reference(self, ref: Reference) -> None:
+        Raises:
+            ServiceStateError: If storage is not initialized
+        """
+        ...
+
+    def delete_reference(self, ref: R) -> None:
         """Delete a reference.
 
         Args:
-            ref: Reference to delete
+            ref (R): Reference to delete
+
+        Raises:
+            ServiceStateError: If storage is not initialized
+            KeyError: If reference does not exist
         """
-        pass
+        ...

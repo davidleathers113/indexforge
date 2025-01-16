@@ -20,8 +20,6 @@ The AdvancedChunker class provides intelligent text segmentation with the follow
    - Configurable overlap between chunks
 """
 
-from typing import List, Tuple
-
 
 class AdvancedChunker:
     """Advanced text chunking with paragraph detection and special case handling.
@@ -74,7 +72,7 @@ class AdvancedChunker:
         """Detect if text is part of a table."""
         return any(text.lstrip().startswith(marker) for marker in self.table_markers)
 
-    def _get_special_case_block(self, lines: List[str], start: int) -> Tuple[int, List[str]]:
+    def _get_special_case_block(self, lines: list[str], start: int) -> tuple[int, list[str]]:
         """Extract a special case block (code, list, table) starting from given index."""
         block = []
         i = start
@@ -104,7 +102,7 @@ class AdvancedChunker:
 
         return i, block
 
-    def _split_oversized_chunk(self, text: str) -> List[str]:
+    def _split_oversized_chunk(self, text: str) -> list[str]:
         """Split a chunk that exceeds max_chunk_size into smaller chunks."""
         words = text.split()
         chunks = []
@@ -116,7 +114,7 @@ class AdvancedChunker:
 
         return chunks
 
-    def _merge_small_chunks(self, chunks: List[str]) -> List[str]:
+    def _merge_small_chunks(self, chunks: list[str]) -> list[str]:
         """Merge chunks smaller than min_chunk_size with neighbors."""
         if not chunks:
             return chunks
@@ -138,7 +136,7 @@ class AdvancedChunker:
 
         return merged
 
-    def chunk_text(self, text: str) -> List[str]:
+    def chunk_text(self, text: str) -> list[str]:
         """Split text into chunks based on paragraphs and special cases.
 
         Args:

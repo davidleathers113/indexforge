@@ -13,20 +13,20 @@ Key Features:
 
 import logging
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, TypeAlias
 
 from opentelemetry import trace
 from opentelemetry.trace import Span
 from sqlalchemy.engine import Connection, Cursor, Engine
 from sqlalchemy.event import listen
-from typing_extensions import TypeAlias
 
 from src.api.config.settings import settings
 from src.api.monitoring.database.utils import extract_table_name, get_operation_type
 from src.api.monitoring.metrics import DB_OPERATION_DURATION, record_error
 
+
 # Type aliases for better readability
-QueryParameters: TypeAlias = Union[Dict[str, Any], tuple[Any, ...], list[Any]]
+QueryParameters: TypeAlias = dict[str, Any] | tuple[Any, ...] | list[Any]
 ExecutionContext: TypeAlias = Any  # SQLAlchemy execution context is complex and varies by version
 
 logger = logging.getLogger(__name__)
@@ -151,7 +151,7 @@ def _after_cursor_execute(
                 )
 
             # Update span if it exists
-            span: Optional[Span] = conn.info.get("current_spans", {}).pop(statement, None)
+            span: Span | None = conn.info.get("current_spans", {}).pop(statement, None)
             if span:
                 span.set_attribute("db.duration", duration)
 

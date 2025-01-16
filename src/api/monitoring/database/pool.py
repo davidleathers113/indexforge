@@ -19,6 +19,7 @@ from sqlalchemy.pool import Pool
 from src.api.config.settings import settings
 from src.api.monitoring.metrics import DB_POOL_STATS, record_error
 
+
 logger = logging.getLogger(__name__)
 
 # Pool health thresholds

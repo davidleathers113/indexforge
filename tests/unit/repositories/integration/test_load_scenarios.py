@@ -19,6 +19,7 @@ from src.api.repositories.weaviate.exceptions import (
     ResourceExhaustionError,
 )
 
+
 # Test data constants
 TEST_CONFIG = {
     "url": "http://localhost:8080",

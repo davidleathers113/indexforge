@@ -3,7 +3,7 @@
 This module contains tests that verify the handling of circular references
 between documents, including self-references and cyclic dependencies.
 """
-from typing import Any, Dict
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -11,9 +11,10 @@ import pytest
 from src.indexing.schema import SchemaValidator
 
 
-def create_document_with_id(doc_id: str) -> Dict[str, Any]:
+def create_document_with_id(doc_id: str) -> dict[str, Any]:
     """Create a test document with a specific ID."""
     return {'id': doc_id, 'content_body': f'Test document {doc_id}', 'schema_version': 1, 'timestamp_utc': '2024-01-20T12:00:00Z', 'parent_id': None, 'chunk_ids': [], 'embedding': [0.1] * 384}
+
 
 def test_direct_circular_reference():
     """Test detection of direct circular references where A -> A."""
@@ -22,6 +23,7 @@ def test_direct_circular_reference():
     doc['parent_id'] = doc_id
     with pytest.raises(ValueError, match='circular.*reference'):
         SchemaValidator.validate_object(doc)
+
 
 def test_indirect_circular_reference():
     """Test detection of indirect circular references where A -> B -> A."""
@@ -34,6 +36,7 @@ def test_indirect_circular_reference():
     with pytest.raises(ValueError, match='circular.*reference'):
         SchemaValidator.validate_object(doc_a)
         SchemaValidator.validate_object(doc_b)
+
 
 def test_complex_circular_reference():
     """Test detection of complex circular references where A -> B -> C -> A."""
@@ -51,6 +54,7 @@ def test_complex_circular_reference():
         SchemaValidator.validate_object(doc_b)
         SchemaValidator.validate_object(doc_c)
 
+
 def test_self_reference_in_chunks():
     """Test detection of self-references in chunk_ids."""
     doc_id = str(uuid4())
@@ -58,6 +62,7 @@ def test_self_reference_in_chunks():
     doc['chunk_ids'] = [str(uuid4()), doc_id, str(uuid4())]
     with pytest.raises(ValueError, match='self-reference'):
         SchemaValidator.validate_object(doc)
+
 
 def test_circular_chunk_reference():
     """Test detection of circular references through chunk relationships."""
@@ -71,6 +76,7 @@ def test_circular_chunk_reference():
         SchemaValidator.validate_object(doc_a)
         SchemaValidator.validate_object(doc_b)
 
+
 def test_mixed_circular_reference():
     """Test detection of circular references mixing parent and chunk relationships."""
     doc_a_id = str(uuid4())
@@ -82,6 +88,7 @@ def test_mixed_circular_reference():
     with pytest.raises(ValueError, match='circular.*reference'):
         SchemaValidator.validate_object(doc_a)
         SchemaValidator.validate_object(doc_b)
+
 
 def test_valid_complex_relationships():
     """Test that valid complex relationships are accepted."""

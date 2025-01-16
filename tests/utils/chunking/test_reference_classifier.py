@@ -24,10 +24,12 @@ def ref_manager():
     manager.add_reference(chunk4, chunk5, ReferenceType.PARENT)
     return manager
 
+
 @pytest.fixture
 def reference_classifier(ref_manager):
     """Create a reference classifier with the test reference manager."""
     return ReferenceClassifier(ref_manager)
+
 
 def test_classify_direct_reference(reference_classifier):
     """Test classification of direct references."""
@@ -39,6 +41,7 @@ def test_classify_direct_reference(reference_classifier):
     assert 'citation_details' in classification.evidence
     assert classification.metadata['is_explicit_reference']
 
+
 def test_classify_indirect_reference(reference_classifier):
     """Test classification of indirect references."""
     source_id = next((chunk_id for chunk_id, chunk in reference_classifier.ref_manager._chunks.items() if 'citation' in chunk.content.lower()))
@@ -49,6 +52,7 @@ def test_classify_indirect_reference(reference_classifier):
     assert classification.metadata['is_semantic_reference']
     assert classification.evidence['semantic_details']['is_highly_similar']
 
+
 def test_classify_structural_reference(reference_classifier):
     """Test classification of structural references."""
     parent_id = next((chunk_id for chunk_id, chunk in reference_classifier.ref_manager._chunks.items() if 'parent' in chunk.content.lower()))
@@ -58,6 +62,7 @@ def test_classify_structural_reference(reference_classifier):
     assert 'structural_details' in classification.evidence
     assert classification.metadata['is_structural_reference']
     assert classification.evidence['structural_details']['is_hierarchical']
+
 
 def test_confidence_calculation(reference_classifier):
     """Test confidence score calculation for different reference types."""
@@ -73,6 +78,7 @@ def test_confidence_calculation(reference_classifier):
     assert similarity_class.confidence > 0.5
     assert structural_class.confidence > 0.5
 
+
 def test_metadata_enrichment(reference_classifier):
     """Test metadata enrichment for classified references."""
     chunk1 = reference_classifier.ref_manager.add_chunk('Source chunk')
@@ -85,6 +91,7 @@ def test_metadata_enrichment(reference_classifier):
     assert 'classification_evidence' in ref.metadata
     assert ref.metadata['custom_field'] == 'test_value'
     assert 'citation_info' in ref.metadata
+
 
 def test_classify_all_references(reference_classifier):
     """Test bulk classification of all references."""

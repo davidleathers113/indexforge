@@ -1,6 +1,5 @@
 """OAuth configuration settings."""
 
-from typing import Dict
 
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
@@ -27,7 +26,7 @@ class OAuthSettings(BaseSettings):
     oauth_redirect_url: str = "http://localhost:8000/api/v1/auth/callback"
 
     @property
-    def providers(self) -> Dict[str, OAuthProviderConfig]:
+    def providers(self) -> dict[str, OAuthProviderConfig]:
         """Get OAuth provider configurations.
 
         Returns:

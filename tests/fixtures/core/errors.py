@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass
 import logging
-from typing import Dict
 from unittest.mock import MagicMock
 
 import pytest
 
 from .base import BaseState
+
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ class AuthError(PermissionError):
 class ValidationError(ValueError):
     """Custom validation error with details."""
 
-    def __init__(self, message: str, code: str = "VALIDATION_ERROR", details: Dict = None, *args):
+    def __init__(self, message: str, code: str = "VALIDATION_ERROR", details: dict = None, *args):
         super().__init__(message, *args)
         self.code = code
         self.message = message
@@ -163,7 +163,7 @@ def mock_validation_error(error_state):
     """Simulates data validation errors with details."""
 
     def create_error(
-        message: str = "Invalid data format", code: str = "VALIDATION_ERROR", details: Dict = None
+        message: str = "Invalid data format", code: str = "VALIDATION_ERROR", details: dict = None
     ):
         error_state.error_message = message
         error_state.error_code = code

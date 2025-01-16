@@ -58,7 +58,6 @@ Note:
 """
 
 import logging
-from typing import Dict, List, Optional
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -67,6 +66,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from src.models.settings import ClusteringConfig
 from src.utils.cache_manager import CacheManager, cached_with_retry
 from src.utils.text_processing import clean_text
+
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class TopicClusterer:
         )
         self.logger = logging.getLogger(__name__)
 
-    def _get_optimal_clusters(self, embeddings: List[List[float]], config: ClusteringConfig) -> int:
+    def _get_optimal_clusters(self, embeddings: list[list[float]], config: ClusteringConfig) -> int:
         """Determine optimal number of clusters using elbow method."""
         if len(embeddings) < config.min_cluster_size:
             return 1
@@ -108,8 +108,8 @@ class TopicClusterer:
         return min(elbow, max_clusters)
 
     def _get_cluster_keywords(
-        self, embeddings: List[List[float]], texts: List[str], centroid: List[float], top_k: int = 5
-    ) -> List[str]:
+        self, embeddings: list[list[float]], texts: list[str], centroid: list[float], top_k: int = 5
+    ) -> list[str]:
         """Extract keywords based on similarity to centroid."""
         # Calculate similarities to centroid
         similarities = cosine_similarity(embeddings, [centroid]).flatten()
@@ -127,8 +127,8 @@ class TopicClusterer:
 
     @cached_with_retry(cache_manager=CacheManager(), key_prefix="clustering", max_attempts=3)
     def cluster_documents(
-        self, documents: List[Dict], config: Optional[ClusteringConfig] = None
-    ) -> List[Dict]:
+        self, documents: list[dict], config: ClusteringConfig | None = None
+    ) -> list[dict]:
         """Cluster documents based on their embeddings."""
         if not documents:
             return []
@@ -177,12 +177,12 @@ class TopicClusterer:
             return documents
 
         except Exception as e:
-            self.logger.error(f"Error clustering documents: {str(e)}")
+            self.logger.error(f"Error clustering documents: {e!s}")
             return documents
 
     def find_similar_topics(
-        self, query_vector: List[float], documents: List[Dict], top_k: int = 5
-    ) -> List[Dict]:
+        self, query_vector: list[float], documents: list[dict], top_k: int = 5
+    ) -> list[dict]:
         """Find clusters most similar to a query vector."""
         try:
             # Group documents by cluster
@@ -221,7 +221,7 @@ class TopicClusterer:
             return cluster_scores[:top_k]
 
         except Exception as e:
-            self.logger.error(f"Error finding similar topics: {str(e)}")
+            self.logger.error(f"Error finding similar topics: {e!s}")
             return []
 
     def cleanup(self):
@@ -233,5 +233,5 @@ class TopicClusterer:
 
             self.logger.info("TopicClusterer resources cleaned up")
         except Exception as e:
-            self.logger.error(f"Error during cleanup: {str(e)}")
+            self.logger.error(f"Error during cleanup: {e!s}")
             raise

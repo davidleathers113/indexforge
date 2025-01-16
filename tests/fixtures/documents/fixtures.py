@@ -6,6 +6,7 @@ import pytest
 
 from .state import DocumentState
 
+
 logger = logging.getLogger(__name__)
 
 

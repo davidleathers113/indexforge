@@ -7,6 +7,7 @@ import pytest
 from src.api.repositories.weaviate.exceptions import DocumentValidationError
 from src.api.repositories.weaviate.operations.index import IndexOperation
 
+
 # Test data constants
 VALID_DOCUMENT = {"id": "1", "text": "Sample text", "metadata": {"source": "test"}}
 

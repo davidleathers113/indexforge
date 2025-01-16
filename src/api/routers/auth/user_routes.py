@@ -1,6 +1,5 @@
 """User-related authentication routes."""
 
-from typing import Optional
 
 from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Response, status
 from supabase.client import AsyncClient
@@ -12,6 +11,7 @@ from src.api.models.responses import AuthResponse, UserProfile
 from src.api.utils.auth_helpers import validate_csrf
 from src.api.utils.cookie_manager import clear_auth_cookies, set_auth_cookies
 
+
 router = APIRouter(tags=["auth"])
 
 
@@ -20,8 +20,8 @@ async def signup(
     request: SignUpRequest,
     response: Response,
     supabase: AsyncClient = Depends(get_supabase_client),
-    csrf_token: Optional[str] = Cookie(None),
-    x_csrf_token: Optional[str] = Header(None),
+    csrf_token: str | None = Cookie(None),
+    x_csrf_token: str | None = Header(None),
 ) -> AuthResponse:
     """Sign up a new user."""
     await validate_csrf(csrf_token, x_csrf_token)

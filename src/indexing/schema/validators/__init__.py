@@ -21,6 +21,7 @@ from .document import validate_document_fields
 from .embedding import validate_embedding, validate_embedding_batch
 from .relationship import validate_relationships
 
+
 __all__ = [
     "validate_document_fields",
     "validate_embedding",
