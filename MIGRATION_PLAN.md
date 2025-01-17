@@ -47,7 +47,12 @@ Core infrastructure is complete and operational. See [Core Infrastructure](COMPL
 
        - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/source_tracker.py` → `src/core/tracking/source.py`
        - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/tenant_source_tracker.py` → `src/core/tracking/tenant.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/validation.py` → `src/core/tracking/validation.py`
+       - 🔄 Move `src/connectors/direct_documentation_indexing/source_tracking/validation.py` → `src/core/tracking/validation.py`
+         - ✅ Created validation strategy interface
+         - ✅ Implemented circular dependency validator
+         - ⏳ Implement chunk reference validator
+         - ⏳ Implement relationship validator
+         - ⏳ Create composite validator
 
      - Document Processing:
 
@@ -97,7 +102,11 @@ Core infrastructure is complete and operational. See [Core Infrastructure](COMPL
 
    - Post-Migration Tasks:
      - 🔄 Update all import statements
-     - ⏳ Verify test coverage
+     - 🔄 Verify test coverage
+       - ✅ Circular dependency validation tests
+       - ⏳ Chunk reference validation tests
+       - ⏳ Relationship validation tests
+       - ⏳ Composite validation tests
      - ⏳ Update documentation references
      - ⏳ Validate functionality after move
      - ⏳ Clean up empty directories
