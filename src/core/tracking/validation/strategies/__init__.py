@@ -19,12 +19,12 @@ This module provides various validation strategies for document lineage data:
 """
 
 from .chunks import ChunkReferenceValidator
-from .circular import CircularDependencyValidator
+from .circular import CircularDependencyValidator, validate_no_circular_reference
 from .relationships import RelationshipValidator
-
 
 __all__ = [
     "ChunkReferenceValidator",
     "CircularDependencyValidator",
     "RelationshipValidator",
+    "validate_no_circular_reference",
 ]

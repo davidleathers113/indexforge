@@ -4,12 +4,13 @@ This module defines the interfaces for storage operations. It provides
 protocols for document storage, chunk storage, reference storage, and storage metrics.
 """
 
-from typing import TYPE_CHECKING, Dict, List, Protocol, TypeVar
+from typing import TYPE_CHECKING, Dict, List, Optional, Protocol, TypeVar
 from uuid import UUID
 
 if TYPE_CHECKING:
     from src.core.models.chunks import Chunk
     from src.core.models.documents import Document
+    from src.core.models.lineage import DocumentLineage
     from src.core.models.references import Reference
     from src.core.settings import Settings
 
@@ -203,5 +204,36 @@ class ReferenceStorage(Protocol):
         Raises:
             ServiceStateError: If storage is not initialized
             KeyError: If reference does not exist
+        """
+        ...
+
+
+class LineageStorage(Protocol):
+    """Protocol for document lineage storage operations."""
+
+    def get_lineage(self, doc_id: str) -> Optional["DocumentLineage"]:
+        """Retrieve lineage information for a document.
+
+        Args:
+            doc_id: ID of the document to retrieve
+
+        Returns:
+            DocumentLineage if found, None otherwise
+        """
+        ...
+
+    def save_lineage(self, lineage: "DocumentLineage") -> None:
+        """Save lineage information for a document.
+
+        Args:
+            lineage: The document lineage to save
+        """
+        ...
+
+    def delete_lineage(self, doc_id: str) -> None:
+        """Delete lineage information for a document.
+
+        Args:
+            doc_id: ID of the document to delete
         """
         ...

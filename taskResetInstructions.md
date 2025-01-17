@@ -1,192 +1,188 @@
-# IndexForge Migration - Development Context Summary
+# IndexForge Development Context Summary
 
 ## Task Overview & Current Status
 
-### Core Problem
+### Core Problem/Feature
 
-- Migrating functionality from connector-specific implementations to core infrastructure
-- Primary focus on source tracking and document lineage features
-- Goal: Create a more maintainable, centralized architecture
+- Migrating document operations and lineage tracking from connector-specific implementation to core functionality
+- Moving from `src/connectors/direct_documentation_indexing/source_tracking/` to `src/core/tracking/`
+- Implementing comprehensive test coverage and validation strategies
 
 ### Current Status
 
-- Core infrastructure completed (storage, metrics, security)
-- Source tracking migration in progress
-- Model migrations completed (6 models moved to core)
-- Documentation and API updates ongoing
+- Document operations migration complete ✅
+
+  - Core functionality migrated
+  - Storage interface integrated
+  - Validation strategies implemented
+  - Test suite migrated and passing
+  - Integration tests complete
+  - API documentation pending
+
+- Document lineage migration in progress 🔄
+  - Core functionality migrated
+  - Operations module migrated
+  - Manager implementation migrated
+  - Test suite migrated and passing
+  - Integration tests complete
+  - API documentation pending
 
 ### Key Architectural Decisions
 
-1. Separation of Core vs. Connector-Specific Code
+1. Separation of Concerns:
 
-   - Moving shared functionality to `src/core/`
-   - Keeping connector-specific logic in `src/connectors/`
-   - Rationale: Better reusability and maintenance
+   - Core operations in `src/core/tracking/operations.py`
+   - Lineage-specific operations in `src/core/tracking/lineage/operations.py`
+   - Validation strategies in dedicated module
 
-2. Modular Structure
+2. Storage Interface:
 
-   - Separate modules for tracking, processing, monitoring
-   - Clear separation of concerns
-   - Rationale: Easier testing and maintenance
+   - Using `LineageStorage` protocol for storage abstraction
+   - Mock implementation for testing
+   - Clear separation between storage and business logic
 
-3. Enhanced Security Model
-   - Centralized encryption management
-   - Secure metadata persistence
-   - Rationale: Consistent security across all components
+3. Validation Strategy:
+   - Dedicated validation module for circular references
+   - Comprehensive relationship validation
+   - Strict type checking and error handling
 
 ### Critical Constraints
 
 - Must maintain backward compatibility
-- Performance impact < 2% degradation
-- Test coverage must remain > 80%
-- Zero downtime migration required
+- Zero tolerance for circular references in document lineage
+- Strict type safety requirements
+- Comprehensive test coverage required
 
 ## Codebase Navigation
 
-### Key Files (By Priority)
+### Key Files (Ranked by Importance)
 
-1. Source Tracking Core
+1. `src/core/tracking/operations.py`
 
-   ```
-   src/core/tracking/models/*.py
-   - Status: Migrated
-   - Role: Core data models for tracking system
-   - Changes: Moved from connector-specific implementation
-   ```
+   - Core document operations implementation
+   - Handles document creation and relationship management
+   - Recently migrated and fully tested
 
-2. Document Processing
+2. `src/core/tracking/lineage/operations.py`
 
-   ```
-   src/core/processors/*.py
-   - Status: Pending migration
-   - Role: Document format handling
-   - Planned: Move from connectors to core
-   ```
+   - Document lineage operations
+   - Manages derivation chains and relationships
+   - Successfully migrated with tests
 
-3. Monitoring & Management
+3. `src/core/tracking/validation/strategies/circular.py`
 
-   ```
-   src/core/monitoring/*.py
-   - Status: Pending migration
-   - Role: System health and monitoring
-   - Planned: Centralize monitoring functionality
-   ```
+   - Circular reference validation
+   - Critical for maintaining data integrity
+   - Recently updated with improved error messages
 
-4. Storage & Transformation
-   ```
-   src/core/storage/*.py
-   - Status: Partially migrated
-   - Role: Data persistence and transformation
-   - Changes: Base implementation complete
-   ```
+4. `tests/core/tracking/test_operations.py`
+
+   - Core operations test suite
+   - Comprehensive coverage of document operations
+   - All tests passing
+
+5. `tests/core/tracking/lineage/test_operations.py`
+
+   - Lineage operations test suite
+   - Covers derivation and relationship validation
+   - All tests passing
+
+6. `src/core/interfaces/storage.py`
+   - Storage interface definitions
+   - Used by both operations and lineage modules
+   - Critical for abstraction layer
 
 ### Dependencies
 
-- Weaviate v4.10.4 (vector database)
-- Redis (caching)
-- OpenAI API (embeddings)
-- RabbitMQ (messaging) - Pending integration
+- Python 3.11
+- pytest for testing
+- Mock storage implementation for tests
+- Type hints and validation throughout
 
 ## Technical Context
 
 ### Technical Assumptions
 
-1. All document processing is async
-2. Storage is eventually consistent
-3. Metadata updates are atomic
-4. Vector operations are idempotent
+1. Document IDs are unique across the system
+2. Parent documents must exist before child relationships
+3. Storage implementation handles serialization
+4. Validation occurs before storage operations
 
-### External Services Integration
+### External Services
 
-- Vector Database (Weaviate)
-
-  - Used for: Semantic search
-  - Status: Operational
-
-- Redis Cache
-
-  - Used for: Performance optimization
-  - Status: Implementation complete
-
-- OpenAI API
-  - Used for: Document embeddings
-  - Status: Operational
+- No direct external service dependencies
+- Storage abstraction allows for different backends
 
 ### Performance Considerations
 
-- Batch processing for large operations
-- Memory management with usage tracking
-- Metrics sampling for high-volume operations
-- Cache optimization with TTL and LRU
+1. Validation strategies optimized for minimal traversal
+2. Caching considerations in storage interface
+3. Efficient relationship tracking
 
 ### Security Requirements
 
-- Encryption at rest
-- Secure metadata storage
-- Key rotation support
-- Tenant isolation
+1. Input validation on all operations
+2. No circular references allowed
+3. Parent-child relationship validation
 
 ## Development Progress
 
-### Last Completed Milestone
+### Last Completed Tasks
 
-- Migration of core tracking models
-  - 6 models moved to core infrastructure
-  - Test coverage maintained at 85%
-  - Performance impact < 2%
+1. Migrated core document operations
+2. Implemented comprehensive test suite
+3. Fixed circular reference validation
+4. Updated import paths
+5. Added integration tests
 
 ### Immediate Next Steps
 
-1. Move remaining source tracking files
-2. Implement document lineage features
-3. Complete API documentation
-4. Finalize security features
+1. Update API documentation for both modules
+2. Remove original source files:
+   - `document_operations.py`
+   - `document_lineage.py`
+   - `lineage_manager.py`
+   - `lineage_operations.py`
+3. Complete cross-package functionality tests
 
 ### Known Issues
 
-1. Import statements need updating throughout codebase
-2. Some circular dependencies in tracking system
-3. Documentation inconsistencies
-4. Pending security review for new components
+1. API documentation needs updating
+2. Some import paths may need adjustment
+3. Cross-package functionality tests pending
 
 ### Failed Approaches
 
-1. Attempted direct file migration without dependency analysis
-
-   - Issue: Broke circular references
-   - Solution: Implemented staged migration
-
-2. Initial monolithic tracking system
-   - Issue: Poor maintainability
-   - Solution: Split into modular components
+1. Initial attempt at relative imports (switched to absolute)
+2. Direct protocol instantiation in tests (implemented mock)
+3. Simple error messages (enhanced for clarity)
 
 ## Developer Notes
 
 ### Codebase Insights
 
-1. Heavy use of Protocol classes for interfaces
-2. Extensive use of async/await patterns
-3. Complex dependency graph in tracking system
-4. Careful handling of tenant isolation required
+1. Absolute imports preferred throughout
+2. Strict type checking enforced
+3. Comprehensive validation before operations
+4. Test fixtures provide reusable setup
 
 ### Temporary Solutions
 
-1. Some hardcoded configurations (to be moved to config files)
-2. Manual cache invalidation (Redis integration pending)
-3. Basic error handling (to be enhanced)
+1. Mock storage implementation for testing
+2. Some TODOs in documentation
+3. Pending API documentation updates
 
 ### Areas Needing Attention
 
-1. Document lineage circular references
-2. Performance impact of encryption
-3. Cache invalidation strategy
-4. Cross-tenant data isolation
-5. API versioning strategy
+1. API documentation completeness
+2. Cross-package functionality testing
+3. Performance optimization opportunities
+4. Security review of validation strategies
 
-### Migration Validation
+### Best Practices
 
-- Run full test suite after each component move
-- Verify functionality in development environment
-- Check for import errors
-- Validate documentation accuracy
-- Performance testing after migration
+1. Always use absolute imports
+2. Maintain comprehensive test coverage
+3. Document all public interfaces
+4. Validate inputs thoroughly
+5. Handle errors gracefully with clear messages

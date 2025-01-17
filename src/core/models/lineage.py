@@ -6,9 +6,10 @@ including transformations, processing steps, and relationships with other docume
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
 
+@runtime_checkable
 class Transformation(Protocol):
     """Protocol for transformation operations."""
 
@@ -22,6 +23,7 @@ class Transformation(Protocol):
         ...
 
 
+@runtime_checkable
 class ProcessingStep(Protocol):
     """Protocol for processing steps."""
 
@@ -35,6 +37,7 @@ class ProcessingStep(Protocol):
         ...
 
 
+@runtime_checkable
 class LogEntry(Protocol):
     """Protocol for log entries."""
 

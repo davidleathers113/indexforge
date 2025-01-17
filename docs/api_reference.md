@@ -1,5 +1,12 @@
 # API Reference
 
+## Core APIs
+
+- [Document Tracking](api/document_tracking.md) - Document operations and lineage tracking
+- [Models](api/models.md) - Data models and schemas
+- [Endpoints](api/endpoints.md) - HTTP API endpoints
+- [Configuration](api/config.md) - Configuration options
+
 ## ServiceMetricsCollector
 
 ### Constructor
