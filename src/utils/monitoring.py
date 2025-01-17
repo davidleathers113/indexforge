@@ -1,71 +1,23 @@
-"""System monitoring and performance tracking utilities.
+"""System monitoring and metrics collection."""
 
-This module provides comprehensive system monitoring and performance tracking
-capabilities for application observability. It includes:
-
-1. Performance Monitoring:
-   - Operation latency tracking
-   - Memory usage monitoring
-   - CPU utilization tracking
-   - Request/error counting
-   - Historical metrics storage
-
-2. Prometheus Integration:
-   - Custom metrics export
-   - Counter and gauge support
-   - Automatic metric updates
-   - Label-based categorization
-
-3. Error Tracking:
-   - Error history maintenance
-   - Detailed error logging
-   - Operation-specific tracking
-   - Timestamp-based organization
-
-4. Resource Management:
-   - Configurable history limits
-   - Automatic cleanup
-   - Memory leak prevention
-   - Resource usage optimization
-
-Usage:
-    ```python
-    from src.utils.monitoring import SystemMonitor
-
-    monitor = SystemMonitor(max_history=1000)
-
-    # Track operation performance
-    @monitor.track_operation("data_processing")
-    def process_data(data):
-        # Process data
-        return result
-
-    # Get performance metrics
-    metrics = monitor.get_performance_metrics()
-    print(f"Average latency: {metrics['avg_latency_ms']}ms")
-    print(f"Error rate: {metrics['error_rate']}%")
-    ```
-
-Note:
-    - Integrates with Prometheus for metrics export
-    - Maintains configurable history of operations
-    - Thread-safe metric collection
-    - Low overhead monitoring
-"""
-
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 import json
 import logging
 import time
-from typing import Any
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, TypeVar
 
 import numpy as np
-from prometheus_client import Counter, Gauge, Histogram
 import psutil
-
+from prometheus_client import Counter, Gauge, Histogram
 
 logger = logging.getLogger(__name__)
+
+# Constants for monitoring thresholds
+MAX_LATENCY_MS = 500  # Maximum acceptable latency in milliseconds
+MAX_CPU_PERCENT = 75  # Maximum acceptable CPU usage percentage
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -254,7 +206,9 @@ class SystemMonitor:
         status = "healthy"
         if error_count > 0:
             status = "degraded"
-        elif any(latency > 500 for latency in latencies) or any(cpu > 75 for cpu in cpu_usage):
+        elif any(latency > MAX_LATENCY_MS for latency in latencies) or any(
+            cpu > MAX_CPU_PERCENT for cpu in cpu_usage
+        ):
             status = "warning"
 
         return {

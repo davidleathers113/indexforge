@@ -7,6 +7,7 @@ protocols for document storage, chunk storage, and reference storage.
 from typing import TYPE_CHECKING, Protocol, TypeVar
 from uuid import UUID
 
+
 if TYPE_CHECKING:
     from src.core.models.chunks import Chunk
     from src.core.models.documents import Document

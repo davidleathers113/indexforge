@@ -1,7 +1,6 @@
 """Base classes for chunk validation strategies."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
 
 from src.ml.processing.models.chunks import Chunk
 
@@ -14,7 +13,7 @@ class ValidationStrategy(ABC):
     """
 
     @abstractmethod
-    def validate(self, chunk: Chunk, metadata: Optional[Dict] = None) -> List[str]:
+    def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
         """Validate a chunk using this strategy.
 
         Args:
@@ -34,7 +33,7 @@ class CompositeValidator(ValidationStrategy):
     individual and groups of validators uniformly.
     """
 
-    def __init__(self, validators: List[ValidationStrategy]) -> None:
+    def __init__(self, validators: list[ValidationStrategy]) -> None:
         """Initialize with list of validators.
 
         Args:
@@ -42,7 +41,7 @@ class CompositeValidator(ValidationStrategy):
         """
         self.validators = validators
 
-    def validate(self, chunk: Chunk, metadata: Optional[Dict] = None) -> List[str]:
+    def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
         """Run all validators on the chunk.
 
         Args:
@@ -67,7 +66,7 @@ class ValidatorBuilder:
 
     def __init__(self) -> None:
         """Initialize an empty validator builder."""
-        self.validators: List[ValidationStrategy] = []
+        self.validators: list[ValidationStrategy] = []
 
     def add_validator(self, validator: ValidationStrategy) -> "ValidatorBuilder":
         """Add a validator to the chain.

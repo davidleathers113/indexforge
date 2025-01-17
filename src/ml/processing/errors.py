@@ -1,6 +1,6 @@
 """Custom exceptions for the processing package."""
 
-from typing import Any, Optional
+from typing import Any
 
 from src.core.errors import ProcessingError, ServiceStateError, ValidationError
 
@@ -21,9 +21,9 @@ class StrategyError(ProcessingError):
     def __init__(
         self,
         message: str,
-        strategy_name: Optional[str] = None,
-        input_metadata: Optional[dict[str, Any]] = None,
-        error_context: Optional[dict[str, Any]] = None,
+        strategy_name: str | None = None,
+        input_metadata: dict[str, Any] | None = None,
+        error_context: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the error.
 

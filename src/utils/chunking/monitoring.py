@@ -4,15 +4,14 @@ This module provides tools for monitoring cache performance, reference health,
 and system metrics.
 """
 
-from dataclasses import dataclass
 import logging
 import time
+from dataclasses import dataclass
 from uuid import UUID
 
 from .reference_cache import ReferenceCache
 from .reference_classifier import ReferenceClassifier
 from .references import ReferenceManager, ReferenceType
-
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +141,7 @@ class ReferenceMonitor:
             if "similarity_score" not in ref.metadata:
                 raise ValueError("Missing similarity score for similar reference")
             score = ref.metadata["similarity_score"]
-            if not isinstance(score, (int, float)) or not 0 <= score <= 1:
+            if not isinstance(score, int | float) or not 0 <= score <= 1:
                 raise ValueError("Invalid similarity score")
 
         if ref.ref_type == ReferenceType.CITATION:

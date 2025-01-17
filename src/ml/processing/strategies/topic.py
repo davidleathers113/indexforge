@@ -21,7 +21,7 @@ class TopicStrategy(ProcessingStrategy[Optional[str]]):
             "business": ["company", "market", "finance", "industry"],
         }
 
-    def process(self, content: str, metadata: Optional[dict[str, Any]] = None) -> Optional[str]:
+    def process(self, content: str, metadata: dict[str, Any] | None = None) -> str | None:
         """Process text content to identify the main topic.
 
         This is a simple keyword-based implementation that can be

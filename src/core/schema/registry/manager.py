@@ -4,7 +4,6 @@ This module provides the core schema registry functionality for managing schema
 definitions across the system.
 """
 
-from typing import Dict, List, Optional, Set
 
 from src.core.schema.base import SchemaType, SchemaVersion
 from src.core.schema.registry.cache import CacheConfig, SchemaCache
@@ -31,7 +30,7 @@ class SchemaRegistry:
     def __init__(
         self,
         storage: SchemaStorage,
-        cache_config: Optional[CacheConfig] = None,
+        cache_config: CacheConfig | None = None,
     ) -> None:
         """Initialize schema registry.
 
@@ -42,8 +41,8 @@ class SchemaRegistry:
         self.storage = storage
         self._cache = SchemaCache(config=cache_config) if cache_config else None
         self._lookup = SchemaLookup()
-        self._active_schemas: Dict[str, Schema] = {}
-        self._dependencies: Dict[str, Set[str]] = {}
+        self._active_schemas: dict[str, Schema] = {}
+        self._dependencies: dict[str, set[str]] = {}
 
     async def register_schema(
         self,
@@ -83,9 +82,9 @@ class SchemaRegistry:
     async def get_schema(
         self,
         name: str,
-        version: Optional[SchemaVersion] = None,
+        version: SchemaVersion | None = None,
         use_cache: bool = True,
-    ) -> Optional[Schema]:
+    ) -> Schema | None:
         """Retrieve a schema by name and optional version.
 
         Args:
@@ -114,9 +113,9 @@ class SchemaRegistry:
 
     def list_schemas(
         self,
-        schema_type: Optional[SchemaType] = None,
+        schema_type: SchemaType | None = None,
         include_inactive: bool = False,
-    ) -> List[Schema]:
+    ) -> list[Schema]:
         """List available schemas.
 
         Args:
@@ -134,7 +133,7 @@ class SchemaRegistry:
                     schemas.append(schema)
         return schemas
 
-    def get_dependencies(self, name: str) -> Set[str]:
+    def get_dependencies(self, name: str) -> set[str]:
         """Get dependencies for a schema.
 
         Args:

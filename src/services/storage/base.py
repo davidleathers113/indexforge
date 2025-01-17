@@ -5,9 +5,10 @@ metrics collection and common functionality.
 """
 
 from dataclasses import dataclass
-from typing import Generic, List, Optional, Tuple, TypeVar
+from typing import Generic, TypeVar
 
 from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
+
 
 T = TypeVar("T")
 
@@ -16,8 +17,8 @@ T = TypeVar("T")
 class BatchResult(Generic[T]):
     """Results of a batch operation."""
 
-    successful: List[T]
-    failed: List[Tuple[T, Exception]]
+    successful: list[T]
+    failed: list[tuple[T, Exception]]
 
     @property
     def success_count(self) -> int:
@@ -67,9 +68,9 @@ class BaseStorageService:
 
     def __init__(
         self,
-        metrics: Optional[StorageMetrics] = None,
-        metrics_provider: Optional[MetricsProvider] = None,
-        batch_config: Optional[BatchConfig] = None,
+        metrics: StorageMetrics | None = None,
+        metrics_provider: MetricsProvider | None = None,
+        batch_config: BatchConfig | None = None,
     ):
         """Initialize the base storage service.
 
@@ -100,7 +101,7 @@ class BaseStorageService:
         if self._metrics_provider:
             self._metrics_provider.start_timer(f"storage.{operation}.duration")
 
-    def _stop_timing(self, operation: str) -> Optional[float]:
+    def _stop_timing(self, operation: str) -> float | None:
         """Stop timing an operation and get duration.
 
         Args:
@@ -113,7 +114,7 @@ class BaseStorageService:
             return self._metrics_provider.stop_timer(f"storage.{operation}.duration")
         return None
 
-    def process_batch(self, items: List[T], operation: str) -> BatchResult[T]:
+    def process_batch(self, items: list[T], operation: str) -> BatchResult[T]:
         """Process a batch of items with metrics and error handling.
 
         Args:

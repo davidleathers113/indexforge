@@ -6,7 +6,49 @@ This document outlines the remaining tasks in the IndexForge migration. For comp
 
 ## Current Status
 
-Core infrastructure is complete and operational. See [Core Infrastructure](COMPLETED_MIGRATIONS.md#core-infrastructure) for details.
+Core infrastructure is complete, source tracking migration is in progress. Chunking system implementation is complete (see [Chunking System](COMPLETED_MIGRATIONS.md#chunking-system)).
+
+### Phase 2: Source Tracking (🔄 In Progress)
+
+- 🔄 Integration tests in progress
+- 🔄 Documentation updates in progress
+
+### Pending Tasks
+
+1. Add integration tests:
+
+   - Test cross-package functionality
+   - Verify tenant isolation
+   - Test configuration persistence
+
+2. Update documentation:
+   - Add migration guide
+   - Update API documentation
+   - Add usage examples
+
+### Dependencies
+
+- Core models package
+- Schema validation
+- Error handling
+
+### Validation Strategy
+
+1. Pre-migration:
+
+   - 🔄 Integration tests in progress
+
+2. Post-migration:
+   - 🔄 Cross-package functionality tests
+   - 🔄 Performance impact assessment
+   - ⏳ Backward compatibility verification
+
+### Next Steps
+
+1. Complete integration tests
+2. Finalize documentation updates
+3. Perform performance assessment
+4. Verify backward compatibility
 
 ## Migration Phases
 
@@ -38,96 +80,95 @@ Core infrastructure is complete and operational. See [Core Infrastructure](COMPL
 1. Schema Management Foundation - ✅ Completed. See [Schema Management](COMPLETED_MIGRATIONS.md#schema-management)
 2. Source-Specific Schema Implementation - ✅ Completed. See [Schema Management](COMPLETED_MIGRATIONS.md#schema-management)
 3. Configuration Management - ✅ Completed. See [Configuration Management](COMPLETED_MIGRATIONS.md#configuration-management)
+4. Chunking System Implementation - ✅ Completed. See [Chunking System](COMPLETED_MIGRATIONS.md#chunking-system)
 
-4. Source Tracking Features (🔄 In Progress)
+5. Source Tracking Features (🔄 In Progress)
 
-   - Functionality Migration:
+   - Document Processing:
 
-     - Source Tracking Core:
+     - ⏳ Move processors to core:
+       - ⏳ `src/connectors/direct_documentation_indexing/processors/base_processor.py` → `src/core/processors/base.py`
+       - ⏳ `src/connectors/direct_documentation_indexing/processors/excel_processor.py` → `src/core/processors/excel.py`
+       - ⏳ `src/connectors/direct_documentation_indexing/processors/word_processor.py` → `src/core/processors/word.py`
 
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/source_tracker.py` → `src/core/tracking/source.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/tenant_source_tracker.py` → `src/core/tracking/tenant.py`
-       - 🔄 Move `src/connectors/direct_documentation_indexing/source_tracking/validation.py` → `src/core/tracking/validation.py`
-         - ✅ Created validation strategy interface
-         - ✅ Implemented circular dependency validator
-         - ⏳ Implement chunk reference validator
-         - ⏳ Implement relationship validator
-         - ⏳ Create composite validator
+   - Document Operations & Lineage:
 
-     - Document Processing:
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/document_operations.py` → `src/core/tracking/operations.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/document_lineage.py` → `src/core/tracking/lineage/document.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/lineage_manager.py` → `src/core/tracking/lineage/manager.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/lineage_operations.py` → `src/core/tracking/lineage/operations.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/version_history.py` → `src/core/tracking/lineage/history.py`
 
-       - ⏳ Move processors to core:
-         - ⏳ `src/connectors/direct_documentation_indexing/processors/base_processor.py` → `src/core/processors/base.py`
-         - ⏳ `src/connectors/direct_documentation_indexing/processors/excel_processor.py` → `src/core/processors/excel.py`
-         - ⏳ `src/connectors/direct_documentation_indexing/processors/word_processor.py` → `src/core/processors/word.py`
+   - Monitoring & Management:
 
-     - Document Operations & Lineage:
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/alert_manager.py` → `src/core/monitoring/alerts.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/error_logging.py` → `src/core/monitoring/errors.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/health_check.py` → `src/core/monitoring/health.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/logging_manager.py` → `src/core/monitoring/logging.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/status_manager.py` → `src/core/monitoring/status.py`
 
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/document_operations.py` → `src/core/tracking/operations.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/document_lineage.py` → `src/core/tracking/lineage/document.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/lineage_manager.py` → `src/core/tracking/lineage/manager.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/lineage_operations.py` → `src/core/tracking/lineage/operations.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/version_history.py` → `src/core/tracking/lineage/history.py`
+   - Storage & Transformation:
 
-     - Monitoring & Management:
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/storage_manager.py` → `src/core/storage/manager.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/storage.py` → `src/core/storage/tracking.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/transformation_manager.py` → `src/core/tracking/transformations.py`
 
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/alert_manager.py` → `src/core/monitoring/alerts.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/error_logging.py` → `src/core/monitoring/errors.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/health_check.py` → `src/core/monitoring/health.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/logging_manager.py` → `src/core/monitoring/logging.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/status_manager.py` → `src/core/monitoring/status.py`
+   - Utilities & Configuration:
 
-     - Storage & Transformation:
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/utils.py` → `src/core/tracking/utils.py`
+     - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/enums.py` → `src/core/tracking/enums.py`
 
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/storage_manager.py` → `src/core/storage/manager.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/storage.py` → `src/core/storage/tracking.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/transformation_manager.py` → `src/core/tracking/transformations.py`
+   - Documentation:
 
-     - Utilities & Configuration:
+     - ⏳ Merge `src/connectors/direct_documentation_indexing/docs/API_REFERENCE.md` into main API documentation
+     - ⏳ Merge `src/connectors/direct_documentation_indexing/docs/CONFIGURATION.md` into main configuration guide
+     - ⏳ Update main README with content from connector READMEs
+     - ⏳ Integrate `src/connectors/direct_documentation_indexing/REFERENCE_SYSTEM.md` into core documentation
 
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/utils.py` → `src/core/tracking/utils.py`
-       - ⏳ Move `src/connectors/direct_documentation_indexing/source_tracking/enums.py` → `src/core/tracking/enums.py`
+   - Connector Refactoring:
 
-     - Documentation:
-
-       - ⏳ Merge `src/connectors/direct_documentation_indexing/docs/API_REFERENCE.md` into main API documentation
-       - ⏳ Merge `src/connectors/direct_documentation_indexing/docs/CONFIGURATION.md` into main configuration guide
-       - ⏳ Update main README with content from connector READMEs
-       - ⏳ Integrate `src/connectors/direct_documentation_indexing/REFERENCE_SYSTEM.md` into core documentation
-
-     - Connector Refactoring:
-       - ⏳ Move `src/connectors/direct_documentation_indexing/connector.py` → `src/connectors/documentation.py`
-       - ⏳ Update `src/connectors/__init__.py` to reflect new connector location
-       - ⏳ Merge Notion connector functionality with documentation connector where appropriate
+     - ⏳ Move `src/connectors/direct_documentation_indexing/connector.py` → `src/connectors/documentation.py`
+     - ⏳ Update `src/connectors/__init__.py` to reflect new connector location
+     - ⏳ Merge Notion connector functionality with documentation connector where appropriate
 
    - Post-Migration Tasks:
-     - 🔄 Update all import statements
+     - ✅ Update core package import statements
+     - 🔄 Update remaining import statements
      - 🔄 Verify test coverage
-       - ✅ Circular dependency validation tests
-       - ⏳ Chunk reference validation tests
-       - ⏳ Relationship validation tests
-       - ⏳ Composite validation tests
+       - ✅ Package structure tests
+         - ✅ Core package initialization
+         - ✅ Package exports validation
+         - ✅ Import resolution verification
+       - ✅ Validation tests
+         - ✅ Circular dependency validation
+         - ✅ Chunk reference validation
+         - ✅ Relationship validation
+         - ✅ Composite validation
+       - ⏳ Integration tests
+         - ⏳ Cross-package functionality
+         - ⏳ API integration
+         - ⏳ Storage integration
      - ⏳ Update documentation references
      - ⏳ Validate functionality after move
      - ⏳ Clean up empty directories
      - ⏳ Remove **pycache** directories
      - ⏳ Update all affected configuration files
 
-5. Cache Optimization (⏳ Pending)
+6. Cache Optimization (⏳ Pending)
 
    - Profile current performance
    - Identify bottlenecks
    - Implement improvements
    - Add monitoring
 
-6. Security Best Practices (⏳ Pending)
+7. Security Best Practices (⏳ Pending)
 
    - Audit current implementation
    - Identify vulnerabilities
    - Implement fixes
    - Add security tests
 
-7. API Documentation (🔄 In Progress)
+8. API Documentation (🔄 In Progress)
 
    - 🔄 Document endpoints
      - ✅ Metrics endpoints
@@ -152,7 +193,7 @@ Core infrastructure is complete and operational. See [Core Infrastructure](COMPL
      - ⏳ Advanced features
      - ⏳ Troubleshooting
 
-8. Testing Infrastructure (🔄 In Progress)
+9. Testing Infrastructure (🔄 In Progress)
    - 🔄 Integration Tests
      - Test storage integration
      - Validate search updates
@@ -195,19 +236,26 @@ Core infrastructure is complete and operational. See [Core Infrastructure](COMPL
 
 2. Risk Assessment Matrix
 
-   | Migration Task      | Risk Level | Impact   | Mitigation Strategy                     |
-   | ------------------- | ---------- | -------- | --------------------------------------- |
-   | Model Migration     | High       | Critical | Comprehensive testing, staged migration |
-   | Processor Migration | Medium     | High     | Parallel implementation, feature flags  |
-   | Storage Migration   | High       | Critical | Backup strategy, rollback plan          |
-   | Documentation       | Low        | Low      | Version control, parallel docs          |
+   | Migration Task        | Risk Level | Impact   | Mitigation Strategy                        |
+   | --------------------- | ---------- | -------- | ------------------------------------------ |
+   | Model Migration       | High       | Critical | Comprehensive testing, staged migration    |
+   | Package Restructuring | Medium     | High     | Clear dependencies, thorough testing       |
+   | Import Resolution     | Low        | Medium   | Systematic updates, automated verification |
+   | Processor Migration   | Medium     | High     | Parallel implementation, feature flags     |
+   | Storage Migration     | High       | Critical | Backup strategy, rollback plan             |
+   | Documentation         | Low        | Low      | Version control, parallel docs             |
 
 3. Validation Strategy
 
    For each component:
 
    a. Pre-Migration Validation
-   // ... rest of validation strategy content ...
+
+   - ✅ Verify package structure integrity
+   - ✅ Validate import relationships
+   - ✅ Check for circular dependencies
+   - 🔄 Test cross-package functionality
+   - ⏳ Verify API compatibility
 
 4. Testing Requirements
    // ... testing requirements content ...
@@ -236,6 +284,26 @@ models.py
 
 lineage_operations.py
 └── version_history.py
+```
+
+#### Package Dependencies Graph
+
+```
+core/
+├── models/
+│   └── (chunks, documents, references)
+├── tracking/
+│   ├── validation/
+│   │   └── strategies/
+│   └── models/
+├── lineage/
+│   └── (depends on: models, tracking)
+├── schema/
+│   └── (depends on: models)
+├── security/
+│   └── (used by: all packages)
+└── config/
+    └── (used by: all packages)
 ```
 
 ### Phase 3: Document Lineage

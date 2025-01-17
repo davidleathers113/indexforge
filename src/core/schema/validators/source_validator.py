@@ -4,7 +4,7 @@ This module provides validation functionality for source-specific schema require
 including custom field validation, source-type validation, and specialized rules.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -18,7 +18,7 @@ class SourceValidationRule(BaseModel):
     field_name: str = Field(..., description="Name of the field to validate")
     field_type: str = Field(..., description="Expected type of the field")
     required: bool = Field(default=False, description="Whether the field is required")
-    constraints: Dict[str, Any] = Field(
+    constraints: dict[str, Any] = Field(
         default_factory=dict, description="Additional validation constraints"
     )
     error_message: str = Field(
@@ -33,7 +33,7 @@ class SourceValidator:
         self,
         source_type: str,
         base_schema: Schema,
-        validation_rules: Optional[List[SourceValidationRule]] = None,
+        validation_rules: list[SourceValidationRule] | None = None,
     ):
         """Initialize source validator.
 
@@ -56,7 +56,7 @@ class SourceValidator:
                     f"Validation rule for {rule.field_name} conflicts with base schema"
                 )
 
-    def validate(self, data: Dict[str, Any]) -> List[ValidationError]:
+    def validate(self, data: dict[str, Any]) -> list[ValidationError]:
         """Validate data against source-specific rules.
 
         Args:
@@ -126,7 +126,7 @@ class SourceValidator:
             )
 
     def _validate_constraints(
-        self, value: Any, constraints: Dict[str, Any], field_name: str
+        self, value: Any, constraints: dict[str, Any], field_name: str
     ) -> None:
         """Validate field constraints.
 

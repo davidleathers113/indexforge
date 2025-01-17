@@ -6,7 +6,7 @@ It implements advanced connection management, graceful degradation, and comprehe
 
 from collections.abc import Callable
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
 import backoff
 import weaviate
@@ -21,6 +21,7 @@ from src.services.base import (
     ServiceNotInitializedError,
     ServiceStateError,
 )
+
 
 if TYPE_CHECKING:
     from src.core.settings import Settings
@@ -63,11 +64,11 @@ class WeaviateClient(VectorService, BaseService):
         BaseService.__init__(self)
         VectorService.__init__(self, settings)
         self._settings = settings
-        self._client: Optional[BaseWeaviateClient] = None
+        self._client: BaseWeaviateClient | None = None
         self._health_check_failures = 0
         self._MAX_HEALTH_CHECK_FAILURES = 3
         self._batch_size = 100
-        self._vector_cache: Dict[str, List[float]] = {}
+        self._vector_cache: dict[str, list[float]] = {}
         self._metrics = ServiceMetricsCollector(
             service_name="weaviate",
             max_history=5000,
@@ -78,10 +79,10 @@ class WeaviateClient(VectorService, BaseService):
     async def batch_add_objects(
         self,
         class_name: str,
-        objects: List[Dict[str, Any]],
-        vectors: Optional[List[List[float]]] = None,
-        batch_size: Optional[int] = None,
-    ) -> List[str]:
+        objects: list[dict[str, Any]],
+        vectors: list[list[float]] | None = None,
+        batch_size: int | None = None,
+    ) -> list[str]:
         """Add multiple objects to Weaviate efficiently.
 
         Args:
@@ -101,7 +102,7 @@ class WeaviateClient(VectorService, BaseService):
             return []
 
         batch_size = batch_size or self._batch_size
-        uuids: List[str] = []
+        uuids: list[str] = []
 
         with self._metrics.measure_operation(
             "batch_add_objects",
@@ -140,11 +141,11 @@ class WeaviateClient(VectorService, BaseService):
     async def search_vectors(
         self,
         class_name: str,
-        vector: List[float],
+        vector: list[float],
         limit: int = 10,
         distance_threshold: float = 0.8,
         with_payload: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Search for similar vectors with optimized performance.
 
         Args:
@@ -199,7 +200,7 @@ class WeaviateClient(VectorService, BaseService):
 
     @require_initialized
     async def delete_batch(
-        self, class_name: str, uuids: List[str], batch_size: Optional[int] = None
+        self, class_name: str, uuids: list[str], batch_size: int | None = None
     ) -> None:
         """Delete multiple objects efficiently.
 
@@ -393,7 +394,7 @@ class WeaviateClient(VectorService, BaseService):
             except WeaviateQueryError as e:
                 raise ServiceStateError(f"Failed to delete object: {e!s}") from e
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get service metrics.
 
         Returns:
@@ -401,7 +402,7 @@ class WeaviateClient(VectorService, BaseService):
         """
         return self._metrics.get_current_metrics()
 
-    def get_health(self) -> Dict[str, Any]:
+    def get_health(self) -> dict[str, Any]:
         """Get service health status.
 
         Returns:

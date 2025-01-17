@@ -8,7 +8,6 @@ This module provides role-based access control (RBAC) functionality including:
 """
 
 from enum import Enum
-from typing import Dict, Optional, Set
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -53,9 +52,9 @@ class Role(BaseModel):
 
     id: UUID
     name: str
-    description: Optional[str] = None
-    permissions: Dict[ResourceType, Set[Permission]]
-    parent_role: Optional[UUID] = None
+    description: str | None = None
+    permissions: dict[ResourceType, set[Permission]]
+    parent_role: UUID | None = None
 
     def has_permission(
         self,
@@ -86,16 +85,16 @@ class ResourcePolicy(BaseModel):
     resource_id: UUID
     resource_type: ResourceType
     owner_id: UUID
-    allowed_roles: Set[UUID]
-    allowed_users: Set[UUID]
+    allowed_roles: set[UUID]
+    allowed_users: set[UUID]
     public: bool = False
 
     def can_access(
         self,
         user_id: UUID,
-        user_roles: Set[UUID],
+        user_roles: set[UUID],
         permission: Permission,
-        roles_by_id: Dict[UUID, Role],
+        roles_by_id: dict[UUID, Role],
     ) -> bool:
         """Check if user can access resource with given permission.
 
@@ -137,11 +136,11 @@ class AuthorizationManager:
 
     def __init__(self):
         """Initialize authorization manager."""
-        self._roles: Dict[UUID, Role] = {}
-        self._user_roles: Dict[UUID, Set[UUID]] = {}
-        self._resource_policies: Dict[UUID, ResourcePolicy] = {}
+        self._roles: dict[UUID, Role] = {}
+        self._user_roles: dict[UUID, set[UUID]] = {}
+        self._resource_policies: dict[UUID, ResourcePolicy] = {}
 
-    def _get_effective_roles(self, role_ids: Set[UUID]) -> Set[UUID]:
+    def _get_effective_roles(self, role_ids: set[UUID]) -> set[UUID]:
         """Get all roles including inherited ones.
 
         Args:

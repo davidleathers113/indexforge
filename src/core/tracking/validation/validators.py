@@ -1,6 +1,5 @@
 """Composite validator for document lineage validation."""
 
-from typing import List
 
 from src.core.models import DocumentLineage
 from src.core.tracking.validation.interfaces import ValidationStrategy
@@ -9,7 +8,7 @@ from src.core.tracking.validation.interfaces import ValidationStrategy
 class CompositeValidator:
     """Composite validator that executes multiple validation strategies."""
 
-    def __init__(self, strategies: List[ValidationStrategy]) -> None:
+    def __init__(self, strategies: list[ValidationStrategy]) -> None:
         """
         Initialize with list of validation strategies.
 

@@ -4,7 +4,6 @@ This module provides caching functionality for schema definitions to improve
 performance and reduce storage load.
 """
 
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -14,15 +13,15 @@ from src.core.schema.schema import Schema
 class CacheConfig(BaseModel):
     """Configuration for schema cache."""
 
-    ttl: Optional[int] = 3600  # Cache TTL in seconds
-    max_size: Optional[int] = 1000  # Maximum number of cached schemas
+    ttl: int | None = 3600  # Cache TTL in seconds
+    max_size: int | None = 1000  # Maximum number of cached schemas
     namespace: str = "schema"  # Cache namespace
 
 
 class SchemaCache:
     """Cache implementation for schema definitions."""
 
-    def __init__(self, config: Optional[CacheConfig] = None) -> None:
+    def __init__(self, config: CacheConfig | None = None) -> None:
         """Initialize schema cache.
 
         Args:
@@ -31,7 +30,7 @@ class SchemaCache:
         self.config = config or CacheConfig()
         self._cache: dict[str, Schema] = {}  # Simple in-memory cache for now
 
-    async def get(self, key: str) -> Optional[Schema]:
+    async def get(self, key: str) -> Schema | None:
         """Get schema from cache.
 
         Args:

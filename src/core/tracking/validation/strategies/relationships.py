@@ -14,11 +14,11 @@ Example:
 """
 
 from logging import getLogger
-from typing import List, Optional, Set
 
 from src.core.models import DocumentLineage
 from src.core.tracking.validation.errors import LineageValidationErrorFactory
 from src.core.tracking.validation.interface import ValidationStrategy
+
 
 logger = getLogger(__name__)
 
@@ -38,7 +38,7 @@ class RelationshipValidator(ValidationStrategy):
         """Initialize the relationship validator."""
         self.error_factory = LineageValidationErrorFactory()
 
-    def validate(self, lineage: DocumentLineage) -> List[str]:
+    def validate(self, lineage: DocumentLineage) -> list[str]:
         """Validate relationships in the document lineage.
 
         Args:
@@ -50,7 +50,7 @@ class RelationshipValidator(ValidationStrategy):
         if not lineage:
             return []
 
-        errors: List[str] = []
+        errors: list[str] = []
 
         # Validate parent-child relationships
         errors.extend(self._validate_parent_child_relationships(lineage))
@@ -66,7 +66,7 @@ class RelationshipValidator(ValidationStrategy):
 
         return errors
 
-    def _validate_parent_child_relationships(self, lineage: DocumentLineage) -> List[str]:
+    def _validate_parent_child_relationships(self, lineage: DocumentLineage) -> list[str]:
         """Validate parent-child relationships in the document lineage.
 
         Args:
@@ -75,7 +75,7 @@ class RelationshipValidator(ValidationStrategy):
         Returns:
             A list of error messages for any invalid parent-child relationships.
         """
-        errors: List[str] = []
+        errors: list[str] = []
 
         # Check parent document reference
         if lineage.parent_id:
@@ -121,7 +121,7 @@ class RelationshipValidator(ValidationStrategy):
 
         return errors
 
-    def _validate_derived_relationships(self, lineage: DocumentLineage) -> List[str]:
+    def _validate_derived_relationships(self, lineage: DocumentLineage) -> list[str]:
         """Validate derived document relationships in the lineage.
 
         Args:
@@ -130,8 +130,8 @@ class RelationshipValidator(ValidationStrategy):
         Returns:
             A list of error messages for any invalid derived relationships.
         """
-        errors: List[str] = []
-        seen_derivations: Set[str] = set()
+        errors: list[str] = []
+        seen_derivations: set[str] = set()
 
         for derived in lineage.derived_documents or []:
             # Check for self-derivation
@@ -162,7 +162,7 @@ class RelationshipValidator(ValidationStrategy):
 
         return errors
 
-    def _validate_cross_references(self, lineage: DocumentLineage) -> List[str]:
+    def _validate_cross_references(self, lineage: DocumentLineage) -> list[str]:
         """Validate cross-document references in the lineage.
 
         Args:
@@ -171,7 +171,7 @@ class RelationshipValidator(ValidationStrategy):
         Returns:
             A list of error messages for any invalid cross-references.
         """
-        errors: List[str] = []
+        errors: list[str] = []
 
         # Validate references in derived documents
         for derived in lineage.derived_documents or []:
@@ -199,7 +199,7 @@ class RelationshipValidator(ValidationStrategy):
 
     def _find_document_by_id(
         self, lineage: DocumentLineage, doc_id: str
-    ) -> Optional[DocumentLineage]:
+    ) -> DocumentLineage | None:
         """Find a document in the lineage tree by its ID.
 
         Args:

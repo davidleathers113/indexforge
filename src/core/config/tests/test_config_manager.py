@@ -6,11 +6,11 @@ including secure storage, migrations, validation, and configuration merging.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 from unittest.mock import Mock
 
-import pytest
 from pydantic import Field
+import pytest
 
 from src.core.config.manager import ConfigurationManager
 from src.core.schema.base import (
@@ -29,7 +29,7 @@ class TestConfig(BaseConfiguration):
 
     name: str = Field(default="test")
     value: int = Field(default=42)
-    api_key: Optional[str] = Field(default=None)
+    api_key: str | None = Field(default=None)
     debug: bool = Field(default=False)
 
     def validate_for_environment(self) -> None:
@@ -52,7 +52,7 @@ class TestMigrationV1ToV2(ConfigurationMigration):
             and to_version.minor == 0
         )
 
-    def migrate(self, config: Dict[str, Any], from_version: ConfigurationVersion) -> Dict[str, Any]:
+    def migrate(self, config: dict[str, Any], from_version: ConfigurationVersion) -> dict[str, Any]:
         """Migrate configuration from v1 to v2."""
         config["value"] = config.get("value", 0) * 2  # Double the value in v2
         return config
@@ -317,8 +317,8 @@ def test_error_handling(config_manager: ConfigurationManager, temp_config_dir: P
             return True
 
         def migrate(
-            self, config: Dict[str, Any], from_version: ConfigurationVersion
-        ) -> Dict[str, Any]:
+            self, config: dict[str, Any], from_version: ConfigurationVersion
+        ) -> dict[str, Any]:
             raise ValueError("Migration failed")
 
     config_manager.register_migration("test", FailingMigration())

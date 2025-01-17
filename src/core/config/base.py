@@ -9,7 +9,7 @@ This module provides the core configuration management functionality, including:
 
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
@@ -35,7 +35,7 @@ class ValidationError(ConfigurationError):
     """Raised when configuration validation fails."""
 
     def __init__(
-        self, message: str, field: Optional[str] = None, details: Optional[Dict[str, Any]] = None
+        self, message: str, field: str | None = None, details: dict[str, Any] | None = None
     ):
         self.field = field
         self.details = details or {}
@@ -82,7 +82,7 @@ class ConfigurationMigration(Protocol):
         """Check if this migration can handle the version transition."""
         ...
 
-    def migrate(self, config: Dict[str, Any], from_version: ConfigurationVersion) -> Dict[str, Any]:
+    def migrate(self, config: dict[str, Any], from_version: ConfigurationVersion) -> dict[str, Any]:
         """Migrate configuration from one version to another."""
         ...
 
@@ -102,19 +102,19 @@ class BaseConfiguration(BaseModel):
         default="development",
         description="Environment this configuration is for",
     )
-    tenant_id: Optional[UUID] = Field(
+    tenant_id: UUID | None = Field(
         default=None,
         description="Optional tenant ID for multi-tenant configurations",
     )
-    last_modified: Optional[str] = Field(
+    last_modified: str | None = Field(
         default=None,
         description="ISO format timestamp of last modification",
     )
-    overrides: Dict[str, Any] = Field(
+    overrides: dict[str, Any] = Field(
         default_factory=dict,
         description="Environment-specific value overrides",
     )
-    sensitive_fields: Set[str] = Field(
+    sensitive_fields: set[str] = Field(
         default_factory=set,
         description="Fields containing sensitive information",
     )
@@ -126,7 +126,7 @@ class BaseConfiguration(BaseModel):
         json_encoders = {UUID: str}
         extra = "forbid"
 
-    def get_value(self, field_name: str, environment: Optional[str] = None) -> Any:
+    def get_value(self, field_name: str, environment: str | None = None) -> Any:
         """Get potentially overridden configuration value."""
         env = environment or self.environment
         override_key = f"{field_name}:{env}"
@@ -154,7 +154,7 @@ class BaseConfiguration(BaseModel):
         """Check if a field contains sensitive information."""
         return field_name in self.sensitive_fields
 
-    def dict(self, *args, **kwargs) -> Dict[str, Any]:
+    def dict(self, *args, **kwargs) -> dict[str, Any]:
         """Override dict serialization to handle sensitive fields."""
         exclude_sensitive = kwargs.pop("exclude_sensitive", False)
         data = super().dict(*args, **kwargs)
@@ -167,7 +167,7 @@ class BaseConfiguration(BaseModel):
         return data
 
     @classmethod
-    def load(cls, path: Union[str, Path]) -> "BaseConfiguration":
+    def load(cls, path: str | Path) -> "BaseConfiguration":
         """Load configuration from a file.
 
         Args:
@@ -198,7 +198,7 @@ class BaseConfiguration(BaseModel):
                 raise
             raise ConfigurationError(f"Failed to load configuration: {e}")
 
-    def save(self, path: Union[str, Path]) -> None:
+    def save(self, path: str | Path) -> None:
         """Save configuration to a file.
 
         Args:

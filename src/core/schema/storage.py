@@ -6,7 +6,6 @@ versioning support and efficient retrieval.
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
 from pydantic import BaseModel
 
@@ -23,7 +22,7 @@ class SchemaMetadata(BaseModel):
     description: str = ""
     created_at: str
     is_active: bool = True
-    dependencies: Set[str] = set()
+    dependencies: set[str] = set()
 
 
 class SchemaStorage:
@@ -37,15 +36,15 @@ class SchemaStorage:
         """
         self.storage_dir = storage_dir
         self.storage_dir.mkdir(parents=True, exist_ok=True)
-        self._metadata_cache: Dict[str, SchemaMetadata] = {}
-        self._schema_cache: Dict[str, Schema] = {}
+        self._metadata_cache: dict[str, SchemaMetadata] = {}
+        self._schema_cache: dict[str, Schema] = {}
         self._load_metadata()
 
     def _load_metadata(self) -> None:
         """Load schema metadata from storage."""
         for file_path in self.storage_dir.glob("*.json"):
             try:
-                with open(file_path, "r") as f:
+                with open(file_path) as f:
                     data = json.load(f)
                     metadata = SchemaMetadata(**data["metadata"])
                     self._metadata_cache[metadata.name] = metadata
@@ -87,7 +86,7 @@ class SchemaStorage:
         if make_active:
             self._deactivate_other_versions(schema.name, schema.version)
 
-    def get_schema(self, name: str, version: Optional[SchemaVersion] = None) -> Optional[Schema]:
+    def get_schema(self, name: str, version: SchemaVersion | None = None) -> Schema | None:
         """Retrieve a schema definition.
 
         Args:
@@ -118,7 +117,7 @@ class SchemaStorage:
 
         # Load schema
         try:
-            with open(schema_path, "r") as f:
+            with open(schema_path) as f:
                 data = json.load(f)
                 schema = Schema.from_dict(data["schema"])
                 self._schema_cache[name] = schema
@@ -127,7 +126,7 @@ class SchemaStorage:
             print(f"Error loading schema {name}: {e}")
             return None
 
-    def list_schemas(self, schema_type: Optional[SchemaType] = None) -> List[SchemaMetadata]:
+    def list_schemas(self, schema_type: SchemaType | None = None) -> list[SchemaMetadata]:
         """List available schemas.
 
         Args:
@@ -141,7 +140,7 @@ class SchemaStorage:
             schemas = [s for s in schemas if s.schema_type == schema_type]
         return sorted(schemas, key=lambda s: (s.name, s.version))
 
-    def get_schema_versions(self, name: str) -> List[SchemaVersion]:
+    def get_schema_versions(self, name: str) -> list[SchemaVersion]:
         """Get all versions of a schema.
 
         Args:
@@ -153,7 +152,7 @@ class SchemaStorage:
         versions = []
         for file_path in self.storage_dir.glob(f"{name}_*.json"):
             try:
-                with open(file_path, "r") as f:
+                with open(file_path) as f:
                     data = json.load(f)
                     metadata = SchemaMetadata(**data["metadata"])
                     versions.append(metadata.version)
@@ -161,7 +160,7 @@ class SchemaStorage:
                 print(f"Error loading schema version from {file_path}: {e}")
         return sorted(versions, reverse=True)
 
-    def delete_schema(self, name: str, version: Optional[SchemaVersion] = None) -> bool:
+    def delete_schema(self, name: str, version: SchemaVersion | None = None) -> bool:
         """Delete a schema definition.
 
         Args:
@@ -216,7 +215,7 @@ class SchemaStorage:
         """
         for file_path in self.storage_dir.glob(f"{name}_*.json"):
             try:
-                with open(file_path, "r") as f:
+                with open(file_path) as f:
                     data = json.load(f)
                     metadata = SchemaMetadata(**data["metadata"])
                     if metadata.version != active_version:

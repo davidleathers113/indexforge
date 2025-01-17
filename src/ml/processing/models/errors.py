@@ -7,10 +7,11 @@ from src.core.errors import (
     ValidationError,
 )
 
+
 # Re-export for backward compatibility
 __all__ = [
-    "ServiceStateError",
     "ServiceInitializationError",
     "ServiceNotInitializedError",
+    "ServiceStateError",
     "ValidationError",
 ]

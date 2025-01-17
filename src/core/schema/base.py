@@ -7,7 +7,7 @@ including schema validation, versioning, and inheritance support.
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Set, TypeVar
+from typing import Any, Protocol, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -25,7 +25,7 @@ class ValidationError(Exception):
     """Raised when schema validation fails."""
 
     def __init__(
-        self, message: str, field: Optional[str] = None, details: Optional[Dict[str, Any]] = None
+        self, message: str, field: str | None = None, details: dict[str, Any] | None = None
     ):
         self.field = field
         self.details = details or {}
@@ -54,7 +54,7 @@ class SchemaVersion(BaseModel):
 class SchemaValidator(Protocol):
     """Protocol defining schema validation interface."""
 
-    def validate(self, data: Dict[str, Any]) -> List[ValidationError]:
+    def validate(self, data: dict[str, Any]) -> list[ValidationError]:
         """Validate data against schema.
 
         Args:
@@ -77,9 +77,9 @@ class BaseSchema(ABC):
         name: str,
         version: SchemaVersion,
         schema_type: SchemaType,
-        fields: Dict[str, Any],
-        required_fields: Optional[Set[str]] = None,
-        validators: Optional[List[SchemaValidator]] = None,
+        fields: dict[str, Any],
+        required_fields: set[str] | None = None,
+        validators: list[SchemaValidator] | None = None,
         description: str = "",
     ):
         """Initialize schema.
@@ -102,7 +102,7 @@ class BaseSchema(ABC):
         self.description = description
 
     @abstractmethod
-    def validate(self, data: Dict[str, Any]) -> List[ValidationError]:
+    def validate(self, data: dict[str, Any]) -> list[ValidationError]:
         """Validate data against this schema.
 
         Args:
@@ -126,7 +126,7 @@ class BaseSchema(ABC):
         ...
 
     @abstractmethod
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert schema to dictionary representation.
 
         Returns:
@@ -136,7 +136,7 @@ class BaseSchema(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: type[T], data: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], data: dict[str, Any]) -> T:
         """Create schema instance from dictionary representation.
 
         Args:

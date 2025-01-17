@@ -1,6 +1,5 @@
 """Batch validation strategies with optimized processing."""
 
-from typing import Dict, List, Optional, Set
 
 from src.ml.processing.models.chunks import Chunk, ChunkBatch
 from src.ml.processing.validation.validators.base import ValidationStrategy
@@ -25,7 +24,7 @@ class BatchValidator(ValidationStrategy):
         self.max_batch_size = max_batch_size
         self._max_memory_bytes = max_memory_mb * 1024 * 1024
         self._chunk_timeout = chunk_processing_timeout
-        self._metadata_cache: Dict[str, Set[str]] = {}
+        self._metadata_cache: dict[str, set[str]] = {}
 
     def _estimate_memory_usage(self, batch: ChunkBatch) -> int:
         """Estimate memory usage for a batch.
@@ -47,7 +46,7 @@ class BatchValidator(ValidationStrategy):
             for chunk in batch.chunks
         )
 
-    def _validate_metadata_consistency(self, chunk: Chunk, batch: ChunkBatch) -> List[str]:
+    def _validate_metadata_consistency(self, chunk: Chunk, batch: ChunkBatch) -> list[str]:
         """Validate metadata consistency efficiently.
 
         Args:
@@ -79,7 +78,7 @@ class BatchValidator(ValidationStrategy):
 
         return errors
 
-    def _validate_sequence_order(self, batch: ChunkBatch) -> List[str]:
+    def _validate_sequence_order(self, batch: ChunkBatch) -> list[str]:
         """Validate sequence ordering efficiently.
 
         Args:
@@ -108,7 +107,7 @@ class BatchValidator(ValidationStrategy):
 
         return errors
 
-    def validate(self, chunk: Chunk, metadata: Optional[Dict] = None) -> List[str]:
+    def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
         """Validate chunk in batch context with optimized processing.
 
         Args:

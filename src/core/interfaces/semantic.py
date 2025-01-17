@@ -3,9 +3,9 @@
 This module provides interfaces for high-level semantic search operations.
 """
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic, List, Optional, Protocol, Tuple, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar
+
 
 if TYPE_CHECKING:
     from src.core.models.chunks import Chunk
@@ -34,7 +34,7 @@ class SearchStrategy(Generic[T], Protocol):
 class VectorSearcher(Protocol):
     """Interface for vector-based search operations."""
 
-    def __init__(self, settings: "Settings", strategy: Optional[SearchStrategy[T]] = None) -> None:
+    def __init__(self, settings: "Settings", strategy: SearchStrategy[T] | None = None) -> None:
         """Initialize the searcher.
 
         Args:
@@ -52,7 +52,7 @@ class VectorSearcher(Protocol):
         limit: int = 10,
         min_score: float = 0.0,
         metadata: dict[str, Any] | None = None,
-    ) -> List[Tuple[T, float]]:
+    ) -> list[tuple[T, float]]:
         """Perform semantic search.
 
         Args:
@@ -76,11 +76,11 @@ class VectorSearcher(Protocol):
     def find_similar(
         self,
         text: str,
-        texts: List[str],
-        limit: Optional[int] = None,
+        texts: list[str],
+        limit: int | None = None,
         min_score: float = 0.0,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> List[Tuple[str, float]]:
+        metadata: Dict[str, Any] | None = None,
+    ) -> list[tuple[str, float]]:
         """Find similar texts from a list.
 
         Args:
@@ -102,7 +102,7 @@ class VectorSearcher(Protocol):
         """
         ...
 
-    def validate_query(self, query: str) -> List[str]:
+    def validate_query(self, query: str) -> list[str]:
         """Validate a search query.
 
         Args:

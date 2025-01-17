@@ -8,12 +8,11 @@ This module provides core authentication functionality including:
 """
 
 import asyncio
+from datetime import datetime, timedelta
 import hashlib
 import hmac
 import secrets
 import time
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Set
 from uuid import UUID, uuid4
 
 import jwt
@@ -55,9 +54,9 @@ class User(BaseModel):
     password_hash: str
     salt: str
     is_active: bool = True
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
     failed_attempts: int = 0
-    lockout_until: Optional[datetime] = None
+    lockout_until: datetime | None = None
 
     @validator("password_hash")
     def validate_password_hash(cls, v: str) -> str:
@@ -103,7 +102,7 @@ class AuthenticationManager:
             config: Authentication configuration
         """
         self.config = config
-        self._rate_limits: Dict[str, Set[float]] = {}
+        self._rate_limits: dict[str, set[float]] = {}
         self._lock = asyncio.Lock()
 
     def _check_rate_limit(self, key: str) -> None:
@@ -131,7 +130,7 @@ class AuthenticationManager:
         # Add timestamp
         self._rate_limits[key].add(now)
 
-    def _hash_password(self, password: str, salt: Optional[str] = None) -> tuple[str, str]:
+    def _hash_password(self, password: str, salt: str | None = None) -> tuple[str, str]:
         """Hash password with salt using PBKDF2-HMAC-SHA512.
 
         Args:
@@ -211,7 +210,7 @@ class AuthenticationManager:
         except jwt.ExpiredSignatureError:
             raise TokenExpiredError()
         except (jwt.InvalidTokenError, ValueError) as e:
-            raise AuthenticationError(f"Invalid token: {str(e)}")
+            raise AuthenticationError(f"Invalid token: {e!s}")
 
     def validate_password_strength(self, password: str) -> None:
         """Validate password meets strength requirements.

@@ -4,7 +4,7 @@ This module provides a concrete implementation of the document storage interface
 with support for batch operations, metrics collection, and memory management.
 """
 
-from typing import Dict, List, Optional, TypeVar
+from typing import TypeVar
 from uuid import UUID, uuid4
 
 from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
@@ -13,6 +13,7 @@ from src.core.models.documents import Document, DocumentMetadata, DocumentType
 from src.core.settings import Settings
 
 from .base import BaseStorageService, BatchConfig, BatchResult
+
 
 T = TypeVar("T", bound=Document)
 
@@ -23,9 +24,9 @@ class DocumentStorageService(BaseStorageService, DocumentStorage[T]):
     def __init__(
         self,
         settings: Settings,
-        metrics: Optional[StorageMetrics] = None,
-        metrics_provider: Optional[MetricsProvider] = None,
-        batch_config: Optional[BatchConfig] = None,
+        metrics: StorageMetrics | None = None,
+        metrics_provider: MetricsProvider | None = None,
+        batch_config: BatchConfig | None = None,
     ) -> None:
         """Initialize document storage.
 
@@ -38,7 +39,7 @@ class DocumentStorageService(BaseStorageService, DocumentStorage[T]):
         super().__init__(
             metrics=metrics, metrics_provider=metrics_provider, batch_config=batch_config
         )
-        self._documents: Dict[UUID, T] = {}
+        self._documents: dict[UUID, T] = {}
         self._settings = settings
 
     def store_document(self, document: T) -> UUID:
@@ -131,7 +132,7 @@ class DocumentStorageService(BaseStorageService, DocumentStorage[T]):
         finally:
             self._stop_timing("delete_document")
 
-    def batch_store_documents(self, documents: List[T]) -> BatchResult[T]:
+    def batch_store_documents(self, documents: list[T]) -> BatchResult[T]:
         """Store multiple documents in a batch operation.
 
         Args:
@@ -142,7 +143,7 @@ class DocumentStorageService(BaseStorageService, DocumentStorage[T]):
         """
         return self.process_batch(documents, "store_document")
 
-    def batch_update_documents(self, updates: List[tuple[UUID, T]]) -> BatchResult[tuple[UUID, T]]:
+    def batch_update_documents(self, updates: list[tuple[UUID, T]]) -> BatchResult[tuple[UUID, T]]:
         """Update multiple documents in a batch operation.
 
         Args:
@@ -172,4 +173,4 @@ class DocumentStorageService(BaseStorageService, DocumentStorage[T]):
             self.delete_document(doc_id)
             return True, "Document storage service is healthy"
         except Exception as e:
-            return False, f"Document storage health check failed: {str(e)}"
+            return False, f"Document storage health check failed: {e!s}"

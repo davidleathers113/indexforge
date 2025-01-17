@@ -1,6 +1,5 @@
 """Storage metrics service implementation."""
 
-from typing import Dict
 
 from src.core.interfaces.storage import StorageMetrics
 from src.core.metrics import ServiceMetricsCollector
@@ -18,20 +17,20 @@ class StorageMetricsService(StorageMetrics, BaseService):
             max_history=5000,
             memory_threshold_mb=500,
         )
-        self._storage_stats: Dict[str, int] = {
+        self._storage_stats: dict[str, int] = {
             "total_bytes": 0,
             "document_count": 0,
             "chunk_count": 0,
             "reference_count": 0,
         }
-        self._operation_counts: Dict[str, int] = {
+        self._operation_counts: dict[str, int] = {
             "reads": 0,
             "writes": 0,
             "updates": 0,
             "deletes": 0,
         }
 
-    def get_storage_usage(self) -> Dict[str, int]:
+    def get_storage_usage(self) -> dict[str, int]:
         """Get storage usage metrics.
 
         Returns:
@@ -44,7 +43,7 @@ class StorageMetricsService(StorageMetrics, BaseService):
         with self._metrics.measure_operation("get_storage_usage"):
             return self._storage_stats.copy()
 
-    def get_operation_counts(self) -> Dict[str, int]:
+    def get_operation_counts(self) -> dict[str, int]:
         """Get operation count metrics.
 
         Returns:

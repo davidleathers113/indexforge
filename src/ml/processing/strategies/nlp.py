@@ -1,6 +1,6 @@
 """NLP-based processing strategies."""
 
-from typing import Any, List, Optional
+from typing import Any
 
 from spacy.language import Language
 from spacy.tokens import Doc
@@ -8,7 +8,7 @@ from spacy.tokens import Doc
 from src.ml.processing.types import ProcessingStrategy
 
 
-class TokenizationStrategy(ProcessingStrategy[List[str]]):
+class TokenizationStrategy(ProcessingStrategy[list[str]]):
     """Strategy for text tokenization using spaCy.
 
     This strategy handles text tokenization and basic linguistic
@@ -26,7 +26,7 @@ class TokenizationStrategy(ProcessingStrategy[List[str]]):
         """
         self.nlp = nlp
 
-    def process(self, content: str, metadata: Optional[dict[str, Any]] = None) -> List[str]:
+    def process(self, content: str, metadata: dict[str, Any] | None = None) -> list[str]:
         """Process text content into tokens.
 
         Args:
@@ -46,7 +46,7 @@ class TokenizationStrategy(ProcessingStrategy[List[str]]):
         return [token.text for token in doc]
 
 
-class NERStrategy(ProcessingStrategy[List[dict[str, Any]]]):
+class NERStrategy(ProcessingStrategy[list[dict[str, Any]]]):
     """Strategy for named entity recognition using spaCy.
 
     This strategy identifies and classifies named entities
@@ -65,8 +65,8 @@ class NERStrategy(ProcessingStrategy[List[dict[str, Any]]]):
         self.nlp = nlp
 
     def process(
-        self, content: str, metadata: Optional[dict[str, Any]] = None
-    ) -> List[dict[str, Any]]:
+        self, content: str, metadata: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """Process text content to extract named entities.
 
         Args:
@@ -112,7 +112,7 @@ class SentimentStrategy(ProcessingStrategy[float]):
         """
         self.nlp = nlp
 
-    def process(self, content: str, metadata: Optional[dict[str, Any]] = None) -> float:
+    def process(self, content: str, metadata: dict[str, Any] | None = None) -> float:
         """Process text content to determine sentiment.
 
         Args:

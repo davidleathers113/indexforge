@@ -1,7 +1,7 @@
 """Base model definitions for text processing."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
 
@@ -21,10 +21,10 @@ class ProcessingMetadata:
     """
 
     operation_id: UUID = field(default_factory=uuid4)
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
-    resource_usage: Dict[str, float] = field(default_factory=dict)
-    custom_attributes: Dict[str, Any] = field(default_factory=dict)
+    start_time: float | None = None
+    end_time: float | None = None
+    resource_usage: dict[str, float] = field(default_factory=dict)
+    custom_attributes: dict[str, Any] = field(default_factory=dict)
 
     def add_attribute(self, key: str, value: Any) -> None:
         """Add a custom attribute.
@@ -67,10 +67,10 @@ class ProcessingContext:
     """
 
     metadata: ProcessingMetadata = field(default_factory=ProcessingMetadata)
-    config: Dict[str, Any] = field(default_factory=dict)
-    state: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
+    state: dict[str, Any] = field(default_factory=dict)
 
-    def update_config(self, updates: Dict[str, Any]) -> None:
+    def update_config(self, updates: dict[str, Any]) -> None:
         """Update configuration values.
 
         Args:

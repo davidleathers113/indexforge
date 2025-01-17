@@ -11,11 +11,12 @@ from .cache import CacheConfig, SchemaCache
 from .lookup import LookupResult, SchemaLookup
 from .manager import SchemaRegistry, SchemaRegistryError
 
+
 __all__ = [
+    "CacheConfig",
+    "LookupResult",
+    "SchemaCache",
+    "SchemaLookup",
     "SchemaRegistry",
     "SchemaRegistryError",
-    "SchemaCache",
-    "CacheConfig",
-    "SchemaLookup",
-    "LookupResult",
 ]

@@ -7,13 +7,14 @@ and cache invalidation strategies.
 
 import asyncio
 import json
-from typing import Optional, Protocol, Set, TypeVar
+from typing import Protocol, TypeVar
 from uuid import UUID
 
-import redis.asyncio as redis
 from pydantic import BaseModel
+import redis.asyncio as redis
 
 from src.core.lineage.base import DocumentLineage
+
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -30,7 +31,7 @@ class CacheConfig(BaseModel):
 class CacheBackend(Protocol):
     """Protocol for lineage cache backends."""
 
-    async def get(self, key: str) -> Optional[bytes]:
+    async def get(self, key: str) -> bytes | None:
         """Get value from cache.
 
         Args:
@@ -45,7 +46,7 @@ class CacheBackend(Protocol):
         self,
         key: str,
         value: bytes,
-        ttl: Optional[int] = None,
+        ttl: int | None = None,
     ) -> None:
         """Set value in cache.
 
@@ -79,7 +80,7 @@ class RedisCache(CacheBackend):
             config: Cache configuration
         """
         self.config = config
-        self._redis: Optional[redis.Redis] = None
+        self._redis: redis.Redis | None = None
         self._lock = asyncio.Lock()
 
     async def _get_client(self) -> redis.Redis:
@@ -118,7 +119,7 @@ class RedisCache(CacheBackend):
         """
         return f"{self.config.namespace}:{key}"
 
-    async def get(self, key: str) -> Optional[bytes]:
+    async def get(self, key: str) -> bytes | None:
         """Get value from Redis cache.
 
         Args:
@@ -134,7 +135,7 @@ class RedisCache(CacheBackend):
         self,
         key: str,
         value: bytes,
-        ttl: Optional[int] = None,
+        ttl: int | None = None,
     ) -> None:
         """Set value in Redis cache.
 
@@ -182,8 +183,8 @@ class LineageCache:
 
     def __init__(
         self,
-        backend: Optional[CacheBackend] = None,
-        config: Optional[CacheConfig] = None,
+        backend: CacheBackend | None = None,
+        config: CacheConfig | None = None,
     ):
         """Initialize lineage cache.
 
@@ -193,7 +194,7 @@ class LineageCache:
         """
         self.config = config or CacheConfig()
         self._backend = backend or RedisCache(self.config)
-        self._pending_invalidations: Set[UUID] = set()
+        self._pending_invalidations: set[UUID] = set()
         self._lock = asyncio.Lock()
 
     def _serialize_lineage(self, lineage: DocumentLineage) -> bytes:
@@ -218,7 +219,7 @@ class LineageCache:
         """
         return DocumentLineage.parse_obj(json.loads(data.decode("utf-8")))
 
-    async def get_lineage(self, document_id: UUID) -> Optional[DocumentLineage]:
+    async def get_lineage(self, document_id: UUID) -> DocumentLineage | None:
         """Get document lineage from cache.
 
         Args:
@@ -242,7 +243,7 @@ class LineageCache:
     async def set_lineage(
         self,
         lineage: DocumentLineage,
-        ttl: Optional[int] = None,
+        ttl: int | None = None,
     ) -> None:
         """Cache document lineage.
 
@@ -269,7 +270,7 @@ class LineageCache:
     async def invalidate_related(
         self,
         document_id: UUID,
-        related_ids: Set[UUID],
+        related_ids: set[UUID],
     ) -> None:
         """Invalidate cached lineage for related documents.
 

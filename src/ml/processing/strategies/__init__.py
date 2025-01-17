@@ -31,7 +31,7 @@ class ModernStrategyManager:
 
     def _register_builtin_strategies(self) -> None:
         """Register built-in strategy implementations."""
-        strategies: Dict[str, Type[ProcessingStrategy]] = {
+        strategies: dict[str, type[ProcessingStrategy]] = {
             "TokenizationStrategy": TokenizationStrategy,
             "NERStrategy": NERStrategy,
             "SentimentStrategy": SentimentStrategy,
@@ -47,8 +47,8 @@ class ModernStrategyManager:
     def register_strategy(
         self,
         name: str,
-        strategy_class: Type[ProcessingStrategy],
-        dependencies: Optional[Set[str]] = None,
+        strategy_class: type[ProcessingStrategy],
+        dependencies: set[str] | None = None,
     ) -> None:
         """Register a new strategy.
 
@@ -61,7 +61,7 @@ class ModernStrategyManager:
         if dependencies:
             self._graph.add_dependencies(name, dependencies)
 
-    async def execute(self, content: str, metadata: Optional[Dict] = None) -> Dict[str, Any]:
+    async def execute(self, content: str, metadata: dict | None = None) -> dict[str, Any]:
         """Execute all registered strategies.
 
         Args:
@@ -74,7 +74,7 @@ class ModernStrategyManager:
         strategies = self._factory.get_strategies()
         return await self._pipeline.execute(strategies, content, metadata)
 
-    def get_result(self, strategy_name: str) -> Optional[Any]:
+    def get_result(self, strategy_name: str) -> Any | None:
         """Get the result of a previously executed strategy.
 
         Args:

@@ -1,7 +1,6 @@
 """Centralized settings management for the application."""
 
 from functools import lru_cache
-from typing import Optional
 
 from pydantic import AnyHttpUrl, Field, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -20,7 +19,7 @@ class Settings(BaseSettings):
     weaviate_url: AnyHttpUrl = Field(..., env="WEAVIATE_URL")
 
     # API Keys and Authentication
-    weaviate_api_key: Optional[str] = Field(None, env="WEAVIATE_API_KEY")
+    weaviate_api_key: str | None = Field(None, env="WEAVIATE_API_KEY")
     secret_key: str = Field(..., env="SECRET_KEY")
     allowed_hosts: list[str] = Field(default=["*"], env="ALLOWED_HOSTS")
 

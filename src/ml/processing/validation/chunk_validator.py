@@ -1,6 +1,5 @@
 """Validation utilities for processing chunks."""
 
-from typing import Dict, List, Optional, Set
 
 from src.ml.processing.models.chunks import Chunk
 from src.ml.processing.validation.validators import (
@@ -31,7 +30,7 @@ class ChunkValidator:
         max_chunk_size: int = 10000,
         min_chunk_size: int = 50,
         max_batch_size: int = 1000,
-        supported_languages: Optional[Set[str]] = None,
+        supported_languages: set[str] | None = None,
         min_content_density: float = 0.3,
     ):
         """Initialize the validator.
@@ -53,7 +52,7 @@ class ChunkValidator:
             .build()
         )
 
-    def validate(self, chunk: Chunk, metadata: Optional[Dict] = None) -> List[str]:
+    def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
         """Validate a chunk before processing.
 
         Args:
@@ -72,8 +71,8 @@ class ChunkValidator:
         return self._validator.validate(chunk, metadata)
 
     def validate_batch(
-        self, chunks: List[Chunk], metadata: Optional[Dict] = None
-    ) -> List[tuple[int, List[str]]]:
+        self, chunks: list[Chunk], metadata: dict | None = None
+    ) -> list[tuple[int, list[str]]]:
         """Validate a batch of chunks.
 
         Args:

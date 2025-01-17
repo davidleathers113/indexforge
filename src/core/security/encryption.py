@@ -8,10 +8,9 @@ This module provides encryption functionality including:
 """
 
 import base64
-import os
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, Optional
+import os
 from uuid import UUID, uuid4
 
 from cryptography.hazmat.primitives import hashes
@@ -63,7 +62,7 @@ class EncryptionKey(BaseModel):
     id: UUID
     key_data: SecretStr
     created_at: datetime
-    expires_at: Optional[datetime]
+    expires_at: datetime | None
     status: KeyStatus = KeyStatus.ACTIVE
     version: int
     key_type: str = "AES256-GCM"
@@ -87,7 +86,7 @@ class EncryptionConfig(BaseModel):
     key_rotation_days: int = 30
     min_key_retention_days: int = 90
     pbkdf2_iterations: int = 100000
-    storage: Optional[KeyStorageConfig] = None
+    storage: KeyStorageConfig | None = None
 
 
 class EncryptionManager:
@@ -100,10 +99,10 @@ class EncryptionManager:
             config: Encryption configuration
         """
         self.config = config
-        self._keys: Dict[UUID, EncryptionKey] = {}
-        self._active_key: Optional[UUID] = None
+        self._keys: dict[UUID, EncryptionKey] = {}
+        self._active_key: UUID | None = None
         self._key_version = 0
-        self._storage: Optional[FileKeyStorage] = None
+        self._storage: FileKeyStorage | None = None
 
         # Initialize storage if configured
         if self.config.storage:
@@ -146,7 +145,7 @@ class EncryptionManager:
             )
             return kdf.derive(master_key.encode())
         except Exception as e:
-            raise KeyGenerationError(f"Key derivation failed: {str(e)}")
+            raise KeyGenerationError(f"Key derivation failed: {e!s}")
 
     async def create_key(self) -> EncryptionKey:
         """Create new encryption key.
@@ -185,7 +184,7 @@ class EncryptionManager:
 
             return key
         except Exception as e:
-            raise KeyGenerationError(f"Failed to create key: {str(e)}")
+            raise KeyGenerationError(f"Failed to create key: {e!s}")
 
     async def rotate_keys(self) -> None:
         """Rotate encryption keys.
@@ -282,7 +281,7 @@ class EncryptionManager:
                 created_at=datetime.utcnow(),
             )
         except Exception as e:
-            raise EncryptionError(f"Encryption failed: {str(e)}")
+            raise EncryptionError(f"Encryption failed: {e!s}")
 
     async def decrypt(self, encrypted_data: EncryptedData) -> bytes:
         """Decrypt encrypted data.
@@ -318,4 +317,4 @@ class EncryptionManager:
         except EncryptionKeyNotFoundError:
             raise DecryptionError("Decryption key not found")
         except Exception as e:
-            raise DecryptionError(f"Decryption failed: {str(e)}")
+            raise DecryptionError(f"Decryption failed: {e!s}")

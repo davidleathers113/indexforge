@@ -1,7 +1,6 @@
 """Language validation strategies with caching support."""
 
 import hashlib
-from typing import Dict, List, Optional, Set
 
 from langdetect import detect, detect_langs
 from langdetect.lang_detect_exception import LangDetectException
@@ -16,8 +15,8 @@ class LanguageValidator(ValidationStrategy):
 
     def __init__(
         self,
-        supported_languages: Optional[Set[str]] = None,
-        cache_service: Optional[CacheService] = None,
+        supported_languages: set[str] | None = None,
+        cache_service: CacheService | None = None,
         min_content_length: int = 50,
         cache_ttl: int = 3600,  # 1 hour cache TTL
     ) -> None:
@@ -47,7 +46,7 @@ class LanguageValidator(ValidationStrategy):
         content_sample = content[:1000]
         return f"lang_detect:{hashlib.md5(content_sample.encode()).hexdigest()}"
 
-    async def _get_cached_result(self, content: str) -> Optional[Dict]:
+    async def _get_cached_result(self, content: str) -> dict | None:
         """Get cached language detection result.
 
         Args:
@@ -66,7 +65,7 @@ class LanguageValidator(ValidationStrategy):
         except Exception:
             return None
 
-    async def _cache_result(self, content: str, result: Dict) -> None:
+    async def _cache_result(self, content: str, result: dict) -> None:
         """Cache language detection result.
 
         Args:
@@ -82,7 +81,7 @@ class LanguageValidator(ValidationStrategy):
         except Exception:
             pass  # Fail silently on cache errors
 
-    async def validate(self, chunk: Chunk, metadata: Optional[Dict] = None) -> List[str]:
+    async def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
         """Validate chunk language with caching support.
 
         Args:

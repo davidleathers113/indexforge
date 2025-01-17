@@ -1,9 +1,10 @@
 """Strategy model definitions for text processing."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Protocol, TypeVar
+from typing import Any, Protocol, TypeVar
 
 from .base import ProcessingMetadata
+
 
 T = TypeVar("T")
 
@@ -18,7 +19,7 @@ class ProcessingStrategy(Protocol[T]):
         T: The type of result produced by this strategy
     """
 
-    def process(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> T:
+    def process(self, content: str, metadata: dict[str, Any] | None = None) -> T:
         """Process the given content using the strategy.
 
         Args:
@@ -34,7 +35,7 @@ class ProcessingStrategy(Protocol[T]):
         """
         ...
 
-    def validate(self, content: str) -> List[str]:
+    def validate(self, content: str) -> list[str]:
         """Validate input content before processing.
 
         Args:
@@ -60,10 +61,10 @@ class StrategyResult:
     """
 
     success: bool = True
-    error_message: Optional[str] = None
+    error_message: str | None = None
     metadata: ProcessingMetadata = field(default_factory=ProcessingMetadata)
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the result.
 
         Returns:
@@ -84,10 +85,10 @@ class TokenizationResult(StrategyResult):
         token_spans: Character spans for each token
     """
 
-    tokens: List[str] = field(default_factory=list)
-    token_spans: List[tuple[int, int]] = field(default_factory=list)
+    tokens: list[str] = field(default_factory=list)
+    token_spans: list[tuple[int, int]] = field(default_factory=list)
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the tokenization result."""
         errors = super().validate()
         if len(self.tokens) != len(self.token_spans):
@@ -103,9 +104,9 @@ class NERResult(StrategyResult):
         entities: List of named entities with details
     """
 
-    entities: List[Dict[str, Any]] = field(default_factory=list)
+    entities: list[dict[str, Any]] = field(default_factory=list)
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the NER result."""
         errors = super().validate()
         for entity in self.entities:
@@ -126,7 +127,7 @@ class SentimentResult(StrategyResult):
     score: float = 0.0
     confidence: float = 0.0
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the sentiment result."""
         errors = super().validate()
         if not -1.0 <= self.score <= 1.0:
@@ -146,11 +147,11 @@ class TopicResult(StrategyResult):
         related_topics: List of related topic IDs
     """
 
-    topic_id: Optional[str] = None
+    topic_id: str | None = None
     confidence: float = 0.0
-    related_topics: List[str] = field(default_factory=list)
+    related_topics: list[str] = field(default_factory=list)
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the topic result."""
         errors = super().validate()
         if self.success and not self.topic_id:
@@ -172,9 +173,9 @@ class SummaryResult(StrategyResult):
 
     summary: str = ""
     compression_ratio: float = 0.0
-    key_points: List[str] = field(default_factory=list)
+    key_points: list[str] = field(default_factory=list)
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the summary result."""
         errors = super().validate()
         if self.success and not self.summary:
@@ -193,10 +194,10 @@ class KeywordResult(StrategyResult):
         max_keywords: Maximum number of keywords to extract
     """
 
-    keywords: List[Dict[str, Any]] = field(default_factory=list)
+    keywords: list[dict[str, Any]] = field(default_factory=list)
     max_keywords: int = 10
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate the keyword result."""
         errors = super().validate()
         if self.success and not self.keywords:

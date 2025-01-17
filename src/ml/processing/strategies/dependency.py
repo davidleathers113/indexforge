@@ -1,7 +1,6 @@
 """Dependency management for processing strategies."""
 
 from collections import defaultdict
-from typing import Dict, List, Set
 
 from src.core.errors import ServiceInitializationError
 
@@ -19,8 +18,8 @@ class DependencyGraph:
 
     def __init__(self) -> None:
         """Initialize the dependency graph."""
-        self._forward_deps: Dict[str, Set[str]] = defaultdict(set)
-        self._reverse_deps: Dict[str, Set[str]] = defaultdict(set)
+        self._forward_deps: dict[str, set[str]] = defaultdict(set)
+        self._reverse_deps: dict[str, set[str]] = defaultdict(set)
 
     def add_dependency(self, strategy: str, depends_on: str) -> None:
         """Add a dependency relationship.
@@ -42,7 +41,7 @@ class DependencyGraph:
         self._forward_deps[strategy].add(depends_on)
         self._reverse_deps[depends_on].add(strategy)
 
-    def add_dependencies(self, strategy: str, dependencies: Set[str]) -> None:
+    def add_dependencies(self, strategy: str, dependencies: set[str]) -> None:
         """Add multiple dependencies for a strategy.
 
         Args:
@@ -55,7 +54,7 @@ class DependencyGraph:
         for dep in dependencies:
             self.add_dependency(strategy, dep)
 
-    def get_dependencies(self, strategy: str) -> Set[str]:
+    def get_dependencies(self, strategy: str) -> set[str]:
         """Get direct dependencies for a strategy.
 
         Args:
@@ -66,7 +65,7 @@ class DependencyGraph:
         """
         return self._forward_deps[strategy]
 
-    def get_dependents(self, strategy: str) -> Set[str]:
+    def get_dependents(self, strategy: str) -> set[str]:
         """Get strategies that depend on the given strategy.
 
         Args:
@@ -77,7 +76,7 @@ class DependencyGraph:
         """
         return self._reverse_deps[strategy]
 
-    def get_execution_order(self) -> List[str]:
+    def get_execution_order(self) -> list[str]:
         """Get optimized execution order respecting dependencies.
 
         Returns:
@@ -87,13 +86,13 @@ class DependencyGraph:
             ServiceInitializationError: If dependencies contain a cycle
         """
         # Kahn's algorithm for topological sort
-        in_degree: Dict[str, int] = defaultdict(int)
+        in_degree: dict[str, int] = defaultdict(int)
         for strategy in self._forward_deps:
             for dep in self._forward_deps[strategy]:
                 in_degree[dep] += 1
 
         # Start with nodes that have no dependencies
-        ready: List[str] = [node for node in self._forward_deps if in_degree[node] == 0]
+        ready: list[str] = [node for node in self._forward_deps if in_degree[node] == 0]
 
         result = []
         while ready:

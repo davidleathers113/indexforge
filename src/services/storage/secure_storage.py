@@ -6,7 +6,7 @@ with storage operations, ensuring data is encrypted at rest.
 
 import json
 from pathlib import Path
-from typing import Dict, Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -15,6 +15,7 @@ from src.core.interfaces.storage import DocumentStorage
 from src.core.models.documents import Document
 from src.core.security.encryption import EncryptedData, EncryptionManager
 from src.core.settings import Settings
+
 
 T = TypeVar("T", bound=Document)
 
@@ -34,7 +35,7 @@ class SecureStorageWrapper(Generic[T]):
         storage: DocumentStorage[T],
         encryption_manager: EncryptionManager,
         settings: Settings,
-        metadata_dir: Optional[Path] = None,
+        metadata_dir: Path | None = None,
     ) -> None:
         """Initialize secure storage wrapper.
 
@@ -47,7 +48,7 @@ class SecureStorageWrapper(Generic[T]):
         self._storage = storage
         self._encryption = encryption_manager
         self._settings = settings
-        self._metadata: Dict[UUID, SecureStorageMetadata] = {}
+        self._metadata: dict[UUID, SecureStorageMetadata] = {}
         self._metadata_dir = metadata_dir or Path("data/secure_storage/metadata")
         self._metadata_dir.mkdir(parents=True, exist_ok=True)
         self._load_metadata()
@@ -112,7 +113,7 @@ class SecureStorageWrapper(Generic[T]):
 
         return doc_id
 
-    async def get_document(self, document_id: UUID) -> Optional[T]:
+    async def get_document(self, document_id: UUID) -> T | None:
         """Retrieve and decrypt a document.
 
         Args:

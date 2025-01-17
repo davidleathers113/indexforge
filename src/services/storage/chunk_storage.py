@@ -4,7 +4,7 @@ This module provides a concrete implementation of the chunk storage interface
 with support for batch operations, metrics collection, and memory management.
 """
 
-from typing import Dict, List, Optional, TypeVar
+from typing import TypeVar
 from uuid import UUID, uuid4
 
 from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
@@ -13,6 +13,7 @@ from src.core.models.chunks import Chunk, ChunkMetadata
 from src.core.settings import Settings
 
 from .base import BaseStorageService, BatchConfig, BatchResult
+
 
 C = TypeVar("C", bound=Chunk)
 
@@ -23,9 +24,9 @@ class ChunkStorageService(BaseStorageService, ChunkStorage[C]):
     def __init__(
         self,
         settings: Settings,
-        metrics: Optional[StorageMetrics] = None,
-        metrics_provider: Optional[MetricsProvider] = None,
-        batch_config: Optional[BatchConfig] = None,
+        metrics: StorageMetrics | None = None,
+        metrics_provider: MetricsProvider | None = None,
+        batch_config: BatchConfig | None = None,
     ) -> None:
         """Initialize chunk storage.
 
@@ -38,7 +39,7 @@ class ChunkStorageService(BaseStorageService, ChunkStorage[C]):
         super().__init__(
             metrics=metrics, metrics_provider=metrics_provider, batch_config=batch_config
         )
-        self._chunks: Dict[UUID, C] = {}
+        self._chunks: dict[UUID, C] = {}
         self._settings = settings
 
     def store_chunk(self, chunk: C) -> UUID:
@@ -131,7 +132,7 @@ class ChunkStorageService(BaseStorageService, ChunkStorage[C]):
         finally:
             self._stop_timing("delete_chunk")
 
-    def batch_store_chunks(self, chunks: List[C]) -> BatchResult[C]:
+    def batch_store_chunks(self, chunks: list[C]) -> BatchResult[C]:
         """Store multiple chunks in a batch operation.
 
         Args:
@@ -142,7 +143,7 @@ class ChunkStorageService(BaseStorageService, ChunkStorage[C]):
         """
         return self.process_batch(chunks, "store_chunk")
 
-    def batch_update_chunks(self, updates: List[tuple[UUID, C]]) -> BatchResult[tuple[UUID, C]]:
+    def batch_update_chunks(self, updates: list[tuple[UUID, C]]) -> BatchResult[tuple[UUID, C]]:
         """Update multiple chunks in a batch operation.
 
         Args:
@@ -176,4 +177,4 @@ class ChunkStorageService(BaseStorageService, ChunkStorage[C]):
             self.delete_chunk(chunk_id)
             return True, "Chunk storage service is healthy"
         except Exception as e:
-            return False, f"Chunk storage health check failed: {str(e)}"
+            return False, f"Chunk storage health check failed: {e!s}"

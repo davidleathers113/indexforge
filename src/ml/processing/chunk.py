@@ -1,6 +1,7 @@
 """Chunk processor implementation."""
 
-from typing import Any, Optional
+from typing import Any
+
 
 try:
     import spacy
@@ -46,7 +47,7 @@ class ChunkProcessor(BaseProcessor[ProcessedChunk]):
             ValueError: If required settings are missing
         """
         super().__init__(settings)
-        self._nlp: Optional[Language] = None
+        self._nlp: Language | None = None
         self._strategy_manager = StrategyManager()
         self._validator = ChunkValidator()
         self._aggregator = ResultAggregator()
@@ -132,7 +133,7 @@ class ChunkProcessor(BaseProcessor[ProcessedChunk]):
             )
 
     def process_chunk(
-        self, chunk: Chunk, metadata: Optional[dict[str, Any]] = None
+        self, chunk: Chunk, metadata: dict[str, Any] | None = None
     ) -> ProcessedChunk:
         """Process a single chunk.
 
@@ -187,7 +188,7 @@ class ChunkProcessor(BaseProcessor[ProcessedChunk]):
         return self._aggregator.build_processed_chunk(chunk)
 
     def process_chunks(
-        self, chunks: list[Chunk], metadata: Optional[dict[str, Any]] = None
+        self, chunks: list[Chunk], metadata: dict[str, Any] | None = None
     ) -> list[ProcessedChunk]:
         """Process multiple chunks.
 

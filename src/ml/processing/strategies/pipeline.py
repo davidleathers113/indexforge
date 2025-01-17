@@ -1,6 +1,6 @@
 """Pipeline for executing processing strategies."""
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from src.ml.processing.models.strategies import ProcessingStrategy
 
@@ -28,14 +28,14 @@ class StrategyPipeline:
         """
         self._graph = dependency_graph
         self._error_handler = ErrorHandler(self._graph._forward_deps)
-        self._results_cache: Dict[str, Any] = {}
+        self._results_cache: dict[str, Any] = {}
 
     async def execute(
         self,
-        strategies: Dict[str, ProcessingStrategy],
+        strategies: dict[str, ProcessingStrategy],
         content: str,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Execute strategies in dependency order.
 
         Args:
@@ -78,7 +78,7 @@ class StrategyPipeline:
         return self._results_cache
 
     async def _execute_strategy(
-        self, name: str, strategy: ProcessingStrategy, content: str, metadata: Dict[str, Any]
+        self, name: str, strategy: ProcessingStrategy, content: str, metadata: dict[str, Any]
     ) -> Any:
         """Execute a single strategy.
 
@@ -122,7 +122,7 @@ class StrategyPipeline:
                 e = StrategyExecutionError(str(e), strategy_name=name)
             raise e
 
-    def get_result(self, strategy_name: str) -> Optional[Any]:
+    def get_result(self, strategy_name: str) -> Any | None:
         """Get the result of a previously executed strategy.
 
         Args:

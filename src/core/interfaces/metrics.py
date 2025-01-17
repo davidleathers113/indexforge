@@ -4,13 +4,13 @@ This module defines the interfaces for metrics collection across different servi
 It provides protocols for storage metrics, operation metrics, and related functionality.
 """
 
-from typing import Dict, Protocol
+from typing import Protocol
 
 
 class StorageMetrics(Protocol):
     """Protocol for storage metrics collection."""
 
-    def get_storage_usage(self) -> Dict[str, int]:
+    def get_storage_usage(self) -> dict[str, int]:
         """Get storage usage metrics.
 
         Returns:
@@ -22,7 +22,7 @@ class StorageMetrics(Protocol):
         """
         ...
 
-    def get_operation_counts(self) -> Dict[str, int]:
+    def get_operation_counts(self) -> dict[str, int]:
         """Get operation count metrics.
 
         Returns:

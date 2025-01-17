@@ -6,6 +6,7 @@ vector embeddings and cosine similarity.
 
 from typing import TYPE_CHECKING, Any, cast
 
+
 try:
     from sklearn.metrics.pairwise import cosine_similarity
 
@@ -19,6 +20,7 @@ from src.ml.processing.models.service import (
     ServiceState,
     ServiceStateError,
 )
+
 
 if TYPE_CHECKING:
     from src.core.settings import Settings

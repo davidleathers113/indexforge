@@ -45,12 +45,12 @@ Note:
     - Thread-safe operations
 """
 
-from collections.abc import Callable
-from functools import wraps
 import hashlib
 import json
 import logging
 import pickle
+from collections.abc import Callable
+from functools import wraps
 from typing import Any
 
 import redis
@@ -123,7 +123,7 @@ class CacheManager:
                     return None
             return None
         except Exception as e:
-            self.logger.error(f"Error getting from cache: {e!s}")
+            self.logger.exception(f"Error getting from cache: {e!s}")
             return None
 
     def set(self, key: str, value: Any, ttl: int | None = None) -> bool:
@@ -137,7 +137,7 @@ class CacheManager:
                 ttl = self.default_ttl
             return bool(self.redis.setex(full_key, ttl, serialized))
         except Exception as e:
-            self.logger.error(f"Error setting cache: {e!s}")
+            self.logger.exception(f"Error setting cache: {e!s}")
             return False
 
     def delete(self, key: str) -> bool:
@@ -148,7 +148,7 @@ class CacheManager:
             full_key = self._get_full_key(key)
             return bool(self.redis.delete(full_key))
         except Exception as e:
-            self.logger.error(f"Error deleting from cache: {e!s}")
+            self.logger.exception(f"Error deleting from cache: {e!s}")
             return False
 
     def cleanup(self):
@@ -157,7 +157,7 @@ class CacheManager:
             if self.redis:
                 self.redis.close()
         except Exception as e:
-            self.logger.error(f"Error cleaning up cache: {e!s}")
+            self.logger.exception(f"Error cleaning up cache: {e!s}")
 
     def cache_decorator(self, key_prefix: str, ttl: int | None = None):
         """Decorator to cache function results.

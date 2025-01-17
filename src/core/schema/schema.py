@@ -4,8 +4,9 @@ This module provides the core schema implementation with validation,
 compatibility checking, and serialization support.
 """
 
+from collections.abc import Iterator
 import re
-from typing import Any, Dict, Iterator, List, Optional, Set
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -24,8 +25,8 @@ class FieldDefinition(BaseModel):
     type: str = Field(..., description="Field data type")
     description: str = Field(default="", description="Field description")
     required: bool = Field(default=False, description="Whether field is required")
-    default: Optional[Any] = Field(default=None, description="Default field value")
-    constraints: Dict[str, Any] = Field(
+    default: Any | None = Field(default=None, description="Default field value")
+    constraints: dict[str, Any] = Field(
         default_factory=dict, description="Additional field constraints"
     )
     override: bool = Field(default=False, description="Whether this field overrides a parent field")
@@ -39,9 +40,9 @@ class Schema(BaseSchema):
         name: str,
         version: SchemaVersion,
         schema_type: SchemaType,
-        fields: Dict[str, FieldDefinition],
-        required_fields: Optional[Set[str]] = None,
-        validators: Optional[List[SchemaValidator]] = None,
+        fields: dict[str, FieldDefinition],
+        required_fields: set[str] | None = None,
+        validators: list[SchemaValidator] | None = None,
         description: str = "",
         parent_schema: Optional["Schema"] = None,
     ):
@@ -75,8 +76,8 @@ class Schema(BaseSchema):
         self._validate_field_definitions()
 
     def _merge_parent_fields(
-        self, fields: Dict[str, FieldDefinition]
-    ) -> Dict[str, FieldDefinition]:
+        self, fields: dict[str, FieldDefinition]
+    ) -> dict[str, FieldDefinition]:
         """Merge fields with parent schema fields, handling overrides.
 
         Args:
@@ -130,7 +131,7 @@ class Schema(BaseSchema):
                         f"Field definition for {field_name} must be FieldDefinition or dict"
                     )
 
-    def validate(self, data: Dict[str, Any]) -> List[ValidationError]:
+    def validate(self, data: dict[str, Any]) -> list[ValidationError]:
         """Validate data against this schema.
 
         Args:
@@ -139,7 +140,7 @@ class Schema(BaseSchema):
         Returns:
             List of validation errors, empty if validation succeeds
         """
-        errors: List[ValidationError] = []
+        errors: list[ValidationError] = []
 
         # Check required fields
         for field in self.required_fields:
@@ -283,7 +284,7 @@ class Schema(BaseSchema):
 
         return True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert schema to dictionary representation.
 
         Returns:
@@ -300,7 +301,7 @@ class Schema(BaseSchema):
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Schema":
+    def from_dict(cls, data: dict[str, Any]) -> "Schema":
         """Create schema instance from dictionary representation.
 
         Args:

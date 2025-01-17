@@ -61,10 +61,10 @@ Note:
     - Customizable redaction patterns
 """
 
-from dataclasses import dataclass
-from datetime import datetime
 import logging
 import re
+from dataclasses import dataclass
+from datetime import datetime
 
 import spacy
 
@@ -89,7 +89,25 @@ class PIIMatch:
 
 
 class PIIDetector:
-    def __init__(self, spacy_model: str = "en_core_web_sm", chunk_size: int = 100000):  # characters
+    """Detector for personally identifiable information (PII) in text.
+
+    This class provides functionality to detect and redact various types of PII
+    including names, email addresses, phone numbers, and other sensitive information.
+    It uses a combination of regex patterns and NER models for detection.
+
+    Attributes:
+        spacy_model: Name of the spaCy model to use for NER
+        chunk_size: Size of text chunks for processing (in characters)
+        logger: Logger instance for tracking operations
+    """
+
+    def __init__(self, spacy_model: str = "en_core_web_sm", chunk_size: int = 100000):
+        """Initialize the PII detector.
+
+        Args:
+            spacy_model: Name of the spaCy model to use for NER detection
+            chunk_size: Maximum size of text chunks for processing (in characters)
+        """
         # Load spaCy model for NER
         self.nlp = spacy.load(spacy_model)
         self.chunk_size = chunk_size

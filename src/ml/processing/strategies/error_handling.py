@@ -1,7 +1,6 @@
 """Error handling for strategy execution."""
 
 import logging
-from typing import Dict, Optional, Set
 
 from src.core.errors import ServiceInitializationError, ValidationError
 
@@ -31,7 +30,7 @@ class ErrorHandler:
         _dependency_graph: Optional reference to strategy dependencies
     """
 
-    def __init__(self, dependency_graph: Optional[Dict[str, Set[str]]] = None) -> None:
+    def __init__(self, dependency_graph: dict[str, set[str]] | None = None) -> None:
         """Initialize the error handler.
 
         Args:
@@ -40,7 +39,7 @@ class ErrorHandler:
         self._logger = logging.getLogger(__name__)
         self._dependency_graph = dependency_graph
 
-    def handle(self, error: Exception, strategy_name: Optional[str] = None) -> None:
+    def handle(self, error: Exception, strategy_name: str | None = None) -> None:
         """Handle strategy execution errors.
 
         Args:
@@ -91,7 +90,7 @@ class ErrorHandler:
         )
 
     def _handle_validation_error(
-        self, error: ValidationError, strategy_name: Optional[str]
+        self, error: ValidationError, strategy_name: str | None
     ) -> None:
         """Handle validation errors.
 
@@ -102,7 +101,7 @@ class ErrorHandler:
         context = f" in {strategy_name}" if strategy_name else ""
         self._logger.error("Validation failed%s: %s", context, str(error))
 
-    def _handle_general_error(self, error: Exception, strategy_name: Optional[str]) -> None:
+    def _handle_general_error(self, error: Exception, strategy_name: str | None) -> None:
         """Handle general execution errors.
 
         Args:
@@ -117,7 +116,7 @@ class ErrorHandler:
             error.__class__.__name__,
         )
 
-    def set_dependency_graph(self, graph: Dict[str, Set[str]]) -> None:
+    def set_dependency_graph(self, graph: dict[str, set[str]]) -> None:
         """Update the dependency graph reference.
 
         Args:

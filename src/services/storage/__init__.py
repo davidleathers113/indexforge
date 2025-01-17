@@ -11,6 +11,7 @@ from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
 
 from .base import BaseStorageService, BatchConfig
 
+
 if TYPE_CHECKING:
     from src.core.interfaces.storage import ChunkStorage, DocumentStorage, ReferenceStorage
     from src.core.settings import Settings
@@ -18,16 +19,16 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound=BaseStorageService)
 
 # Service instance cache
-_service_cache: Dict[str, object] = {}
-_metrics_provider: Optional[MetricsProvider] = None
-_storage_metrics: Optional[StorageMetrics] = None
-_batch_config: Optional[BatchConfig] = None
+_service_cache: dict[str, object] = {}
+_metrics_provider: MetricsProvider | None = None
+_storage_metrics: StorageMetrics | None = None
+_batch_config: BatchConfig | None = None
 
 
 def configure_storage(
-    metrics_provider: Optional[MetricsProvider] = None,
-    storage_metrics: Optional[StorageMetrics] = None,
-    batch_config: Optional[BatchConfig] = None,
+    metrics_provider: MetricsProvider | None = None,
+    storage_metrics: StorageMetrics | None = None,
+    batch_config: BatchConfig | None = None,
 ) -> None:
     """Configure global storage service settings.
 
@@ -44,7 +45,7 @@ def configure_storage(
 
 def _get_cached_service(
     service_key: str,
-    service_class: Type[T],
+    service_class: type[T],
     settings: "Settings",
     **kwargs: Any,
 ) -> T:
@@ -79,7 +80,7 @@ def clear_service_cache() -> None:
     _service_cache.clear()
 
 
-def check_service_health() -> Tuple[bool, str]:
+def check_service_health() -> tuple[bool, str]:
     """Check the health of all initialized storage services.
 
     Returns:
@@ -98,7 +99,7 @@ def check_service_health() -> Tuple[bool, str]:
 
         return True, "All storage services are healthy"
     except Exception as e:
-        return False, f"Health check failed: {str(e)}"
+        return False, f"Health check failed: {e!s}"
 
 
 def get_document_storage(settings: "Settings") -> "DocumentStorage":
@@ -162,10 +163,10 @@ def get_reference_storage(settings: "Settings") -> "ReferenceStorage":
 
 
 __all__ = [
-    "configure_storage",
-    "get_document_storage",
-    "get_chunk_storage",
-    "get_reference_storage",
-    "clear_service_cache",
     "check_service_health",
+    "clear_service_cache",
+    "configure_storage",
+    "get_chunk_storage",
+    "get_document_storage",
+    "get_reference_storage",
 ]

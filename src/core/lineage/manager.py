@@ -6,7 +6,6 @@ and relationship tracking.
 """
 
 import asyncio
-from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 from src.core.lineage.base import ChangeType, DocumentLineage, SourceInfo
@@ -30,10 +29,10 @@ class LineageManager:
 
     def __init__(self):
         """Initialize lineage manager."""
-        self._lineage: Dict[UUID, DocumentLineage] = {}
+        self._lineage: dict[UUID, DocumentLineage] = {}
         self._lock = asyncio.Lock()
 
-    async def get_lineage(self, document_id: UUID) -> Optional[DocumentLineage]:
+    async def get_lineage(self, document_id: UUID) -> DocumentLineage | None:
         """Get lineage information for a document.
 
         Args:
@@ -48,8 +47,8 @@ class LineageManager:
     async def create_lineage(
         self,
         document_id: UUID,
-        source_info: Optional[SourceInfo] = None,
-        parent_id: Optional[UUID] = None,
+        source_info: SourceInfo | None = None,
+        parent_id: UUID | None = None,
     ) -> DocumentLineage:
         """Create new lineage for a document.
 
@@ -101,9 +100,9 @@ class LineageManager:
         self,
         document_id: UUID,
         change_type: ChangeType,
-        source_info: Optional[SourceInfo] = None,
-        metadata: Optional[Dict[str, str]] = None,
-        related_ids: Optional[Set[UUID]] = None,
+        source_info: SourceInfo | None = None,
+        metadata: dict[str, str] | None = None,
+        related_ids: set[UUID] | None = None,
     ) -> DocumentLineage:
         """Update lineage for a document.
 
@@ -216,8 +215,8 @@ class LineageManager:
     async def get_document_history(
         self,
         document_id: UUID,
-        since_version: Optional[int] = None,
-    ) -> List[Dict[str, str]]:
+        since_version: int | None = None,
+    ) -> list[dict[str, str]]:
         """Get change history for a document.
 
         Args:
@@ -245,8 +244,8 @@ class LineageManager:
     async def _check_circular_references(
         self,
         document_id: UUID,
-        reference_ids: Set[UUID],
-        visited: Optional[Set[UUID]] = None,
+        reference_ids: set[UUID],
+        visited: set[UUID] | None = None,
     ) -> None:
         """Check for circular references in the document graph.
 

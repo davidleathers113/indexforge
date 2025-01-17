@@ -19,6 +19,7 @@ from .embeddings import (
 from .processing import TextProcessor
 from .search import SemanticSearch
 
+
 if TYPE_CHECKING:
     import numpy as np
     import numpy.typing as npt

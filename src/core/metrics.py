@@ -8,7 +8,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 import psutil
 
@@ -19,13 +19,13 @@ class OperationMetrics:
 
     operation_name: str
     start_time: datetime
-    end_time: Optional[datetime] = None
-    duration: Optional[float] = None
+    end_time: datetime | None = None
+    duration: float | None = None
     success: bool = True
-    error_type: Optional[str] = None
-    error_message: Optional[str] = None
-    memory_usage: Optional[float] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    error_type: str | None = None
+    error_message: str | None = None
+    memory_usage: float | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ServiceMetricsCollector:
@@ -49,17 +49,17 @@ class ServiceMetricsCollector:
         self.memory_threshold_mb = memory_threshold_mb
 
         # Metrics storage
-        self.operations: List[OperationMetrics] = []
-        self.error_counts: Dict[str, int] = defaultdict(int)
-        self.operation_counts: Dict[str, int] = defaultdict(int)
-        self.slow_operations: Set[str] = set()
-        self._current_operation: Optional[OperationMetrics] = None
+        self.operations: list[OperationMetrics] = []
+        self.error_counts: dict[str, int] = defaultdict(int)
+        self.operation_counts: dict[str, int] = defaultdict(int)
+        self.slow_operations: set[str] = set()
+        self._current_operation: OperationMetrics | None = None
 
     @contextmanager
     def measure_operation(
         self,
         operation_name: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Measure operation performance.
 
@@ -104,7 +104,7 @@ class ServiceMetricsCollector:
 
             self._current_operation = None
 
-    def get_current_metrics(self) -> Dict[str, Any]:
+    def get_current_metrics(self) -> dict[str, Any]:
         """Get current service metrics.
 
         Returns:
@@ -134,8 +134,8 @@ class ServiceMetricsCollector:
     def get_operation_metrics(
         self,
         operation_name: str,
-        time_window: Optional[timedelta] = None,
-    ) -> Dict[str, Any]:
+        time_window: timedelta | None = None,
+    ) -> dict[str, Any]:
         """Get metrics for a specific operation.
 
         Args:
@@ -174,7 +174,7 @@ class ServiceMetricsCollector:
             "success_rate": len([op for op in filtered_ops if op.success]) / len(filtered_ops),
         }
 
-    def check_health(self) -> Dict[str, Any]:
+    def check_health(self) -> dict[str, Any]:
         """Check service health based on metrics.
 
         Returns:

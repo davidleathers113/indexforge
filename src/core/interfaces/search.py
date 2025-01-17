@@ -18,6 +18,7 @@ from .vector import (
     VectorService,
 )
 
+
 __all__ = [
     "AddObjectCommand",
     "BatchAddCommand",

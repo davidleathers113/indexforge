@@ -8,7 +8,7 @@ import datetime
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Type, TypeVar, Union
+from typing import TypeVar
 
 from src.core.schema.base import (
     BaseConfiguration,
@@ -20,6 +20,7 @@ from src.core.schema.base import (
 )
 from src.core.security.encryption import EncryptionManager
 
+
 T = TypeVar("T", bound=BaseConfiguration)
 
 
@@ -28,8 +29,8 @@ class ConfigurationManager:
 
     def __init__(
         self,
-        config_dir: Optional[Union[str, Path]] = None,
-        encryption_manager: Optional[EncryptionManager] = None,
+        config_dir: str | Path | None = None,
+        encryption_manager: EncryptionManager | None = None,
     ):
         """Initialize configuration manager.
 
@@ -39,9 +40,9 @@ class ConfigurationManager:
             encryption_manager: Optional encryption manager for secure storage.
         """
         self.config_dir = Path(config_dir) if config_dir else Path.cwd()
-        self._cache: Dict[str, BaseConfiguration] = {}
+        self._cache: dict[str, BaseConfiguration] = {}
         self._env = os.getenv("INDEXFORGE_ENV", "development")
-        self._migrations: Dict[str, List[ConfigurationMigration]] = {}
+        self._migrations: dict[str, list[ConfigurationMigration]] = {}
         self._encryption_manager = encryption_manager
 
     def register_migration(self, config_name: str, migration: ConfigurationMigration) -> None:
@@ -57,9 +58,9 @@ class ConfigurationManager:
 
     def get_config(
         self,
-        config_class: Type[T],
+        config_class: type[T],
         name: str,
-        environment: Optional[str] = None,
+        environment: str | None = None,
         reload: bool = False,
         validate: bool = True,
     ) -> T:
@@ -160,9 +161,9 @@ class ConfigurationManager:
 
     def _load_config(
         self,
-        config_class: Type[T],
+        config_class: type[T],
         name: str,
-        environment: Optional[str] = None,
+        environment: str | None = None,
     ) -> T:
         """Load configuration from files and environment.
 
@@ -263,7 +264,7 @@ class ConfigurationManager:
         self,
         config: BaseConfiguration,
         name: str,
-        environment: Optional[str] = None,
+        environment: str | None = None,
         secure: bool = False,
     ) -> None:
         """Save configuration to file.

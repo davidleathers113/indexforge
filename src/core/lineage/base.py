@@ -6,7 +6,6 @@ including source tracking, version history, and relationship management.
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -29,7 +28,7 @@ class SourceInfo(BaseModel):
     source_id: str = Field(..., description="Unique identifier for the source")
     source_type: str = Field(..., description="Type of source (e.g., git, filesystem, api)")
     location: str = Field(..., description="Location within the source")
-    metadata: Dict[str, str] = Field(default_factory=dict, description="Source-specific metadata")
+    metadata: dict[str, str] = Field(default_factory=dict, description="Source-specific metadata")
 
 
 class ChangeRecord(BaseModel):
@@ -41,10 +40,10 @@ class ChangeRecord(BaseModel):
     change_type: ChangeType = Field(..., description="Type of change")
     document_id: UUID = Field(..., description="ID of the document that changed")
     version: int = Field(..., description="Document version after the change")
-    source_info: Optional[SourceInfo] = Field(None, description="Source information if relevant")
-    metadata: Dict[str, str] = Field(default_factory=dict, description="Change-specific metadata")
-    parent_id: Optional[UUID] = Field(None, description="ID of parent document if derived")
-    related_ids: Set[UUID] = Field(default_factory=set, description="IDs of related documents")
+    source_info: SourceInfo | None = Field(None, description="Source information if relevant")
+    metadata: dict[str, str] = Field(default_factory=dict, description="Change-specific metadata")
+    parent_id: UUID | None = Field(None, description="ID of parent document if derived")
+    related_ids: set[UUID] = Field(default_factory=set, description="IDs of related documents")
 
 
 class DocumentLineage(BaseModel):
@@ -52,25 +51,25 @@ class DocumentLineage(BaseModel):
 
     document_id: UUID = Field(..., description="Document ID")
     current_version: int = Field(default=1, description="Current document version")
-    source_info: Optional[SourceInfo] = Field(None, description="Current source information")
-    parent_id: Optional[UUID] = Field(None, description="ID of parent document if derived")
-    children_ids: Set[UUID] = Field(default_factory=set, description="IDs of child documents")
-    reference_ids: Set[UUID] = Field(default_factory=set, description="IDs of referenced documents")
-    referenced_by_ids: Set[UUID] = Field(
+    source_info: SourceInfo | None = Field(None, description="Current source information")
+    parent_id: UUID | None = Field(None, description="ID of parent document if derived")
+    children_ids: set[UUID] = Field(default_factory=set, description="IDs of child documents")
+    reference_ids: set[UUID] = Field(default_factory=set, description="IDs of referenced documents")
+    referenced_by_ids: set[UUID] = Field(
         default_factory=set, description="IDs of documents referencing this one"
     )
-    history: List[ChangeRecord] = Field(
+    history: list[ChangeRecord] = Field(
         default_factory=list, description="Chronological history of changes"
     )
-    metadata: Dict[str, str] = Field(default_factory=dict, description="Current document metadata")
+    metadata: dict[str, str] = Field(default_factory=dict, description="Current document metadata")
 
     def add_change(
         self,
         change_type: ChangeType,
-        source_info: Optional[SourceInfo] = None,
-        metadata: Optional[Dict[str, str]] = None,
-        parent_id: Optional[UUID] = None,
-        related_ids: Optional[Set[UUID]] = None,
+        source_info: SourceInfo | None = None,
+        metadata: dict[str, str] | None = None,
+        parent_id: UUID | None = None,
+        related_ids: set[UUID] | None = None,
     ) -> None:
         """Add a change record to the document's history.
 
@@ -110,7 +109,7 @@ class DocumentLineage(BaseModel):
             )
         )
 
-    def get_changes_since(self, version: int) -> List[ChangeRecord]:
+    def get_changes_since(self, version: int) -> list[ChangeRecord]:
         """Get all changes since a specific version.
 
         Args:
@@ -121,7 +120,7 @@ class DocumentLineage(BaseModel):
         """
         return [change for change in self.history if change.version > version]
 
-    def get_related_documents(self) -> Set[UUID]:
+    def get_related_documents(self) -> set[UUID]:
         """Get all documents related to this one.
 
         This includes parent, children, references, and documents referencing this one.

@@ -5,7 +5,8 @@ This module provides interfaces for vector database operations using the Command
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, Optional, Protocol, TypeVar
+
 
 if TYPE_CHECKING:
     from src.core.models.base import BaseModel
@@ -35,12 +36,12 @@ class AddObjectCommand(VectorCommand[str]):
     """Command for adding objects to vector store."""
 
     class_name: str
-    data_object: Dict[str, Any]
-    vector: Optional[List[float]] = None
+    data_object: dict[str, Any]
+    vector: list[float] | None = None
 
 
 @dataclass
-class GetObjectCommand(VectorCommand[Optional[Dict[str, Any]]]):
+class GetObjectCommand(VectorCommand[Optional[dict[str, Any]]]):
     """Command for retrieving objects from vector store."""
 
     class_name: str
@@ -56,13 +57,13 @@ class DeleteObjectCommand(VectorCommand[None]):
 
 
 @dataclass
-class BatchAddCommand(VectorCommand[List[str]]):
+class BatchAddCommand(VectorCommand[list[str]]):
     """Command for batch adding objects."""
 
     class_name: str
-    objects: List[Dict[str, Any]]
-    vectors: Optional[List[List[float]]] = None
-    batch_size: Optional[int] = None
+    objects: list[dict[str, Any]]
+    vectors: list[list[float]] | None = None
+    batch_size: int | None = None
 
 
 @dataclass
@@ -70,16 +71,16 @@ class BatchDeleteCommand(VectorCommand[None]):
     """Command for batch deleting objects."""
 
     class_name: str
-    uuids: List[str]
-    batch_size: Optional[int] = None
+    uuids: list[str]
+    batch_size: int | None = None
 
 
 @dataclass
-class VectorSearchCommand(VectorCommand[List[Dict[str, Any]]]):
+class VectorSearchCommand(VectorCommand[list[dict[str, Any]]]):
     """Command for vector similarity search."""
 
     class_name: str
-    vector: List[float]
+    vector: list[float]
     limit: int = 10
     distance_threshold: float = 0.8
     with_payload: bool = True

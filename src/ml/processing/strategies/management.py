@@ -4,8 +4,8 @@ This module is maintained for backward compatibility.
 New code should use ModernStrategyManager instead.
 """
 
+from typing import Any, TypeVar
 import warnings
-from typing import Any, Dict, List, Optional, TypeVar
 
 from src.ml.processing.errors import ServiceInitializationError
 from src.ml.processing.models.strategies import ProcessingStrategy
@@ -13,6 +13,7 @@ from src.ml.processing.models.strategies import ProcessingStrategy
 from .dependency import DependencyGraph
 from .factory import StrategyFactory
 from .pipeline import StrategyPipeline
+
 
 T = TypeVar("T")
 
@@ -40,7 +41,7 @@ class StrategyManager:
         self._pipeline = StrategyPipeline(self._graph)
 
     @property
-    def strategies(self) -> List[ProcessingStrategy[T]]:
+    def strategies(self) -> list[ProcessingStrategy[T]]:
         """Get the list of registered strategies."""
         return list(self._factory.get_strategies().values())
 
@@ -83,8 +84,8 @@ class StrategyManager:
             raise ServiceInitializationError(str(e), service_name=e.service_name)
 
     async def execute_pipeline(
-        self, content: str, metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, content: str, metadata: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Execute all strategies in optimized order.
 
         Args:

@@ -1,30 +1,38 @@
-"""Document lineage validation package."""
+"""Document lineage validation package.
 
-from src.core.tracking.validation.errors import (
+This module provides validation functionality for document lineage data, including:
+- Validation strategies for different aspects of document lineage
+- Error types and factories for validation errors
+- Composite validator for executing multiple validation strategies
+"""
+
+from src.core.tracking.validation.composite import CompositeValidator
+from src.core.tracking.validation.interface import (
     CircularDependencyError,
     InconsistentRelationshipError,
     LineageValidationErrorFactory,
     MissingReferenceError,
-)
-from src.core.tracking.validation.interfaces import (
     ValidationError,
-    ValidationErrorFactory,
     ValidationStrategy,
 )
+from src.core.tracking.validation.strategies.chunks import ChunkReferenceValidator
 from src.core.tracking.validation.strategies.circular import CircularDependencyValidator
-from src.core.tracking.validation.validators import CompositeValidator
+from src.core.tracking.validation.strategies.relationships import RelationshipValidator
+
 
 __all__ = [
-    # Interfaces
+    # Core Interfaces
     "ValidationStrategy",
     "ValidationError",
-    "ValidationErrorFactory",
     # Error Types
     "CircularDependencyError",
     "InconsistentRelationshipError",
     "MissingReferenceError",
     "LineageValidationErrorFactory",
-    # Validators
+    # Validation Strategies
     "CircularDependencyValidator",
+    "ChunkReferenceValidator",
+    "RelationshipValidator",
+    # Composite Validator
     "CompositeValidator",
 ]

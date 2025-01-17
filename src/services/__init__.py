@@ -12,6 +12,7 @@ from src.services.storage import (
 )
 from src.services.weaviate import WeaviateClient
 
+
 __all__ = [
     "RedisService",
     "WeaviateClient",

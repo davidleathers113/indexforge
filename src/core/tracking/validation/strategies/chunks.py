@@ -14,11 +14,11 @@ Example:
 """
 
 from logging import getLogger
-from typing import List, Optional, Set
 
 from src.core.models import DocumentLineage
 from src.core.tracking.validation.errors import LineageValidationErrorFactory
 from src.core.tracking.validation.interface import ValidationStrategy
+
 
 logger = getLogger(__name__)
 
@@ -37,7 +37,7 @@ class ChunkReferenceValidator(ValidationStrategy):
         """Initialize the chunk reference validator."""
         self.error_factory = LineageValidationErrorFactory()
 
-    def validate(self, lineage: DocumentLineage) -> List[str]:
+    def validate(self, lineage: DocumentLineage) -> list[str]:
         """Validate chunk references in the document lineage.
 
         Args:
@@ -49,8 +49,8 @@ class ChunkReferenceValidator(ValidationStrategy):
         if not lineage:
             return []
 
-        errors: List[str] = []
-        seen_chunks: Set[str] = set()
+        errors: list[str] = []
+        seen_chunks: set[str] = set()
 
         # Validate each chunk reference
         for chunk_ref in lineage.chunk_references or []:
@@ -89,7 +89,7 @@ class ChunkReferenceValidator(ValidationStrategy):
 
     def _get_source_document(
         self, lineage: DocumentLineage, doc_id: str
-    ) -> Optional[DocumentLineage]:
+    ) -> DocumentLineage | None:
         """Get a source document from the lineage by its ID.
 
         Args:

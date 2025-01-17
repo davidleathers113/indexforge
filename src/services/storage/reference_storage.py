@@ -4,7 +4,7 @@ This module provides a concrete implementation of the reference storage interfac
 with support for batch operations, metrics collection, and memory management.
 """
 
-from typing import Dict, List, Optional, Set, TypeVar
+from typing import TypeVar
 from uuid import UUID
 
 from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
@@ -13,6 +13,7 @@ from src.core.models.references import Reference
 from src.core.settings import Settings
 
 from .base import BaseStorageService, BatchConfig, BatchResult
+
 
 R = TypeVar("R", bound=Reference)
 
@@ -23,9 +24,9 @@ class ReferenceStorageService(BaseStorageService, ReferenceStorage[R]):
     def __init__(
         self,
         settings: Settings,
-        metrics: Optional[StorageMetrics] = None,
-        metrics_provider: Optional[MetricsProvider] = None,
-        batch_config: Optional[BatchConfig] = None,
+        metrics: StorageMetrics | None = None,
+        metrics_provider: MetricsProvider | None = None,
+        batch_config: BatchConfig | None = None,
     ) -> None:
         """Initialize reference storage.
 
@@ -38,7 +39,7 @@ class ReferenceStorageService(BaseStorageService, ReferenceStorage[R]):
         super().__init__(
             metrics=metrics, metrics_provider=metrics_provider, batch_config=batch_config
         )
-        self._references: Dict[UUID, Set[R]] = {}
+        self._references: dict[UUID, set[R]] = {}
         self._settings = settings
 
     def store_reference(self, ref: R) -> None:
@@ -62,7 +63,7 @@ class ReferenceStorageService(BaseStorageService, ReferenceStorage[R]):
         finally:
             self._stop_timing("store_reference")
 
-    def get_references(self, chunk_id: UUID) -> List[R]:
+    def get_references(self, chunk_id: UUID) -> list[R]:
         """Get references for a chunk.
 
         Args:
@@ -104,7 +105,7 @@ class ReferenceStorageService(BaseStorageService, ReferenceStorage[R]):
         finally:
             self._stop_timing("delete_reference")
 
-    def batch_store_references(self, references: List[R]) -> BatchResult[R]:
+    def batch_store_references(self, references: list[R]) -> BatchResult[R]:
         """Store multiple references in a batch operation.
 
         Args:
@@ -115,7 +116,7 @@ class ReferenceStorageService(BaseStorageService, ReferenceStorage[R]):
         """
         return self.process_batch(references, "store_reference")
 
-    def batch_delete_references(self, references: List[R]) -> BatchResult[R]:
+    def batch_delete_references(self, references: list[R]) -> BatchResult[R]:
         """Delete multiple references in a batch operation.
 
         Args:
@@ -146,4 +147,4 @@ class ReferenceStorageService(BaseStorageService, ReferenceStorage[R]):
             self.delete_reference(test_ref)
             return True, "Reference storage service is healthy"
         except Exception as e:
-            return False, f"Reference storage health check failed: {str(e)}"
+            return False, f"Reference storage health check failed: {e!s}"

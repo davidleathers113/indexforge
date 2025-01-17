@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING, Any
 
+
 try:
     import nltk
     from nltk.tokenize import sent_tokenize
@@ -13,6 +14,7 @@ except ImportError:
 from .base import BaseProcessor
 from .errors import ServiceInitializationError
 from .types import ServiceState
+
 
 if TYPE_CHECKING:
     from src.core.settings import Settings

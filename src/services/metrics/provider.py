@@ -5,9 +5,8 @@ with support for sampling and async collection.
 """
 
 import random
-import time
 from threading import Lock
-from typing import Dict, Optional
+import time
 
 from src.core.interfaces.metrics import MetricsProvider
 
@@ -22,9 +21,9 @@ class SampledMetricsProvider(MetricsProvider):
             sample_rate: Sampling rate between 0 and 1 (default: 1.0)
         """
         self._sample_rate = max(0.0, min(1.0, sample_rate))
-        self._counters: Dict[str, int] = {}
-        self._values: Dict[str, list[float]] = {}
-        self._timers: Dict[str, float] = {}
+        self._counters: dict[str, int] = {}
+        self._values: dict[str, list[float]] = {}
+        self._timers: dict[str, float] = {}
         self._lock = Lock()
 
     def _should_sample(self) -> bool:
@@ -73,7 +72,7 @@ class SampledMetricsProvider(MetricsProvider):
         with self._lock:
             self._timers[name] = time.monotonic()
 
-    def stop_timer(self, name: str) -> Optional[float]:
+    def stop_timer(self, name: str) -> float | None:
         """Stop a timer and get the elapsed time.
 
         Args:
@@ -91,7 +90,7 @@ class SampledMetricsProvider(MetricsProvider):
                 return time.monotonic() - start_time
             return None
 
-    def get_metrics(self) -> Dict[str, Dict[str, float]]:
+    def get_metrics(self) -> dict[str, dict[str, float]]:
         """Get all collected metrics.
 
         Returns:

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import numpy.typing as npt
 
+
 try:
     from sentence_transformers import SentenceTransformer
 
@@ -25,6 +26,7 @@ from src.ml.processing.models.service import (
     ServiceState,
     ServiceStateError,
 )
+
 
 if TYPE_CHECKING:
     from src.core.settings import Settings

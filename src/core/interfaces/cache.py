@@ -6,14 +6,14 @@ This module defines the interface for cache services used throughout the system.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 
 class CacheService(ABC):
     """Interface for cache services."""
 
     @abstractmethod
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Get a value from the cache.
 
         Args:
@@ -25,7 +25,7 @@ class CacheService(ABC):
         pass
 
     @abstractmethod
-    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl: int | None = None) -> bool:
         """Set a value in the cache.
 
         Args:

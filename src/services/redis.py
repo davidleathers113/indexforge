@@ -5,7 +5,7 @@ handling connection pooling, pipelining, and advanced caching operations.
 """
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import redis
 from redis import Redis
@@ -16,12 +16,13 @@ from src.core.interfaces import CacheService
 from src.core.metrics import ServiceMetricsCollector
 from src.services.base import BaseService, ServiceInitializationError, ServiceNotInitializedError
 
+
 if TYPE_CHECKING:
     from src.core.settings import Settings
 
 
-CacheValue = Union[str, int, float, bytes, List[Any], Dict[str, Any]]
-PipelineOperation = Tuple[str, str, List[Any]]  # command, key, args
+CacheValue = Union[str, int, float, bytes, list[Any], dict[str, Any]]
+PipelineOperation = tuple[str, str, list[Any]]  # command, key, args
 
 
 class RedisService(CacheService, BaseService):
@@ -32,7 +33,7 @@ class RedisService(CacheService, BaseService):
         BaseService.__init__(self)
         CacheService.__init__(self, settings)
         self._settings = settings
-        self._redis: Optional[Redis] = None
+        self._redis: Redis | None = None
         self._pipeline_batch_size = 1000
         self._default_ttl = 3600  # 1 hour
         self._metrics = ServiceMetricsCollector(
@@ -102,7 +103,7 @@ class RedisService(CacheService, BaseService):
             except RedisError:
                 return False
 
-    async def get(self, key: str) -> Optional[CacheValue]:
+    async def get(self, key: str) -> CacheValue | None:
         """Get value from Redis with type handling.
 
         Args:
@@ -131,7 +132,7 @@ class RedisService(CacheService, BaseService):
         self,
         key: str,
         value: CacheValue,
-        expire: Optional[Union[int, timedelta]] = None,
+        expire: int | timedelta | None = None,
         nx: bool = False,
         xx: bool = False,
     ) -> bool:
@@ -205,10 +206,10 @@ class RedisService(CacheService, BaseService):
 
     async def pipeline_execute(
         self,
-        operations: List[PipelineOperation],
+        operations: list[PipelineOperation],
         transaction: bool = True,
         raise_on_error: bool = False,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """Execute multiple operations in a pipeline.
 
         Args:
@@ -272,7 +273,7 @@ class RedisService(CacheService, BaseService):
             except RedisError:
                 return False
 
-    async def get_many(self, keys: List[str]) -> Dict[str, Optional[CacheValue]]:
+    async def get_many(self, keys: list[str]) -> dict[str, CacheValue | None]:
         """Get multiple values efficiently.
 
         Args:
@@ -291,14 +292,14 @@ class RedisService(CacheService, BaseService):
                 for key in keys:
                     pipe.get(key)
                 values = pipe.execute()
-                return dict(zip(keys, values))
+                return dict(zip(keys, values, strict=False))
             except RedisError:
-                return {key: None for key in keys}
+                return dict.fromkeys(keys)
 
     async def set_many(
         self,
-        items: Dict[str, CacheValue],
-        expire: Optional[Union[int, timedelta]] = None,
+        items: dict[str, CacheValue],
+        expire: int | timedelta | None = None,
     ) -> bool:
         """Set multiple key-value pairs efficiently.
 
@@ -342,7 +343,7 @@ class RedisService(CacheService, BaseService):
             except RedisError:
                 return False
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get service metrics.
 
         Returns:
@@ -350,7 +351,7 @@ class RedisService(CacheService, BaseService):
         """
         return self._metrics.get_current_metrics()
 
-    def get_health(self) -> Dict[str, Any]:
+    def get_health(self) -> dict[str, Any]:
         """Get service health status.
 
         Returns:

@@ -1,6 +1,5 @@
 """Content validation strategies."""
 
-from typing import Dict, List, Optional
 
 from src.ml.processing.models.chunks import Chunk
 from src.ml.processing.validation.validators.base import ValidationStrategy
@@ -19,7 +18,7 @@ class SizeValidator(ValidationStrategy):
         self.min_size = min_size
         self.max_size = max_size
 
-    def validate(self, chunk: Chunk, metadata: Optional[Dict] = None) -> List[str]:
+    def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
         """Validate chunk size.
 
         Args:
@@ -51,7 +50,7 @@ class ContentQualityValidator(ValidationStrategy):
         """
         self.min_density = min_density
 
-    def validate(self, chunk: Chunk, metadata: Optional[Dict] = None) -> List[str]:
+    def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
         """Validate content quality.
 
         Args:

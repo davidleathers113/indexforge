@@ -8,6 +8,7 @@ from src.core.models.documents import DocumentStatus, ProcessingStep
 
 from .models import ProcessingStrategy, ServiceNotInitializedError, ServiceState
 
+
 if TYPE_CHECKING:
     from src.core.settings import Settings
 

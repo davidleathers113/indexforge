@@ -4,8 +4,9 @@ This module provides the centralized error hierarchy for all service and process
 related errors. All other error definitions should inherit from these base classes.
 """
 
+from collections.abc import Sequence
 from enum import Enum
-from typing import Any, Optional, Sequence
+from typing import Any
 
 
 class ServiceState(Enum):
@@ -43,7 +44,7 @@ class ServiceError(Exception):
         metadata: Additional error context
     """
 
-    def __init__(self, message: str, metadata: Optional[dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, metadata: dict[str, Any] | None = None) -> None:
         """Initialize the error.
 
         Args:
@@ -86,9 +87,9 @@ class ServiceInitializationError(ServiceStateError):
     def __init__(
         self,
         message: str,
-        cause: Optional[Exception] = None,
-        service_name: Optional[str] = None,
-        missing_dependencies: Optional[Sequence[str]] = None,
+        cause: Exception | None = None,
+        service_name: str | None = None,
+        missing_dependencies: Sequence[str] | None = None,
     ) -> None:
         """Initialize the error.
 
@@ -120,9 +121,9 @@ class ServiceNotInitializedError(ServiceStateError):
     def __init__(
         self,
         message: str,
-        service_name: Optional[str] = None,
-        current_state: Optional[str] = None,
-        required_state: Optional[str] = None,
+        service_name: str | None = None,
+        current_state: str | None = None,
+        required_state: str | None = None,
     ) -> None:
         """Initialize the error.
 
@@ -167,8 +168,8 @@ class ValidationError(ProcessingError):
     def __init__(
         self,
         errors: Sequence[str],
-        field_errors: Optional[dict[str, list[str]]] = None,
-        validation_context: Optional[dict[str, Any]] = None,
+        field_errors: dict[str, list[str]] | None = None,
+        validation_context: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the error.
 

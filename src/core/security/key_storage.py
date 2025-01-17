@@ -7,10 +7,10 @@ This module provides secure storage functionality for encryption keys including:
 - Key backup and recovery
 """
 
-import os
 from datetime import datetime
+import os
 from pathlib import Path
-from typing import Dict, Optional, Protocol
+from typing import Protocol
 from uuid import UUID
 
 from cryptography.fernet import Fernet
@@ -28,7 +28,7 @@ class KeyStorageConfig(BaseModel):
     """Configuration for key storage."""
 
     storage_dir: Path
-    backup_dir: Optional[Path] = None
+    backup_dir: Path | None = None
     storage_key: SecretStr  # Used to encrypt keys at rest
     max_backup_count: int = 3
     enable_atomic_writes: bool = True
@@ -41,7 +41,7 @@ class KeyStorageProtocol(Protocol):
         """Store encryption key securely."""
         ...
 
-    async def load_keys(self) -> Dict[UUID, EncryptionKey]:
+    async def load_keys(self) -> dict[UUID, EncryptionKey]:
         """Load all stored encryption keys."""
         ...
 
@@ -146,7 +146,7 @@ class FileKeyStorage:
         # Store key
         await self._write_key_file(key_path, key)
 
-    async def load_keys(self) -> Dict[UUID, EncryptionKey]:
+    async def load_keys(self) -> dict[UUID, EncryptionKey]:
         """Load all stored encryption keys.
 
         Returns:

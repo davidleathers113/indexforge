@@ -4,6 +4,7 @@ Provides interfaces and base classes for:
 - Document processing and storage
 - Service lifecycle management
 - Text processing and analysis
+- Document lineage validation
 """
 
 from .base import BaseService, ServiceStateError
@@ -35,6 +36,14 @@ from .models import (
     Reference,
     ReferenceType,
     SemanticReference,
+)
+from .tracking.validation import (
+    ChunkReferenceValidator,
+    CircularDependencyValidator,
+    CompositeValidator,
+    RelationshipValidator,
+    ValidationError,
+    ValidationStrategy,
 )
 from .utils import (
     calculate_text_similarity,
@@ -85,6 +94,13 @@ __all__ = [
     "Reference",
     "ReferenceType",
     "SemanticReference",
+    # Validation
+    "ValidationStrategy",
+    "ValidationError",
+    "ChunkReferenceValidator",
+    "CircularDependencyValidator",
+    "RelationshipValidator",
+    "CompositeValidator",
     # Utilities
     "clean_text",
     "split_into_sentences",

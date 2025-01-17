@@ -12,10 +12,10 @@ Key Features:
 """
 
 import logging
-from typing import Set
 
 from src.core.models import DocumentLineage
 from src.core.tracking.validation.interface import LineageValidationErrorFactory, ValidationStrategy
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +47,9 @@ class CircularDependencyValidator(ValidationStrategy):
             ```
         """
         errors = []
-        visited: Set[str] = set()
+        visited: set[str] = set()
 
-        def check_derivation_chain(doc_id: str, chain: Set[str]) -> None:
+        def check_derivation_chain(doc_id: str, chain: set[str]) -> None:
             """Recursively check derivation chain for cycles.
 
             Args:

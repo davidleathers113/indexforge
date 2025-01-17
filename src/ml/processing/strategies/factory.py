@@ -1,6 +1,5 @@
 """Factory for creating and configuring processing strategies."""
 
-from typing import Dict, Optional, Set, Type
 
 from src.core.errors import ServiceInitializationError
 from src.ml.processing.models.strategies import ProcessingStrategy
@@ -20,9 +19,9 @@ class StrategyFactory:
 
     def __init__(self) -> None:
         """Initialize the strategy factory."""
-        self._registry: Dict[str, Type[ProcessingStrategy]] = {}
-        self._instances: Dict[str, ProcessingStrategy] = {}
-        self._dependencies: Dict[str, Set[str]] = {
+        self._registry: dict[str, type[ProcessingStrategy]] = {}
+        self._instances: dict[str, ProcessingStrategy] = {}
+        self._dependencies: dict[str, set[str]] = {
             "TokenizationStrategy": set(),  # No dependencies
             "NERStrategy": {"TokenizationStrategy"},  # Requires tokenization
             "SentimentStrategy": {"TokenizationStrategy"},  # Requires tokenization
@@ -34,8 +33,8 @@ class StrategyFactory:
     def register(
         self,
         name: str,
-        strategy_class: Type[ProcessingStrategy],
-        dependencies: Optional[Set[str]] = None,
+        strategy_class: type[ProcessingStrategy],
+        dependencies: set[str] | None = None,
     ) -> None:
         """Register a strategy class.
 
@@ -88,11 +87,11 @@ class StrategyFactory:
             return strategy
         except Exception as e:
             raise ServiceInitializationError(
-                f"Failed to initialize strategy {name}: {str(e)}",
+                f"Failed to initialize strategy {name}: {e!s}",
                 service_name=name,
             ) from e
 
-    def get_dependencies(self, name: str) -> Set[str]:
+    def get_dependencies(self, name: str) -> set[str]:
         """Get dependencies for a strategy.
 
         Args:
@@ -109,7 +108,7 @@ class StrategyFactory:
 
         return self._dependencies.get(name, set())
 
-    def get_strategies(self) -> Dict[str, ProcessingStrategy]:
+    def get_strategies(self) -> dict[str, ProcessingStrategy]:
         """Get all registered strategy instances.
 
         Returns:

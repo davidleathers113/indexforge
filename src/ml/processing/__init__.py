@@ -20,6 +20,7 @@ from .models import (
 )
 from .text import TextProcessor
 
+
 __all__ = [
     # Core processors
     "BaseProcessor",

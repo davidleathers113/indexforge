@@ -5,7 +5,6 @@ version resolution and dependency tracking.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set
 
 from src.core.schema.base import SchemaType, SchemaVersion
 from src.core.schema.schema import Schema
@@ -15,10 +14,10 @@ from src.core.schema.schema import Schema
 class LookupResult:
     """Result of a schema lookup operation."""
 
-    schema: Optional[Schema]
-    dependencies: Set[str]
+    schema: Schema | None
+    dependencies: set[str]
     is_active: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class SchemaLookup:
@@ -26,8 +25,8 @@ class SchemaLookup:
 
     def __init__(self) -> None:
         """Initialize schema lookup."""
-        self._type_index: Dict[SchemaType, Set[str]] = {t: set() for t in SchemaType}
-        self._version_index: Dict[str, List[SchemaVersion]] = {}
+        self._type_index: dict[SchemaType, set[str]] = {t: set() for t in SchemaType}
+        self._version_index: dict[str, list[SchemaVersion]] = {}
 
     def index_schema(self, schema: Schema) -> None:
         """Index a schema for efficient lookup.
@@ -46,7 +45,7 @@ class SchemaLookup:
             versions.append(schema.version)
             versions.sort(reverse=True)
 
-    def find_by_type(self, schema_type: SchemaType) -> Set[str]:
+    def find_by_type(self, schema_type: SchemaType) -> set[str]:
         """Find all schema names of a given type.
 
         Args:
@@ -57,7 +56,7 @@ class SchemaLookup:
         """
         return self._type_index.get(schema_type, set())
 
-    def find_latest_version(self, name: str) -> Optional[SchemaVersion]:
+    def find_latest_version(self, name: str) -> SchemaVersion | None:
         """Find latest version of a schema.
 
         Args:
@@ -72,9 +71,9 @@ class SchemaLookup:
     def find_compatible_version(
         self,
         name: str,
-        min_version: Optional[SchemaVersion] = None,
-        max_version: Optional[SchemaVersion] = None,
-    ) -> Optional[SchemaVersion]:
+        min_version: SchemaVersion | None = None,
+        max_version: SchemaVersion | None = None,
+    ) -> SchemaVersion | None:
         """Find compatible schema version.
 
         Args:

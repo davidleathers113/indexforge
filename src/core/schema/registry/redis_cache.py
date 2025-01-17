@@ -5,7 +5,6 @@ supporting distributed caching with TTL and size limits.
 """
 
 import json
-from typing import Optional
 
 from redis.asyncio import Redis
 
@@ -19,7 +18,7 @@ class RedisSchemaCache(SchemaCache):
     def __init__(
         self,
         redis: Redis,
-        config: Optional[CacheConfig] = None,
+        config: CacheConfig | None = None,
     ) -> None:
         """Initialize Redis schema cache.
 
@@ -30,7 +29,7 @@ class RedisSchemaCache(SchemaCache):
         super().__init__(config)
         self.redis = redis
 
-    async def get(self, key: str) -> Optional[Schema]:
+    async def get(self, key: str) -> Schema | None:
         """Get schema from Redis cache.
 
         Args:

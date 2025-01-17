@@ -1,7 +1,7 @@
 """Chunk model definitions for text processing."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
 from .base import ProcessingContext, ProcessingMetadata
@@ -23,7 +23,7 @@ class Chunk:
 
     id: UUID = field(default_factory=uuid4)
     content: str = field(default="")
-    metadata: Optional[Dict[str, Any]] = field(default=None)
+    metadata: dict[str, Any] | None = field(default=None)
     context: ProcessingContext = field(default_factory=ProcessingContext)
 
     def __post_init__(self) -> None:
@@ -54,11 +54,11 @@ class ProcessedChunk:
 
     id: UUID
     content: str
-    metadata: Optional[Dict[str, Any]] = None
-    tokens: List[str] = field(default_factory=list)
-    named_entities: List[Dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] | None = None
+    tokens: list[str] = field(default_factory=list)
+    named_entities: list[dict[str, Any]] = field(default_factory=list)
     sentiment_score: float = 0.0
-    topic_id: Optional[str] = None
+    topic_id: str | None = None
     processing_metadata: ProcessingMetadata = field(default_factory=ProcessingMetadata)
 
     def __post_init__(self) -> None:
@@ -86,8 +86,8 @@ class ChunkBatch:
         context: Processing context for the batch
     """
 
-    chunks: List[Chunk] = field(default_factory=list)
-    metadata: Optional[Dict[str, Any]] = field(default=None)
+    chunks: list[Chunk] = field(default_factory=list)
+    metadata: dict[str, Any] | None = field(default=None)
     context: ProcessingContext = field(default_factory=ProcessingContext)
 
     def __post_init__(self) -> None:
@@ -110,7 +110,7 @@ class ChunkBatch:
             raise TypeError("Input must be a Chunk instance")
         self.chunks.append(chunk)
 
-    def get_chunk(self, chunk_id: UUID) -> Optional[Chunk]:
+    def get_chunk(self, chunk_id: UUID) -> Chunk | None:
         """Get a chunk by its ID.
 
         Args:
