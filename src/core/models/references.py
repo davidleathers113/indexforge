@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 from uuid import UUID
 
 
@@ -40,22 +41,34 @@ class Reference:
     source_id: UUID  # ID of the source chunk
     target_id: UUID  # ID of the target chunk
     ref_type: ReferenceType  # Type of reference
-    metadata: dict = field(default_factory=dict)  # Additional reference metadata
+    metadata: dict[str, Any] = field(default_factory=dict)  # Additional reference metadata
     bidirectional: bool = False  # Whether reference is bidirectional
 
 
 @dataclass
-class CitationReference(Reference):
+class CitationReference:
     """Represents a citation reference between chunks."""
 
-    text: str = field(repr=True)  # The cited text
-    start_pos: int = field(repr=True)  # Start position in source chunk
-    end_pos: int = field(repr=True)  # End position in source chunk
+    reference: Reference  # Base reference fields
+    text: str  # The cited text
+    start_pos: int  # Start position in source chunk
+    end_pos: int  # End position in source chunk
+
+    def __post_init__(self):
+        """Ensure reference type is CITATION."""
+        if self.reference.ref_type != ReferenceType.CITATION:
+            self.reference.ref_type = ReferenceType.CITATION
 
 
 @dataclass
-class SemanticReference(Reference):
+class SemanticReference:
     """Represents a semantic reference between chunks."""
 
-    similarity_score: float = field(repr=True)  # Similarity score between chunks
+    reference: Reference  # Base reference fields
+    similarity_score: float  # Similarity score between chunks
     topic_id: int | None = None  # Optional topic cluster ID
+
+    def __post_init__(self):
+        """Ensure reference type is SIMILAR or RELATED."""
+        if self.reference.ref_type not in {ReferenceType.SIMILAR, ReferenceType.RELATED}:
+            self.reference.ref_type = ReferenceType.SIMILAR

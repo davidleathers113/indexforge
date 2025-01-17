@@ -1,13 +1,11 @@
 """Core storage interfaces.
 
 This module defines the interfaces for storage operations. It provides
-protocols for document storage, chunk storage, reference storage, and
-storage metrics collection.
+protocols for document storage, chunk storage, and reference storage.
 """
 
 from typing import TYPE_CHECKING, Protocol, TypeVar
 from uuid import UUID
-
 
 if TYPE_CHECKING:
     from src.core.models.chunks import Chunk
@@ -20,97 +18,45 @@ C = TypeVar("C", bound="Chunk")
 R = TypeVar("R", bound="Reference")
 
 
-class StorageMetrics(Protocol):
-    """Protocol for storage metrics collection."""
-
-    def get_storage_usage(self) -> dict[str, int]:
-        """Get storage usage metrics.
-
-        Returns:
-            Dict[str, int]: Dictionary containing:
-                - total_bytes: Total storage used in bytes
-                - document_count: Number of stored documents
-                - chunk_count: Number of stored chunks
-                - reference_count: Number of stored references
-        """
-        ...
-
-    def get_operation_counts(self) -> dict[str, int]:
-        """Get operation count metrics.
-
-        Returns:
-            Dict[str, int]: Dictionary containing counts for:
-                - reads: Number of read operations
-                - writes: Number of write operations
-                - updates: Number of update operations
-                - deletes: Number of delete operations
-        """
-        ...
-
-
-class DocumentStorage(Protocol):
+class DocumentStorage(Protocol[T]):
     """Protocol for document storage operations."""
-
-    def __init__(self, settings: "Settings") -> None:
-        """Initialize the document storage.
-
-        Args:
-            settings (Settings): Application settings
-        """
-        ...
 
     def store_document(self, document: T) -> UUID:
         """Store a document.
 
         Args:
-            document (T): Document to store
+            document: Document to store
 
         Returns:
-            UUID: Generated document ID
-
-        Raises:
-            ServiceStateError: If storage is not initialized
-            ValueError: If document is invalid
+            UUID: Unique identifier for the stored document
         """
         ...
 
-    def get_document(self, doc_id: UUID) -> T | None:
-        """Get a document by ID.
+    def get_document(self, document_id: UUID) -> T:
+        """Retrieve a document by ID.
 
         Args:
-            doc_id (UUID): Document ID
+            document_id: ID of document to retrieve
 
         Returns:
-            Optional[T]: Document if found, None otherwise
-
-        Raises:
-            ServiceStateError: If storage is not initialized
+            T: Retrieved document
         """
         ...
 
-    def update_document(self, doc_id: UUID, document: T) -> None:
+    def update_document(self, document_id: UUID, document: T) -> None:
         """Update a document.
 
         Args:
-            doc_id (UUID): Document ID
-            document (T): Updated document
-
-        Raises:
-            ServiceStateError: If storage is not initialized
-            ValueError: If document is invalid
-            KeyError: If document does not exist
+            document_id: ID of document to update
+            document: Updated document
         """
         ...
 
-    def delete_document(self, doc_id: UUID) -> None:
+    def delete_document(self, document_id: UUID) -> None:
         """Delete a document.
 
         Args:
-            doc_id (UUID): Document ID
-
-        Raises:
-            ServiceStateError: If storage is not initialized
-            KeyError: If document does not exist
+            document_id: ID of document to delete
         """
         ...
 

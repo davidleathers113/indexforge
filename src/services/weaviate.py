@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Protocol, TypeVar
 import backoff
 import weaviate
 from weaviate.client import WeaviateClient as BaseWeaviateClient
-from weaviate.exceptions import WeaviateConnectionError, WeaviateRequestError, WeaviateTimeout
+from weaviate.exceptions import WeaviateConnectionError, WeaviateQueryError, WeaviateTimeoutError
 
 from src.core.interfaces import VectorService
 from src.core.metrics import ServiceMetricsCollector
@@ -133,7 +133,7 @@ class WeaviateClient(VectorService, BaseService):
 
                     return uuids
 
-                except WeaviateRequestError as e:
+                except WeaviateQueryError as e:
                     raise ServiceStateError(f"Batch operation failed: {e!s}") from e
 
     @require_initialized
@@ -194,7 +194,7 @@ class WeaviateClient(VectorService, BaseService):
 
                     return result.get("data", {}).get("Get", {}).get(class_name, [])
 
-                except WeaviateRequestError as e:
+                except WeaviateQueryError as e:
                     raise ServiceStateError(f"Vector search failed: {e!s}") from e
 
     @require_initialized
@@ -242,7 +242,7 @@ class WeaviateClient(VectorService, BaseService):
                                     },
                                 )
 
-                except WeaviateRequestError as e:
+                except WeaviateQueryError as e:
                     raise ServiceStateError(f"Batch deletion failed: {e!s}") from e
 
     async def cleanup(self) -> None:
@@ -260,7 +260,10 @@ class WeaviateClient(VectorService, BaseService):
             self._metrics.reset()
 
     @backoff.on_exception(
-        backoff.expo, (WeaviateConnectionError, WeaviateTimeout), max_tries=3, max_time=30
+        backoff.expo,
+        (WeaviateConnectionError, WeaviateTimeoutError),
+        max_tries=3,
+        max_time=30,
     )
     async def initialize(self) -> None:
         """Initialize Weaviate connection with automatic retry.
@@ -347,7 +350,7 @@ class WeaviateClient(VectorService, BaseService):
                 return str(
                     client.data.creator().with_vector(vector).with_payload(data_object).create()
                 )
-            except WeaviateRequestError as e:
+            except WeaviateQueryError as e:
                 raise ServiceStateError(f"Failed to add object: {e!s}") from e
 
     @require_initialized
@@ -369,7 +372,7 @@ class WeaviateClient(VectorService, BaseService):
             try:
                 result = client.data.get_by_id(uuid=uuid).do()
                 return result if result else None
-            except WeaviateRequestError:
+            except WeaviateQueryError:
                 return None
 
     @require_initialized
@@ -387,7 +390,7 @@ class WeaviateClient(VectorService, BaseService):
         async with self.operation_context() as client:
             try:
                 client.data.delete_by_id(uuid=uuid).do()
-            except WeaviateRequestError as e:
+            except WeaviateQueryError as e:
                 raise ServiceStateError(f"Failed to delete object: {e!s}") from e
 
     def get_metrics(self) -> Dict[str, Any]:

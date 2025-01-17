@@ -1,30 +1,45 @@
-"""Document storage service implementation."""
+"""Document storage service implementation.
 
-from typing import Dict, Optional, TypeVar
+This module provides a concrete implementation of the document storage interface
+with support for batch operations, metrics collection, and memory management.
+"""
+
+from typing import Dict, List, Optional, TypeVar
 from uuid import UUID, uuid4
 
-from src.core.errors import ServiceStateError
+from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
 from src.core.interfaces.storage import DocumentStorage
-from src.core.models.documents import Document
-from src.services.base import BaseService
-from src.services.storage.metrics import StorageMetricsService
+from src.core.models.documents import Document, DocumentMetadata, DocumentType
+from src.core.settings import Settings
+
+from .base import BaseStorageService, BatchConfig, BatchResult
 
 T = TypeVar("T", bound=Document)
 
 
-class DocumentStorageService(DocumentStorage, BaseService):
-    """Implementation of document storage operations."""
+class DocumentStorageService(BaseStorageService, DocumentStorage[T]):
+    """Implementation of document storage operations with metrics and batch support."""
 
-    def __init__(self, metrics: StorageMetricsService) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        metrics: Optional[StorageMetrics] = None,
+        metrics_provider: Optional[MetricsProvider] = None,
+        batch_config: Optional[BatchConfig] = None,
+    ) -> None:
         """Initialize document storage.
 
         Args:
-            metrics: Storage metrics service
+            settings: Application settings
+            metrics: Optional storage metrics collector
+            metrics_provider: Optional metrics provider for detailed metrics
+            batch_config: Optional batch operation configuration
         """
-        BaseService.__init__(self)
+        super().__init__(
+            metrics=metrics, metrics_provider=metrics_provider, batch_config=batch_config
+        )
         self._documents: Dict[UUID, T] = {}
-        self._metrics = metrics
-        self._initialized = True
+        self._settings = settings
 
     def store_document(self, document: T) -> UUID:
         """Store a document.
@@ -36,87 +51,125 @@ class DocumentStorageService(DocumentStorage, BaseService):
             UUID: Generated document ID
 
         Raises:
-            ServiceStateError: If storage is not initialized
             ValueError: If document is invalid
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Document storage is not initialized")
-
         if not document:
             raise ValueError("Document cannot be None")
 
-        doc_id = uuid4()
-        self._documents[doc_id] = document
-        self._metrics.increment_storage_stat("document_count")
-        self._metrics.increment_storage_stat("total_bytes", len(str(document).encode()))
-        self._metrics.increment_operation_count("writes")
-        return doc_id
+        self._time_operation("store_document")
+        try:
+            doc_id = uuid4()
+            self._documents[doc_id] = document
+            self._record_operation("store")
+            return doc_id
+        finally:
+            self._stop_timing("store_document")
 
-    def get_document(self, doc_id: UUID) -> Optional[T]:
-        """Get a document by ID.
+    def get_document(self, document_id: UUID) -> T:
+        """Retrieve a document by ID.
 
         Args:
-            doc_id: Document ID
+            document_id: ID of document to retrieve
 
         Returns:
-            Optional[T]: Document if found, None otherwise
+            T: Retrieved document
 
         Raises:
-            ServiceStateError: If storage is not initialized
+            KeyError: If document does not exist
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Document storage is not initialized")
+        self._time_operation("get_document")
+        try:
+            if document_id not in self._documents:
+                raise KeyError(f"Document {document_id} not found")
 
-        self._metrics.increment_operation_count("reads")
-        return self._documents.get(doc_id)
+            document = self._documents[document_id]
+            self._record_operation("get")
+            return document
+        finally:
+            self._stop_timing("get_document")
 
-    def update_document(self, doc_id: UUID, document: T) -> None:
+    def update_document(self, document_id: UUID, document: T) -> None:
         """Update a document.
 
         Args:
-            doc_id: Document ID
+            document_id: ID of document to update
             document: Updated document
 
         Raises:
-            ServiceStateError: If storage is not initialized
             ValueError: If document is invalid
             KeyError: If document does not exist
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Document storage is not initialized")
-
         if not document:
             raise ValueError("Document cannot be None")
 
-        if doc_id not in self._documents:
-            raise KeyError(f"Document with ID {doc_id} does not exist")
+        self._time_operation("update_document")
+        try:
+            if document_id not in self._documents:
+                raise KeyError(f"Document {document_id} not found")
 
-        old_size = len(str(self._documents[doc_id]).encode())
-        new_size = len(str(document).encode())
-        size_diff = new_size - old_size
+            self._documents[document_id] = document
+            self._record_operation("update")
+        finally:
+            self._stop_timing("update_document")
 
-        self._documents[doc_id] = document
-        self._metrics.increment_storage_stat("total_bytes", size_diff)
-        self._metrics.increment_operation_count("updates")
-
-    def delete_document(self, doc_id: UUID) -> None:
+    def delete_document(self, document_id: UUID) -> None:
         """Delete a document.
 
         Args:
-            doc_id: Document ID
+            document_id: ID of document to delete
 
         Raises:
-            ServiceStateError: If storage is not initialized
             KeyError: If document does not exist
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Document storage is not initialized")
+        self._time_operation("delete_document")
+        try:
+            if document_id not in self._documents:
+                raise KeyError(f"Document {document_id} not found")
 
-        if doc_id not in self._documents:
-            raise KeyError(f"Document with ID {doc_id} does not exist")
+            del self._documents[document_id]
+            self._record_operation("delete")
+        finally:
+            self._stop_timing("delete_document")
 
-        doc_size = len(str(self._documents[doc_id]).encode())
-        del self._documents[doc_id]
-        self._metrics.decrement_storage_stat("document_count")
-        self._metrics.decrement_storage_stat("total_bytes", doc_size)
-        self._metrics.increment_operation_count("deletes")
+    def batch_store_documents(self, documents: List[T]) -> BatchResult[T]:
+        """Store multiple documents in a batch operation.
+
+        Args:
+            documents: List of documents to store
+
+        Returns:
+            BatchResult containing successful and failed documents
+        """
+        return self.process_batch(documents, "store_document")
+
+    def batch_update_documents(self, updates: List[tuple[UUID, T]]) -> BatchResult[tuple[UUID, T]]:
+        """Update multiple documents in a batch operation.
+
+        Args:
+            updates: List of (document_id, document) pairs to update
+
+        Returns:
+            BatchResult containing successful and failed updates
+        """
+        return self.process_batch(updates, "update_document")
+
+    def check_health(self) -> tuple[bool, str]:
+        """Check the health of the document storage service.
+
+        Returns:
+            Tuple containing:
+                - bool: True if service is healthy
+                - str: Status message
+        """
+        try:
+            # Perform basic health check
+            metadata = DocumentMetadata(
+                title="Health Check Document",
+                doc_type=DocumentType.TEXT,
+            )
+            test_doc = Document(metadata=metadata)
+            doc_id = self.store_document(test_doc)
+            self.delete_document(doc_id)
+            return True, "Document storage service is healthy"
+        except Exception as e:
+            return False, f"Document storage health check failed: {str(e)}"

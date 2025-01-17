@@ -1,239 +1,192 @@
-# Development Context Summary
+# IndexForge Migration - Development Context Summary
 
 ## Task Overview & Current Status
 
 ### Core Problem
 
-Refactoring the codebase to improve dependency management, testing infrastructure, and overall architecture, with a focus on:
+- Migrating functionality from connector-specific implementations to core infrastructure
+- Primary focus on source tracking and document lineage features
+- Goal: Create a more maintainable, centralized architecture
 
-- Resolving circular dependencies
-- Implementing comprehensive testing
-- Enhancing service layer isolation
-- Improving code maintainability
+### Current Status
 
-### Implementation Status
-
-- **Overall Progress**: ~75-80% complete
-- **Major Completed Components**:
-
-  - Package structure reorganization
-  - Core interface refinement
-  - Base service implementations
-  - Initial metrics collection system
-  - Error handling framework
-
-- **Major Incomplete Components**:
-  - End-to-end testing (60%)
-  - CI/CD pipeline (60%)
-  - Integration testing (75%)
-  - Circular dependency resolution (80%)
+- Core infrastructure completed (storage, metrics, security)
+- Source tracking migration in progress
+- Model migrations completed (6 models moved to core)
+- Documentation and API updates ongoing
 
 ### Key Architectural Decisions
 
-1. **Protocol-based Interfaces**
+1. Separation of Core vs. Connector-Specific Code
 
-   - Rationale: Improved type safety and interface segregation
-   - Implementation: All core interfaces converted to Protocol pattern
+   - Moving shared functionality to `src/core/`
+   - Keeping connector-specific logic in `src/connectors/`
+   - Rationale: Better reusability and maintenance
 
-2. **Service Layer Isolation**
+2. Modular Structure
 
-   - Pattern: Factory + Dependency Injection
-   - Implementation: Container-based DI with singleton services
+   - Separate modules for tracking, processing, monitoring
+   - Clear separation of concerns
+   - Rationale: Easier testing and maintenance
 
-3. **Testing Strategy**
-   - Approach: Multi-layered testing (unit, integration, e2e)
-   - Framework: pytest with async support
+3. Enhanced Security Model
+   - Centralized encryption management
+   - Secure metadata persistence
+   - Rationale: Consistent security across all components
 
 ### Critical Constraints
 
 - Must maintain backward compatibility
-- Zero downtime requirements for service updates
-- Performance impact must be minimal
-- Type safety must be enforced
+- Performance impact < 2% degradation
+- Test coverage must remain > 80%
+- Zero downtime migration required
 
 ## Codebase Navigation
 
 ### Key Files (By Priority)
 
-1. `src/core/interfaces/processing.py`
+1. Source Tracking Core
 
-   - Role: Core processing interfaces
-   - Status: Complete, needs performance optimization
-   - Changes: Added Protocol patterns, type hints
+   ```
+   src/core/tracking/models/*.py
+   - Status: Migrated
+   - Role: Core data models for tracking system
+   - Changes: Moved from connector-specific implementation
+   ```
 
-2. `src/ml/embeddings.py`
+2. Document Processing
 
-   - Role: Embedding generation and management
-   - Status: 70% complete
-   - Pending: Advanced strategies, caching
+   ```
+   src/core/processors/*.py
+   - Status: Pending migration
+   - Role: Document format handling
+   - Planned: Move from connectors to core
+   ```
 
-3. `src/services/base.py`
+3. Monitoring & Management
 
-   - Role: Base service implementation
-   - Status: Complete
-   - Recent: Added metrics collection
+   ```
+   src/core/monitoring/*.py
+   - Status: Pending migration
+   - Role: System health and monitoring
+   - Planned: Centralize monitoring functionality
+   ```
 
-4. `src/core/container.py`
+4. Storage & Transformation
+   ```
+   src/core/storage/*.py
+   - Status: Partially migrated
+   - Role: Data persistence and transformation
+   - Changes: Base implementation complete
+   ```
 
-   - Role: Dependency injection configuration
-   - Status: 85% complete
-   - Pending: Integration test completion
+### Dependencies
 
-5. `.github/workflows/ci.yml`
-   - Role: CI pipeline configuration
-   - Status: 60% complete
-   - Pending: E2E tests, deployment workflows
-
-### Important Dependencies
-
-- Poetry for dependency management
-- FastAPI for API layer
-- Redis and Weaviate for storage
-- sentence-transformers for embeddings
-- pytest for testing infrastructure
+- Weaviate v4.10.4 (vector database)
+- Redis (caching)
+- OpenAI API (embeddings)
+- RabbitMQ (messaging) - Pending integration
 
 ## Technical Context
 
 ### Technical Assumptions
 
-1. Python 3.11+ environment
-2. Async-first architecture
-3. Container-based deployment
-4. Stateless service design
+1. All document processing is async
+2. Storage is eventually consistent
+3. Metadata updates are atomic
+4. Vector operations are idempotent
 
-### External Services
+### External Services Integration
 
-1. Redis
+- Vector Database (Weaviate)
 
-   - Usage: Caching, message queue
-   - Configuration: Cluster mode supported
+  - Used for: Semantic search
+  - Status: Operational
 
-2. Weaviate
-   - Usage: Vector storage
-   - Configuration: Standalone mode
+- Redis Cache
+
+  - Used for: Performance optimization
+  - Status: Implementation complete
+
+- OpenAI API
+  - Used for: Document embeddings
+  - Status: Operational
 
 ### Performance Considerations
 
-1. Embedding Generation
-
-   - Batch processing optimization
-   - Caching strategy implementation
-   - Memory usage optimization
-
-2. Service Layer
-   - Connection pooling
-   - Resource cleanup
-   - State management
+- Batch processing for large operations
+- Memory management with usage tracking
+- Metrics sampling for high-volume operations
+- Cache optimization with TTL and LRU
 
 ### Security Requirements
 
-1. Service Authentication
-
-   - mTLS for service communication
-   - API key management
-
-2. Data Protection
-   - Input validation
-   - Output sanitization
-   - Access control
+- Encryption at rest
+- Secure metadata storage
+- Key rotation support
+- Tenant isolation
 
 ## Development Progress
 
 ### Last Completed Milestone
 
-- Package structure reorganization
-- Core interface implementation
-- Base service layer implementation
+- Migration of core tracking models
+  - 6 models moved to core infrastructure
+  - Test coverage maintained at 85%
+  - Performance impact < 2%
 
 ### Immediate Next Steps
 
-1. Complete E2E Test Suite
-
-   - Create test directory structure
-   - Implement core scenarios
-   - Add performance tests
-
-2. Enhance CI Pipeline
-
-   - Configure test runners
-   - Set up deployment workflows
-   - Add security scanning
-
-3. Finish Integration Tests
-   - Add cross-service scenarios
-   - Implement load testing
-   - Add failure recovery tests
+1. Move remaining source tracking files
+2. Implement document lineage features
+3. Complete API documentation
+4. Finalize security features
 
 ### Known Issues
 
-1. Circular Dependencies
-
-   - ML package has remaining cycles
-   - Import performance impact
-
-2. Testing Gaps
-
-   - Missing E2E scenarios
-   - Incomplete load testing
-   - Limited error scenarios
-
-3. Performance Concerns
-   - Memory usage in embedding generation
-   - Connection pool optimization
-   - Resource cleanup in long-running operations
+1. Import statements need updating throughout codebase
+2. Some circular dependencies in tracking system
+3. Documentation inconsistencies
+4. Pending security review for new components
 
 ### Failed Approaches
 
-1. Monolithic Analysis Module
+1. Attempted direct file migration without dependency analysis
 
-   - Issue: Maintainability and testing
-   - Solution: Split into strategy-based components
+   - Issue: Broke circular references
+   - Solution: Implemented staged migration
 
-2. Direct Service Dependencies
-   - Issue: Circular imports
-   - Solution: Interface-based abstraction
+2. Initial monolithic tracking system
+   - Issue: Poor maintainability
+   - Solution: Split into modular components
 
 ## Developer Notes
 
 ### Codebase Insights
 
-1. Service Initialization
-
-   - Order matters for dependency injection
-   - Health checks are critical for stability
-   - State management needs careful handling
-
-2. Testing Approach
-   - Use fixtures for complex setups
-   - Isolate external service tests
-   - Mock heavy operations
+1. Heavy use of Protocol classes for interfaces
+2. Extensive use of async/await patterns
+3. Complex dependency graph in tracking system
+4. Careful handling of tenant isolation required
 
 ### Temporary Solutions
 
-1. Type Checking
+1. Some hardcoded configurations (to be moved to config files)
+2. Manual cache invalidation (Redis integration pending)
+3. Basic error handling (to be enhanced)
 
-   - Some `TYPE_CHECKING` blocks need review
-   - Forward references may need optimization
+### Areas Needing Attention
 
-2. Error Handling
-   - Some generic exceptions need specialization
-   - Recovery mechanisms need enhancement
+1. Document lineage circular references
+2. Performance impact of encryption
+3. Cache invalidation strategy
+4. Cross-tenant data isolation
+5. API versioning strategy
 
-### Critical Areas
+### Migration Validation
 
-1. Resource Management
-
-   - Monitor connection pools
-   - Track memory usage
-   - Implement proper cleanup
-
-2. Performance Monitoring
-
-   - Add detailed metrics
-   - Implement tracing
-   - Set up alerting
-
-3. Security
-   - Review authentication flows
-   - Audit dependency vulnerabilities
-   - Implement proper logging
+- Run full test suite after each component move
+- Verify functionality in development environment
+- Check for import errors
+- Validate documentation accuracy
+- Performance testing after migration

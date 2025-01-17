@@ -1,30 +1,45 @@
-"""Chunk storage service implementation."""
+"""Chunk storage service implementation.
 
-from typing import Dict, Optional, TypeVar
+This module provides a concrete implementation of the chunk storage interface
+with support for batch operations, metrics collection, and memory management.
+"""
+
+from typing import Dict, List, Optional, TypeVar
 from uuid import UUID, uuid4
 
-from src.core.errors import ServiceStateError
+from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
 from src.core.interfaces.storage import ChunkStorage
-from src.core.models.chunks import Chunk
-from src.services.base import BaseService
-from src.services.storage.metrics import StorageMetricsService
+from src.core.models.chunks import Chunk, ChunkMetadata
+from src.core.settings import Settings
+
+from .base import BaseStorageService, BatchConfig, BatchResult
 
 C = TypeVar("C", bound=Chunk)
 
 
-class ChunkStorageService(ChunkStorage, BaseService):
-    """Implementation of chunk storage operations."""
+class ChunkStorageService(BaseStorageService, ChunkStorage[C]):
+    """Implementation of chunk storage operations with metrics and batch support."""
 
-    def __init__(self, metrics: StorageMetricsService) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        metrics: Optional[StorageMetrics] = None,
+        metrics_provider: Optional[MetricsProvider] = None,
+        batch_config: Optional[BatchConfig] = None,
+    ) -> None:
         """Initialize chunk storage.
 
         Args:
-            metrics: Storage metrics service
+            settings: Application settings
+            metrics: Optional storage metrics collector
+            metrics_provider: Optional metrics provider for detailed metrics
+            batch_config: Optional batch operation configuration
         """
-        BaseService.__init__(self)
+        super().__init__(
+            metrics=metrics, metrics_provider=metrics_provider, batch_config=batch_config
+        )
         self._chunks: Dict[UUID, C] = {}
-        self._metrics = metrics
-        self._initialized = True
+        self._settings = settings
 
     def store_chunk(self, chunk: C) -> UUID:
         """Store a chunk.
@@ -36,87 +51,129 @@ class ChunkStorageService(ChunkStorage, BaseService):
             UUID: Generated chunk ID
 
         Raises:
-            ServiceStateError: If storage is not initialized
             ValueError: If chunk is invalid
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Chunk storage is not initialized")
-
         if not chunk:
             raise ValueError("Chunk cannot be None")
 
-        chunk_id = uuid4()
-        self._chunks[chunk_id] = chunk
-        self._metrics.increment_storage_stat("chunk_count")
-        self._metrics.increment_storage_stat("total_bytes", len(str(chunk).encode()))
-        self._metrics.increment_operation_count("writes")
-        return chunk_id
+        self._time_operation("store_chunk")
+        try:
+            chunk_id = uuid4()
+            self._chunks[chunk_id] = chunk
+            self._record_operation("store")
+            return chunk_id
+        finally:
+            self._stop_timing("store_chunk")
 
-    def get_chunk(self, chunk_id: UUID) -> Optional[C]:
-        """Get a chunk by ID.
+    def get_chunk(self, chunk_id: UUID) -> C:
+        """Retrieve a chunk by ID.
 
         Args:
-            chunk_id: Chunk ID
+            chunk_id: ID of chunk to retrieve
 
         Returns:
-            Optional[C]: Chunk if found, None otherwise
+            C: Retrieved chunk
 
         Raises:
-            ServiceStateError: If storage is not initialized
+            KeyError: If chunk does not exist
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Chunk storage is not initialized")
+        self._time_operation("get_chunk")
+        try:
+            if chunk_id not in self._chunks:
+                raise KeyError(f"Chunk {chunk_id} not found")
 
-        self._metrics.increment_operation_count("reads")
-        return self._chunks.get(chunk_id)
+            chunk = self._chunks[chunk_id]
+            self._record_operation("get")
+            return chunk
+        finally:
+            self._stop_timing("get_chunk")
 
     def update_chunk(self, chunk_id: UUID, chunk: C) -> None:
         """Update a chunk.
 
         Args:
-            chunk_id: Chunk ID
+            chunk_id: ID of chunk to update
             chunk: Updated chunk
 
         Raises:
-            ServiceStateError: If storage is not initialized
             ValueError: If chunk is invalid
             KeyError: If chunk does not exist
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Chunk storage is not initialized")
-
         if not chunk:
             raise ValueError("Chunk cannot be None")
 
-        if chunk_id not in self._chunks:
-            raise KeyError(f"Chunk with ID {chunk_id} does not exist")
+        self._time_operation("update_chunk")
+        try:
+            if chunk_id not in self._chunks:
+                raise KeyError(f"Chunk {chunk_id} not found")
 
-        old_size = len(str(self._chunks[chunk_id]).encode())
-        new_size = len(str(chunk).encode())
-        size_diff = new_size - old_size
-
-        self._chunks[chunk_id] = chunk
-        self._metrics.increment_storage_stat("total_bytes", size_diff)
-        self._metrics.increment_operation_count("updates")
+            self._chunks[chunk_id] = chunk
+            self._record_operation("update")
+        finally:
+            self._stop_timing("update_chunk")
 
     def delete_chunk(self, chunk_id: UUID) -> None:
         """Delete a chunk.
 
         Args:
-            chunk_id: Chunk ID
+            chunk_id: ID of chunk to delete
 
         Raises:
-            ServiceStateError: If storage is not initialized
             KeyError: If chunk does not exist
         """
-        if not self.is_initialized:
-            raise ServiceStateError("Chunk storage is not initialized")
+        self._time_operation("delete_chunk")
+        try:
+            if chunk_id not in self._chunks:
+                raise KeyError(f"Chunk {chunk_id} not found")
 
-        if chunk_id not in self._chunks:
-            raise KeyError(f"Chunk with ID {chunk_id} does not exist")
+            del self._chunks[chunk_id]
+            self._record_operation("delete")
+        finally:
+            self._stop_timing("delete_chunk")
 
-        chunk_size = len(str(self._chunks[chunk_id]).encode())
-        del self._chunks[chunk_id]
-        self._metrics.decrement_storage_stat("chunk_count")
-        self._metrics.decrement_storage_stat("total_bytes", chunk_size)
-        self._metrics.increment_operation_count("deletes")
+    def batch_store_chunks(self, chunks: List[C]) -> BatchResult[C]:
+        """Store multiple chunks in a batch operation.
+
+        Args:
+            chunks: List of chunks to store
+
+        Returns:
+            BatchResult containing successful and failed chunks
+        """
+        return self.process_batch(chunks, "store_chunk")
+
+    def batch_update_chunks(self, updates: List[tuple[UUID, C]]) -> BatchResult[tuple[UUID, C]]:
+        """Update multiple chunks in a batch operation.
+
+        Args:
+            updates: List of (chunk_id, chunk) pairs to update
+
+        Returns:
+            BatchResult containing successful and failed updates
+        """
+        return self.process_batch(updates, "update_chunk")
+
+    def check_health(self) -> tuple[bool, str]:
+        """Check the health of the chunk storage service.
+
+        Returns:
+            Tuple containing:
+                - bool: True if service is healthy
+                - str: Status message
+        """
+        try:
+            # Perform basic health check
+            metadata = ChunkMetadata(
+                content_type="text",
+                language="en",
+                line_numbers=(1, 1),
+            )
+            test_chunk = Chunk(
+                content="health check content",
+                metadata=metadata,
+            )
+            chunk_id = self.store_chunk(test_chunk)
+            self.delete_chunk(chunk_id)
+            return True, "Chunk storage service is healthy"
+        except Exception as e:
+            return False, f"Chunk storage health check failed: {str(e)}"
