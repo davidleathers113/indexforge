@@ -4,8 +4,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from src.connectors.direct_documentation_indexing.source_tracking.enums import LogLevel
 from src.connectors.direct_documentation_indexing.source_tracking.error_logging import LogEntry
+from src.core.monitoring.errors.models.log_entry import LogLevel
 
 
 @pytest.fixture
@@ -36,9 +36,7 @@ def test_log_entry_creation():
 
 def test_log_entry_default_metadata():
     """Test log entry creation with default metadata."""
-    entry = LogEntry(
-        message="Test", log_level=LogLevel.WARNING, timestamp=datetime.now(UTC)
-    )
+    entry = LogEntry(message="Test", log_level=LogLevel.WARNING, timestamp=datetime.now(UTC))
 
     assert entry.metadata == {}, "Default metadata should be empty dict"
 

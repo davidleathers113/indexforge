@@ -1,0 +1,75 @@
+groups:
+  - name: istio.slo.rules
+    rules:
+      # Latency SLO alerts
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(istio_request_duration_milliseconds_bucket{reporter="destination"}[5m]))
+            by (le, destination_service)
+          ) > 500
+        for: 5m
+        labels:
+          severity: warning
+          category: latency
+        annotations:
+          summary: High latency detected for {{ $labels.destination_service }}
+          description: P95 latency is above 500ms for {{ $labels.destination_service }}
+
+      # Error rate SLO alerts
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(istio_requests_total{reporter="destination", response_code=~"5.*"}[5m]))
+          by (destination_service)
+          /
+          sum(rate(istio_requests_total{reporter="destination"}[5m]))
+          by (destination_service)
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: High error rate for {{ $labels.destination_service }}
+          description: Error rate is above 5% for {{ $labels.destination_service }}
+
+      # Circuit breaker alerts
+      - alert: CircuitBreakerTripped
+        expr: |
+          increase(istio_circuit_breakers_total{reporter="destination"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          category: reliability
+        annotations:
+          summary: Circuit breaker tripped for {{ $labels.destination_service }}
+          description: Circuit breaker has been tripped in the last 5 minutes
+
+      # mTLS compliance
+      - alert: MTLSComplianceIssue
+        expr: |
+          istio_requests_total{connection_security_policy!="mutual_tls"} > 0
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: Non-mTLS traffic detected
+          description: Detected traffic without mutual TLS for {{ $labels.destination_service }}
+
+      # Service health
+      - alert: ServiceHealthDegraded
+        expr: |
+          sum(rate(istio_requests_total{reporter="destination", response_code!~"5.*"}[5m]))
+          by (destination_service)
+          /
+          sum(rate(istio_requests_total{reporter="destination"}[5m]))
+          by (destination_service)
+          < 0.99
+        for: 15m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: Service health degraded for {{ $labels.destination_service }}
+          description: Service availability is below 99% for {{ $labels.destination_service }}

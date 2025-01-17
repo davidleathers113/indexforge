@@ -1,0 +1,20 @@
+{
+    "schema_variations": {
+        "class": "TestDocDocument",
+        "description": "Test document source",
+        "vectorizer": "text2vec-transformers"
+    },
+    "custom_properties": {
+        "test_metadata": {
+            "dataType": ["text"],
+            "description": "Test-specific metadata"
+        }
+    },
+    "vectorizer_settings": {
+        "model": "all-MiniLM-L6-v2",
+        "poolingStrategy": "mean"
+    },
+    "cross_source_mappings": {
+        "test_ref": "reference_id"
+    }
+}

@@ -1,0 +1,70 @@
+services:
+  # Main Web Service
+  - type: web
+    name: indexforge
+    runtime: docker
+    plan: free
+    image: davidleathers/indexforge:latest
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      # Redis connection (automatically set by Render)
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: indexforge-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: indexforge-redis
+          property: port
+      # Weaviate connection
+      - key: WEAVIATE_URL
+        fromService:
+          type: web
+          name: indexforge-weaviate
+          property: host
+      - key: WEAVIATE_PORT
+        value: "8080"
+      - key: WEAVIATE_GRPC_PORT
+        value: "50051"
+      # Other secure environment variables - to be set in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false
+
+  # Redis Service
+  - type: redis
+    name: indexforge-redis
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+    plan: free
+    maxmemoryPolicy: noeviction
+
+  # Weaviate Service
+  - type: web
+    name: indexforge-weaviate
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.weaviate
+    dockerContext: .
+    envVars:
+      - key: QUERY_DEFAULTS_LIMIT
+        value: 25
+      - key: AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED
+        value: "true"
+      - key: PERSISTENCE_DATA_PATH
+        value: /var/lib/weaviate
+      - key: ENABLE_API_BASED_MODULES
+        value: "true"
+      - key: CLUSTER_HOSTNAME
+        value: node1
+      - key: LOG_LEVEL
+        value: info
+    disk:
+      name: weaviate-data
+      mountPath: /var/lib/weaviate
+      sizeGB: 10

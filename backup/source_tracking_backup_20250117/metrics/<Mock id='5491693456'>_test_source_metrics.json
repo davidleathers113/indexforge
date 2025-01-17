@@ -1,0 +1,11 @@
+{
+  "authority_score": 0.5,
+  "content_quality_score": 0.9,
+  "update_frequency": 2880.0,
+  "last_update": "2025-01-07T07:12:43.465524+00:00",
+  "total_updates": 2,
+  "quality_checks": {
+    "overall_score": 0.9
+  },
+  "metadata_completeness": 0.0
+}

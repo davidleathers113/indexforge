@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from src.connectors.direct_documentation_indexing.source_tracking.enums import LogLevel
+from src.core.monitoring.errors.models.log_entry import LogLevel
 
 
 @pytest.fixture

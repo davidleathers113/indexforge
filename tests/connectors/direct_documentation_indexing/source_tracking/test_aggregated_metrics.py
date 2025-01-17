@@ -14,11 +14,10 @@ from src.connectors.direct_documentation_indexing.source_tracking import (
 from src.connectors.direct_documentation_indexing.source_tracking.document_operations import (
     add_document,
 )
-from src.connectors.direct_documentation_indexing.source_tracking.enums import (
-    LogLevel,
-    ProcessingStatus,
-)
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
+from src.core.monitoring.errors.models.log_entry import LogLevel
+from src.core.monitoring.health.models import HealthStatus
+from src.core.processing.steps.models.step import ProcessingStatus
 
 
 @pytest.fixture

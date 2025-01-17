@@ -1,188 +1,187 @@
-# IndexForge Development Context Summary
+# IndexForge Migration - Development Context Summary
 
 ## Task Overview & Current Status
 
-### Core Problem/Feature
+### Core Problem
 
-- Migrating document operations and lineage tracking from connector-specific implementation to core functionality
-- Moving from `src/connectors/direct_documentation_indexing/source_tracking/` to `src/core/tracking/`
-- Implementing comprehensive test coverage and validation strategies
+- Migrating source tracking functionality from connector-specific implementation to core package
+- Restructuring document operations and lineage tracking for better maintainability
+- Consolidating monitoring and management capabilities
 
-### Current Status
+### Implementation Status
 
-- Document operations migration complete ✅
-
-  - Core functionality migrated
-  - Storage interface integrated
-  - Validation strategies implemented
-  - Test suite migrated and passing
-  - Integration tests complete
-  - API documentation pending
-
-- Document lineage migration in progress 🔄
-  - Core functionality migrated
-  - Operations module migrated
-  - Manager implementation migrated
-  - Test suite migrated and passing
-  - Integration tests complete
-  - API documentation pending
+- Core infrastructure complete ✅
+- Chunking system complete ✅
+- Document tracking system complete ✅
+- Document processor migration complete ✅
+- Source tracking migration in progress 🔄
 
 ### Key Architectural Decisions
 
-1. Separation of Concerns:
+1. Centralization of core functionality
 
-   - Core operations in `src/core/tracking/operations.py`
-   - Lineage-specific operations in `src/core/tracking/lineage/operations.py`
-   - Validation strategies in dedicated module
+   - Moving document operations to core package for reusability
+   - Standardizing storage interfaces for consistency
+   - Implementing unified validation strategies
 
-2. Storage Interface:
+2. Enhanced Type Safety
 
-   - Using `LineageStorage` protocol for storage abstraction
-   - Mock implementation for testing
-   - Clear separation between storage and business logic
+   - Strict type checking throughout codebase
+   - Comprehensive validation at boundaries
+   - Type-safe storage implementation
 
-3. Validation Strategy:
-   - Dedicated validation module for circular references
-   - Comprehensive relationship validation
-   - Strict type checking and error handling
+3. Monitoring Infrastructure
+   - Centralized metrics collection
+   - Performance monitoring integration
+   - Structured logging system
 
 ### Critical Constraints
 
 - Must maintain backward compatibility
-- Zero tolerance for circular references in document lineage
-- Strict type safety requirements
-- Comprehensive test coverage required
+- Zero downtime migration requirement
+- Strict type safety enforcement
+- Performance impact < 2% degradation
 
 ## Codebase Navigation
 
-### Key Files (Ranked by Importance)
+### Key Files (By Priority)
 
-1. `src/core/tracking/operations.py`
+1. Core Operations
 
-   - Core document operations implementation
-   - Handles document creation and relationship management
-   - Recently migrated and fully tested
+   - `src/core/tracking/operations.py`
+     - Core document management functionality
+     - Recently migrated from connector
+     - Handles document CRUD operations
 
-2. `src/core/tracking/lineage/operations.py`
+2. Lineage Tracking
 
-   - Document lineage operations
-   - Manages derivation chains and relationships
-   - Successfully migrated with tests
+   - `src/core/tracking/lineage/operations.py`
+     - Document relationship management
+     - Parent-child tracking
+     - Derivation chain handling
 
-3. `src/core/tracking/validation/strategies/circular.py`
+3. Storage Implementation
 
-   - Circular reference validation
-   - Critical for maintaining data integrity
-   - Recently updated with improved error messages
+   - `src/core/tracking/storage.py`
+     - Document persistence layer
+     - Metrics integration
+     - Batch operation support
 
-4. `tests/core/tracking/test_operations.py`
-
-   - Core operations test suite
-   - Comprehensive coverage of document operations
-   - All tests passing
-
-5. `tests/core/tracking/lineage/test_operations.py`
-
-   - Lineage operations test suite
-   - Covers derivation and relationship validation
-   - All tests passing
-
-6. `src/core/interfaces/storage.py`
-   - Storage interface definitions
-   - Used by both operations and lineage modules
-   - Critical for abstraction layer
+4. Monitoring (Pending Migration)
+   - `src/connectors/direct_documentation_indexing/source_tracking/alert_manager.py`
+   - `src/connectors/direct_documentation_indexing/source_tracking/error_logging.py`
+   - `src/connectors/direct_documentation_indexing/source_tracking/health_check.py`
+   - Moving to `src/core/monitoring/`
 
 ### Dependencies
 
-- Python 3.11
-- pytest for testing
-- Mock storage implementation for tests
-- Type hints and validation throughout
+- Core models package
+- Schema validation system
+- Storage metrics infrastructure
+- Type-safe storage implementation
 
 ## Technical Context
 
 ### Technical Assumptions
 
-1. Document IDs are unique across the system
-2. Parent documents must exist before child relationships
-3. Storage implementation handles serialization
-4. Validation occurs before storage operations
+1. Document relationships are acyclic
+2. Storage operations are atomic
+3. Metrics collection has negligible performance impact
+4. Document IDs are globally unique
 
 ### External Services
 
-- No direct external service dependencies
-- Storage abstraction allows for different backends
+- Redis for caching
+- Storage backend (configurable)
+- Metrics collection service
 
 ### Performance Considerations
 
-1. Validation strategies optimized for minimal traversal
-2. Caching considerations in storage interface
-3. Efficient relationship tracking
+- Batch operations for bulk processing
+- Caching with size limits and TTL
+- Memory management with usage tracking
+- Optimized validation strategies
 
 ### Security Requirements
 
-1. Input validation on all operations
-2. No circular references allowed
-3. Parent-child relationship validation
+- Secure metadata persistence
+- Encryption for sensitive data
+- Access control implementation
+- Audit logging
 
 ## Development Progress
 
 ### Last Completed Tasks
 
-1. Migrated core document operations
-2. Implemented comprehensive test suite
-3. Fixed circular reference validation
-4. Updated import paths
-5. Added integration tests
+- Core document operations migration
+- Storage interface integration
+- Test suite refactoring
+- API documentation for core metrics
 
 ### Immediate Next Steps
 
-1. Update API documentation for both modules
-2. Remove original source files:
-   - `document_operations.py`
-   - `document_lineage.py`
-   - `lineage_manager.py`
-   - `lineage_operations.py`
-3. Complete cross-package functionality tests
+1. File Migrations:
+
+   - Move monitoring components to core
+   - Migrate storage management
+   - Transfer utility modules
+
+2. Documentation:
+   - Complete API documentation
+   - Update configuration guides
+   - Merge reference documentation
 
 ### Known Issues
 
-1. API documentation needs updating
-2. Some import paths may need adjustment
-3. Cross-package functionality tests pending
+1. Cross-package functionality verification pending
+2. API integration tests incomplete
+3. Documentation references need updating
+4. Empty directories cleanup required
 
 ### Failed Approaches
 
-1. Initial attempt at relative imports (switched to absolute)
-2. Direct protocol instantiation in tests (implemented mock)
-3. Simple error messages (enhanced for clarity)
+- Direct storage migration (caused consistency issues)
+- Parallel validation strategies (performance impact)
+- In-place file updates (breaking changes)
 
 ## Developer Notes
 
 ### Codebase Insights
 
-1. Absolute imports preferred throughout
-2. Strict type checking enforced
-3. Comprehensive validation before operations
-4. Test fixtures provide reusable setup
+1. Storage layer has implicit dependencies on validation
+2. Metrics collection affects all operations
+3. Document relationships require bidirectional updates
+4. Configuration changes need careful validation
 
 ### Temporary Solutions
 
-1. Mock storage implementation for testing
-2. Some TODOs in documentation
-3. Pending API documentation updates
+1. Cross-package imports during migration
+2. Duplicate validation logic in transition
+3. Manual relationship verification
 
-### Areas Needing Attention
+### Critical Areas
 
-1. API documentation completeness
-2. Cross-package functionality testing
-3. Performance optimization opportunities
-4. Security review of validation strategies
+1. Document Relationship Management
 
-### Best Practices
+   - Careful handling of parent-child updates
+   - Validation of relationship chains
+   - Circular reference prevention
 
-1. Always use absolute imports
+2. Storage Operations
+
+   - Transaction handling
+   - Error recovery
+   - Consistency maintenance
+
+3. Configuration Management
+   - Environment-specific settings
+   - Secure field handling
+   - Migration compatibility
+
+### Migration Recommendations
+
+1. Use staged migration approach
 2. Maintain comprehensive test coverage
-3. Document all public interfaces
-4. Validate inputs thoroughly
-5. Handle errors gracefully with clear messages
+3. Document all configuration changes
+4. Verify backward compatibility
+5. Monitor performance metrics

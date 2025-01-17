@@ -8,8 +8,8 @@ from src.connectors.direct_documentation_indexing.source_tracking import (
     add_document,
     log_error_or_warning,
 )
-from src.connectors.direct_documentation_indexing.source_tracking.enums import LogLevel
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
+from src.core.monitoring.errors.models.log_entry import LogLevel
 
 
 @pytest.fixture

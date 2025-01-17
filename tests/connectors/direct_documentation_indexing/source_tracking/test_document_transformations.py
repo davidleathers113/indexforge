@@ -3,12 +3,12 @@
 import pytest
 
 from src.connectors.direct_documentation_indexing.source_tracking import add_document
-from src.connectors.direct_documentation_indexing.source_tracking.enums import TransformationType
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
 from src.connectors.direct_documentation_indexing.source_tracking.transformation_manager import (
     get_transformation_history,
     record_transformation,
 )
+from src.core.tracking.transformations import TransformationType
 
 
 @pytest.fixture

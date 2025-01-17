@@ -5,17 +5,15 @@ from typing import Any
 
 import pytest
 
-from src.connectors.direct_documentation_indexing.source_tracking import (
-    add_processing_step,
-)
+from src.connectors.direct_documentation_indexing.source_tracking import add_processing_step
 from src.connectors.direct_documentation_indexing.source_tracking.alert_manager import AlertConfig
 from src.connectors.direct_documentation_indexing.source_tracking.document_operations import (
     add_document,
 )
-from src.connectors.direct_documentation_indexing.source_tracking.enums import (
-    ProcessingStatus,
-)
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
+from src.core.monitoring.errors.models.log_entry import LogLevel
+from src.core.monitoring.health.models import HealthStatus
+from src.core.processing.steps.models.step import ProcessingStatus
 
 
 @pytest.fixture

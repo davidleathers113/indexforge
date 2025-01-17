@@ -14,7 +14,6 @@ from src.core.settings import Settings
 
 from .base import BaseStorageService, BatchConfig, BatchResult
 
-
 T = TypeVar("T", bound=Document)
 
 

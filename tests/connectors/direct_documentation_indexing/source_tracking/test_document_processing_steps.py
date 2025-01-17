@@ -7,8 +7,8 @@ from src.connectors.direct_documentation_indexing.source_tracking import (
     add_processing_step,
     get_processing_steps,
 )
-from src.connectors.direct_documentation_indexing.source_tracking.enums import ProcessingStatus
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
+from src.core.processing.steps.models.step import ProcessingStatus
 
 
 @pytest.fixture

@@ -8,6 +8,7 @@ from src.connectors.direct_documentation_indexing.source_tracking.enums import L
 from src.connectors.direct_documentation_indexing.source_tracking.error_logging import (
     DocumentErrorLogger,
 )
+from src.core.monitoring.errors.models.log_entry import LogLevel
 
 
 @pytest.fixture

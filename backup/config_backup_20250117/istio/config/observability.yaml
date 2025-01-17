@@ -1,0 +1,58 @@
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: mesh-telemetry
+  namespace: istio-system
+spec:
+  tracing:
+    - providers:
+        - name: jaeger
+      randomSamplingPercentage: 100.0
+      customTags:
+        environment:
+          literal:
+            value: "production"
+        version:
+          header:
+            name: "x-version"
+  metrics:
+    - providers:
+        - name: prometheus
+      overrides:
+        - match:
+            metric: REQUEST_COUNT
+            mode: CLIENT_AND_SERVER
+          tagOverrides:
+            response_code:
+              value: "response.code"
+            service_name:
+              value: "source.workload.name"
+        - match:
+            metric: REQUEST_DURATION
+            mode: CLIENT_AND_SERVER
+          tagOverrides:
+            source_workload:
+              value: "source.workload.name"
+            destination_service:
+              value: "destination.service.name"
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: "response.code >= 400"
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: istio-component-monitor
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: pilot
+  namespaceSelector:
+    matchNames:
+      - istio-system
+  endpoints:
+    - port: http-monitoring
+      interval: 15s

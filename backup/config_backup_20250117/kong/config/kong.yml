@@ -1,0 +1,880 @@
+_format_version: "3.0"
+_transform: true
+
+upstreams:
+  - name: app-upstream
+    targets:
+      - target: app:8000
+        weight: 100
+    healthchecks:
+      active:
+        healthy:
+          interval: 5
+          successes: 2
+          http_statuses:
+            - 200
+            - 302
+        http_path: /health
+        timeout: 5
+        unhealthy:
+          http_failures: 3
+          http_statuses:
+            - 429
+            - 404
+            - 500
+            - 501
+            - 502
+            - 503
+            - 504
+            - 505
+          interval: 5
+          timeouts: 3
+      passive:
+        healthy:
+          http_statuses:
+            - 200
+            - 201
+            - 202
+            - 203
+            - 204
+            - 205
+            - 206
+            - 207
+            - 208
+            - 226
+            - 302
+          successes: 5
+        unhealthy:
+          http_failures: 5
+          http_statuses:
+            - 429
+            - 500
+            - 503
+          timeouts: 3
+      threshold: 0
+
+  - name: ml-upstream
+    targets:
+      - target: ml-service:8001
+        weight: 100
+    healthchecks:
+      active:
+        healthy:
+          interval: 10
+          successes: 2
+          http_statuses:
+            - 200
+            - 302
+        http_path: /health
+        timeout: 10
+        unhealthy:
+          http_failures: 3
+          http_statuses:
+            - 429
+            - 404
+            - 500
+            - 501
+            - 502
+            - 503
+            - 504
+            - 505
+          interval: 10
+          timeouts: 3
+      passive:
+        healthy:
+          http_statuses:
+            - 200
+            - 201
+            - 202
+            - 203
+            - 204
+            - 205
+            - 206
+            - 207
+            - 208
+            - 226
+            - 302
+          successes: 5
+        unhealthy:
+          http_failures: 5
+          http_statuses:
+            - 429
+            - 500
+            - 503
+          timeouts: 3
+      threshold: 0
+
+services:
+  - name: app-service
+    url: http://app-upstream
+    retries: 5
+    connect_timeout: 3000
+    write_timeout: 5000
+    read_timeout: 60000
+    tags:
+      - "production"
+      - "internal"
+      - "v1"
+    routes:
+      - name: app-routes
+        paths:
+          - /api/v1/
+        strip_path: false
+        preserve_host: true
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "http://localhost:3000"  # Development
+            - "${CORS_ORIGIN}"        # Production frontend URL
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+            - PATCH
+          headers:
+            - Content-Type
+            - Authorization
+            - X-Request-ID
+            - X-Supabase-Auth
+          exposed_headers:
+            - X-Request-ID
+          credentials: true
+          max_age: 3600
+          preflight_continue: false
+      - name: jwt
+        config:
+          header_names:
+            - "Authorization"
+          claims_to_verify:
+            - "exp"
+            - "aud"
+          maximum_expiration: 3600  # 1 hour
+          secret_is_base64: false
+          run_on_preflight: false
+          key_claim_name: "sub"
+          anonymous: false  # Require JWT for all routes
+          validate_token_exp: true
+      - name: rate-limiting
+        config:
+          minute: ${RATE_LIMIT_MINUTE}
+          hour: ${RATE_LIMIT_HOUR}
+          policy: local
+          hide_client_headers: false
+          redis_ssl: false
+          redis_ssl_verify: false
+          error_code: 429
+          error_message: "API rate limit exceeded"
+          limit_by: consumer
+          path_handling: "v0"
+          header_name: null
+          fault_tolerant: true
+          sync_rate: 10
+          namespace: "app_service"
+          strategy: "local"
+          window_size:
+            minute: 60
+            hour: 3600
+          window_type: "sliding"
+          retry_after_jitter_max: 0
+          path_specific_limits:
+            - path_regex: "/api/v1/documents.*"
+              limits:
+                minute: 30
+                hour: 300
+            - path_regex: "/api/v1/search.*"
+              limits:
+                minute: 120
+                hour: 1200
+            - path_regex: "/api/v1/metadata.*"
+              limits:
+                minute: 60
+                hour: 600
+      - name: proxy-cache
+        config:
+          content_type:
+            - application/json
+          cache_ttl: ${CACHE_TTL}
+          strategy: ${CACHE_STRATEGY}
+          cache_control: true
+          storage_ttl: 3600
+          memory:
+            dictionary_name: kong_db_cache
+          cache_by_method:
+            - GET
+          cache_by_headers:
+            - Accept
+            - Accept-Language
+          response_code:
+            - 200
+          request_method:
+            - GET
+          vary_headers:
+            - Accept-Language
+          vary_query_params:
+            - version
+            - fields
+          cache_key_pattern:
+            - headers:
+                - X-Request-ID
+            - uri_captures
+            - query_string
+          cache_by_regex:
+            - pattern: "/api/v1/documents.*"
+              cache_ttl: 600  # 10 minutes for document listings
+            - pattern: "/api/v1/search.*"
+              cache_ttl: 300  # 5 minutes for search results
+            - pattern: "/api/v1/metadata.*"
+              cache_ttl: 1800 # 30 minutes for metadata
+          ignore_uri_case: true
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - "X-Content-Type-Options:nosniff"
+              - "X-Frame-Options:DENY"
+              - "X-XSS-Protection:1; mode=block"
+              - "Strict-Transport-Security:max-age=31536000; includeSubDomains"
+              - "Content-Security-Policy:default-src 'self'; img-src 'self' data:; script-src 'self'"
+      - name: request-size-limiting
+        config:
+          allowed_payload_size: 10
+      - name: health-checks
+        config:
+          active:
+            type: http
+            http_path: /health
+            timeout: 5
+            concurrency: 10
+            healthy:
+              interval: 5
+              successes: 2
+              http_statuses: [200, 302]
+            unhealthy:
+              interval: 5
+              timeouts: 3
+              http_failures: 3
+              http_statuses: [429, 404, 500, 501, 502, 503, 504, 505]
+            headers:
+              X-Health-Check: "true"
+          passive:
+            type: http
+            healthy:
+              successes: 5
+              http_statuses: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 302]
+            unhealthy:
+              timeouts: 3
+              http_failures: 5
+              http_statuses: [429, 500, 503]
+          threshold: 0.5
+
+  - name: ml-service
+    url: http://ml-upstream
+    retries: 3
+    connect_timeout: 5000
+    write_timeout: 10000
+    read_timeout: 120000
+    tags:
+      - "production"
+      - "ml"
+      - "v1"
+    routes:
+      - name: ml-routes
+        paths:
+          - /api/v1/ml/
+        strip_path: false
+        preserve_host: true
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "http://localhost:3000"  # Development
+            - "${CORS_ORIGIN}"        # Production frontend URL
+          methods:
+            - GET
+            - POST
+            - OPTIONS
+          headers:
+            - Content-Type
+            - Authorization
+            - X-Request-ID
+            - X-Supabase-Auth
+          exposed_headers:
+            - X-Request-ID
+          credentials: true
+          max_age: 3600
+          preflight_continue: false
+      - name: jwt
+        config:
+          header_names:
+            - "Authorization"
+          claims_to_verify:
+            - "exp"
+            - "aud"
+          maximum_expiration: 3600  # 1 hour
+          secret_is_base64: false
+          run_on_preflight: false
+          key_claim_name: "sub"
+          anonymous: false
+          validate_token_exp: true
+      - name: rate-limiting
+        config:
+          minute: ${ML_RATE_LIMIT_MINUTE}
+          hour: ${ML_RATE_LIMIT_HOUR}
+          policy: local
+          hide_client_headers: false
+          redis_ssl: false
+          redis_ssl_verify: false
+          error_code: 429
+          error_message: "ML service rate limit exceeded"
+          limit_by: consumer
+          path_handling: "v0"
+          header_name: null
+          fault_tolerant: true
+          sync_rate: 10
+          namespace: "ml_service"
+          strategy: "local"
+          window_size:
+            minute: 60
+            hour: 3600
+          window_type: "sliding"
+          retry_after_jitter_max: 0
+          path_specific_limits:
+            - path_regex: "/api/v1/ml/embeddings.*"
+              limits:
+                minute: 20
+                hour: 200
+            - path_regex: "/api/v1/ml/analyze.*"
+              limits:
+                minute: 30
+                hour: 300
+      - name: ip-restriction
+        config:
+          allow:
+            - "127.0.0.1"
+            - "${ALLOWED_IPS}"  # Configure in production
+          deny: []
+      - name: request-size-limiting
+        config:
+          allowed_payload_size: 50  # Higher limit for ML service
+      - name: proxy-cache
+        config:
+          content_type:
+            - application/json
+          cache_ttl: ${ML_CACHE_TTL:-600}  # 10 minutes default for ML endpoints
+          strategy: ${CACHE_STRATEGY}
+          cache_control: true
+          storage_ttl: 7200
+          memory:
+            dictionary_name: kong_ml_cache
+          cache_by_method:
+            - GET
+          response_code:
+            - 200
+          request_method:
+            - GET
+          cache_by_regex:
+            - pattern: "/api/v1/ml/embeddings.*"
+              cache_ttl: 3600  # 1 hour for embeddings
+            - pattern: "/api/v1/ml/analyze.*"
+              cache_ttl: 300   # 5 minutes for analysis results
+          ignore_uri_case: true
+      - name: health-checks
+        config:
+          active:
+            type: http
+            http_path: /health
+            timeout: 10
+            concurrency: 5
+            healthy:
+              interval: 10
+              successes: 2
+              http_statuses: [200, 302]
+            unhealthy:
+              interval: 10
+              timeouts: 3
+              http_failures: 3
+              http_statuses: [429, 404, 500, 501, 502, 503, 504, 505]
+            headers:
+              X-Health-Check: "true"
+          passive:
+            type: http
+            healthy:
+              successes: 5
+              http_statuses: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 302]
+            unhealthy:
+              timeouts: 3
+              http_failures: 5
+              http_statuses: [429, 500, 503]
+            threshold: 0.5
+
+plugins:
+  - name: correlation-id
+    config:
+      header_name: X-Request-ID
+      generator: uuid#counter
+      echo_downstream: true
+  - name: request-termination
+    config:
+      status_code: 503
+      message: "API is temporarily unavailable"
+    enabled: false  # Only enable during maintenance
+  - name: prometheus
+    config:
+      status_codes: true
+      latency: true
+      bandwidth: true
+      upstream_health: true
+      per_consumer: true
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+      upstream_health_metrics: true
+      consumer_status_metrics: true
+      service_status_metrics: true
+      shdict_usage: true
+      memory_stats: true
+      stream_metrics: true
+      shared_dict_metrics:
+        - "kong_db_cache"
+        - "kong_ml_cache"
+      metric_config:
+        prefix: "kong_"
+        labels:
+          - "service"
+          - "route"
+          - "consumer"
+          - "status"
+          - "environment"
+          - "instance"
+      rules:
+        # HTTP Request Metrics
+        - name: kong_http_requests_total
+          labels:
+            - "service"
+            - "route"
+            - "status_code"
+            - "consumer"
+            - "method"
+        - name: kong_http_request_size_bytes
+          labels:
+            - "service"
+            - "route"
+            - "consumer"
+        - name: kong_http_response_size_bytes
+          labels:
+            - "service"
+            - "route"
+            - "consumer"
+
+        # Latency Metrics
+        - name: kong_http_request_duration_ms
+          labels:
+            - "service"
+            - "route"
+            - "consumer"
+            - "status_code"
+        - name: kong_upstream_latency_ms
+          labels:
+            - "service"
+            - "upstream"
+        - name: kong_kong_latency_ms
+          labels:
+            - "service"
+            - "route"
+
+        # Cache Metrics
+        - name: kong_cache_hit_total
+          labels:
+            - "cache_name"
+            - "service"
+        - name: kong_cache_miss_total
+          labels:
+            - "cache_name"
+            - "service"
+
+        # Rate Limiting Metrics
+        - name: kong_rate_limiting_current
+          labels:
+            - "service"
+            - "consumer"
+            - "limit_name"
+        - name: kong_rate_limiting_remaining
+          labels:
+            - "service"
+            - "consumer"
+            - "limit_name"
+
+        # Authentication Metrics
+        - name: kong_authentication_failures_total
+          labels:
+            - "service"
+            - "consumer"
+            - "auth_type"
+        - name: kong_authentication_successes_total
+          labels:
+            - "service"
+            - "consumer"
+            - "auth_type"
+
+        # Health Check Metrics
+        - name: kong_upstream_target_health
+          labels:
+            - "upstream"
+            - "target"
+            - "status"
+        - name: kong_upstream_target_weight
+          labels:
+            - "upstream"
+            - "target"
+
+        # Memory and Resource Metrics
+        - name: kong_memory_lua_shared_dict_bytes
+          labels:
+            - "dict_name"
+        - name: kong_memory_workers_lua_vms_bytes
+          labels:
+            - "pid"
+        - name: kong_nginx_connections
+          labels:
+            - "state"
+
+        # Error Metrics
+        - name: kong_error_total
+          labels:
+            - "service"
+            - "type"
+            - "status_code"
+  - name: file-log
+    config:
+      path: /usr/local/kong/logs/access.log
+      reopen: true
+      custom_fields_by_lua:
+        request_time: "return ngx.var.request_time"
+        upstream_response_time: "return ngx.var.upstream_response_time"
+        realip_remote_addr: "return ngx.var.realip_remote_addr"
+        http_user_agent: "return ngx.var.http_user_agent"
+        service_name: "return kong.router.get_service().name"
+        consumer_id: "return (kong.client.get_consumer() or {}).id"
+        route_name: "return (kong.router.get_route() or {}).name"
+      custom_fields:
+        environment: "${ENVIRONMENT}"
+        instance_id: "${HOSTNAME}"
+  - name: rate-limiting
+    config:
+      minute: ${GLOBAL_RATE_LIMIT_MINUTE:-100}
+      hour: ${GLOBAL_RATE_LIMIT_HOUR:-1000}
+      fault_tolerant: true
+      hide_client_headers: false
+      policy: local
+      limit_by: ip
+      path_handling: "v0"
+      namespace: "global"
+      strategy: "local"
+      window_type: "sliding"
+      sync_rate: 10
+      redis_ssl: false
+      redis_ssl_verify: false
+  - name: bot-detection
+    config:
+      allow:
+        - "curl"
+        - "PostmanRuntime"
+        - "Mozilla"
+        - "Chrome"
+        - "Safari"
+        - "Edge"
+        - "Firefox"
+      deny:
+        - "python-requests.*"
+        - "Go-http-client.*"
+        - "Java.*"
+        - ".*[Bb]ot.*"
+        - ".*[Ss]craper.*"
+        - ".*[Cc]rawler.*"
+      whitelist_uris:
+        - "/api/v1/health"
+        - "/api/v1/status"
+      blacklist_uris:
+        - "*.php"
+        - "*.asp"
+        - "/wp-*"
+      custom_rules:
+        - name: "high_frequency_requests"
+          rule_type: "request_count"
+          window_size: 60
+          threshold: 1000
+          action: "deny"
+        - name: "suspicious_patterns"
+          rule_type: "uri_pattern"
+          patterns:
+            - ".*eval\\(.*\\)"
+            - ".*\\[\\$.*\\].*"
+            - ".*<script.*>.*"
+          action: "deny"
+      max_req_per_ip: 100
+      max_req_per_ip_per_hour: 1000
+      block_on_suspicious: true
+      log_only: false
+
+  - name: anti-ddos
+    config:
+      window_size: 60
+      limit: 10000
+      unlimited_statuses:
+        - 401
+        - 403
+        - 404
+      strategy: "cluster"
+      sync_rate: -1
+      redis:
+        host: "redis"
+        port: 6379
+        timeout: 2000
+        database: 1
+      blacklist_time: 600
+      safelist:
+        - "127.0.0.1"
+        - "${ALLOWED_IPS}"
+      detection:
+        layer3:
+          enabled: true
+          threshold: 10000
+        layer7:
+          enabled: true
+          threshold: 5000
+        behavioral:
+          enabled: true
+          normal_threshold: 100
+          suspicious_threshold: 500
+          malicious_threshold: 1000
+
+  - name: request-validator-enhanced
+    config:
+      validate_request_body: true
+      validate_request_headers: true
+      validate_request_method: true
+      validate_request_uri: true
+      validate_request_query: true
+      check_utf8: true
+      uri_patterns_blacklist:
+        - ".*\\.\\..*"
+        - ".*%2e%2e.*"
+        - ".*%252e%252e.*"
+      header_patterns_blacklist:
+        - ".*\\[\\$.*\\].*"
+        - ".*<script.*>.*"
+      query_patterns_blacklist:
+        - ".*UNION.*SELECT.*"
+        - ".*EXEC.*SP.*"
+        - ".*DROP.*TABLE.*"
+      max_request_args: 100
+      max_uri_length: 4096
+      max_header_length: 4096
+      block_on_validation_failure: true
+
+  - name: response-transformer
+    config:
+      add:
+        headers:
+          - "X-Content-Type-Options:nosniff"
+          - "X-Frame-Options:DENY"
+          - "X-XSS-Protection:1; mode=block"
+          - "Strict-Transport-Security:max-age=31536000; includeSubDomains; preload"
+          - "Content-Security-Policy:default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'"
+          - "Permissions-Policy:accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+          - "Referrer-Policy:strict-origin-when-cross-origin"
+          - "Cross-Origin-Embedder-Policy:require-corp"
+          - "Cross-Origin-Opener-Policy:same-origin"
+          - "Cross-Origin-Resource-Policy:same-origin"
+  - name: request-validator
+    config:
+      body_schema:
+        application/json:
+          type: "object"
+          additionalProperties: false
+          required:
+            - "type"
+          properties:
+            type:
+              type: "string"
+              enum: ["document", "metadata", "search", "analyze"]
+            content:
+              type: "string"
+              maxLength: 1048576  # 1MB
+            metadata:
+              type: "object"
+              maxProperties: 50
+            query:
+              type: "string"
+              maxLength: 1000
+      verbose_response: true
+      allowed_content_types:
+        - "application/json"
+        - "multipart/form-data"
+      strip_path: false
+      version: "draft4"
+      ensure_content_length: true
+      allowed_methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "DELETE"
+        - "PATCH"
+        - "OPTIONS"
+  - name: ip-restriction
+    config:
+      allow:
+        - "127.0.0.1"
+        - "${ALLOWED_IPS}"
+      deny:
+        - "0.0.0.0/0"  # Deny all by default
+      status: 403
+      message: "Your IP address is not allowed"
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 2
+      require_content_length: true
+      error_response: '{"message":"Request size limit exceeded"}'
+      error_code: 413
+      size_unit: "mb"
+  - name: request-transformer
+    config:
+      remove:
+        headers:
+          - "X-Powered-By"
+          - "Server"
+      append:
+        headers:
+          - "X-Request-ID:${request_id}"
+          - "X-Service-Version:${service_version}"
+      http_method: keep
+      preserve_host: true
+      remove_trailing_slash: true
+  - name: acl
+    config:
+      allow:
+        - "admin"
+        - "service"
+      deny: []
+      hide_groups_header: true
+      error_code: 403
+      error_message: "Access denied"
+  - name: error-handler
+    config:
+      server_error_handling: true
+      transform_headers: true
+      handle_unexpected: true
+      err_templates:
+        - err_type: upstream_timeout
+          template: '{"code": 504, "message": "Service temporarily unavailable", "error": "Gateway Timeout"}'
+        - err_type: upstream_unavailable
+          template: '{"code": 503, "message": "Service temporarily unavailable", "error": "Service Unavailable"}'
+        - err_type: rate_limit_exceeded
+          template: '{"code": 429, "message": "Too many requests", "error": "Rate Limit Exceeded"}'
+        - err_type: authentication_failed
+          template: '{"code": 401, "message": "Authentication required", "error": "Unauthorized"}'
+        - err_type: access_denied
+          template: '{"code": 403, "message": "Access denied", "error": "Forbidden"}'
+        - err_type: validation_failed
+          template: '{"code": 400, "message": "Invalid request", "error": "Bad Request"}'
+
+  - name: response-transformer-advanced
+    config:
+      add:
+        json:
+          - "$.response_time:$(request_time)"
+          - "$.service:$(service_name)"
+          - "$.request_id:$(request_id)"
+        headers:
+          - "X-Response-Time:$(request_time)"
+          - "X-Service-Name:$(service_name)"
+      remove:
+        json:
+          - "internal_data"
+          - "sensitive_info"
+        headers:
+          - "X-Internal-Header"
+      replace:
+        json:
+          - "$.status:$(status)"
+          - "$.timestamp:$(timestamp)"
+      append:
+        json:
+          - "$.meta.version:${SERVICE_VERSION}"
+          - "$.meta.environment:${ENVIRONMENT}"
+      transform:
+        - template: '{"data": $(body), "meta": {"timestamp": "$(timestamp)", "request_id": "$(request_id)"}}'
+          content_types:
+            - "application/json"
+
+  - name: circuit-breaker
+    config:
+      timeout: 60000
+      failures: 5
+      reset_timeout: 60000
+      max_failures: 3
+      wait_time: 10000
+      status_code:
+        - 500
+        - 502
+        - 503
+        - 504
+      trip_conditions:
+        - condition_type: "http_status"
+          status_codes:
+            - 500
+            - 502
+            - 503
+            - 504
+          count: 5
+          window_size: 60
+        - condition_type: "latency"
+          threshold: 5000
+          count: 10
+          window_size: 60
+      recovery:
+        success_count: 2
+      fallback:
+        status_code: 503
+        body: '{"error": "Service temporarily unavailable", "code": "CIRCUIT_OPEN"}'
+        headers:
+          - "Content-Type:application/json"
+          - "Retry-After:60"
+
+  - name: retry
+    config:
+      attempts: 3
+      retry_on_status:
+        - 500
+        - 502
+        - 503
+        - 504
+      retry_on_connection_errors: true
+      backoff_algorithm: exponential
+      initial_delay: 100
+      max_delay: 1000
+
+  - name: health-check-logger
+    config:
+      log_level: notice
+      successful_checks: false
+      format: "$time_iso8601 $service_name $status $check_type $latency"
+      path: /usr/local/kong/logs/healthcheck.log
+
+  - name: service-discovery
+    config:
+      discovery_type: dns
+      dns_order: ["LAST", "SRV", "A", "CNAME"]
+      ttl: 30
+      negative_ttl: 10
+      cache_size: 100
+      validate_certs: true
+      resolver_timeout: 2000
+      resolver_retries: 3
+      resolver_addresses:
+        - "8.8.8.8"
+        - "8.8.4.4"
+      resolver_port: 53
