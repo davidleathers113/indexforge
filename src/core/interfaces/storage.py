@@ -1,12 +1,11 @@
 """Core storage interfaces.
 
 This module defines the interfaces for storage operations. It provides
-protocols for document storage, chunk storage, and reference storage.
+protocols for document storage, chunk storage, reference storage, and storage metrics.
 """
 
-from typing import TYPE_CHECKING, Protocol, TypeVar
+from typing import TYPE_CHECKING, Dict, List, Protocol, TypeVar
 from uuid import UUID
-
 
 if TYPE_CHECKING:
     from src.core.models.chunks import Chunk
@@ -17,6 +16,35 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="Document")
 C = TypeVar("C", bound="Chunk")
 R = TypeVar("R", bound="Reference")
+
+
+class StorageMetrics(Protocol):
+    """Protocol for storage metrics collection."""
+
+    def __init__(self, settings: "Settings") -> None:
+        """Initialize storage metrics.
+
+        Args:
+            settings: Storage configuration settings
+        """
+        pass
+
+    def record_operation(self, operation: str, duration: float) -> None:
+        """Record a storage operation and its duration.
+
+        Args:
+            operation: Name of the storage operation
+            duration: Duration of the operation in seconds
+        """
+        pass
+
+    def get_metrics(self) -> Dict[str, List[float]]:
+        """Get collected storage metrics.
+
+        Returns:
+            Dict[str, List[float]]: Dictionary mapping operation names to lists of durations
+        """
+        pass
 
 
 class DocumentStorage(Protocol[T]):

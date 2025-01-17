@@ -4,14 +4,12 @@ This module provides interfaces for high-level semantic search operations.
 """
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar
-
+from typing import TYPE_CHECKING, Any, Dict, Generic, List, Protocol, Tuple, TypeVar
 
 if TYPE_CHECKING:
-    from src.core.models.chunks import Chunk
-    from src.core.settings import Settings
+    from .settings import Settings
 
-T = TypeVar("T", bound="Chunk")
+T = TypeVar("T")
 
 
 @dataclass
@@ -76,31 +74,24 @@ class VectorSearcher(Protocol):
     def find_similar(
         self,
         text: str,
-        texts: list[str],
+        texts: List[str],
         limit: int | None = None,
         min_score: float = 0.0,
         metadata: Dict[str, Any] | None = None,
-    ) -> list[tuple[str, float]]:
-        """Find similar texts from a list.
+    ) -> List[Tuple[str, float]]:
+        """Find similar texts to the input text.
 
         Args:
-            text: Query text to find similar matches for
+            text: Input text to find similar texts for
             texts: List of texts to search through
-            limit: Maximum number of results to return (None for all)
+            limit: Maximum number of results to return
             min_score: Minimum similarity score threshold
-            metadata: Optional similarity search metadata
+            metadata: Optional metadata to filter results
 
         Returns:
-            List of tuples containing (similar_text, score) where:
-                - similar_text: The matching text
-                - score: Similarity score between 0 and 1
-
-        Raises:
-            ServiceStateError: If searcher is not initialized
-            ValueError: If text is empty or parameters are invalid
-            TypeError: If inputs are not strings
+            List[Tuple[str, float]]: List of (text, score) tuples
         """
-        ...
+        pass
 
     def validate_query(self, query: str) -> list[str]:
         """Validate a search query.

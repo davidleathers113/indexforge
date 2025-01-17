@@ -1,25 +1,22 @@
-"""Document tracking models for IndexForge.
+"""Tracking models.
 
-This package provides data models for:
-- Document lineage tracking
-- Health monitoring
-- Logging and metrics
+This module provides models for tracking document processing and transformations.
 """
 
-from .health import HealthStatus
-from .lineage import DocumentLineage
-from .logging import LogEntry, LogLevel
-from .processing import ProcessingStatus
-
+from .tracking import (
+    LogEntry,
+    LogLevel,
+    ProcessingStatus,
+    ProcessingStep,
+    Transformation,
+    TransformationType,
+)
 
 __all__ = [
-    # Health models
-    "HealthStatus",
-    # Lineage models
-    "DocumentLineage",
-    # Logging models
     "LogEntry",
     "LogLevel",
-    # Processing models
     "ProcessingStatus",
+    "ProcessingStep",
+    "Transformation",
+    "TransformationType",
 ]

@@ -89,19 +89,19 @@ class ProcessingResult:
         return cls(status="success", content=content)
 
     @classmethod
-    def error(
-        cls, error_message: str, partial_content: Optional[Dict[str, Any]] = None
+    def create_error(
+        cls, error_msg: str, partial_content: Optional[Dict[str, Any]] = None
     ) -> "ProcessingResult":
         """Create an error processing result.
 
         Args:
-            error_message: Description of the error
+            error_msg: Description of the error
             partial_content: Any content that was extracted before the error
 
         Returns:
             ProcessingResult: Error result with message and optional partial content
         """
-        return cls(status="error", content=partial_content or {}, error=error_message)
+        return cls(status="error", content=partial_content or {}, error=error_msg)
 
 
 class BaseProcessor(ABC):

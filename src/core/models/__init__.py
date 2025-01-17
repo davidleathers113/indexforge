@@ -3,12 +3,10 @@
 This module provides data models for documents, chunks, references, and document lineage.
 """
 
-from src.core.tracking.models.lineage import DocumentLineage
-
 from .chunks import Chunk, ChunkMetadata, ProcessedChunk
 from .documents import Document, DocumentMetadata, DocumentStatus, DocumentType, ProcessingStep
+from .lineage import DocumentLineage
 from .references import CitationReference, Reference, ReferenceType, SemanticReference
-
 
 __all__ = [
     # Chunk models
