@@ -17,11 +17,18 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Type, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 from uuid import UUID
 
-from .base import BaseStorage, DataCorruptionError, SerializationStrategy, StorageError
+if TYPE_CHECKING:
+    from pathlib import Path
+
+from src.core.storage.strategies.base import (
+    BaseStorage,
+    DataCorruptionError,
+    SerializationStrategy,
+    StorageError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +36,30 @@ T = TypeVar("T")
 
 
 class JsonSerializationError(StorageError):
-    """Raised when JSON serialization fails."""
+    """Raised when JSON serialization/deserialization fails."""
+
+
+class JsonDeserializationError(JsonSerializationError):
+    """Raised when JSON deserialization fails for a specific field."""
+
+    def __init__(self, field: str, value: Any, reason: str) -> None:
+        """Initialize error.
+
+        Args:
+            field: Name of field that failed to deserialize
+            value: Value that could not be deserialized
+            reason: Reason for failure
+        """
+        super().__init__(f"Failed to deserialize field '{field}' with value '{value}': {reason}")
+        self.field = field
+        self.value = value
+        self.reason = reason
 
 
 class JsonSerializer(SerializationStrategy[T]):
     """JSON serialization implementation."""
 
-    def __init__(self, model_type: Type[T]) -> None:
+    def __init__(self, model_type: type[T]) -> None:
         """Initialize serializer.
 
         Args:
@@ -51,14 +75,20 @@ class JsonSerializer(SerializationStrategy[T]):
 
         Returns:
             JSON-serializable value
+
+        Raises:
+            JsonSerializationError: If value cannot be serialized
         """
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        if isinstance(obj, UUID):
-            return str(obj)
-        if hasattr(obj, "to_dict"):
-            return obj.to_dict()
-        return obj
+        try:
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            if isinstance(obj, UUID):
+                return str(obj)
+            if hasattr(obj, "to_dict"):
+                return obj.to_dict()
+            return obj
+        except Exception as e:
+            raise JsonSerializationError(f"Failed to serialize value '{obj}': {e}") from e
 
     def _deserialize_value(self, value: Any, key: str) -> Any:
         """Deserialize a single value.
@@ -71,7 +101,7 @@ class JsonSerializer(SerializationStrategy[T]):
             Deserialized value
 
         Raises:
-            ValueError: If value cannot be deserialized
+            JsonDeserializationError: If value cannot be deserialized
         """
         if isinstance(value, str):
             # Try parsing as datetime
@@ -81,8 +111,15 @@ class JsonSerializer(SerializationStrategy[T]):
                 # Try parsing as UUID
                 try:
                     return UUID(value)
-                except ValueError:
+                except (ValueError, AttributeError):
+                    # Not a datetime or UUID, return as string
                     return value
+        elif isinstance(value, dict) and hasattr(self.model_type, "from_dict"):
+            # Handle nested objects
+            try:
+                return self.model_type.from_dict(value)
+            except Exception as e:
+                raise JsonDeserializationError(key, value, f"Invalid nested object: {e}")
         return value
 
     def serialize(self, data: T) -> bytes:
@@ -108,7 +145,7 @@ class JsonSerializer(SerializationStrategy[T]):
             return json.dumps(serialized, indent=2).encode()
 
         except Exception as e:
-            logger.error("JSON serialization failed: %s", e)
+            logger.exception("JSON serialization failed")
             raise JsonSerializationError(f"Failed to serialize data: {e}") from e
 
     def deserialize(self, data: bytes) -> T:
@@ -130,18 +167,32 @@ class JsonSerializer(SerializationStrategy[T]):
             if not isinstance(raw_data, dict):
                 raise DataCorruptionError("JSON data must be an object")
 
-            # Convert values
-            processed_data = {k: self._deserialize_value(v, k) for k, v in raw_data.items()}
+            # Convert values with detailed error handling
+            processed_data = {}
+            for key, value in raw_data.items():
+                try:
+                    processed_data[key] = self._deserialize_value(value, key)
+                except JsonDeserializationError:
+                    raise
+                except Exception as e:
+                    raise JsonDeserializationError(key, value, str(e))
 
-            # Create instance
-            if hasattr(self.model_type, "from_dict"):
-                return self.model_type.from_dict(processed_data)
-            return self.model_type(**processed_data)
+            # Create instance with validation
+            try:
+                if hasattr(self.model_type, "from_dict"):
+                    return self.model_type.from_dict(processed_data)
+                return self.model_type(**processed_data)
+            except Exception as e:
+                raise DataCorruptionError(
+                    f"Failed to create {self.model_type.__name__}: {e}"
+                ) from e
 
         except json.JSONDecodeError as e:
             raise DataCorruptionError(f"Invalid JSON data: {e}") from e
+        except (DataCorruptionError, JsonDeserializationError):
+            raise
         except Exception as e:
-            logger.error("JSON deserialization failed: %s", e)
+            logger.exception("JSON deserialization failed")
             raise JsonSerializationError(f"Failed to deserialize data: {e}") from e
 
 
@@ -149,7 +200,7 @@ class JsonStorage(BaseStorage[T]):
     """JSON file storage implementation."""
 
     def __init__(
-        self, storage_path: Path, model_type: Type[T], *, extension: str = ".json"
+        self, storage_path: Path, model_type: type[T], *, extension: str = ".json"
     ) -> None:
         """Initialize JSON storage.
 

@@ -14,8 +14,11 @@ Key Features:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Generic, Iterable, Protocol, TypeVar
-from uuid import UUID
+from typing import TYPE_CHECKING, Generic, Protocol, TypeVar
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from uuid import UUID
 
 from src.core.models.documents import Document
 

@@ -28,14 +28,14 @@ Example:
     ```
 """
 
-import logging
-import threading
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+import logging
 from pathlib import Path
-from typing import Dict, Optional
+import threading
 
 import psutil
+
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class StorageManager:
             storage_path: Path to the storage directory.
         """
         self.storage_path = Path(storage_path)
-        self._metrics_cache: Optional[StorageMetrics] = None
+        self._metrics_cache: StorageMetrics | None = None
         self._cache_lock = threading.Lock()
         self._cache_duration = timedelta(seconds=5)
         self._last_check = datetime.min.replace(tzinfo=UTC)
@@ -146,7 +146,7 @@ class StorageManager:
         metrics = self.get_storage_metrics(use_cache=use_cache)
         return metrics.percent_used > threshold_percent
 
-    def get_directory_size(self, path: Optional[Path] = None) -> int:
+    def get_directory_size(self, path: Path | None = None) -> int:
         """Calculate total size of a directory recursively.
 
         Args:
@@ -176,7 +176,7 @@ class StorageManager:
 
     def cleanup_old_files(
         self, max_age: timedelta, pattern: str = "*.json", dry_run: bool = False
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Remove files older than specified age.
 
         Args:

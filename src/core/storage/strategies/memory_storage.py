@@ -1,165 +1,184 @@
 """Memory storage strategy implementation.
 
-This module provides an in-memory implementation of the storage strategy,
-primarily intended for testing purposes. It maintains data in memory
-using a dictionary and provides atomic operations through locking.
+.. deprecated:: 1.0.0
+    This module is deprecated and will be removed in version 2.0.0.
+    Use `src.core.storage.strategies.memory_storage.storage.MemoryStorage` instead.
 
-Key Features:
-    - Fast in-memory storage
-    - Thread-safe operations
-    - Type-safe data handling
-    - Simulated failures for testing
-    - No persistence between runs
+Migration Guide:
+    1. Import the new implementation:
+       ```python
+       from src.core.storage.strategies.memory_storage.storage import MemoryStorage
+       ```
+    2. Update constructor calls to use Settings object:
+       ```python
+       storage = MemoryStorage(settings=settings)
+       ```
+    3. Replace any direct attribute access with corresponding methods
+
+This module now re-exports the new implementation from the memory_storage package.
+The original implementation has been replaced with a more comprehensive version
+that provides better organization, thread safety, and memory management.
 """
 
 from __future__ import annotations
 
+import functools
 import logging
-import threading
-from copy import deepcopy
-from datetime import UTC, datetime
-from typing import Dict, Generic, Type, TypeVar
+import warnings
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, overload
 
-from pydantic import BaseModel
+from src.core.settings import Settings
+from src.core.storage.strategies.memory_storage.storage import MemoryStorage as NewMemoryStorage
 
-from .base import DataCorruptionError, DataNotFoundError, StorageError, StorageStrategy
+if TYPE_CHECKING:
+    from src.core.models.chunks import Chunk
+    from src.core.models.documents import Document
+    from src.core.models.references import Reference
 
-T = TypeVar("T", bound=BaseModel)
 logger = logging.getLogger(__name__)
 
+T = TypeVar("T", bound="Document")
+C = TypeVar("C", bound="Chunk")
+R = TypeVar("R", bound="Reference")
 
-class MemoryStorage(StorageStrategy[T], Generic[T]):
-    """In-memory implementation of storage strategy."""
 
-    def __init__(self, model_type: Type[T], simulate_failures: bool = False) -> None:
-        """Initialize memory storage.
+def validate_settings(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorator to validate settings before initialization.
+
+    Args:
+        func: Function to wrap
+
+    Returns:
+        Wrapped function with settings validation
+    """
+
+    @functools.wraps(func)
+    def wrapper(self: MemoryStorage[T, C, R], *args: Any, **kwargs: Any) -> Any:
+        if "settings" in kwargs:
+            settings = kwargs["settings"]
+            if not isinstance(settings, Settings):
+                raise TypeError("settings must be an instance of Settings")
+            if not hasattr(settings, "storage"):
+                raise ValueError("settings must have storage configuration")
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
+@functools.lru_cache(maxsize=128)
+def create_settings_from_legacy(
+    max_size_bytes: int | None = None,
+    max_items: int | None = None,
+) -> Settings:
+    """Create settings object from legacy parameters with caching.
+
+    Args:
+        max_size_bytes: Maximum size in bytes
+        max_items: Maximum number of items
+
+    Returns:
+        Settings object configured with provided parameters
+    """
+    return Settings(
+        storage=Settings.StorageSettings(
+            max_size_bytes=max_size_bytes,
+            max_items=max_items,
+        )
+    )
+
+
+class MemoryStorage(NewMemoryStorage[T, C, R]):
+    """Deprecated memory storage implementation.
+
+    This class is maintained for backward compatibility and will be removed
+    in version 2.0.0. Use memory_storage.storage.MemoryStorage instead.
+
+    Warning:
+        This implementation is deprecated. While it maintains compatibility
+        with existing code, new code should use the new implementation directly.
+
+    Migration Example:
+        >>> # Old usage:
+        >>> storage = MemoryStorage(model_type=Document)
+        >>>
+        >>> # New usage:
+        >>> from src.core.storage.strategies.memory_storage.storage import MemoryStorage
+        >>> storage = MemoryStorage(settings=settings)
+
+    Note:
+        This implementation includes performance optimizations:
+        - Settings conversion caching
+        - Parameter validation
+        - Usage tracking for migration metrics
+    """
+
+    # Class-level tracking for migration metrics
+    _legacy_init_count = 0
+    _new_init_count = 0
+
+    @overload
+    def __init__(self, *, settings: Settings) -> None:
+        """Initialize with settings object (new style)."""
+        ...
+
+    @overload
+    def __init__(
+        self,
+        model_type: type[T],
+        *,
+        simulate_failures: bool = False,
+        max_size_bytes: int | None = None,
+        max_items: int | None = None,
+    ) -> None:
+        """Initialize with legacy parameters (deprecated)."""
+        ...
+
+    @validate_settings
+    def __init__(self, model_type: type[T] | None = None, **kwargs: Any) -> None:
+        """Initialize memory storage with backward compatibility.
+
+        Supports both new-style initialization with settings object and
+        legacy initialization with individual parameters.
 
         Args:
-            model_type: Type of model to store
-            simulate_failures: Whether to simulate storage failures for testing
-        """
-        self._model_type = model_type
-        self._simulate_failures = simulate_failures
-        self._data: Dict[str, dict] = {}
-        self._lock = threading.Lock()
-        self._last_modified = datetime.now(UTC)
-        logger.info("Initialized memory storage for %s", model_type.__name__)
-
-    def save(self, key: str, data: T) -> None:
-        """Save data to memory.
-
-        Args:
-            key: Key to store data under
-            data: Data to store
+            model_type: Model type for legacy initialization (deprecated)
+            **kwargs: Settings object or legacy parameters
 
         Raises:
-            StorageError: If storage fails
+            TypeError: If settings is not a Settings instance
+            ValueError: If settings lacks storage configuration
         """
-        if self._simulate_failures and key.startswith("fail"):
-            raise StorageError("Simulated storage failure")
+        self._warn_deprecation()
 
-        try:
-            # Validate data is of correct type
-            if not isinstance(data, self._model_type):
-                raise ValueError(f"Data must be instance of {self._model_type.__name__}")
+        if "settings" in kwargs:
+            # New-style initialization
+            MemoryStorage._new_init_count += 1
+            logger.debug("Using new-style initialization with settings object")
+            super().__init__(settings=kwargs["settings"])
+        else:
+            # Legacy initialization
+            MemoryStorage._legacy_init_count += 1
+            logger.debug("Using legacy initialization with individual parameters")
+            settings = create_settings_from_legacy(
+                max_size_bytes=kwargs.get("max_size_bytes"),
+                max_items=kwargs.get("max_items"),
+            )
+            super().__init__(settings=settings)
 
-            # Store copy of data dict to prevent external modification
-            with self._lock:
-                self._data[key] = deepcopy(data.model_dump())
-                self._last_modified = datetime.now(UTC)
-                logger.debug("Saved data for key: %s", key)
-        except Exception as e:
-            logger.error("Failed to save data for key %s: %s", key, e)
-            raise StorageError(f"Failed to save data: {e}") from e
+        # Log initialization metrics
+        logger.info(
+            "Memory storage initialization stats - Legacy: %d, New: %d",
+            self._legacy_init_count,
+            self._new_init_count,
+        )
 
-    def load(self, key: str) -> T:
-        """Load data from memory.
-
-        Args:
-            key: Key to load data for
-
-        Returns:
-            Loaded data
-
-        Raises:
-            DataNotFoundError: If key not found
-            DataCorruptionError: If data validation fails
-            StorageError: If loading fails
-        """
-        if self._simulate_failures and key.startswith("fail"):
-            raise StorageError("Simulated storage failure")
-
-        try:
-            with self._lock:
-                data_dict = self._data.get(key)
-                if data_dict is None:
-                    raise DataNotFoundError(f"No data found for key: {key}")
-
-                # Create copy of data to prevent external modification
-                data_dict = deepcopy(data_dict)
-
-            try:
-                # Attempt to create model instance
-                return self._model_type.model_validate(data_dict)
-            except Exception as e:
-                raise DataCorruptionError(f"Failed to validate data: {e}")
-
-        except (DataNotFoundError, DataCorruptionError):
-            raise
-        except Exception as e:
-            logger.error("Failed to load data for key %s: %s", key, e)
-            raise StorageError(f"Failed to load data: {e}") from e
-
-    def delete(self, key: str) -> None:
-        """Delete data from memory.
-
-        Args:
-            key: Key to delete data for
-
-        Raises:
-            DataNotFoundError: If key not found
-            StorageError: If deletion fails
-        """
-        if self._simulate_failures and key.startswith("fail"):
-            raise StorageError("Simulated storage failure")
-
-        try:
-            with self._lock:
-                if key not in self._data:
-                    raise DataNotFoundError(f"No data found for key: {key}")
-                del self._data[key]
-                self._last_modified = datetime.now(UTC)
-                logger.debug("Deleted data for key: %s", key)
-        except DataNotFoundError:
-            raise
-        except Exception as e:
-            logger.error("Failed to delete data for key %s: %s", key, e)
-            raise StorageError(f"Failed to delete data: {e}") from e
-
-    def exists(self, key: str) -> bool:
-        """Check if key exists in memory.
-
-        Args:
-            key: Key to check
-
-        Returns:
-            True if key exists, False otherwise
-        """
-        with self._lock:
-            return key in self._data
-
-    def clear(self) -> None:
-        """Clear all data from memory."""
-        with self._lock:
-            self._data.clear()
-            self._last_modified = datetime.now(UTC)
-            logger.debug("Cleared all data")
-
-    def get_last_modified(self) -> datetime:
-        """Get last modification time.
-
-        Returns:
-            Timestamp of last modification
-        """
-        with self._lock:
-            return self._last_modified
+    def _warn_deprecation(self) -> None:
+        """Emit deprecation warning with migration instructions."""
+        warnings.warn(
+            "\nThis MemoryStorage implementation is deprecated and will be removed in "
+            "version 2.0.0.\n"
+            "Please migrate to src.core.storage.strategies.memory_storage.storage.MemoryStorage.\n"
+            "See the class docstring for migration instructions.",
+            DeprecationWarning,
+            stacklevel=2,
+        )

@@ -36,16 +36,16 @@ Example:
     ```
 """
 
-import json
-import logging
-import threading
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
+import json
+import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
+import threading
 
 from src.core.models.lineage import DocumentLineage
 from src.core.processing.steps.models.step import ProcessingStatus
+
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class LineageStorageBase(ABC):
     """Abstract base class defining the interface for lineage storage."""
 
     @abstractmethod
-    def get_lineage(self, doc_id: str) -> Optional[DocumentLineage]:
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
         """Get document lineage by ID."""
         pass
 
@@ -76,7 +76,7 @@ class LineageStorageBase(ABC):
         pass
 
     @abstractmethod
-    def get_all_lineages(self) -> Dict[str, DocumentLineage]:
+    def get_all_lineages(self) -> dict[str, DocumentLineage]:
         """Get all document lineages."""
         pass
 
@@ -87,8 +87,8 @@ class LineageStorageBase(ABC):
 
     @abstractmethod
     def get_lineages_by_time(
-        self, start_time: Optional[datetime] = None, end_time: Optional[datetime] = None
-    ) -> Dict[str, DocumentLineage]:
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> dict[str, DocumentLineage]:
         """Get document lineages within a time range."""
         pass
 
@@ -96,14 +96,14 @@ class LineageStorageBase(ABC):
 class LineageStorage(LineageStorageBase):
     """Implementation of document lineage storage."""
 
-    def __init__(self, storage_dir: Union[str, Path]):
+    def __init__(self, storage_dir: str | Path):
         """Initialize lineage storage.
 
         Args:
             storage_dir: Path to storage directory.
         """
         self.storage_dir = Path(storage_dir)
-        self._data: Dict[str, DocumentLineage] = {}
+        self._data: dict[str, DocumentLineage] = {}
         self._lock = threading.Lock()
         self._last_save = datetime.min.replace(tzinfo=UTC)
         self._modified = False
@@ -173,7 +173,7 @@ class LineageStorage(LineageStorageBase):
                 temp_file.unlink()
             raise StorageAccessError(f"Failed to save lineage data: {e}") from e
 
-    def get_lineage(self, doc_id: str) -> Optional[DocumentLineage]:
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
         """Get document lineage by ID.
 
         Args:
@@ -196,7 +196,7 @@ class LineageStorage(LineageStorageBase):
             self._modified = True
         self._save_data()
 
-    def get_all_lineages(self) -> Dict[str, DocumentLineage]:
+    def get_all_lineages(self) -> dict[str, DocumentLineage]:
         """Get all document lineages.
 
         Returns:
@@ -218,8 +218,8 @@ class LineageStorage(LineageStorageBase):
         self._save_data()
 
     def get_lineages_by_time(
-        self, start_time: Optional[datetime] = None, end_time: Optional[datetime] = None
-    ) -> Dict[str, DocumentLineage]:
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> dict[str, DocumentLineage]:
         """Get document lineages within a time range.
 
         Args:
@@ -244,7 +244,7 @@ class LineageStorage(LineageStorageBase):
 
             return filtered
 
-    def get_lineages_by_status(self, status: ProcessingStatus) -> Dict[str, DocumentLineage]:
+    def get_lineages_by_status(self, status: ProcessingStatus) -> dict[str, DocumentLineage]:
         """Get document lineages by processing status.
 
         Args:

@@ -13,16 +13,19 @@ Key Features:
 
 from __future__ import annotations
 
-import logging
-import threading
 from collections import deque
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
-from typing import Deque
+import logging
+import threading
+from typing import TYPE_CHECKING
 
 import psutil
 
 from .models import OperationMetrics, PerformanceMetrics, StorageMetrics
+
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +48,7 @@ class MetricsCollector:
         """
         self.storage_path = storage_path
         self.window_seconds = window_seconds
-        self._operation_metrics: Deque[OperationMetrics] = deque(maxlen=max_history)
+        self._operation_metrics: deque[OperationMetrics] = deque(maxlen=max_history)
         self._lock = threading.Lock()
 
     def record_operation(
@@ -92,8 +95,8 @@ class MetricsCollector:
                 free_space_bytes=usage.free,
                 total_documents=total_docs,
             )
-        except Exception as e:
-            logger.error("Failed to collect storage metrics: %s", e)
+        except Exception:
+            logger.exception("Failed to collect storage metrics")
             raise
 
     def get_performance_metrics(self) -> PerformanceMetrics:

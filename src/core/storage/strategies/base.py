@@ -14,12 +14,13 @@ Key Features:
 
 from __future__ import annotations
 
-import logging
 from abc import ABC, abstractmethod
+import logging
 from pathlib import Path
 from typing import Generic, Protocol, TypeVar
 
 from src.core.models.documents import Document
+
 
 logger = logging.getLogger(__name__)
 

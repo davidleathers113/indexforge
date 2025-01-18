@@ -14,9 +14,12 @@ Key Features:
 from __future__ import annotations
 
 import logging
-from datetime import datetime
-from pathlib import Path
-from uuid import UUID
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from pathlib import Path
+    from uuid import UUID
 
 from src.core.models.lineage import DocumentLineage
 from src.core.storage.strategies.base import DataNotFoundError, StorageError
@@ -43,8 +46,8 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
         """Ensure storage is initialized."""
         try:
             self._storage._ensure_storage_path()
-        except StorageError as e:
-            logger.error("Failed to initialize lineage storage: %s", e)
+        except StorageError:
+            logger.exception("Failed to initialize lineage storage")
             raise
 
     def get(self, doc_id: UUID) -> DocumentLineage:
@@ -63,8 +66,8 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
             return self._storage.load(str(doc_id))
         except DataNotFoundError as e:
             raise DocumentNotFoundError(f"Document lineage not found: {doc_id}") from e
-        except StorageError as e:
-            logger.error("Failed to load lineage for document %s: %s", doc_id, e)
+        except StorageError:
+            logger.exception("Failed to load lineage for document %s", doc_id)
             raise
 
     def create(self, lineage: DocumentLineage) -> None:
@@ -81,8 +84,8 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
 
         try:
             self._storage.save(str(lineage.doc_id), lineage)
-        except StorageError as e:
-            logger.error("Failed to create lineage for document %s: %s", lineage.doc_id, e)
+        except StorageError:
+            logger.exception("Failed to create lineage for document %s", lineage.doc_id)
             raise
 
     def update(self, lineage: DocumentLineage) -> None:
@@ -99,8 +102,8 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
 
         try:
             self._storage.save(str(lineage.doc_id), lineage)
-        except StorageError as e:
-            logger.error("Failed to update lineage for document %s: %s", lineage.doc_id, e)
+        except StorageError:
+            logger.exception("Failed to update lineage for document %s", lineage.doc_id)
             raise
 
     def delete(self, doc_id: UUID) -> None:
@@ -116,8 +119,8 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
             self._storage.delete(str(doc_id))
         except DataNotFoundError as e:
             raise DocumentNotFoundError(f"Document lineage not found: {doc_id}") from e
-        except StorageError as e:
-            logger.error("Failed to delete lineage for document %s: %s", doc_id, e)
+        except StorageError:
+            logger.exception("Failed to delete lineage for document %s", doc_id)
             raise
 
     def exists(self, doc_id: UUID) -> bool:
@@ -141,7 +144,7 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
             files = list(self._storage.storage_path.glob("*.json"))
             return {UUID(f.stem) for f in files if f.stem != "index" and UUID.is_valid_uuid(f.stem)}
         except Exception as e:
-            logger.error("Failed to list lineage IDs: %s", e)
+            logger.exception("Failed to list lineage IDs")
             raise StorageError(f"Failed to list lineage: {e}") from e
 
     def get_by_origin(self, origin_id: UUID) -> list[DocumentLineage]:
@@ -162,7 +165,7 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
                     result.append(lineage)
             return result
         except Exception as e:
-            logger.error("Failed to get lineage by origin %s: %s", origin_id, e)
+            logger.exception("Failed to get lineage by origin %s", origin_id)
             raise StorageError(f"Failed to query lineage: {e}") from e
 
     def get_by_time_range(
@@ -189,5 +192,5 @@ class LineageRepository(BaseRepository[DocumentLineage], Repository[DocumentLine
                 result.append(lineage)
             return result
         except Exception as e:
-            logger.error("Failed to get lineage by time range: %s", e)
+            logger.exception("Failed to get lineage by time range")
             raise StorageError(f"Failed to query lineage: {e}") from e

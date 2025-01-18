@@ -14,8 +14,11 @@ Key Features:
 from __future__ import annotations
 
 import logging
-from pathlib import Path
-from uuid import UUID
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from uuid import UUID
 
 from src.core.models.documents import Document
 from src.core.storage.strategies.base import DataNotFoundError, StorageError
@@ -42,8 +45,8 @@ class DocumentRepository(BaseRepository[Document], Repository[Document]):
         """Ensure storage is initialized."""
         try:
             self._storage._ensure_storage_path()
-        except StorageError as e:
-            logger.error("Failed to initialize document storage: %s", e)
+        except StorageError:
+            logger.exception("Failed to initialize document storage")
             raise
 
     def get(self, doc_id: UUID) -> Document:
@@ -62,8 +65,8 @@ class DocumentRepository(BaseRepository[Document], Repository[Document]):
             return self._storage.load(str(doc_id))
         except DataNotFoundError as e:
             raise DocumentNotFoundError(f"Document not found: {doc_id}") from e
-        except StorageError as e:
-            logger.error("Failed to load document %s: %s", doc_id, e)
+        except StorageError:
+            logger.exception("Failed to load document %s", doc_id)
             raise
 
     def create(self, document: Document) -> None:
@@ -80,8 +83,8 @@ class DocumentRepository(BaseRepository[Document], Repository[Document]):
 
         try:
             self._storage.save(str(document.id), document)
-        except StorageError as e:
-            logger.error("Failed to create document %s: %s", document.id, e)
+        except StorageError:
+            logger.exception("Failed to create document %s", document.id)
             raise
 
     def update(self, document: Document) -> None:
@@ -98,8 +101,8 @@ class DocumentRepository(BaseRepository[Document], Repository[Document]):
 
         try:
             self._storage.save(str(document.id), document)
-        except StorageError as e:
-            logger.error("Failed to update document %s: %s", document.id, e)
+        except StorageError:
+            logger.exception("Failed to update document %s", document.id)
             raise
 
     def delete(self, doc_id: UUID) -> None:
@@ -115,8 +118,8 @@ class DocumentRepository(BaseRepository[Document], Repository[Document]):
             self._storage.delete(str(doc_id))
         except DataNotFoundError as e:
             raise DocumentNotFoundError(f"Document not found: {doc_id}") from e
-        except StorageError as e:
-            logger.error("Failed to delete document %s: %s", doc_id, e)
+        except StorageError:
+            logger.exception("Failed to delete document %s", doc_id)
             raise
 
     def exists(self, doc_id: UUID) -> bool:
@@ -136,10 +139,9 @@ class DocumentRepository(BaseRepository[Document], Repository[Document]):
         Returns:
             Set of document IDs
         """
-        # List all files in storage directory
         try:
             files = list(self._storage.storage_path.glob("*.json"))
             return {UUID(f.stem) for f in files if f.stem != "index" and UUID.is_valid_uuid(f.stem)}
         except Exception as e:
-            logger.error("Failed to list document IDs: %s", e)
+            logger.exception("Failed to list document IDs")
             raise StorageError(f"Failed to list documents: {e}") from e

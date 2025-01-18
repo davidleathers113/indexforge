@@ -13,18 +13,20 @@ Example:
     ```
 """
 
-import functools
-import warnings
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, TypeVar
+import functools
+from typing import Any, TypeVar
+import warnings
 
-from src.connectors.direct_documentation_indexing.source_tracking import storage as old_storage
 from src.connectors.direct_documentation_indexing.source_tracking import (
+    storage as old_storage,
     storage_manager as old_storage_manager,
 )
 from src.core.storage.repositories.documents import DocumentRepository
 from src.core.storage.repositories.lineage import LineageRepository
 from src.core.storage.strategies.json_storage import JsonStorage
+
 
 F = TypeVar("F", bound=Callable[..., Any])
 
