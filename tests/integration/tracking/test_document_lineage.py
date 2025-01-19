@@ -2,11 +2,9 @@
 
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
-from src.core.interfaces.storage import LineageStorage
 from src.core.tracking.lineage.manager import DocumentLineageManager
 from src.core.tracking.lineage.operations import add_derivation
 from src.core.tracking.models.transformation import TransformationType
@@ -28,7 +26,7 @@ def manager(storage_dir) -> DocumentLineageManager:
 
 
 @pytest.fixture
-def sample_metadata() -> Dict:
+def sample_metadata() -> dict:
     """Create sample document metadata."""
     return {
         "type": "pdf",
@@ -40,7 +38,7 @@ def sample_metadata() -> Dict:
 
 
 @pytest.fixture
-def transformation_chain(manager: DocumentLineageManager, sample_metadata: Dict) -> List[str]:
+def transformation_chain(manager: DocumentLineageManager, sample_metadata: dict) -> list[str]:
     """Create a chain of documents with various transformations."""
     doc_ids = []
     transform_types = [
@@ -91,7 +89,7 @@ def transformation_chain(manager: DocumentLineageManager, sample_metadata: Dict)
 
 def test_transformation_history_tracking(
     manager: DocumentLineageManager,
-    transformation_chain: List[str],
+    transformation_chain: list[str],
 ):
     """Test tracking and retrieval of transformation history."""
     # Get history for last document
@@ -112,7 +110,7 @@ def test_transformation_history_tracking(
 
 def test_filtered_transformation_history(
     manager: DocumentLineageManager,
-    transformation_chain: List[str],
+    transformation_chain: list[str],
 ):
     """Test filtering of transformation history."""
     doc_id = transformation_chain[-1]
@@ -139,7 +137,7 @@ def test_filtered_transformation_history(
 
 def test_transformation_persistence(
     manager: DocumentLineageManager,
-    transformation_chain: List[str],
+    transformation_chain: list[str],
     storage_dir: Path,
 ):
     """Test persistence of transformation history across manager instances."""
@@ -152,7 +150,7 @@ def test_transformation_persistence(
 
     # Compare histories
     assert len(original_history) == len(new_history)
-    for orig, new in zip(original_history, new_history):
+    for orig, new in zip(original_history, new_history, strict=False):
         assert orig.type == new.type
         assert orig.description == new.description
         assert orig.parameters == new.parameters
@@ -161,7 +159,7 @@ def test_transformation_persistence(
 
 def test_complex_transformation_graph(
     manager: DocumentLineageManager,
-    sample_metadata: Dict,
+    sample_metadata: dict,
 ):
     """Test handling of complex transformation graphs."""
     # Create documents with multiple transformation paths
@@ -263,7 +261,7 @@ def test_complex_transformation_graph(
 
 def test_concurrent_transformation_tracking(
     manager: DocumentLineageManager,
-    sample_metadata: Dict,
+    sample_metadata: dict,
 ):
     """Test handling of concurrent transformation operations."""
     doc_id = "concurrent_doc"

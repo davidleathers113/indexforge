@@ -2,13 +2,14 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+import pytest
 
 from src.core.processors.base import BaseProcessor, ProcessingResult
+
 
 # Configure logging for the test module
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class TestProcessor(BaseProcessor):
     """Test implementation of BaseProcessor."""
 
     def __init__(
-        self, config: Optional[Dict[str, Any]] = None, logger: Optional[logging.Logger] = None
+        self, config: dict[str, Any] | None = None, logger: logging.Logger | None = None
     ):
         """Initialize the test processor.
 
@@ -60,7 +61,7 @@ class TestProcessor(BaseProcessor):
                 file_path.suffix,
             )
             return result
-        except Exception as e:
+        except Exception:
             self.logger.exception("Error checking if file can be processed: %s", file_path)
             return False
 
@@ -96,7 +97,7 @@ class TestProcessor(BaseProcessor):
             self.logger.info("Successfully processed file: %s", file_path)
             return result
 
-        except OSError as e:
+        except OSError:
             self.logger.exception("OSError processing file: %s", file_path)
             raise
         except Exception as e:

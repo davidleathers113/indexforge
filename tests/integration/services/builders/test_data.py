@@ -4,7 +4,6 @@ This module provides builder classes for constructing test data objects
 in a flexible and reusable way.
 """
 
-from typing import Optional
 from uuid import UUID
 
 from src.core.models.chunks import Chunk, ChunkMetadata
@@ -57,7 +56,7 @@ class ChunkBuilder:
 
     def __init__(self):
         """Initialize with default values."""
-        self.document_id: Optional[UUID] = None
+        self.document_id: UUID | None = None
         self.start_index = 0
         self.end_index = 10
         self.content = "Test chunk content"
@@ -96,8 +95,8 @@ class ReferenceBuilder:
 
     def __init__(self):
         """Initialize with default values."""
-        self.source_id: Optional[UUID] = None
-        self.target_id: Optional[UUID] = None
+        self.source_id: UUID | None = None
+        self.target_id: UUID | None = None
         self.reference_type = "cites"
         self.confidence = 0.95
 

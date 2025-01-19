@@ -1,0 +1,251 @@
+{# Template for testing multiline function arguments indentation #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestMultilineFunctionArgsIndentation:
+    """Test indentation of multiline function arguments."""
+
+    def test_multiline_function_call_indentation(self, env):
+        """Test that multiline function calls maintain proper indentation."""
+        template_str = """\
+def test_function():
+    result = complex_function(
+        first_arg={{ first }},
+        second_arg={{ second }},
+        third_arg=dict(
+            nested_key_1={{ nested.key1 }},
+            nested_key_2={{ nested.key2 }},
+            nested_list=[
+                {{ nested.items[0] }},
+                {{ nested.items[1] }},
+                {{ nested.items[2] }},
+            ]
+        ),
+        fourth_arg=lambda x: (
+            x.transform()
+            if x.is_valid()
+            else x.default()
+        )
+    )
+    return result"""
+
+        context = {
+            "first": 1,
+            "second": "test",
+            "nested": {
+                "key1": "value1",
+                "key2": "value2",
+                "items": [1, 2, 3],
+            },
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    result = complex_function(
+        first_arg=1,
+        second_arg="test",
+        third_arg=dict(
+            nested_key_1="value1",
+            nested_key_2="value2",
+            nested_list=[
+                1,
+                2,
+                3,
+            ]
+        ),
+        fourth_arg=lambda x: (
+            x.transform()
+            if x.is_valid()
+            else x.default()
+        )
+    )
+    return result"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_multiline_method_chain_indentation(self, env):
+        """Test that multiline method chains maintain proper indentation."""
+        template_str = """\
+def test_function():
+    result = (
+        initial_value
+        .transform(
+            first_param={{ params.first }},
+            second_param={{ params.second }}
+        )
+        .filter(
+            condition=lambda x: (
+                x > {{ threshold }}
+                and x < {{ limit }}
+            )
+        )
+        .map(
+            lambda x: [
+                x * {{ factors[0] }},
+                x * {{ factors[1] }},
+                x * {{ factors[2] }}
+            ]
+        )
+        .result()
+    )
+    return result"""
+
+        context = {
+            "params": {
+                "first": 1,
+                "second": 2,
+            },
+            "threshold": 10,
+            "limit": 100,
+            "factors": [2, 3, 4],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    result = (
+        initial_value
+        .transform(
+            first_param=1,
+            second_param=2
+        )
+        .filter(
+            condition=lambda x: (
+                x > 10
+                and x < 100
+            )
+        )
+        .map(
+            lambda x: [
+                x * 2,
+                x * 3,
+                x * 4
+            ]
+        )
+        .result()
+    )
+    return result"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_multiline_function_definition_indentation(self, env):
+        """Test that multiline function definitions maintain proper indentation."""
+        template_str = """\
+def test_function(
+    first_param: {{ types.first }},
+    second_param: {{ types.second }},
+    *,
+    optional_param: {{ types.optional }} = {{ default_value }},
+    **kwargs: {{ types.kwargs }}
+) -> {{ return_type }}:
+    \"\"\"
+    Test function with multiline parameters.
+
+    Args:
+        first_param: {{ param_docs.first }}
+        second_param: {{ param_docs.second }}
+        optional_param: {{ param_docs.optional }}
+        **kwargs: {{ param_docs.kwargs }}
+
+    Returns:
+        {{ param_docs.returns }}
+    \"\"\"
+    result = process_params(
+        first_param,
+        second_param,
+        optional=optional_param,
+        **kwargs
+    )
+    return result"""
+
+        context = {
+            "types": {
+                "first": "int",
+                "second": "str",
+                "optional": "bool",
+                "kwargs": "Any",
+            },
+            "default_value": "False",
+            "return_type": "Dict[str, Any]",
+            "param_docs": {
+                "first": "The first parameter",
+                "second": "The second parameter",
+                "optional": "An optional flag",
+                "kwargs": "Additional keyword arguments",
+                "returns": "A dictionary of processed parameters",
+            },
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function(
+    first_param: int,
+    second_param: str,
+    *,
+    optional_param: bool = False,
+    **kwargs: Any
+) -> Dict[str, Any]:
+    """
+    Test function with multiline parameters.
+
+    Args:
+        first_param: The first parameter
+        second_param: The second parameter
+        optional_param: An optional flag
+        **kwargs: Additional keyword arguments
+
+    Returns:
+        A dictionary of processed parameters
+    """
+    result = process_params(
+        first_param,
+        second_param,
+        optional=optional_param,
+        **kwargs
+    )
+    return result"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

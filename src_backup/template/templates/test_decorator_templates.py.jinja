@@ -1,0 +1,230 @@
+{# Template for testing decorator templates #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestDecoratorTemplates:
+    """Test rendering of decorator templates."""
+
+    def test_simple_decorator_template(self, env):
+        """Test that simple decorator templates maintain proper formatting."""
+        template_str = """\
+@{{ decorator_name }}
+def test_function():
+    \"\"\"{{ docstring }}\"\"\"
+    result = process_data()
+    assert result == {{ expected_result }}"""
+
+        context = {
+            "decorator_name": "pytest.mark.integration",
+            "docstring": "Test integration functionality",
+            "expected_result": "success",
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+@pytest.mark.integration
+def test_function():
+    """Test integration functionality"""
+    result = process_data()
+    assert result == "success\""""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+
+    def test_decorator_with_arguments_template(self, env):
+        """Test that decorator templates with arguments maintain proper formatting."""
+        template_str = """\
+@{{ decorator_name }}(
+    {%- for key, value in decorator_args.items() %}
+    {{ key }}={{ value }},
+    {%- endfor %}
+)
+def test_function(
+    {%- for arg in function_args %}
+    {{ arg }},
+    {%- endfor %}
+):
+    \"\"\"{{ docstring }}\"\"\"
+    {%- for setup_line in setup %}
+    {{ setup_line }}
+    {%- endfor %}
+
+    result = process_data(
+        {%- for key, value in process_args.items() %}
+        {{ key }}={{ value }},
+        {%- endfor %}
+    )
+
+    {%- for verify_line in verification %}
+    {{ verify_line }}
+    {%- endfor %}"""
+
+        context = {
+            "decorator_name": "pytest.mark.parametrize",
+            "decorator_args": {
+                "argnames": "'input_value,expected_output'",
+                "argvalues": "[('value1', 1), ('value2', 2)]",
+            },
+            "function_args": [
+                "input_value",
+                "expected_output",
+                "mocker",
+            ],
+            "docstring": "Test parameterized functionality",
+            "setup": [
+                "mock = mocker.Mock()",
+                "mock.process.return_value = expected_output",
+            ],
+            "process_args": {
+                "value": "input_value",
+                "processor": "mock",
+            },
+            "verification": [
+                "assert result == expected_output",
+                "mock.process.assert_called_once_with(input_value)",
+            ],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+@pytest.mark.parametrize(
+    argnames='input_value,expected_output',
+    argvalues=[('value1', 1), ('value2', 2)],
+)
+def test_function(
+    input_value,
+    expected_output,
+    mocker,
+):
+    """Test parameterized functionality"""
+    mock = mocker.Mock()
+    mock.process.return_value = expected_output
+
+    result = process_data(
+        value=input_value,
+        processor=mock,
+    )
+
+    assert result == expected_output
+    mock.process.assert_called_once_with(input_value)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+
+    def test_multiple_decorators_template(self, env):
+        """Test that templates with multiple decorators maintain proper formatting."""
+        template_str = """\
+{%- for decorator in decorators %}
+@{{ decorator.name }}
+{%- if decorator.args %}(
+    {%- for key, value in decorator.args.items() %}
+    {{ key }}={{ value }},
+    {%- endfor %}
+)
+{%- endif %}
+{%- endfor %}
+def test_function():
+    \"\"\"{{ docstring }}\"\"\"
+    {%- for setup_line in setup %}
+    {{ setup_line }}
+    {%- endfor %}
+
+    with pytest.raises({{ expected_exception }}):
+        result = process_data()
+
+    {%- for verify_line in verification %}
+    {{ verify_line }}
+    {%- endfor %}"""
+
+        context = {
+            "decorators": [
+                {
+                    "name": "pytest.mark.integration",
+                    "args": None,
+                },
+                {
+                    "name": "pytest.mark.timeout",
+                    "args": {"seconds": 30},
+                },
+                {
+                    "name": "pytest.mark.xfail",
+                    "args": {
+                        "reason": "'Feature not implemented yet'",
+                        "strict": True,
+                    },
+                },
+            ],
+            "docstring": "Test multiple decorator functionality",
+            "setup": [
+                "mock = mocker.Mock()",
+                "mock.process.side_effect = ValueError('Invalid input')",
+            ],
+            "expected_exception": "ValueError",
+            "verification": [
+                "mock.process.assert_called_once()",
+                "mock.cleanup.assert_not_called()",
+            ],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+@pytest.mark.integration
+@pytest.mark.timeout(
+    seconds=30,
+)
+@pytest.mark.xfail(
+    reason='Feature not implemented yet',
+    strict=True,
+)
+def test_function():
+    """Test multiple decorator functionality"""
+    mock = mocker.Mock()
+    mock.process.side_effect = ValueError('Invalid input')
+
+    with pytest.raises(ValueError):
+        result = process_data()
+
+    mock.process.assert_called_once()
+    mock.cleanup.assert_not_called()"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+{%- endblock %}

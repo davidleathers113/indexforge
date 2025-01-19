@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/codebase-restructure]
   pull_request:
-    branches: [main]
+    branches: [main, feature/codebase-restructure]
 
 jobs:
   test:
@@ -102,13 +102,23 @@ jobs:
             --cov-append \
             -v \
             --durations=10 \
-            --durations-min=1.0
+            --durations-min=1.0 \
+            --benchmark-only \
+            --benchmark-autosave
         env:
           REDIS_URL: redis://localhost:6379/0
           WEAVIATE_URL: http://localhost:8080
           REDIS_POOL_SIZE: 10
           REDIS_MAX_CONNECTIONS: 50
           WEAVIATE_BATCH_SIZE: 100
+          MIGRATION_PHASE: "true"
+
+      - name: Store benchmark results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: .benchmarks/
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

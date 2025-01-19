@@ -19,6 +19,7 @@ from .strategies import (
     TrendAnalysis,
 )
 
+
 __all__ = [
     "AnalysisConfig",
     "AnalysisConfigFactory",
@@ -28,9 +29,9 @@ __all__ = [
     "ChangePointAnalysis",
     "CorrelationAnalysis",
     "MetricsRepository",
-    "PerformanceAnalyzer",
     "PerformanceAnalysisBuilder",
     "PerformanceAnalysisOrchestrator",
+    "PerformanceAnalyzer",
     "SeasonalityAnalysis",
     "TrendAnalysis",
 ]

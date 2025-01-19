@@ -1,12 +1,13 @@
-import asyncio
+from collections.abc import Awaitable, Callable
 import json
+from pathlib import Path
 import statistics
 import time
-from pathlib import Path
-from typing import Any, Awaitable, Callable, Dict, List, TypeVar
+from typing import Any, TypeVar
 
 import numpy as np
 import psutil
+
 
 T = TypeVar("T")
 
@@ -15,15 +16,15 @@ class PerformanceMetrics:
     def __init__(self, operation_name: str, metrics_path: Path):
         self.operation_name = operation_name
         self.metrics_path = metrics_path
-        self.durations_ms: List[float] = []
-        self.memory_samples_mb: List[float] = []
-        self.cpu_samples: List[float] = []
-        self.network_io_samples: List[Dict[str, int]] = []
-        self.disk_io_samples: List[Dict[str, int]] = []
+        self.durations_ms: list[float] = []
+        self.memory_samples_mb: list[float] = []
+        self.cpu_samples: list[float] = []
+        self.network_io_samples: list[dict[str, int]] = []
+        self.disk_io_samples: list[dict[str, int]] = []
         self._start_time: float = 0
         self._start_memory: float = 0
-        self._start_network_io: Dict[str, int] = {}
-        self._start_disk_io: Dict[str, int] = {}
+        self._start_network_io: dict[str, int] = {}
+        self._start_disk_io: dict[str, int] = {}
         self._process = psutil.Process()
 
     def start_operation(self) -> None:
@@ -69,7 +70,7 @@ class PerformanceMetrics:
             }
         )
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Calculate comprehensive performance statistics."""
         if not self.durations_ms:
             return {}

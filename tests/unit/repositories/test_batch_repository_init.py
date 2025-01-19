@@ -1,28 +1,34 @@
-"""Test initialization and configuration of BatchRepository."""
+"""Test batch repository initialization.
 
-from unittest.mock import Mock
+This module contains tests for initializing batch repositories with various configurations.
+"""
+
+from unittest.mock import Mock, patch
 
 import pytest
+import weaviate
 
-from src.api.repositories.weaviate.exceptions import RepositoryConfigError
-from src.api.repositories.weaviate.repository import BatchRepository
+from src.api.repositories.weaviate.batch import BatchRepository
+from src.api.repositories.weaviate.exceptions import BatchConfigurationError
 
-
-# Test data constants
+# Test configuration
 TEST_CONFIG = {
     "url": "http://localhost:8080",
-    "api_key": "test-api-key",
-    "timeout": 300,
+    "auth_credentials": weaviate.auth.AuthApiKey(api_key="test-api-key"),
+    "collection_name": "test_collection",
     "batch_size": 100,
+    "dynamic": True,
+    "creation_time_ms": 100,
 }
 
 
 @pytest.fixture
 def mock_client():
     """Setup mock Weaviate client."""
-    client = Mock()
-    client.collections.create.return_value = Mock()
-    return client
+    with patch("weaviate.Client") as mock_client:
+        client = mock_client.return_value
+        client.collections.get.return_value = Mock()
+        yield client
 
 
 @pytest.fixture
@@ -41,12 +47,18 @@ def test_repository_initialization_with_valid_config(mock_client):
     When: Initializing the BatchRepository
     Then: Repository should be properly initialized with the given configuration
     """
-    repo = BatchRepository(client=mock_client, **TEST_CONFIG)
+    repo = BatchRepository(
+        client=mock_client,
+        collection_name=TEST_CONFIG["collection_name"],
+        batch_size=TEST_CONFIG["batch_size"],
+        dynamic=TEST_CONFIG["dynamic"],
+        creation_time_ms=TEST_CONFIG["creation_time_ms"],
+    )
 
-    assert repo.url == TEST_CONFIG["url"]
-    assert repo.api_key == TEST_CONFIG["api_key"]
-    assert repo.timeout == TEST_CONFIG["timeout"]
-    assert repo.batch_size == TEST_CONFIG["batch_size"]
+    assert repo._collection_name == TEST_CONFIG["collection_name"]
+    assert repo.batch_config.batch_size == TEST_CONFIG["batch_size"]
+    assert repo.batch_config.dynamic is TEST_CONFIG["dynamic"]
+    assert repo.batch_config.creation_time == TEST_CONFIG["creation_time_ms"]
 
 
 def test_repository_initialization_with_defaults(mock_client):
@@ -57,28 +69,12 @@ def test_repository_initialization_with_defaults(mock_client):
     When: Initializing the BatchRepository
     Then: Repository should use default values for optional parameters
     """
-    minimal_config = {"url": TEST_CONFIG["url"]}
-    repo = BatchRepository(client=mock_client, **minimal_config)
+    repo = BatchRepository(client=mock_client, collection_name=TEST_CONFIG["collection_name"])
 
-    assert repo.url == minimal_config["url"]
-    assert repo.api_key is None
-    assert repo.timeout > 0  # Should have a default timeout
-    assert repo.batch_size > 0  # Should have a default batch size
-
-
-def test_repository_initialization_validates_url(mock_client):
-    """
-    Test URL validation during initialization.
-
-    Given: Invalid URL configurations
-    When: Initializing the BatchRepository
-    Then: Appropriate validation errors should be raised
-    """
-    invalid_configs = [{"url": ""}, {"url": "not-a-url"}, {"url": "ftp://invalid-scheme.com"}]
-
-    for config in invalid_configs:
-        with pytest.raises(RepositoryConfigError, match="Invalid URL"):
-            BatchRepository(client=mock_client, **config)
+    assert repo._collection_name == TEST_CONFIG["collection_name"]
+    assert repo.batch_config.batch_size > 0  # Should have a default batch size
+    assert repo.batch_config.dynamic is True  # Should default to True
+    assert repo.batch_config.creation_time > 0  # Should have a default creation time
 
 
 def test_repository_initialization_validates_batch_size(mock_client):
@@ -89,31 +85,31 @@ def test_repository_initialization_validates_batch_size(mock_client):
     When: Initializing the BatchRepository
     Then: Appropriate validation errors should be raised
     """
-    invalid_configs = [
-        {**TEST_CONFIG, "batch_size": 0},
-        {**TEST_CONFIG, "batch_size": -1},
-        {**TEST_CONFIG, "batch_size": "not-a-number"},
-    ]
+    invalid_batch_sizes = [0, -1, "not-a-number"]
 
-    for config in invalid_configs:
-        with pytest.raises(RepositoryConfigError, match="Invalid batch size"):
-            BatchRepository(client=mock_client, **config)
+    for batch_size in invalid_batch_sizes:
+        with pytest.raises(BatchConfigurationError, match="Invalid batch size"):
+            BatchRepository(
+                client=mock_client,
+                collection_name=TEST_CONFIG["collection_name"],
+                batch_size=batch_size,
+            )
 
 
-def test_repository_initialization_validates_timeout(mock_client):
+def test_repository_initialization_validates_creation_time(mock_client):
     """
-    Test timeout validation during initialization.
+    Test creation time validation during initialization.
 
-    Given: Invalid timeout configurations
+    Given: Invalid creation time configurations
     When: Initializing the BatchRepository
     Then: Appropriate validation errors should be raised
     """
-    invalid_configs = [
-        {**TEST_CONFIG, "timeout": 0},
-        {**TEST_CONFIG, "timeout": -1},
-        {**TEST_CONFIG, "timeout": "not-a-number"},
-    ]
+    invalid_creation_times = [0, -1, "not-a-number"]
 
-    for config in invalid_configs:
-        with pytest.raises(RepositoryConfigError, match="Invalid timeout"):
-            BatchRepository(client=mock_client, **config)
+    for creation_time in invalid_creation_times:
+        with pytest.raises(BatchConfigurationError, match="Invalid creation time"):
+            BatchRepository(
+                client=mock_client,
+                collection_name=TEST_CONFIG["collection_name"],
+                creation_time_ms=creation_time,
+            )

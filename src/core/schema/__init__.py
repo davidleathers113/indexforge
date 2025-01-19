@@ -7,9 +7,17 @@ This package provides functionality for:
 """
 
 from .base import BaseSchema, SchemaType, ValidationError
+from .registry import (
+    CacheConfig,
+    LookupResult,
+    SchemaCache,
+    SchemaLookup,
+    SchemaRegistry,
+    SchemaRegistryError,
+)
 from .schema import Schema
 from .storage import SchemaStorage
-
+from .validators import SourceValidationRule, SourceValidator
 
 __all__ = [
     # Base components
@@ -19,4 +27,14 @@ __all__ = [
     # Schema management
     "Schema",
     "SchemaStorage",
+    # Registry
+    "CacheConfig",
+    "LookupResult",
+    "SchemaCache",
+    "SchemaLookup",
+    "SchemaRegistry",
+    "SchemaRegistryError",
+    # Validators
+    "SourceValidationRule",
+    "SourceValidator",
 ]

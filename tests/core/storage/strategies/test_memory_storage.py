@@ -1,12 +1,11 @@
 """Tests for memory storage strategy."""
 
-import threading
 from datetime import UTC, datetime
-from typing import List
+import threading
 from uuid import uuid4
 
-import pytest
 from pydantic import BaseModel, Field
+import pytest
 
 from src.core.storage.strategies.base import DataCorruptionError, DataNotFoundError, StorageError
 from src.core.storage.strategies.memory_storage import MemoryStorage
@@ -161,7 +160,7 @@ def test_concurrent_access(storage: MemoryStorage[TestModel]) -> None:
     """Test concurrent access to storage."""
     total_threads = 10
     operations_per_thread = 100
-    results: List[Exception] = []
+    results: list[Exception] = []
 
     def worker() -> None:
         """Worker function for concurrent testing."""

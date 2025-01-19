@@ -1,7 +1,6 @@
 """Tests for version history management."""
 
-from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 

@@ -2,11 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List
 
 import docx
 import pytest
-from docx.shared import Inches
 
 from src.core.processors.word import WordProcessor
 
@@ -75,7 +73,7 @@ def test_process_basic_docx_success(processor, basic_docx, caplog):
     """Test successful processing of a basic Word document."""
     result = processor.process_file(basic_docx)
     assert result.status == "success"
-    assert isinstance(result.content, Dict)
+    assert isinstance(result.content, dict)
     assert "full_text" in result.content
     assert "Test Document" in result.content["full_text"]
     assert "Processing Word document" in caplog.text

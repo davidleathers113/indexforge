@@ -4,17 +4,17 @@ This module provides focused tests for reference storage operations,
 including lifecycle, batch processing, and error handling.
 """
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from uuid import UUID
 
 import pytest
 from pytest_asyncio import fixture
+from tests.integration.services.base.storage_test import BaseStorageTest
+from tests.integration.services.builders.test_data import ReferenceBuilder
 
 from src.core.models.references import Reference
 from src.core.settings import Settings
 from src.services.storage import BatchConfig, ReferenceStorageService
-from tests.integration.services.base.storage_test import BaseStorageTest
-from tests.integration.services.builders.test_data import ReferenceBuilder
 
 
 @fixture

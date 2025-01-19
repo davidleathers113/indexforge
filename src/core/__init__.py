@@ -31,7 +31,6 @@ from .models import (
     DocumentMetadata,
     DocumentStatus,
     DocumentType,
-    ProcessedChunk,
     ProcessingStep,
     Reference,
     ReferenceType,
@@ -45,23 +44,24 @@ from .tracking.validation import (
     ValidationError,
     ValidationStrategy,
 )
-from .utils import (
+from .utils.similarity import (
     calculate_text_similarity,
-    chunk_text_by_sentences,
-    clean_text,
     compute_cluster_centroids,
     compute_cosine_similarities,
-    detect_circular_references,
-    find_text_boundaries,
     get_top_similar_indices,
-    perform_topic_clustering,
-    predict_topic,
+)
+from .utils.text import (
+    chunk_text_by_sentences,
+    clean_text,
+    find_text_boundaries,
     split_into_sentences,
+)
+from .utils.validation import (
+    detect_circular_references,
     validate_chunk_references,
     validate_document_relationships,
     validate_reference_integrity,
 )
-
 
 __all__ = [
     # Base classes
@@ -84,7 +84,6 @@ __all__ = [
     # Models
     "Chunk",
     "ChunkMetadata",
-    "ProcessedChunk",
     "Document",
     "DocumentMetadata",
     "DocumentStatus",
@@ -110,8 +109,6 @@ __all__ = [
     "compute_cosine_similarities",
     "compute_cluster_centroids",
     "get_top_similar_indices",
-    "perform_topic_clustering",
-    "predict_topic",
     "detect_circular_references",
     "validate_chunk_references",
     "validate_document_relationships",

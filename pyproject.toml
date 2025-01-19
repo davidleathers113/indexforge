@@ -93,6 +93,7 @@ pillow = "^11.1.0"
 dependency-injector = "^4.45.0"
 backoff = "^2.2.1"
 poetry = "^2.0.1"
+pyjwt = "^2.10.1"
 
 [tool.poetry.group.storage]
 optional = true
@@ -122,7 +123,7 @@ numpy = {version = "^2.2.1", allow-prereleases = false}
 scikit-learn = "^1.6.0"
 sentence-transformers = "^2.5.1"
 nltk = "^3.8.1"
-tiktoken = "^0.5.2"
+tiktoken = "^0.8.0"
 tqdm = "^4.67.1"
 spacy = "^3.8.3"
 faiss-cpu = "^1.7.4"
@@ -400,9 +401,10 @@ typing-modules = ["typing", "typing_extensions"]
 
 # Per-file ignores
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401", "D104"]
-"tests/*" = ["D100", "D101", "D102", "D103", "D104", "S101"]
-"src/migrations/*" = ["D", "ERA", "RUF012"]
+"__init__.py" = ["F401", "D104", "I001"]
+"src/api/repositories/weaviate/**/*.py" = ["I001"]
+"tests/*" = ["D100", "D101", "D102", "D103", "D104", "S101", "I001"]
+"src/migrations/*" = ["D", "ERA", "RUF012", "I001"]
 "src/config/*" = ["D100", "D104"]
 
 # Plugin configurations
@@ -429,7 +431,7 @@ force-sort-within-sections = true
 known-first-party = ["src"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 split-on-trailing-comma = true
-relative-imports-order = "furthest-to-closest"
+relative-imports-order = "closest-to-furthest"
 extra-standard-library = ["typing"]
 known-third-party = [
     "aio_pika",

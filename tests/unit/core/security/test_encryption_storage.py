@@ -1,16 +1,13 @@
 """Unit tests for encryption manager with key storage integration."""
 
 import asyncio
-from datetime import datetime, timedelta
 from pathlib import Path
-from uuid import uuid4
 
-import pytest
 from pydantic import SecretStr
+import pytest
 
 from src.core.security.encryption import (
     EncryptionConfig,
-    EncryptionKey,
     EncryptionKeyNotFoundError,
     EncryptionManager,
     KeyStatus,

@@ -7,15 +7,14 @@ and error conditions.
 
 import logging
 from pathlib import Path
-from typing import Dict, List
 
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from docx import Document
-from docx.shared import Inches
+import pytest
 
-from src.core.processors.word import HeaderData, TableData, WordProcessor
+from src.core.processors.word import WordProcessor
+
 
 # Configure logging for tests
 logger = logging.getLogger(__name__)

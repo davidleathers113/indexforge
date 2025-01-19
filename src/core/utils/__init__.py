@@ -1,47 +1,25 @@
-"""Core utility functions.
+"""Core utilities package.
 
-This module provides utility functions for text processing, similarity
-computation, and validation operations.
+This package provides common utility functions and classes used across the application.
+It is organized into several submodules:
+
+- text: Text processing utilities (cleaning, tokenization, etc.)
+- cache: Caching utilities and decorators
+- security: Security-related utilities (PII detection, vault management)
+- ml: Machine learning utilities (embeddings, clustering)
+- io: Input/output utilities (file processing, serialization)
+- monitoring: Monitoring and metrics utilities
+- validation: Validation utilities
 """
 
-from .similarity import (
-    compute_cluster_centroids,
-    compute_cosine_similarities,
-    get_top_similar_indices,
-    perform_topic_clustering,
-    predict_topic,
-)
-from .text import (
-    calculate_text_similarity,
-    chunk_text_by_sentences,
-    clean_text,
-    find_text_boundaries,
-    split_into_sentences,
-)
-from .validation import (
-    detect_circular_references,
-    validate_chunk_references,
-    validate_document_relationships,
-    validate_reference_integrity,
-)
-
+from . import cache, io, ml, monitoring, security, text, validation
 
 __all__ = [
-    # Similarity functions
-    "compute_cosine_similarities",
-    "compute_cluster_centroids",
-    "get_top_similar_indices",
-    "perform_topic_clustering",
-    "predict_topic",
-    # Text processing functions
-    "clean_text",
-    "split_into_sentences",
-    "chunk_text_by_sentences",
-    "find_text_boundaries",
-    "calculate_text_similarity",
-    # Validation functions
-    "detect_circular_references",
-    "validate_chunk_references",
-    "validate_document_relationships",
-    "validate_reference_integrity",
+    "cache",
+    "io",
+    "ml",
+    "monitoring",
+    "security",
+    "text",
+    "validation",
 ]

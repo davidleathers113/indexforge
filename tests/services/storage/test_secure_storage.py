@@ -9,13 +9,13 @@ from pathlib import Path
 from uuid import UUID, uuid4
 
 import pytest
-from pydantic import BaseModel
 
 from src.core.interfaces.storage import DocumentStorage
 from src.core.models.documents import Document
 from src.core.security.encryption import EncryptionManager
 from src.core.settings import Settings
 from src.services.storage.secure_storage import SecureStorageWrapper
+
 
 logger = logging.getLogger(__name__)
 

@@ -1,10 +1,9 @@
 """Unit tests for document lineage tracking."""
 
 import uuid
-from typing import Dict, Set
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from src.core.lineage.base import ChangeType, DocumentLineage, SourceInfo
 from src.core.lineage.manager import CircularReferenceError, LineageError, LineageManager

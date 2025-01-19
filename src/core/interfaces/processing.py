@@ -7,13 +7,13 @@ operations.
 
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
-
 if TYPE_CHECKING:
     import numpy as np
 
-    from src.core.models.chunks import Chunk, ProcessedChunk
+    from src.core.models.chunks import Chunk
     from src.core.models.documents import ProcessingStep
     from src.core.settings import Settings
+    from src.ml.processing.models.chunks import ProcessedChunk
 
 T = TypeVar("T", bound="Chunk")
 P = TypeVar("P", bound="ProcessedChunk")
@@ -225,9 +225,7 @@ class ChunkTransformer(Protocol):
         """
         ...
 
-    def transform_chunks(
-        self, chunks: list[T], metadata: dict[str, Any] | None = None
-    ) -> list[P]:
+    def transform_chunks(self, chunks: list[T], metadata: dict[str, Any] | None = None) -> list[P]:
         """Transform multiple chunks.
 
         Args:
@@ -300,9 +298,7 @@ class TextProcessor(Protocol):
         """
         ...
 
-    def split_into_sentences(
-        self, text: str, metadata: dict[str, Any] | None = None
-    ) -> list[str]:
+    def split_into_sentences(self, text: str, metadata: dict[str, Any] | None = None) -> list[str]:
         """Split text into sentences.
 
         Args:

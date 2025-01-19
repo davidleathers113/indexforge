@@ -5,13 +5,12 @@ storage services, including batch operations, metrics collection, and error scen
 """
 
 import asyncio
-from typing import AsyncGenerator, List, Optional
+from collections.abc import AsyncGenerator
 from uuid import UUID
 
 import pytest
 from pytest_asyncio import fixture
 
-from src.core.interfaces.metrics import StorageMetrics
 from src.core.models.chunks import Chunk, ChunkMetadata
 from src.core.models.documents import Document, DocumentMetadata, DocumentType
 from src.core.settings import Settings
@@ -290,7 +289,7 @@ class TestStorageIntegration:
         assert len(set(doc_ids)) == len(documents)  # All IDs should be unique
 
         # Perform concurrent retrievals
-        async def get_document(doc_id: UUID) -> Optional[Document]:
+        async def get_document(doc_id: UUID) -> Document | None:
             return await document_storage.get_document(doc_id)
 
         tasks = [get_document(doc_id) for doc_id in doc_ids]
@@ -430,7 +429,7 @@ class TestStorageIntegration:
         # 2. Check chunks
         doc_chunks = await chunk_storage.get_chunks(chunk_ids)
         assert len(doc_chunks) == len(chunks)
-        for chunk, original in zip(doc_chunks, chunks):
+        for chunk, original in zip(doc_chunks, chunks, strict=False):
             assert chunk is not None
             assert chunk.content == original.content
             assert chunk.metadata.document_id == parent_id

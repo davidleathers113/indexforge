@@ -4,15 +4,12 @@ This module provides the foundational test infrastructure for storage service te
 including common verification methods and test utilities.
 """
 
-from typing import Any, Generic, List, Optional, TypeVar
+from typing import Generic, TypeVar
 from uuid import UUID
 
-import pytest
-from pytest_asyncio import fixture
-
-from src.core.interfaces.metrics import StorageMetrics
 from src.core.models.base import BaseModel
 from src.services.storage import BaseStorageService
+
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -24,7 +21,7 @@ class BaseStorageTest(Generic[T]):
     async def verify_storage_operation(
         storage_service: BaseStorageService,
         test_data: T,
-        stored_id: Optional[UUID] = None,
+        stored_id: UUID | None = None,
     ) -> UUID:
         """Verify basic storage operations.
 
@@ -51,8 +48,8 @@ class BaseStorageTest(Generic[T]):
     @staticmethod
     async def verify_batch_operations(
         storage_service: BaseStorageService,
-        test_data: List[T],
-    ) -> List[UUID]:
+        test_data: list[T],
+    ) -> list[UUID]:
         """Verify batch storage operations.
 
         Args:
@@ -70,7 +67,7 @@ class BaseStorageTest(Generic[T]):
         # Verify batch retrieval
         retrieved = await storage_service.get_batch(stored_ids)
         assert len(retrieved) == len(test_data)
-        assert all(r == d for r, d in zip(retrieved, test_data))
+        assert all(r == d for r, d in zip(retrieved, test_data, strict=False))
 
         return stored_ids
 

@@ -10,15 +10,14 @@ Tests focus on:
 """
 
 import asyncio
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import AsyncGenerator
 from uuid import UUID, uuid4
 
-import pytest
 from pydantic import BaseModel
+import pytest
 
-from src.core.models.documents import Document
 from src.core.storage.secure.key_rotation import KeyRotationHandler
 from src.core.storage.secure.metadata import MetadataHandler
 from src.core.storage.secure.storage import SecureStorageWrapper
@@ -118,7 +117,7 @@ async def test_concurrent_encryption(secure_storage):
 
     # Concurrent decrypted gets
     stored_docs = await asyncio.gather(*[secure_storage.get_document(doc.id) for doc in docs])
-    assert all(a == b for a, b in zip(stored_docs, docs))
+    assert all(a == b for a, b in zip(stored_docs, docs, strict=False))
 
 
 async def test_encryption_error_handling(secure_storage, metadata_handler):

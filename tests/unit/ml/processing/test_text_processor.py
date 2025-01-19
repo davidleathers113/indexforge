@@ -1,12 +1,12 @@
 """Unit tests for the text processor implementation."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
 from src.core.settings import Settings
 from src.ml.processing.errors import ServiceInitializationError
-from src.ml.processing.text import NLTK_AVAILABLE, TextProcessor
+from src.ml.processing.text import TextProcessor
 from src.ml.processing.types import ServiceState
 
 

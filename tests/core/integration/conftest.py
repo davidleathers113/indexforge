@@ -1,7 +1,6 @@
 """Test fixtures for integration testing."""
 
 from datetime import UTC, datetime
-from typing import Any, Dict
 
 import pytest
 
@@ -13,7 +12,7 @@ class MockStorage:
 
     def __init__(self):
         """Initialize mock storage."""
-        self._lineage: Dict[str, DocumentLineage] = {}
+        self._lineage: dict[str, DocumentLineage] = {}
         self._last_modified = datetime.now(UTC)
 
     def get_lineage(self, doc_id: str) -> DocumentLineage | None:
@@ -25,7 +24,7 @@ class MockStorage:
         self._lineage[lineage.doc_id] = lineage
         self._last_modified = datetime.now(UTC)
 
-    def get_all_lineage(self) -> Dict[str, DocumentLineage]:
+    def get_all_lineage(self) -> dict[str, DocumentLineage]:
         """Get all document lineage data."""
         return self._lineage.copy()
 

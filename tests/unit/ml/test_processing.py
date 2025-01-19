@@ -10,7 +10,6 @@ from src.ml.processing import (
     SPACY_AVAILABLE,
     ChunkProcessor,
     ServiceInitializationError,
-    ServiceNotInitializedError,
     ServiceState,
     ServiceStateError,
 )

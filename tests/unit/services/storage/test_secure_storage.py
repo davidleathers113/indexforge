@@ -1,12 +1,10 @@
 """Unit tests for secure storage wrapper."""
 
 import json
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import UUID, uuid4
+from uuid import UUID
 
-import pytest
 from pydantic import SecretStr
+import pytest
 
 from src.core.models.documents import Document, DocumentMetadata, DocumentType
 from src.core.security.encryption import EncryptedData, EncryptionConfig, EncryptionManager

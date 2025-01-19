@@ -1,8 +1,6 @@
 """Unit tests for schema registry implementation."""
 
-from datetime import datetime
 from pathlib import Path
-from typing import AsyncGenerator
 
 import pytest
 
@@ -10,7 +8,6 @@ from src.core.schema.base import SchemaType, SchemaVersion
 from src.core.schema.registry import (
     CacheConfig,
     CircularDependencyError,
-    SchemaCache,
     SchemaRegistry,
     SchemaRegistryError,
 )

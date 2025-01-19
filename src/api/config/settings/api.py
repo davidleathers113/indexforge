@@ -1,32 +1,40 @@
-"""API server settings configuration."""
+"""API settings configuration."""
 
+from typing import Any
 
 from pydantic import Field
 
-from src.api.config.settings import BaseAppSettings
+from .base import BaseAppSettings
 
 
 class APISettings(BaseAppSettings):
-    """API server settings."""
+    """API settings."""
 
-    # Core API Settings
-    API_V1_STR: str = "/api/v1"
-    PROJECT_NAME: str = "Document API"
-    ENVIRONMENT: str = Field("development", env="ENVIRONMENT")
-    VERSION: str = "0.1.0"
+    title: str = Field(default="IndexForge API", description="API title")
+    description: str = Field(
+        default="Universal file indexing and processing system",
+        description="API description",
+    )
+    version: str = Field(default="0.1.0", description="API version")
+    docs_url: str = Field(default="/docs", description="API documentation URL")
+    redoc_url: str = Field(default="/redoc", description="ReDoc documentation URL")
+    openapi_url: str = Field(default="/openapi.json", description="OpenAPI schema URL")
+    root_path: str = Field(default="", description="API root path")
+    root_path_in_servers: bool = Field(
+        default=True, description="Include root path in OpenAPI servers"
+    )
 
-    # Deployment Settings
-    DEPLOYMENT_REGION: str = "us-west"
-    DEBUG: bool = Field(False, env="DEBUG")
-    API_HOST: str = Field("0.0.0.0", env="API_HOST")
-    API_PORT: int = Field(8000, env="API_PORT")
-    API_WORKERS: int = Field(1, env="API_WORKERS")
-    API_RELOAD: bool = Field(True, env="API_RELOAD")
-
-    # CORS Settings
-    BACKEND_CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",  # React default port
-        "http://localhost:5173",  # Vite default port
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-    ]
+    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Override dict to include nested settings."""
+        base_dict = super().dict(*args, **kwargs)
+        return {
+            **base_dict,
+            "title": self.title,
+            "description": self.description,
+            "version": self.version,
+            "docs_url": self.docs_url,
+            "redoc_url": self.redoc_url,
+            "openapi_url": self.openapi_url,
+            "root_path": self.root_path,
+            "root_path_in_servers": self.root_path_in_servers,
+        }

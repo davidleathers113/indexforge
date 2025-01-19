@@ -1,18 +1,16 @@
 """Test utilities and configurations for Word processor tests."""
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
-
-import pytest
+from typing import Any
 
 
 @dataclass
 class TestContent:
     """Test content configurations."""
 
-    headers: Dict[int, str]
-    paragraphs: List[str]
-    table_data: List[List[str]]
+    headers: dict[int, str]
+    paragraphs: list[str]
+    table_data: list[list[str]]
 
 
 class TestDataConfig:
@@ -105,7 +103,7 @@ class ProcessorConfig:
     }
 
     @classmethod
-    def get_config(cls, config_type: str) -> Dict[str, Any]:
+    def get_config(cls, config_type: str) -> dict[str, Any]:
         """Get predefined processor configuration.
 
         Args:

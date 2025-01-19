@@ -16,7 +16,6 @@ from src.connectors.direct_documentation_indexing.source_tracking.document_opera
 )
 from src.connectors.direct_documentation_indexing.source_tracking.storage import LineageStorage
 from src.core.monitoring.errors.models.log_entry import LogLevel
-from src.core.monitoring.health.models import HealthStatus
 from src.core.processing.steps.models.step import ProcessingStatus
 
 

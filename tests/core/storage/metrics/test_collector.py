@@ -2,12 +2,11 @@
 
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
 from src.core.storage.metrics.collector import MetricsCollector
-from src.core.storage.metrics.models import OperationMetrics, PerformanceMetrics, StorageMetrics
+from src.core.storage.metrics.models import OperationMetrics, StorageMetrics
 
 
 @pytest.fixture

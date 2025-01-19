@@ -4,7 +4,6 @@ This module contains comprehensive tests for all chunking strategies, including
 base functionality, edge cases, and specific features of each strategy.
 """
 
-from typing import Type
 
 import pytest
 
@@ -37,7 +36,7 @@ def validator():
 class TestChunkingBase:
     """Base test class for all chunking strategies."""
 
-    strategy_class: Type[ChunkingStrategy] = None
+    strategy_class: type[ChunkingStrategy] = None
 
     @pytest.fixture
     def strategy(self, validator):

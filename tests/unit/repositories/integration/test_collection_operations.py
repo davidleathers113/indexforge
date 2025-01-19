@@ -7,29 +7,38 @@ focusing on batch configuration, retry mechanisms, and error handling.
 from unittest.mock import Mock, call, patch
 
 import pytest
+import weaviate
 from requests.exceptions import ConnectionError
 
-from src.api.repositories.weaviate.client import WeaviateClient
-from src.api.repositories.weaviate.exceptions import (
-    BatchConfigurationError,
-    RetryExhaustedError,
-)
-
+from src.api.repositories.weaviate.exceptions import BatchConfigurationError, RetryExhaustedError
 
 # Test data constants
 TEST_CONFIG = {
     "url": "http://localhost:8080",
-    "api_key": "test-api-key",
-    "timeout": 300,
-    "retry_count": 3,
+    "auth_credentials": weaviate.auth.AuthApiKey(api_key="test-api-key"),
+    "additional_config": weaviate.config.AdditionalConfig(
+        timeout_config=weaviate.config.Timeout(timeout_ms=300000),
+        batch_config=weaviate.config.BatchConfig(
+            creation_time_ms=100,
+            dynamic=True,
+            batch_size=100,
+        ),
+    ),
+    "additional_headers": None,
 }
 
 TEST_COLLECTION_CONFIG = {
     "name": "test_collection",
-    "vectorizer": "text2vec-contextionary",
+    "vectorizer_config": weaviate.config.Configure.Vectorizer.text2vec_contextionary(),
     "properties": [
-        {"name": "text", "dataType": ["text"]},
-        {"name": "metadata", "dataType": ["object"]},
+        weaviate.classes.Property(
+            name="text",
+            data_type=["text"],
+        ),
+        weaviate.classes.Property(
+            name="metadata",
+            data_type=["object"],
+        ),
     ],
 }
 
@@ -49,6 +58,7 @@ def mock_collection():
     """Setup mock collection with batch configuration capabilities."""
     collection = Mock()
     collection.batch.configure.return_value = None
+    collection.data.insert_many.return_value = {"status": "success"}
     return collection
 
 
@@ -61,13 +71,17 @@ def test_batch_configuration_success(mock_client, mock_collection):
     Then: Configuration should be applied successfully
     """
     mock_client.collections.get.return_value = mock_collection
-    batch_config = {"batch_size": 100, "dynamic": True, "timeout_retries": 3}
+    batch_config = weaviate.config.BatchConfig(
+        batch_size=100,
+        dynamic=True,
+        creation_time_ms=100,
+    )
 
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
-    collection.batch.configure(**batch_config)
+    collection.batch.configure(batch_config)
 
-    mock_collection.batch.configure.assert_called_once_with(**batch_config)
+    mock_collection.batch.configure.assert_called_once_with(batch_config)
 
 
 def test_batch_configuration_validation(mock_client, mock_collection):
@@ -80,17 +94,17 @@ def test_batch_configuration_validation(mock_client, mock_collection):
     """
     mock_client.collections.get.return_value = mock_collection
     invalid_configs = [
-        {"batch_size": -1},  # Invalid batch size
-        {"timeout_retries": "invalid"},  # Invalid retry count
-        {"dynamic": "not-boolean"},  # Invalid dynamic setting
+        weaviate.config.BatchConfig(batch_size=-1),  # Invalid batch size
+        weaviate.config.BatchConfig(creation_time_ms="invalid"),  # Invalid creation time
+        weaviate.config.BatchConfig(dynamic="not-boolean"),  # Invalid dynamic setting
     ]
 
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     for config in invalid_configs:
         with pytest.raises(BatchConfigurationError):
-            collection.batch.configure(**config)
+            collection.batch.configure(config)
 
 
 def test_operation_retry_mechanism(mock_client, mock_collection):
@@ -103,18 +117,18 @@ def test_operation_retry_mechanism(mock_client, mock_collection):
     """
     mock_client.collections.get.return_value = mock_collection
     # Mock failures that succeed after retries
-    mock_collection.batch.add_objects.side_effect = [
+    mock_collection.data.insert_many.side_effect = [
         ConnectionError("First attempt"),
         ConnectionError("Second attempt"),
         {"status": "success"},  # Success on third attempt
     ]
 
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
-    result = collection.batch.add_objects([{"id": "1", "text": "test"}])
+    result = collection.data.insert_many([{"id": "1", "text": "test"}])
 
     assert result["status"] == "success"
-    assert mock_collection.batch.add_objects.call_count == 3
+    assert mock_collection.data.insert_many.call_count == 3
 
 
 def test_retry_exhaustion(mock_client, mock_collection):
@@ -126,16 +140,19 @@ def test_retry_exhaustion(mock_client, mock_collection):
     Then: Should raise retry exhausted error after all attempts fail
     """
     mock_client.collections.get.return_value = mock_collection
-    mock_collection.batch.add_objects.side_effect = ConnectionError("Persistent failure")
+    mock_collection.data.insert_many.side_effect = ConnectionError("Persistent failure")
 
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     with pytest.raises(RetryExhaustedError) as exc_info:
-        collection.batch.add_objects([{"id": "1", "text": "test"}])
+        collection.data.insert_many([{"id": "1", "text": "test"}])
 
     assert "Persistent failure" in str(exc_info.value)
-    assert mock_collection.batch.add_objects.call_count == TEST_CONFIG["retry_count"]
+    assert (
+        mock_collection.data.insert_many.call_count
+        == TEST_CONFIG["additional_config"].timeout_config.retries
+    )
 
 
 def test_error_callback_invocation(mock_client, mock_collection):
@@ -149,16 +166,16 @@ def test_error_callback_invocation(mock_client, mock_collection):
     mock_client.collections.get.return_value = mock_collection
     error_callback = Mock()
 
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
-    collection.batch.on_error(error_callback)
+    collection.batch.configure(weaviate.config.BatchConfig(callback_on_error=error_callback))
 
     # Simulate an error
     error = Exception("Test error")
-    mock_collection.batch.add_objects.side_effect = error
+    mock_collection.data.insert_many.side_effect = error
 
     try:
-        collection.batch.add_objects([{"id": "1", "text": "test"}])
+        collection.data.insert_many([{"id": "1", "text": "test"}])
     except Exception:
         pass
 
@@ -175,16 +192,16 @@ def test_concurrent_batch_operations(mock_client, mock_collection):
     """
     mock_client.collections.get.return_value = mock_collection
 
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     # Simulate concurrent operations
     batch1 = [{"id": "1", "text": "test1"}]
     batch2 = [{"id": "2", "text": "test2"}]
 
-    collection.batch.add_objects(batch1)
-    collection.batch.add_objects(batch2)
+    collection.data.insert_many(batch1)
+    collection.data.insert_many(batch2)
 
     # Verify operations were processed in order
     expected_calls = [call(batch1), call(batch2)]
-    mock_collection.batch.add_objects.assert_has_calls(expected_calls, any_order=False)
+    mock_collection.data.insert_many.assert_has_calls(expected_calls, any_order=False)

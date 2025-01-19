@@ -1,10 +1,7 @@
 """Unit tests for schema implementation."""
 
-from datetime import datetime
 
-import pytest
-
-from src.core.schema.base import SchemaType, SchemaVersion, ValidationError
+from src.core.schema.base import SchemaType, SchemaVersion
 from src.core.schema.schema import FieldDefinition, Schema
 
 

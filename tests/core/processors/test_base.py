@@ -6,13 +6,14 @@ establishing common test cases that will be inherited by specific processor test
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+import pytest
 
 from src.core.processors.base import BaseProcessor, ProcessingResult
+
 
 # Configure logging for tests
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ class TestProcessor(BaseProcessor):
     """Test implementation of BaseProcessor for testing."""
 
     def __init__(
-        self, config: Optional[Dict[str, Any]] = None, supported_extensions: set[str] = None
+        self, config: dict[str, Any] | None = None, supported_extensions: set[str] = None
     ):
         """Initialize test processor with optional configuration and supported extensions.
 

@@ -1,8 +1,8 @@
 """Shared fixtures for processor tests."""
 
+from collections.abc import Generator
 import logging
 from pathlib import Path
-from typing import Generator
 
 import pytest
 

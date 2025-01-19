@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.core.models.documents import Document, DocumentStatus
+from src.core.models.documents import Document
 from src.core.tracking.storage import DocumentStorage
 
 

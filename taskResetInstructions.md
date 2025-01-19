@@ -1,166 +1,196 @@
-# Memory Storage Refactoring - Development Context
+# Development Context Summary
 
 ## Task Overview & Current Status
 
-### Core Problem
+### Core Problem/Feature
 
-Refactoring the memory storage implementation to improve organization, maintainability, and performance while ensuring backward compatibility.
+- Implementing a document processing system with support for multiple file types (Excel, Word)
+- Focus on performance, resource management, and scalability
+- Part of larger ML pipeline migration and restructuring effort
 
 ### Current Status
 
-- ✅ Created new package structure for memory storage
-- ✅ Implemented thread-safe operations
-- ✅ Added performance optimizations (caching, validation)
-- ✅ Established deprecation path with clear migration guide
-- 🔄 In progress: Testing and monitoring improvements
+- Base processor framework completed ✅
+- Excel and Word processors implemented ✅
+- Integration tests completed ✅
+- Performance benchmarks implemented ✅
+- Currently in Phase 3 of migration (ML Component Migration)
 
 ### Key Architectural Decisions
 
-1. **Package Structure**:
+1. **Processor Hierarchy**
 
-   - Moved from single file to organized package
-   - Separated concerns into distinct modules
-   - Rationale: Better maintainability and clearer code organization
+   - Base processor class with common functionality
+   - Specialized processors for each document type
+   - Rationale: Promotes code reuse and consistent interface
 
-2. **Backward Compatibility**:
+2. **Configuration Management**
 
-   - Created wrapper class with deprecation warnings
-   - Support both old and new initialization patterns
-   - Rationale: Allow gradual migration without breaking changes
+   - Pydantic-based configuration system
+   - Separate configs for each processor type
+   - Rationale: Type safety and validation at configuration level
 
-3. **Performance Optimizations**:
-   - Added settings caching with `@functools.lru_cache`
-   - Implemented parameter validation decorator
-   - Rationale: Reduce redundant operations and improve efficiency
+3. **Resource Management**
+   - Context manager pattern for resource cleanup
+   - Explicit initialization/cleanup lifecycle
+   - Rationale: Predictable resource handling and memory management
 
 ### Critical Constraints
 
-- Must maintain backward compatibility until version 2.0.0
-- Must preserve thread safety and memory management
-- Must support both legacy and new initialization patterns
+- Memory usage limits: < 500MB per processor instance
+- Processing time: < 30s for standard documents
+- Thread safety for concurrent processing
+- Proper resource cleanup required
 
 ## Codebase Navigation
 
-### Key Files (by importance)
+### Key Files (By Importance)
 
-1. `src/core/storage/strategies/memory_storage/storage.py`
+1. `src/ml/processing/document/base.py`
 
-   - Role: Core implementation of memory storage
-   - Changes: Complete rewrite with improved architecture
-   - Status: Complete, needs testing
+   - Core processor interface and base implementation
+   - Defines ProcessingResult and resource management
+   - Recently added: Error handling improvements
 
-2. `src/core/storage/strategies/memory_storage/__init__.py`
+2. `src/ml/processing/document/excel.py`
 
-   - Role: Package initialization and exports
-   - Changes: Added proper exports and documentation
-   - Status: Complete
+   - Excel-specific document processor
+   - Handles spreadsheet parsing and validation
+   - Recent changes: Memory optimization for large files
 
-3. `src/core/storage/strategies/memory_storage.py`
+3. `src/ml/processing/document/word.py`
 
-   - Role: Backward compatibility wrapper
-   - Changes: Converted to re-export with deprecation
-   - Status: Complete, monitoring in place
+   - Word document processor implementation
+   - Manages text, tables, and metadata extraction
+   - Recent changes: Added image handling support
 
-4. `src/core/interfaces/storage.py`
-   - Role: Defines storage interfaces
-   - Changes: None (reference only)
-   - Status: Stable
+4. `src/ml/processing/document/config.py`
+
+   - Configuration classes for all processors
+   - Validation rules and defaults
+   - Recent changes: Updated for Pydantic v2 compatibility
+
+5. `tests/integration/ml/processing/document/test_processor_integration.py`
+
+   - Integration tests for processor interactions
+   - Concurrent processing validation
+   - Recent changes: Added error propagation tests
+
+6. `tests/integration/ml/processing/document/test_processor_performance.py`
+   - Performance benchmarks and resource monitoring
+   - Memory and CPU utilization tests
+   - Recent addition: Comprehensive performance metrics
 
 ### Dependencies
 
-- Core Settings Module (`src.core.settings`)
-- Storage Interfaces (`src.core.interfaces.storage`)
-- Document Models (`src.core.models`)
+- python-docx: Word document processing
+- pandas: Excel file handling
+- pydantic: Configuration management
+- pytest: Testing framework
+- psutil: Resource monitoring
 
 ## Technical Context
 
 ### Technical Assumptions
 
-1. Settings object structure remains stable
-2. Thread safety is required for all operations
-3. Memory limits are enforced at runtime
+- Documents are UTF-8 encoded
+- Excel files follow standard Office Open XML format
+- Word documents contain standard elements (text, tables, images)
+- System has sufficient memory for parallel processing
+
+### External Services
+
+- None currently - all processing is local
+- Future integration planned with storage services
 
 ### Performance Considerations
 
-1. Settings conversion is cached (128 entries max)
-2. Parameter validation is optimized
-3. Memory usage is tracked efficiently
-4. Thread-safe operations use RLock for nested calls
+1. Memory Management
+
+   - Streaming large files when possible
+   - Explicit cleanup of resources
+   - Memory usage monitoring and limits
+
+2. Scalability
+   - Thread-safe processor implementations
+   - Configurable batch sizes
+   - Resource pooling for concurrent processing
 
 ### Security Considerations
 
-1. Memory limits prevent resource exhaustion
-2. Thread safety prevents race conditions
-3. Type validation ensures data integrity
+- File size limits enforced
+- File type validation
+- Content validation before processing
+- Memory limits to prevent DOS
 
 ## Development Progress
 
-### Last Completed
+### Last Completed Tasks
 
-- Implemented performance optimizations
-- Added usage metrics tracking
-- Created comprehensive migration guide
+1. Implemented performance benchmarks
 
-### Next Steps
+   - Processing time measurements
+   - Memory usage tracking
+   - Resource utilization monitoring
+   - Concurrent load testing
 
-1. Add unit tests for:
+2. Added integration tests
+   - Sequential processing
+   - Concurrent processing
+   - Error propagation
+   - Resource cleanup
 
-   - Settings conversion
-   - Parameter validation
-   - Backward compatibility
-   - Performance optimizations
+### Immediate Next Steps
 
-2. Implement monitoring:
-
-   - Usage patterns
-   - Performance metrics
-   - Migration progress
-
-3. Add performance benchmarks:
-   - Compare old vs new implementation
-   - Measure caching effectiveness
-   - Profile memory usage
+1. Implement batch processing functionality
+2. Add service layer integration
+3. Complete tracking migration
+4. Update documentation with performance guidelines
 
 ### Known Issues
 
-1. Relative import in memory_storage.py needs resolution
-2. Migration metrics could be lost on process restart
-3. Need more comprehensive error handling for edge cases
+1. Linter error in integration tests (unused variable)
+2. Import path issues in some modules
+3. Memory spikes during large file processing
 
 ### Failed Approaches
 
-1. Direct inheritance from old implementation
+1. Using memory mapping for large files
 
-   - Issue: Too tightly coupled
-   - Solution: Used composition instead
+   - Issue: Inconsistent performance across platforms
+   - Solution: Switched to chunked reading
 
-2. Automatic migration
-   - Issue: Too complex and risky
-   - Solution: Opted for manual migration with clear guide
+2. Generic processor configuration
+   - Issue: Lost type safety
+   - Solution: Specialized configs for each processor type
 
 ## Developer Notes
 
-### Non-Obvious Insights
+### Codebase Insights
 
-1. RLock is required (not Lock) due to nested operations
-2. Settings conversion needs caching due to frequent calls
-3. Type hints require special handling for generic types
+- Processor initialization is lazy - resources allocated on first use
+- Configuration validation happens at instantiation time
+- Error handling follows hierarchy pattern
+- Memory cleanup is automatic via context managers
 
 ### Temporary Solutions
 
-1. In-memory metrics tracking
-   - Will need persistence in future
-   - Consider adding metrics storage
+- Manual garbage collection calls in large file tests
+- Fixed timeouts in performance tests
+- Hardcoded limits for concurrent processing
 
-### Critical Areas
+### Areas Needing Attention
 
-1. Thread safety in initialization
-2. Memory limit enforcement
-3. Type validation in generic methods
-4. Migration path validation
+1. Resource pooling for concurrent processing
+2. Error recovery mechanisms
+3. Performance optimization for memory usage
+4. Service layer integration points
+5. Documentation of performance characteristics
 
-### Future Considerations
+### Best Practices
 
-1. Add telemetry for migration progress
-2. Consider automated migration tools
-3. Plan for version 2.0.0 clean-up
+1. Always use context managers for processors
+2. Validate configurations before processing
+3. Monitor memory usage in concurrent scenarios
+4. Follow error handling patterns
+5. Add performance tests for new features

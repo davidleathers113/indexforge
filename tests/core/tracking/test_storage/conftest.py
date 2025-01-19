@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 from uuid import UUID, uuid4
 
 import pytest
@@ -15,7 +14,7 @@ from src.core.tracking.storage import DocumentStorage
 def create_test_document(
     title: str = "Test Document",
     doc_type: DocumentType = DocumentType.TEXT,
-    parent_id: Optional[UUID] = None,
+    parent_id: UUID | None = None,
     status: DocumentStatus = DocumentStatus.PENDING,
     **metadata_kwargs,
 ) -> Document:

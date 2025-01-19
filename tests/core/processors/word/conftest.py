@@ -1,17 +1,19 @@
 """Shared fixtures for Word processor tests."""
 
+from collections.abc import Generator
 import logging
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Any
 
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from docx import Document
+import pytest
 
 from src.core.processors.word import WordProcessor
 
 from .test_utils import ProcessorConfig, TestContent, TestDataConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +34,7 @@ def cleanup_test_files(request: FixtureRequest, tmp_path: Path):
 
 
 @pytest.fixture(params=["default", "full_extraction", "headers_only", "tables_only"])
-def processor_config(request: FixtureRequest) -> Dict[str, Any]:
+def processor_config(request: FixtureRequest) -> dict[str, Any]:
     """Provide various processor configurations.
 
     Args:
@@ -66,7 +68,7 @@ def word_processor(request: FixtureRequest, caplog: LogCaptureFixture) -> WordPr
 
 @pytest.fixture
 def configured_processor(
-    request: FixtureRequest, processor_config: Dict[str, Any], caplog: LogCaptureFixture
+    request: FixtureRequest, processor_config: dict[str, Any], caplog: LogCaptureFixture
 ) -> WordProcessor:
     """Provide a configured Word processor instance.
 
@@ -117,7 +119,7 @@ class DocumentBuilder:
         if not path.parent.exists():
             raise ValueError("Parent directory does not exist")
 
-    def add_headers(self, headers: Dict[int, str]) -> "DocumentBuilder":
+    def add_headers(self, headers: dict[int, str]) -> "DocumentBuilder":
         """Add headers to document.
 
         Args:
@@ -136,7 +138,7 @@ class DocumentBuilder:
             self.doc.add_heading(text, level=level)
         return self
 
-    def add_paragraphs(self, texts: List[str]) -> "DocumentBuilder":
+    def add_paragraphs(self, texts: list[str]) -> "DocumentBuilder":
         """Add paragraphs to document.
 
         Args:
@@ -150,7 +152,7 @@ class DocumentBuilder:
             self.doc.add_paragraph(text)
         return self
 
-    def add_table(self, rows: int, cols: int, data: List[List[str]]) -> "DocumentBuilder":
+    def add_table(self, rows: int, cols: int, data: list[list[str]]) -> "DocumentBuilder":
         """Add table to document.
 
         Args:

@@ -8,19 +8,16 @@ processing, including:
 - Document lineage system
 """
 
-import asyncio
-from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
 
-from src.core.lineage.base import ChangeType, DocumentLineage, SourceInfo
+from src.core.lineage.base import ChangeType, SourceInfo
 from src.core.lineage.manager import LineageManager
 from src.core.monitoring.errors.lifecycle.manager import ErrorLoggingManager
 from src.core.monitoring.errors.models.log_entry import LogLevel
 from src.core.processing.steps.lifecycle.manager import ProcessingStepManager
 from src.core.processing.steps.models.step import ProcessingStatus
-from src.core.tracking.source.config import SourceConfig
 from src.core.tracking.source.tracker import SourceTracker
 
 

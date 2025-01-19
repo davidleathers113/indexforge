@@ -14,7 +14,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.core.lineage.base import ChangeType, DocumentLineage, SourceInfo
+from src.core.lineage.base import ChangeType, SourceInfo
 from src.core.lineage.manager import LineageManager
 from src.core.monitoring.errors.lifecycle.manager import ErrorLoggingManager
 from src.core.monitoring.errors.models.log_entry import LogLevel
@@ -88,14 +88,14 @@ async def test_concurrent_document_processing(managers):
     should_fail = [i % 2 == 0 for i in range(10)]
 
     # Process all documents concurrently
-    tasks = [process_document(doc_id, managers, fail) for doc_id, fail in zip(doc_ids, should_fail)]
+    tasks = [process_document(doc_id, managers, fail) for doc_id, fail in zip(doc_ids, should_fail, strict=False)]
 
     start_time = datetime.now(UTC)
     await asyncio.gather(*tasks)
     end_time = datetime.now(UTC)
 
     # Verify processing completed for all documents
-    for doc_id, failed in zip(doc_ids, should_fail):
+    for doc_id, failed in zip(doc_ids, should_fail, strict=False):
         # Check processing steps
         steps = managers["processing"].get_steps(doc_id=doc_id)
         assert len(steps) == 2  # initialization + processing

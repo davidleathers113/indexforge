@@ -2,7 +2,6 @@
 
 import pytest
 
-from src.core.interfaces.storage import LineageStorage
 from src.core.tracking.lineage.operations import (
     add_derivation,
     get_derivation_chain,

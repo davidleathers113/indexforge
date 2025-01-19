@@ -1,8 +1,7 @@
 """Test fixtures for chunk processor tests."""
 
-import uuid
-from typing import Any
 from unittest.mock import Mock, patch
+import uuid
 
 import pytest
 from spacy.language import Language

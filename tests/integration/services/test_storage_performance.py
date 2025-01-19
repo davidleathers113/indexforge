@@ -5,32 +5,29 @@ measuring throughput, latency, and resource usage under various loads.
 """
 
 import asyncio
+from collections.abc import AsyncGenerator
+from dataclasses import asdict, dataclass
 import gc
 import json
-import time
-from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import AsyncGenerator, Dict, List, Optional, Tuple
+import time
 from uuid import UUID
 
 import psutil
 import pytest
 from pytest_asyncio import fixture
+from tests.integration.services.builders.test_data import (
+    ChunkBuilder,
+    DocumentBuilder,
+    ReferenceBuilder,
+)
 
-from src.core.models.chunks import Chunk
-from src.core.models.documents import Document
-from src.core.models.references import Reference
 from src.core.settings import Settings
 from src.services.storage import (
     BatchConfig,
     ChunkStorageService,
     DocumentStorageService,
     ReferenceStorageService,
-)
-from tests.integration.services.builders.test_data import (
-    ChunkBuilder,
-    DocumentBuilder,
-    ReferenceBuilder,
 )
 
 
@@ -43,7 +40,7 @@ class OperationMetrics:
     memory_mb: float
     throughput: float
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -54,14 +51,14 @@ class TestReport:
     start_time: float
     end_time: float
     total_duration: float
-    operations: List[OperationMetrics]
+    operations: list[OperationMetrics]
     peak_memory_mb: float
     avg_memory_mb: float
     total_operations: int
     successful_operations: int
     failed_operations: int
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert report to dictionary."""
         return asdict(self)
 
@@ -108,7 +105,7 @@ class MemoryMonitor:
         """Get memory usage change in MB."""
         return self.end_memory - self.start_memory
 
-    def detect_leaks(self, threshold_mb: float = 1.0) -> Optional[float]:
+    def detect_leaks(self, threshold_mb: float = 1.0) -> float | None:
         """Detect potential memory leaks."""
         if len(self.measurements) < 2:
             return None
@@ -185,7 +182,7 @@ class TestStoragePerformance:
 
     async def measure_operation_metrics(
         self, operation, operation_name: str, iterations: int = 1
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """Measure operation execution time and memory usage."""
         metrics = []
         async with MemoryMonitor() as memory:

@@ -7,14 +7,14 @@ data validation, and error handling.
 
 import logging
 from pathlib import Path
-from typing import Dict, List
 
-import pandas as pd
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+import pandas as pd
+import pytest
 
-from src.core.processors.excel import ExcelProcessor, SheetData
+from src.core.processors.excel import ExcelProcessor
+
 
 # Configure logging for tests
 logger = logging.getLogger(__name__)

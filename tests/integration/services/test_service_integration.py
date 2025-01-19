@@ -1,13 +1,12 @@
 """Integration tests for service interactions."""
 
 import asyncio
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 import pytest
 
 from src.core.errors import ServiceError
-from src.core.metrics import ServiceMetricsCollector
 from src.core.settings import Settings
 from src.services import RedisService, WeaviateClient
 from src.services.factory import ServiceFactory
@@ -97,7 +96,7 @@ class TestServiceIntegration:
     async def test_weaviate_batch_operations(self, weaviate_service: WeaviateClient):
         """Test Weaviate batch operations."""
         class_name = "TestClass"
-        test_objects: List[Dict[str, Any]] = [
+        test_objects: list[dict[str, Any]] = [
             {"text": "test document 1", "category": "A"},
             {"text": "test document 2", "category": "B"},
             {"text": "test document 3", "category": "C"},
@@ -220,19 +219,19 @@ class TestServiceIntegration:
             result = await redis_service.get(key)
             assert result == value
 
-        redis_tasks = [redis_operation(k, v) for k, v in zip(keys, values)]
+        redis_tasks = [redis_operation(k, v) for k, v in zip(keys, values, strict=False)]
         await asyncio.gather(*redis_tasks)
 
         # Test concurrent Weaviate operations
         vectors = [np.random.rand(128).tolist() for _ in range(num_operations)]
         objects = [{"text": f"doc_{i}", "value": i} for i in range(num_operations)]
 
-        async def weaviate_operation(obj: Dict[str, Any], vector: List[float]):
+        async def weaviate_operation(obj: dict[str, Any], vector: list[float]):
             uuid = await weaviate_service.add_object("TestClass", obj, vector)
             assert uuid is not None
             return uuid
 
-        weaviate_tasks = [weaviate_operation(obj, vec) for obj, vec in zip(objects, vectors)]
+        weaviate_tasks = [weaviate_operation(obj, vec) for obj, vec in zip(objects, vectors, strict=False)]
         uuids = await asyncio.gather(*weaviate_tasks)
 
         # Cleanup

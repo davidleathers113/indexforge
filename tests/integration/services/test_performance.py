@@ -1,9 +1,8 @@
 """Integration tests for service performance benchmarks."""
 
 import asyncio
+from statistics import mean
 import time
-from statistics import mean, stdev
-from typing import Any, Dict, List
 
 import numpy as np
 import pytest
@@ -82,7 +81,7 @@ class TestServicePerformance:
 
         # Measure batch set
         batch_set_time = await self.measure_operation_time(
-            asyncio.gather(*[redis_service.set(k, v) for k, v in zip(keys, values)])
+            asyncio.gather(*[redis_service.set(k, v) for k, v in zip(keys, values, strict=False)])
         )
 
         # Measure batch get
@@ -104,7 +103,7 @@ class TestServicePerformance:
         num_clients = 50
         ops_per_client = 100
 
-        async def client_workload(client_id: int) -> List[float]:
+        async def client_workload(client_id: int) -> list[float]:
             """Simulate client workload."""
             latencies = []
             for i in range(ops_per_client):

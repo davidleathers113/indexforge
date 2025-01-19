@@ -7,11 +7,9 @@ This module provides comprehensive performance testing with:
 - Batch processing benchmarks
 """
 
-import asyncio
+from datetime import datetime
 import gc
 import time
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
 
 import numpy as np
 import psutil
@@ -30,11 +28,11 @@ class PerformanceMetrics:
 
     def __init__(self) -> None:
         """Initialize metrics collection."""
-        self.operation_times: List[float] = []
-        self.memory_usage: List[float] = []
-        self.batch_sizes: List[int] = []
-        self.error_counts: Dict[str, int] = {}
-        self.start_time: Optional[float] = None
+        self.operation_times: list[float] = []
+        self.memory_usage: list[float] = []
+        self.batch_sizes: list[int] = []
+        self.error_counts: dict[str, int] = {}
+        self.start_time: float | None = None
 
     def start_operation(self) -> None:
         """Start timing an operation."""
@@ -56,7 +54,7 @@ class PerformanceMetrics:
         self.start_time = None
         return duration
 
-    def get_statistics(self) -> Dict[str, float]:
+    def get_statistics(self) -> dict[str, float]:
         """Calculate performance statistics.
 
         Returns:

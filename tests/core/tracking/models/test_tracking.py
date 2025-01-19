@@ -8,9 +8,11 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from src.core.models.lineage import LogEntry as LogEntryProtocol
-from src.core.models.lineage import ProcessingStep as ProcessingStepProtocol
-from src.core.models.lineage import Transformation as TransformationProtocol
+from src.core.models.lineage import (
+    LogEntry as LogEntryProtocol,
+    ProcessingStep as ProcessingStepProtocol,
+    Transformation as TransformationProtocol,
+)
 from src.core.tracking.models.tracking import (
     LogEntry,
     LogLevel,

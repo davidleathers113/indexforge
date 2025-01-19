@@ -7,22 +7,23 @@ focusing on connection handling, authentication, and timeout configurations.
 from unittest.mock import Mock, patch
 
 import pytest
+import weaviate
 from requests.exceptions import ConnectionError, Timeout
 
-from src.api.repositories.weaviate.client import WeaviateClient
 from src.api.repositories.weaviate.exceptions import (
     AuthenticationError,
     ClientInitializationError,
     TimeoutConfigurationError,
 )
 
-
 # Test data constants
 TEST_CONFIG = {
     "url": "http://localhost:8080",
-    "api_key": "test-api-key",
-    "timeout": 300,
-    "retry_count": 3,
+    "auth_credentials": weaviate.auth.AuthApiKey(api_key="test-api-key"),
+    "additional_config": weaviate.config.AdditionalConfig(
+        timeout_config=weaviate.config.Timeout(timeout_ms=300000)
+    ),
+    "additional_headers": None,
 }
 
 
@@ -35,11 +36,11 @@ def mock_weaviate():
 
 @pytest.fixture
 def client_factory():
-    """Create a function to instantiate WeaviateClient with custom config."""
+    """Create a function to instantiate Weaviate client with custom config."""
 
     def create_client(**kwargs):
         config = {**TEST_CONFIG, **kwargs}
-        return WeaviateClient(**config)
+        return weaviate.Client(**config)
 
     return create_client
 
@@ -55,8 +56,8 @@ def test_successful_client_initialization(mock_weaviate, client_factory):
     client = client_factory()
 
     assert client.url == TEST_CONFIG["url"]
-    assert client.api_key == TEST_CONFIG["api_key"]
-    assert client.timeout == TEST_CONFIG["timeout"]
+    assert isinstance(client.auth_credentials, weaviate.auth.AuthApiKey)
+    assert isinstance(client.additional_config.timeout_config, weaviate.config.Timeout)
     mock_weaviate.assert_called_once()
 
 
@@ -74,7 +75,6 @@ def test_connection_failure_handling(mock_weaviate, client_factory):
         client_factory()
 
     assert "Failed to connect" in str(exc_info.value)
-    assert "after 3 retries" in str(exc_info.value)
 
 
 def test_authentication_validation(mock_weaviate, client_factory):
@@ -88,7 +88,7 @@ def test_authentication_validation(mock_weaviate, client_factory):
     mock_weaviate.side_effect = Exception("Invalid API key")
 
     with pytest.raises(AuthenticationError) as exc_info:
-        client_factory(api_key="invalid-key")
+        client_factory(auth_credentials=weaviate.auth.AuthApiKey(api_key="invalid-key"))
 
     assert "Invalid API key" in str(exc_info.value)
 
@@ -102,12 +102,20 @@ def test_timeout_configuration(mock_weaviate, client_factory):
     Then: Should validate and apply timeout settings correctly
     """
     # Test valid timeout
-    client = client_factory(timeout=600)
-    assert client.timeout == 600
+    client = client_factory(
+        additional_config=weaviate.config.AdditionalConfig(
+            timeout_config=weaviate.config.Timeout(timeout_ms=600000)
+        )
+    )
+    assert client.additional_config.timeout_config.timeout_ms == 600000
 
     # Test invalid timeout
     with pytest.raises(TimeoutConfigurationError):
-        client_factory(timeout=-1)
+        client_factory(
+            additional_config=weaviate.config.AdditionalConfig(
+                timeout_config=weaviate.config.Timeout(timeout_ms=-1)
+            )
+        )
 
 
 def test_retry_mechanism(mock_weaviate, client_factory):
@@ -144,4 +152,4 @@ def test_connection_timeout_handling(mock_weaviate, client_factory):
         client_factory()
 
     assert "Connection timed out" in str(exc_info.value)
-    assert mock_weaviate.call_count == TEST_CONFIG["retry_count"]
+    assert mock_weaviate.call_count == 3

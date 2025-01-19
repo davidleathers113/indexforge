@@ -4,8 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.core.models.chunks import ProcessedChunk
 from src.ml.processing.errors import ServiceStateError
+from src.ml.processing.models.chunks import ProcessedChunk
 
 
 def test_process_chunk(processor, sample_chunk, mock_nlp):
@@ -40,7 +40,7 @@ def test_process_chunks(processor, sample_chunks, mock_nlp):
     results = processor.process_chunks(sample_chunks)
 
     assert len(results) == len(sample_chunks)
-    for result, original in zip(results, sample_chunks):
+    for result, original in zip(results, sample_chunks, strict=False):
         assert isinstance(result, ProcessedChunk)
         assert result.id == original.id
         assert result.content == original.content

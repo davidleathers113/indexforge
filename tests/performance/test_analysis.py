@@ -1,11 +1,9 @@
 """Tests for performance analysis components."""
 
 from pathlib import Path
-from typing import List
 
 import numpy as np
 import pytest
-
 from tests.performance.analysis import (
     AnalysisConfig,
     AnalysisConfigFactory,
@@ -20,7 +18,7 @@ from tests.performance.analysis import (
 
 
 @pytest.fixture
-def sample_metrics() -> List[float]:
+def sample_metrics() -> list[float]:
     """Generate sample metrics for testing.
 
     Returns:
@@ -148,7 +146,7 @@ def test_analyzer_error_handling(sample_metrics):
     """Test analyzer error handling."""
 
     class FailingStrategy(SeasonalityAnalysis):
-        def analyze(self, values: List[float], **kwargs):
+        def analyze(self, values: list[float], **kwargs):
             raise ValueError("Simulated failure")
 
     analyzer = PerformanceAnalyzer([FailingStrategy()])

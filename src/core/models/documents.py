@@ -9,34 +9,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
+
+from .types import DocumentStatus, DocumentType
 
 
 if TYPE_CHECKING:
     from .chunks import Chunk
-
-
-class DocumentStatus(Enum):
-    """Document processing status."""
-
-    PENDING = "pending"  # Not yet processed
-    PROCESSING = "processing"  # Currently being processed
-    PROCESSED = "processed"  # Successfully processed
-    FAILED = "failed"  # Processing failed
-    ARCHIVED = "archived"  # Document archived
-
-
-class DocumentType(Enum):
-    """Types of documents that can be processed."""
-
-    TEXT = "text"  # Plain text documents
-    MARKDOWN = "markdown"  # Markdown documents
-    HTML = "html"  # HTML documents
-    PDF = "pdf"  # PDF documents
-    CODE = "code"  # Source code files
-    NOTION = "notion"  # Notion workspace exports
 
 
 @dataclass

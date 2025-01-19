@@ -3,9 +3,9 @@
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from src.core.models import DocumentLineage
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +21,11 @@ class MockLineageStorage:
         """
         self.storage_dir = Path(storage_dir)
         self.storage_dir.mkdir(parents=True, exist_ok=True)
-        self._lineage_data: Dict[str, DocumentLineage] = {}
+        self._lineage_data: dict[str, DocumentLineage] = {}
         logger.debug("Initialized mock storage in directory: %s", storage_dir)
 
     @property
-    def lineage_data(self) -> Dict[str, DocumentLineage]:
+    def lineage_data(self) -> dict[str, DocumentLineage]:
         """Get the current lineage data."""
         # Load all files from storage into memory
         for file_path in self.storage_dir.glob("*.json"):
@@ -47,7 +47,7 @@ class MockLineageStorage:
         """
         return self.storage_dir / f"{doc_id}.json"
 
-    def get_lineage(self, doc_id: str) -> Optional[DocumentLineage]:
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
         """Retrieve lineage information for a document.
 
         Args:
@@ -106,7 +106,7 @@ class MockLineageStorage:
             logger.error("Error deleting lineage for document %s: %s", doc_id, str(e))
             raise
 
-    def get_all_lineage(self) -> List[DocumentLineage]:
+    def get_all_lineage(self) -> list[DocumentLineage]:
         """Get all document lineage records.
 
         Returns:
@@ -114,7 +114,7 @@ class MockLineageStorage:
         """
         return list(self.lineage_data.values())
 
-    def update_document_lineage(self, doc_id: str, updates: Dict) -> None:
+    def update_document_lineage(self, doc_id: str, updates: dict) -> None:
         """Update specific fields in a document's lineage.
 
         Args:

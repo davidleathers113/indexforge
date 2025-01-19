@@ -1,6 +1,6 @@
 """Performance analyzer implementation using the Strategy pattern."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from tests.performance.analysis.strategies import AnalysisStrategy
 
@@ -8,7 +8,7 @@ from tests.performance.analysis.strategies import AnalysisStrategy
 class PerformanceAnalyzer:
     """Executes performance analysis using configured strategies."""
 
-    def __init__(self, strategies: Optional[List[AnalysisStrategy]] = None):
+    def __init__(self, strategies: list[AnalysisStrategy] | None = None):
         """Initialize the analyzer with strategies.
 
         Args:
@@ -24,7 +24,7 @@ class PerformanceAnalyzer:
         """
         self.strategies.append(strategy)
 
-    def analyze(self, values: List[float], **kwargs) -> Dict[str, Any]:
+    def analyze(self, values: list[float], **kwargs) -> dict[str, Any]:
         """Run all configured analysis strategies.
 
         Args:
@@ -53,7 +53,7 @@ class PerformanceAnalysisBuilder:
 
     def __init__(self):
         """Initialize the builder."""
-        self.strategies: List[AnalysisStrategy] = []
+        self.strategies: list[AnalysisStrategy] = []
 
     def add_strategy(self, strategy: AnalysisStrategy) -> "PerformanceAnalysisBuilder":
         """Add an analysis strategy.

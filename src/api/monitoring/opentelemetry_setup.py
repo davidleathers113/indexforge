@@ -12,7 +12,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace.sampling import ParentBasedTraceIdRatio
 
-from src.api.config.settings import settings
+from src.api.config import settings
 
 
 # Initialize optional OpenTelemetry components

@@ -1,10 +1,9 @@
 """Unit tests for source-specific schema validation."""
 
-from typing import Any, Dict
 
 import pytest
 
-from src.core.schema.base import SchemaType, SchemaVersion, ValidationError
+from src.core.schema.base import SchemaType, SchemaVersion
 from src.core.schema.schema import FieldDefinition, Schema
 from src.core.schema.validators.source_validator import SourceValidationRule, SourceValidator
 

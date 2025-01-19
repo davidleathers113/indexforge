@@ -1,7 +1,7 @@
 """Shared fixtures for processing steps tests."""
 
+from collections.abc import Generator
 from datetime import UTC, datetime
-from typing import Dict, Generator
 
 import pytest
 
@@ -19,7 +19,7 @@ class MockStorage:
     """Mock storage backend for testing."""
 
     def __init__(self) -> None:
-        self.lineage_data: Dict[str, MockLineage] = {}
+        self.lineage_data: dict[str, MockLineage] = {}
 
     def get_lineage(self, doc_id: str) -> MockLineage:
         if doc_id not in self.lineage_data:
@@ -29,7 +29,7 @@ class MockStorage:
     def save_lineage(self, lineage: MockLineage) -> None:
         pass
 
-    def get_all_lineage(self) -> Dict[str, MockLineage]:
+    def get_all_lineage(self) -> dict[str, MockLineage]:
         return self.lineage_data
 
 

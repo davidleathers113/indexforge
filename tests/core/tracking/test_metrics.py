@@ -1,7 +1,7 @@
 """Tests for storage metrics collection."""
 
-import time
 from pathlib import Path
+import time
 
 import pytest
 

@@ -3,10 +3,10 @@
 import logging
 from pathlib import Path
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 
 from src.core.processors.word import WordProcessor
+
 
 logger = logging.getLogger(__name__)
 

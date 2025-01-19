@@ -7,13 +7,14 @@ ensuring proper handling of encryption metadata for secure document storage.
 import json
 import logging
 from pathlib import Path
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from src.core.security.encryption import EncryptedData
 from src.services.storage.secure_metadata import MetadataHandler, SecureStorageMetadata
+
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +195,7 @@ def test_handle_save_failure(metadata_dir: Path, metadata: SecureStorageMetadata
     """
 
     def mock_dump(*args, **kwargs):
-        raise IOError("Simulated write failure")
+        raise OSError("Simulated write failure")
 
     monkeypatch.setattr(json, "dump", mock_dump)
 

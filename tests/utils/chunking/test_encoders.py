@@ -4,8 +4,7 @@ This module contains integration tests for the token encoder factory and its
 implementations, including caching behavior, fallback mechanisms, and error handling.
 """
 
-import logging
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -13,7 +12,6 @@ from src.utils.chunking.strategies.encoders import (
     TIKTOKEN_AVAILABLE,
     BasicEncoder,
     TiktokenEncoder,
-    TokenEncoder,
     TokenEncoderFactory,
 )
 

@@ -1,15 +1,13 @@
 """Tests for the core alert management system."""
 
 import json
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import requests
 
 from src.core.monitoring.alerts.lifecycle.manager import AlertLifecycleManager
-from src.core.monitoring.alerts.models.alert import Alert
 from src.core.monitoring.alerts.models.config import AlertConfig
 from src.core.monitoring.alerts.models.types import AlertSeverity, AlertType
 

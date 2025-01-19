@@ -3,8 +3,8 @@
 from functools import lru_cache
 from urllib.parse import urlparse
 
+import weaviate
 from weaviate.auth import AuthApiKey
-import weaviate.classes as wvc
 from weaviate.config import AdditionalConfig, Proxies
 from weaviate.exceptions import WeaviateConnectionError
 
@@ -22,10 +22,11 @@ def create_additional_config() -> AdditionalConfig:
         AdditionalConfig: Configuration instance with timeout and batch settings.
     """
     return AdditionalConfig(
-        timeout=settings.WEAVIATE_TIMEOUT,
-        batch_size=settings.WEAVIATE_BATCH_SIZE,
-        timeout_retries=settings.WEAVIATE_TIMEOUT_RETRIES,
-        connection_timeout=settings.WEAVIATE_CONNECTION_TIMEOUT,
+        timeout_config=weaviate.config.TimeoutConfig(
+            timeout=settings.WEAVIATE_TIMEOUT,
+            connection_timeout=settings.WEAVIATE_CONNECTION_TIMEOUT,
+            retries=settings.WEAVIATE_TIMEOUT_RETRIES,
+        ),
         headers={
             "X-Request-ID": "document-api",
             "User-Agent": "IndexForge/1.0",
@@ -39,7 +40,7 @@ def create_additional_config() -> AdditionalConfig:
             else None
         ),
         trust_env=True,
-        grpc_secure=settings.WEAVIATE_ENABLE_GRPC,
+        grpc_port=settings.WEAVIATE_GRPC_PORT if settings.WEAVIATE_ENABLE_GRPC else None,
     )
 
 
@@ -47,7 +48,7 @@ def create_embedded_client(
     url: str,
     additional_config: AdditionalConfig,
     auth: AuthApiKey | None = None,
-) -> wvc.WeaviateClient:
+) -> weaviate.WeaviateClient:
     """Create a Weaviate client for embedded/local instance.
 
     Args:
@@ -62,11 +63,11 @@ def create_embedded_client(
         WeaviateConnectionError: If connection fails or configuration is invalid.
     """
     try:
-        return wvc.init.connect_to_embedded(
+        return weaviate.Client(
+            url=url,
             port=settings.WEAVIATE_PORT,
-            grpc_port=settings.WEAVIATE_GRPC_PORT,
             additional_config=additional_config,
-            auth_credentials=auth,
+            auth_client_secret=auth,
         )
     except Exception as e:
         raise WeaviateConnectionError(
@@ -78,7 +79,7 @@ def create_custom_client(
     url: str,
     additional_config: AdditionalConfig,
     auth: AuthApiKey | None = None,
-) -> wvc.WeaviateClient:
+) -> weaviate.WeaviateClient:
     """Create a Weaviate client for custom/remote instance.
 
     Args:
@@ -93,10 +94,10 @@ def create_custom_client(
         WeaviateConnectionError: If connection fails or configuration is invalid.
     """
     try:
-        return wvc.init.connect_to_custom(
+        return weaviate.Client(
             url=url,
             additional_config=additional_config,
-            auth_credentials=auth,
+            auth_client_secret=auth,
         )
     except Exception as e:
         raise WeaviateConnectionError(f"Failed to connect to Weaviate at {url}: {e!s}") from e
@@ -104,7 +105,7 @@ def create_custom_client(
 
 @lru_cache
 @with_weaviate_error_handling
-def get_weaviate_client() -> wvc.WeaviateClient:
+def get_weaviate_client() -> weaviate.WeaviateClient:
     """Get a configured Weaviate client.
 
     Returns:

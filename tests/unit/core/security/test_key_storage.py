@@ -1,12 +1,10 @@
 """Unit tests for key storage functionality."""
 
-import os
 from datetime import datetime
-from pathlib import Path
 from uuid import uuid4
 
-import pytest
 from pydantic import SecretStr
+import pytest
 
 from src.core.security.encryption import EncryptionKey, KeyStatus
 from src.core.security.key_storage import FileKeyStorage, KeyStorageConfig, KeyStorageError

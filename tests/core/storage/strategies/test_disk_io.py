@@ -9,10 +9,8 @@ for the JSON storage strategy, including:
 """
 
 import asyncio
-import os
-import time
 from pathlib import Path
-from typing import List
+import time
 from uuid import UUID
 
 import pytest
@@ -22,7 +20,7 @@ from src.core.storage.strategies.json_storage import JsonStorage
 
 
 @pytest.fixture
-def sample_documents(size: int = 1000) -> List[Document]:
+def sample_documents(size: int = 1000) -> list[Document]:
     """Create a list of sample documents for testing."""
     return [
         Document(

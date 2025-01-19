@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List
 
 import pandas as pd
 import pytest
@@ -61,9 +60,9 @@ def test_process_excel_success(processor, excel_file, caplog):
     result = processor.process(excel_file)
     assert isinstance(result, ProcessingResult)
     assert result.status == "success"
-    assert isinstance(result.content, List)
+    assert isinstance(result.content, list)
     assert len(result.content) == 1  # One sheet
-    assert isinstance(result.content[0], Dict)
+    assert isinstance(result.content[0], dict)
     assert "sheet_name" in result.content[0]
     assert "data" in result.content[0]
     assert "Processing Excel file" in caplog.text
@@ -74,9 +73,9 @@ def test_process_csv_success(processor, csv_file, caplog):
     result = processor.process(csv_file)
     assert isinstance(result, ProcessingResult)
     assert result.status == "success"
-    assert isinstance(result.content, List)
+    assert isinstance(result.content, list)
     assert len(result.content) == 1
-    assert isinstance(result.content[0], Dict)
+    assert isinstance(result.content[0], dict)
     assert "Processing CSV file" in caplog.text
 
 

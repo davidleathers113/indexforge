@@ -1,19 +1,21 @@
 """Shared fixtures for document tracking tests."""
 
+from collections.abc import Generator
+from datetime import UTC, datetime
 import logging
 import os
-import sys
-from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Generator
+import sys
+from typing import Any
 
-import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+import pytest
 
 from src.core.tracking.operations import add_document
 
 from .mocks import MockLineageStorage
+
 
 # Configure logging for tests
 logging.basicConfig(

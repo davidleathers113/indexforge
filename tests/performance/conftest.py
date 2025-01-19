@@ -1,7 +1,7 @@
-import json
 from dataclasses import dataclass
+import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -22,7 +22,7 @@ def performance_thresholds() -> PerformanceThresholds:
 
 
 @pytest.fixture
-def performance_baseline(tmp_path: Path) -> Dict[str, Any]:
+def performance_baseline(tmp_path: Path) -> dict[str, Any]:
     """Loads or creates performance baseline metrics."""
     baseline_file = tmp_path / "performance_baseline.json"
     if baseline_file.exists():

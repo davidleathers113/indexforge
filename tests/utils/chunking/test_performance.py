@@ -6,7 +6,7 @@ of different chunking strategies under various conditions.
 
 import statistics
 import time
-from typing import Any, Dict, Type
+from typing import Any
 
 import pytest
 
@@ -14,6 +14,7 @@ from src.utils.chunking.strategies.base import ChunkingStrategy, ChunkValidator
 from src.utils.chunking.strategies.char_based import CharacterBasedChunking
 from src.utils.chunking.strategies.token_based import TokenBasedChunking, TokenEncoderFactory
 from src.utils.chunking.strategies.word_based import WordBasedChunking
+
 
 # Test data for benchmarks
 BENCHMARK_TEXTS = {
@@ -55,9 +56,9 @@ class BenchmarkResult:
     """Container for benchmark results."""
 
     def __init__(self):
-        self.times: Dict[str, float] = {}
-        self.chunk_counts: Dict[str, int] = {}
-        self.memory_usage: Dict[str, float] = {}
+        self.times: dict[str, float] = {}
+        self.chunk_counts: dict[str, int] = {}
+        self.memory_usage: dict[str, float] = {}
 
     def add_result(self, name: str, time_taken: float, chunk_count: int, memory_used: float):
         """Add a benchmark result."""
@@ -65,7 +66,7 @@ class BenchmarkResult:
         self.chunk_counts[name] = chunk_count
         self.memory_usage[name] = memory_used
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get statistical summary of results."""
         return {
             "time_mean": statistics.mean(self.times.values()),
@@ -78,7 +79,7 @@ class BenchmarkResult:
 class PerformanceBase:
     """Base class for performance testing."""
 
-    strategy_class: Type[ChunkingStrategy] = None
+    strategy_class: type[ChunkingStrategy] = None
 
     @pytest.fixture
     def strategy(self, validator):

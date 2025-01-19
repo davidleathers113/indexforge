@@ -4,17 +4,17 @@ This module provides focused tests for chunk storage operations,
 including lifecycle, batch processing, and error handling.
 """
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from uuid import UUID
 
 import pytest
 from pytest_asyncio import fixture
+from tests.integration.services.base.storage_test import BaseStorageTest
+from tests.integration.services.builders.test_data import ChunkBuilder
 
 from src.core.models.chunks import Chunk
 from src.core.settings import Settings
 from src.services.storage import BatchConfig, ChunkStorageService
-from tests.integration.services.base.storage_test import BaseStorageTest
-from tests.integration.services.builders.test_data import ChunkBuilder
 
 
 @fixture
@@ -102,7 +102,7 @@ class TestChunkStorage(BaseStorageTest[Chunk]):
 
         # Update batch
         updates = []
-        for chunk_id, chunk in zip(chunk_ids, test_chunks):
+        for chunk_id, chunk in zip(chunk_ids, test_chunks, strict=False):
             chunk.content = f"Updated {chunk.content}"
             updates.append((chunk_id, chunk))
 

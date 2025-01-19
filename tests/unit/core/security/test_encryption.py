@@ -1,18 +1,16 @@
 """Unit tests for encryption functionality."""
 
+from datetime import datetime
 import time
-from datetime import datetime, timedelta
 from uuid import UUID
 
-import pytest
 from pydantic import SecretStr
+import pytest
 
 from src.core.security.encryption import (
     DecryptionError,
     EncryptedData,
     EncryptionConfig,
-    EncryptionError,
-    EncryptionKey,
     EncryptionKeyNotFoundError,
     EncryptionManager,
     KeyGenerationError,

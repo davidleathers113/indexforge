@@ -4,17 +4,17 @@ This module provides focused tests for document storage operations,
 including lifecycle, batch processing, and error handling.
 """
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from uuid import UUID
 
 import pytest
 from pytest_asyncio import fixture
-
-from src.core.models.documents import Document, DocumentType
-from src.core.settings import Settings
-from src.services.storage import BatchConfig, DocumentStorageService
 from tests.integration.services.base.storage_test import BaseStorageTest
 from tests.integration.services.builders.test_data import DocumentBuilder
+
+from src.core.models.documents import Document
+from src.core.settings import Settings
+from src.services.storage import BatchConfig, DocumentStorageService
 
 
 @fixture
@@ -96,7 +96,7 @@ class TestDocumentStorage(BaseStorageTest[Document]):
 
         # Update batch
         updates = []
-        for doc_id, doc in zip(doc_ids, test_documents):
+        for doc_id, doc in zip(doc_ids, test_documents, strict=False):
             doc.content = f"Updated {doc.content}"
             updates.append((doc_id, doc))
 

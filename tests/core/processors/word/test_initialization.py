@@ -1,12 +1,12 @@
 """Tests for Word processor initialization and configuration."""
 
 import logging
-from pathlib import Path
 
-import pytest
 from _pytest.logging import LogCaptureFixture
+import pytest
 
 from src.core.processors.word import WordProcessor
+
 
 logger = logging.getLogger(__name__)
 

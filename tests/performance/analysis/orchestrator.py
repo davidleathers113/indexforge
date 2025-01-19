@@ -1,8 +1,7 @@
 """Performance analysis orchestration."""
 
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .analyzer import PerformanceAnalyzer
 from .config import AnalysisConfig
@@ -23,7 +22,7 @@ class PerformanceAnalysisOrchestrator:
         self,
         metrics_repository: MetricsRepository,
         config: AnalysisConfig,
-        analyzer: Optional[PerformanceAnalyzer] = None,
+        analyzer: PerformanceAnalyzer | None = None,
     ):
         """Initialize the orchestrator.
 
@@ -46,7 +45,7 @@ class PerformanceAnalysisOrchestrator:
         analyzer.add_strategy(CorrelationAnalysis())
         return analyzer
 
-    def analyze_operation(self, operation_name: str) -> Dict[str, Any]:
+    def analyze_operation(self, operation_name: str) -> dict[str, Any]:
         """Analyze performance trends for an operation.
 
         Args:

@@ -11,8 +11,6 @@ including tests for:
 
 import asyncio
 import time
-from concurrent.futures import ThreadPoolExecutor
-from typing import List
 from uuid import UUID
 
 import pytest
@@ -24,7 +22,7 @@ from src.core.storage.strategies.memory_storage import MemoryStorage
 
 
 @pytest.fixture
-def sample_documents(size: int = 1000) -> List[Document]:
+def sample_documents(size: int = 1000) -> list[Document]:
     """Create a list of sample documents for testing."""
     return [
         Document(id=UUID(int=i), content=f"Test document {i}", metadata={"test_key": f"value_{i}"})
@@ -84,7 +82,7 @@ async def test_batch_operation_throughput(storage_strategy, sample_documents):
 
     throughput = batch_size / load_duration
     assert throughput > 50, f"Batch load throughput: {throughput:.1f} ops/sec"
-    assert all(a == b for a, b in zip(loaded_docs, docs))
+    assert all(a == b for a, b in zip(loaded_docs, docs, strict=False))
 
 
 async def test_concurrent_operation_performance(storage_strategy, sample_documents):

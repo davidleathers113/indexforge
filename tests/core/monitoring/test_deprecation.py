@@ -10,15 +10,21 @@ import pytest
 
 from src.core.monitoring.alerts.models.alert import Alert as NewAlert
 from src.core.monitoring.alerts.models.config import AlertConfig as NewConfig
-from src.core.monitoring.alerts.models.types import AlertSeverity as NewSeverity
-from src.core.monitoring.alerts.models.types import AlertType as NewType
+from src.core.monitoring.alerts.models.types import (
+    AlertSeverity as NewSeverity,
+    AlertType as NewType,
+)
 
 
 def test_deprecated_imports():
     """Verify that deprecated imports emit warnings but still work."""
     with pytest.warns(DeprecationWarning) as warnings:
-        from src.core.monitoring.alerts.models import Alert  # noqa: F401
-        from src.core.monitoring.alerts.models import AlertConfig, AlertSeverity, AlertType
+        from src.core.monitoring.alerts.models import (
+            Alert,
+            AlertConfig,
+            AlertSeverity,
+            AlertType,
+        )
 
     # Check warning message
     assert len(warnings) == 1

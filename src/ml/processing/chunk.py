@@ -1,7 +1,6 @@
 """Chunk processor implementation."""
 
-from typing import Any
-
+from typing import TYPE_CHECKING, Any
 
 try:
     import spacy
@@ -11,17 +10,22 @@ try:
 except ImportError:
     SPACY_AVAILABLE = False
 
-from src.core.models.chunks import Chunk, ProcessedChunk
+from src.core.models.chunks import Chunk
 from src.core.models.documents import DocumentStatus, ProcessingStep
+from src.core.settings import Settings
+from src.ml.service import ServiceInitializationError, ServiceState
 
 from .base import BaseProcessor
-from .errors import ServiceInitializationError, ValidationError
+from .errors import ValidationError
+from .models.chunks import ProcessedChunk
 from .results.aggregator import ResultAggregator
 from .strategies.management import StrategyManager
 from .strategies.nlp import NERStrategy, SentimentStrategy, TokenizationStrategy
 from .strategies.topic import TopicStrategy
-from .types import ServiceState
 from .validation.chunk_validator import ChunkValidator
+
+if TYPE_CHECKING:
+    from .types import ServiceState
 
 
 class ChunkProcessor(BaseProcessor[ProcessedChunk]):
@@ -37,7 +41,7 @@ class ChunkProcessor(BaseProcessor[ProcessedChunk]):
         strategy_manager: Manager for processing strategies
     """
 
-    def __init__(self, settings: "Settings") -> None:
+    def __init__(self, settings: Settings) -> None:
         """Initialize the processor.
 
         Args:
@@ -132,9 +136,7 @@ class ChunkProcessor(BaseProcessor[ProcessedChunk]):
                 service_name=self.__class__.__name__,
             )
 
-    def process_chunk(
-        self, chunk: Chunk, metadata: dict[str, Any] | None = None
-    ) -> ProcessedChunk:
+    def process_chunk(self, chunk: Chunk, metadata: dict[str, Any] | None = None) -> ProcessedChunk:
         """Process a single chunk.
 
         This method applies all registered strategies to the chunk

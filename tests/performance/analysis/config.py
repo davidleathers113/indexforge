@@ -1,16 +1,14 @@
 """Configuration factory for performance analysis."""
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple, Union
-
-import numpy as np
+from typing import Any
 
 
 @dataclass
 class AnalysisConfig:
     """Configuration settings for performance analysis."""
 
-    metric_paths: List[List[str]]
+    metric_paths: list[list[str]]
     baseline_threshold: float
     correlation_threshold: float
     significance_level: float
@@ -18,7 +16,7 @@ class AnalysisConfig:
     change_point_window: int
     anomaly_contamination: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert config to dictionary.
 
         Returns:
@@ -35,7 +33,7 @@ class AnalysisConfig:
         }
 
     @classmethod
-    def from_dict(cls, config_dict: Dict[str, Any]) -> "AnalysisConfig":
+    def from_dict(cls, config_dict: dict[str, Any]) -> "AnalysisConfig":
         """Create config from dictionary.
 
         Args:

@@ -5,7 +5,7 @@ Each strategy focuses on a specific type of analysis while maintaining a consist
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 from scipy import stats
@@ -24,7 +24,7 @@ class AnalysisStrategy(ABC):
     """Base class for analysis strategies."""
 
     @abstractmethod
-    def analyze(self, values: List[float], **kwargs) -> Dict[str, Any]:
+    def analyze(self, values: list[float], **kwargs) -> dict[str, Any]:
         """Analyze the given values.
 
         Args:
@@ -39,7 +39,7 @@ class AnalysisStrategy(ABC):
         """
         pass
 
-    def _validate_input(self, values: List[float], min_length: int = 2) -> None:
+    def _validate_input(self, values: list[float], min_length: int = 2) -> None:
         """Validate input values.
 
         Args:
@@ -60,7 +60,7 @@ class AnalysisStrategy(ABC):
 class SeasonalityAnalysis(AnalysisStrategy):
     """Detect and analyze seasonality in time series data."""
 
-    def analyze(self, values: List[float], period: Optional[int] = None) -> Dict[str, Any]:
+    def analyze(self, values: list[float], period: int | None = None) -> dict[str, Any]:
         """Analyze seasonality patterns.
 
         Args:
@@ -96,13 +96,13 @@ class SeasonalityAnalysis(AnalysisStrategy):
                 ),
             }
         except (ValueError, np.linalg.LinAlgError, NotImplementedError) as e:
-            raise AnalysisError(f"Seasonality analysis failed: {str(e)}")
+            raise AnalysisError(f"Seasonality analysis failed: {e!s}")
 
 
 class ChangePointAnalysis(AnalysisStrategy):
     """Detect significant changes in metric behavior."""
 
-    def analyze(self, values: List[float], window: int = 10) -> Dict[str, Any]:
+    def analyze(self, values: list[float], window: int = 10) -> dict[str, Any]:
         """Detect change points in the time series.
 
         Args:
@@ -146,13 +146,13 @@ class ChangePointAnalysis(AnalysisStrategy):
 
             return {"changes": changes}
         except Exception as e:
-            raise AnalysisError(f"Change point analysis failed: {str(e)}")
+            raise AnalysisError(f"Change point analysis failed: {e!s}")
 
 
 class AnomalyDetection(AnalysisStrategy):
     """Detect anomalies using multiple methods."""
 
-    def analyze(self, values: List[float], contamination: float = 0.1) -> Dict[str, Any]:
+    def analyze(self, values: list[float], contamination: float = 0.1) -> dict[str, Any]:
         """Detect anomalies in the metric values.
 
         Args:
@@ -170,7 +170,7 @@ class AnomalyDetection(AnalysisStrategy):
             if not 0 < contamination < 0.5:
                 raise AnalysisError("Contamination must be between 0 and 0.5")
 
-            results: Dict[str, List[Tuple[int, float]]] = {}
+            results: dict[str, list[tuple[int, float]]] = {}
             ts = np.array(values)
 
             # Z-score method
@@ -198,13 +198,13 @@ class AnomalyDetection(AnalysisStrategy):
 
             return results
         except Exception as e:
-            raise AnalysisError(f"Anomaly detection failed: {str(e)}")
+            raise AnalysisError(f"Anomaly detection failed: {e!s}")
 
 
 class TrendAnalysis(AnalysisStrategy):
     """Analyze trends and correlations in metric data."""
 
-    def analyze(self, values: List[float], baseline_threshold: float = 1.1) -> Dict[str, Any]:
+    def analyze(self, values: list[float], baseline_threshold: float = 1.1) -> dict[str, Any]:
         """Calculate comprehensive trend statistics.
 
         Args:
@@ -243,13 +243,13 @@ class TrendAnalysis(AnalysisStrategy):
 
             return trend_analysis
         except Exception as e:
-            raise AnalysisError(f"Trend analysis failed: {str(e)}")
+            raise AnalysisError(f"Trend analysis failed: {e!s}")
 
 
 class CorrelationAnalysis(AnalysisStrategy):
     """Analyze correlations between multiple metrics."""
 
-    def analyze(self, values: List[float], other_values: Dict[str, List[float]]) -> Dict[str, Any]:
+    def analyze(self, values: list[float], other_values: dict[str, list[float]]) -> dict[str, Any]:
         """Calculate correlations between metrics.
 
         Args:
@@ -284,4 +284,4 @@ class CorrelationAnalysis(AnalysisStrategy):
 
             return results
         except Exception as e:
-            raise AnalysisError(f"Correlation analysis failed: {str(e)}")
+            raise AnalysisError(f"Correlation analysis failed: {e!s}")

@@ -1,308 +1,647 @@
-"""Storage management for document tracking.
+"""
+Storage management for document lineage data.
 
-This module provides a type-safe implementation of document storage with proper
-handling of document types, relationships, and metadata.
+This module provides functionality for persisting and retrieving document lineage data,
+handling serialization and deserialization of complex data structures, and managing
+the storage directory structure.
+
+The storage system uses JSON files to store document lineage information, with automatic
+handling of datetime serialization and custom object types. It provides atomic operations
+for reading and writing data to prevent corruption during concurrent access.
+
+Example:
+    ```python
+    # Initialize storage
+    storage = LineageStorage("/path/to/storage")
+
+    # Add and retrieve documents
+    storage.add_document("doc123", metadata={"type": "pdf"})
+    lineage = storage.get_lineage("doc123")
+
+    # Save changes
+    storage.save_lineage_data()
+    ```
 """
 
-from __future__ import annotations
-
-import json
-import logging
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
+import json
+import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Protocol, TypeVar, cast
-from uuid import UUID
 
-from ..models.documents import Document, DocumentMetadata, DocumentStatus, DocumentType
-from ..models.settings import Settings
-from .metrics import StorageMetricsCollector
+from .enums import LogLevel, ProcessingStatus, TransformationType
+from .models import DocumentLineage, LogEntry, ProcessingStep, Transformation
+from .utils import load_json
+
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T", bound=Document)
+
+class LineageStorageBase(ABC):
+    """Abstract base class defining the interface for lineage storage."""
+
+    @abstractmethod
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
+        """Get document lineage by ID."""
+        pass
+
+    @abstractmethod
+    def save_lineage(self, lineage: DocumentLineage) -> None:
+        """Save document lineage."""
+        pass
+
+    @abstractmethod
+    def get_all_lineages(self) -> dict[str, DocumentLineage]:
+        """Get all document lineages."""
+        pass
+
+    @abstractmethod
+    def delete_lineage(self, doc_id: str) -> None:
+        """Delete document lineage."""
+        pass
+
+    @abstractmethod
+    def get_lineages_by_time(
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> dict[str, DocumentLineage]:
+        """Get document lineages within a time range."""
+        pass
+
+    @abstractmethod
+    def get_lineages_by_status(self, status: str) -> dict[str, DocumentLineage]:
+        """Get document lineages by processing status."""
+        pass
 
 
-class StorageProtocol(Protocol[T]):
-    """Protocol defining the interface for document storage."""
+class LineageStorage(LineageStorageBase):
+    """
+    Storage manager for document lineage data.
 
-    def get_document(self, doc_id: UUID) -> Optional[T]:
-        """Retrieve a document by ID."""
-        ...
+    This class handles the persistence of document lineage information, including
+    loading from and saving to disk, managing the storage directory structure,
+    and providing atomic operations for data access.
 
-    def save_document(self, document: T) -> None:
-        """Save a document."""
-        ...
+    The storage uses a JSON-based format for data persistence, with automatic
+    handling of datetime serialization and custom object types. The storage
+    structure is designed to be human-readable and easily inspectable for
+    debugging purposes.
 
-    def update_document(self, doc_id: UUID, updates: Dict[str, Any]) -> None:
-        """Update an existing document.
+    Attributes:
+        storage_dir (Path): Path to the directory where lineage data is stored.
+        lineage_data (Dict[str, DocumentLineage]): In-memory cache of loaded lineage data.
 
-        Args:
-            doc_id: ID of document to update
-            updates: Dictionary of updates to apply
+    Example:
+        ```python
+        # Initialize storage
+        storage = LineageStorage("/data/lineage")
 
-        Raises:
-            KeyError: If document not found
-            ValueError: If updates would create invalid document state
-        """
-        ...
-
-    def delete_document(self, doc_id: UUID) -> None:
-        """Delete a document."""
-        ...
-
-
-class BaseStorage(ABC):
-    """Abstract base class for storage implementations."""
-
-    def __init__(self, storage_path: Path, settings: Optional[Settings] = None) -> None:
-        """Initialize storage.
-
-        Args:
-            storage_path: Path to storage directory
-            settings: Optional settings for storage configuration
-        """
-        self.storage_path = storage_path
-        self.storage_path.mkdir(parents=True, exist_ok=True)
-        self.settings = settings or Settings(storage_path=storage_path)
-        self.metrics = (
-            StorageMetricsCollector(self.settings) if self.settings.metrics_enabled else None
+        # Add a document
+        storage.add_document(
+            doc_id="doc123",
+            metadata={"type": "pdf", "pages": 10}
         )
 
-    @abstractmethod
-    def _load_data(self) -> None:
-        """Load data from storage."""
-        pass
+        # Get document data
+        lineage = storage.get_lineage("doc123")
+        print(f"Document created at: {lineage.created_at}")
+        ```
+    """
 
-    @abstractmethod
-    def _save_data(self) -> None:
-        """Save data to storage."""
-        pass
-
-
-class DocumentStorage(BaseStorage, StorageProtocol[T]):
-    """Implementation of document storage with type safety."""
-
-    def __init__(self, storage_path: Path, settings: Optional[Settings] = None) -> None:
-        """Initialize document storage.
-
-        Args:
-            storage_path: Path to storage directory
-            settings: Optional settings for storage configuration
+    def __init__(self, storage_dir: str | None = None):
         """
-        super().__init__(storage_path, settings)
-        self.documents: Dict[UUID, T] = {}
-        self._load_data()
-
-    def get_document(self, doc_id: UUID) -> Optional[T]:
-        """Retrieve a document by ID.
+        Initialize the storage manager.
 
         Args:
-            doc_id: Document ID
+            storage_dir: Optional path to the storage directory. If not provided,
+                       uses a default directory in the package's location.
+
+        Example:
+            ```python
+            # Use default storage location
+            storage = LineageStorage()
+
+            # Use custom storage location
+            storage = LineageStorage("/path/to/storage")
+            ```
+        """
+        self.storage_dir = Path(storage_dir) if storage_dir else Path(__file__).parent / "lineage"
+        logger.debug(f"Initializing LineageStorage with directory: {self.storage_dir}")
+        self.lineage_data: dict[str, DocumentLineage] = {}
+        self._load_lineage_data()
+
+    def _get_storage_path(self) -> Path:
+        """
+        Get the path to the lineage data storage file.
 
         Returns:
-            Document if found, None otherwise
+            Path object pointing to the JSON storage file.
+
+        Note:
+            This is an internal method used by the storage manager to maintain
+            consistent file paths across operations.
         """
-        if self.metrics:
-            self.metrics.start_operation("get_document")
-        try:
-            return self.documents.get(doc_id)
-        finally:
-            if self.metrics:
-                self.metrics.end_operation("get_document")
+        path = self.storage_dir / "document_lineage.json"
+        logger.debug(f"Storage path: {path}")
+        return path
 
-    def save_document(self, document: T) -> None:
-        """Save a document.
+    def _load_lineage_data(self) -> None:
+        """
+        Load existing lineage data from storage.
 
-        Args:
-            document: Document to save
+        This method reads the JSON storage file and deserializes the data into
+        DocumentLineage objects, handling all necessary type conversions and
+        validation.
 
         Raises:
-            ValueError: If document type is invalid
+            Exception: If there are errors reading or parsing the storage file.
+                     These are caught and logged, with an empty data set being
+                     used as a fallback.
+
+        Note:
+            This is called automatically during initialization and should not
+            typically need to be called directly.
         """
-        if self.metrics:
-            self.metrics.start_operation("save_document")
         try:
-            if not isinstance(document.metadata.doc_type, DocumentType):
-                raise ValueError(f"Invalid document type: {document.metadata.doc_type}")
+            storage_path = self._get_storage_path()
+            logger.debug(f"Loading lineage data from {storage_path}")
+            if storage_path.exists():
+                data = load_json(storage_path)
+                logger.debug(f"Found {len(data)} documents in storage")
+                for doc_id, lineage in data.items():
+                    logger.debug(f"Processing document {doc_id}")
+                    self.lineage_data[doc_id] = DocumentLineage(
+                        doc_id=doc_id,
+                        origin_id=lineage.get("origin_id"),
+                        origin_source=lineage.get("origin_source"),
+                        origin_type=lineage.get("origin_type"),
+                        derived_from=lineage.get("derived_from"),
+                        derived_documents=lineage.get("derived_documents", []),
+                        transformations=[
+                            Transformation(
+                                transform_type=TransformationType(t["transform_type"]),
+                                timestamp=datetime.fromisoformat(t["timestamp"]),
+                                description=t.get("description", ""),
+                                parameters=t.get("parameters", {}),
+                                metadata=t.get("metadata", {}),
+                            )
+                            for t in lineage.get("transformations", [])
+                        ],
+                        processing_steps=[
+                            ProcessingStep(
+                                step_name=p["step_name"],
+                                status=ProcessingStatus(p["status"]),
+                                timestamp=datetime.fromisoformat(p["timestamp"]),
+                                details=p.get("details", {}),
+                            )
+                            for p in lineage.get("processing_steps", [])
+                        ],
+                        error_logs=[
+                            LogEntry(
+                                log_level=LogLevel(log_entry["level"]),
+                                message=log_entry["message"],
+                                timestamp=datetime.fromisoformat(log_entry["timestamp"]),
+                                metadata=log_entry.get("metadata", {}),
+                            )
+                            for log_entry in lineage.get("error_logs", [])
+                        ],
+                        performance_metrics=lineage.get("performance_metrics", {}),
+                        metadata=lineage.get("metadata", {}),
+                        created_at=datetime.fromisoformat(lineage["created_at"]),
+                        last_modified=datetime.fromisoformat(lineage["last_modified"]),
+                        children=lineage.get("children", []),
+                        parents=lineage.get("parents", []),
+                    )
+                logger.debug("Successfully loaded all lineage data")
+            else:
+                logger.debug("No existing lineage data found")
+        except Exception as e:
+            logger.error(f"Error loading lineage data: {e}")
+            self.lineage_data = {}
 
-            self.documents[document.id] = document
-            self._save_data()
-        finally:
-            if self.metrics:
-                self.metrics.end_operation("save_document")
+    def save_lineage_data(self) -> None:
+        """
+        Save current lineage data to storage.
 
-    def update_document(self, doc_id: UUID, updates: Dict[str, Any]) -> None:
-        """Update an existing document.
+        This method serializes all document lineage data to JSON format and writes
+        it to the storage file. It handles datetime serialization and ensures the
+        storage directory exists.
+
+        Raises:
+            Exception: If there are errors creating the directory or writing the file.
+                     These are logged and re-raised to allow error handling by callers.
+
+        Example:
+            ```python
+            storage = LineageStorage("/data/lineage")
+            storage.add_document("doc123")
+            storage.save_lineage_data()  # Persists changes to disk
+            ```
+        """
+        try:
+            logger.debug(f"Ensuring storage directory exists: {self.storage_dir}")
+            self.storage_dir.mkdir(parents=True, exist_ok=True)
+
+            logger.debug(f"Preparing to save {len(self.lineage_data)} documents")
+            data = {doc_id: lineage.to_dict() for doc_id, lineage in self.lineage_data.items()}
+
+            storage_path = self._get_storage_path()
+            logger.debug(f"Writing lineage data to {storage_path}")
+            with open(storage_path, "w") as f:
+                json.dump(data, f, indent=2)
+            logger.debug("Successfully saved lineage data")
+        except Exception as e:
+            logger.error(f"Error saving lineage data: {e}")
+            raise
+
+    def add_document_lineage(self, doc_id: str, lineage: DocumentLineage) -> None:
+        """Add a document lineage object to storage."""
+        logger.debug(f"Adding document lineage for {doc_id}")
+        self.lineage_data[doc_id] = lineage
+        self.save_lineage_data()
+        logger.debug(f"Successfully added document lineage for {doc_id}")
+
+    def get_lineage(self, doc_id: str) -> DocumentLineage | None:
+        """Get document lineage by ID."""
+        logger.debug(f"Retrieving lineage for document {doc_id}")
+        lineage = self.lineage_data.get(doc_id)
+        if lineage:
+            logger.debug(f"Found lineage for document {doc_id}")
+        else:
+            logger.debug(f"No lineage found for document {doc_id}")
+        return lineage
+
+    def get_all_lineage(self) -> dict[str, DocumentLineage]:
+        """
+        Get all lineage data.
+
+        Returns:
+            Dictionary mapping document IDs to their DocumentLineage objects.
+
+        Example:
+            ```python
+            all_lineage = storage.get_all_lineage()
+            for doc_id, lineage in all_lineage.items():
+                print(f"Document {doc_id} created at {lineage.created_at}")
+            ```
+        """
+        logger.debug(f"Retrieving all lineage data ({len(self.lineage_data)} documents)")
+        return self.lineage_data
+
+    def update_document_lineage(self, doc_id: str, updates: dict) -> None:
+        """
+        Update document lineage with new data.
 
         Args:
-            doc_id: ID of document to update
+            doc_id: Document ID to update
             updates: Dictionary of updates to apply
 
         Raises:
-            KeyError: If document not found
-            ValueError: If updates would create invalid document state
+            ValueError: If document not found or if update would create circular reference
         """
-        if self.metrics:
-            self.metrics.start_operation("update_document")
-        try:
-            document = self.documents.get(doc_id)
-            if not document:
-                raise KeyError(f"Document {doc_id} not found")
+        logger.debug("Starting lineage update for document %s", doc_id)
+        logger.debug("Update contents: %s", updates)
 
-            # Handle metadata updates
-            if "metadata" in updates:
-                metadata_updates = updates["metadata"]
-                if "doc_type" in metadata_updates:
-                    if not isinstance(metadata_updates["doc_type"], DocumentType):
-                        raise ValueError(f"Invalid document type: {metadata_updates['doc_type']}")
+        if doc_id not in self.lineage_data:
+            logger.error("Document %s not found for update", doc_id)
+            raise ValueError(f"Document {doc_id} not found")
 
-                # Update metadata fields
-                for key, value in metadata_updates.items():
-                    setattr(document.metadata, key, value)
+        lineage = self.lineage_data[doc_id]
+        logger.debug(
+            "Current document state - ID: %s, Parents: %s, Children: %s, Derived From: %s",
+            doc_id,
+            lineage.parents,
+            lineage.children,
+            lineage.derived_from,
+        )
 
-                # Always update the updated_at timestamp
-                document.metadata.updated_at = datetime.now(UTC)
+        # Check for circular references if updating parents
+        if "parents" in updates:
+            from .lineage_operations import _would_create_circular_reference
 
-            # Handle status update
-            if "status" in updates:
-                if not isinstance(updates["status"], DocumentStatus):
-                    raise ValueError(f"Invalid status: {updates['status']}")
-                document.status = updates["status"]
+            new_parents = updates["parents"]
+            logger.debug("Checking circular references for new parents: %s", new_parents)
 
-            # Handle relationship updates
-            if "parent_id" in updates:
-                new_parent_id = updates["parent_id"]
-                if new_parent_id is not None:
-                    # Verify parent exists
-                    parent = self.documents.get(new_parent_id)
-                    if not parent:
-                        raise ValueError(f"Parent document {new_parent_id} not found")
+            for parent_id in new_parents:
+                logger.debug("Checking parent %s for circular reference with %s", parent_id, doc_id)
 
-                    # Update parent's children
-                    if doc_id not in parent.child_ids:
-                        parent.child_ids.add(doc_id)
-                        parent.metadata.updated_at = datetime.now(UTC)
+                # Log parent's current state
+                parent_lineage = self.lineage_data.get(parent_id)
+                if parent_lineage:
+                    logger.debug(
+                        "Parent state - ID: %s, Parents: %s, Children: %s, Derived From: %s",
+                        parent_id,
+                        parent_lineage.parents,
+                        parent_lineage.children,
+                        parent_lineage.derived_from,
+                    )
 
-                # Update document's parent
-                document.parent_id = new_parent_id
+                if _would_create_circular_reference(self, parent_id, doc_id):
+                    error_msg = f"Circular reference detected: adding {parent_id} as parent would create a cycle in document lineage"
+                    logger.error(
+                        "Circular reference details - Document: %s, Attempted Parent: %s, Current Parents: %s, Current Children: %s",
+                        doc_id,
+                        parent_id,
+                        lineage.parents,
+                        lineage.children,
+                    )
+                    raise ValueError(error_msg)
 
-            if "child_ids" in updates:
-                new_child_ids = updates["child_ids"]
-                # Verify all children exist
-                for child_id in new_child_ids:
-                    if child_id not in self.documents:
-                        raise ValueError(f"Child document {child_id} not found")
+                logger.debug("No circular reference found for parent %s", parent_id)
 
-                # Update document's children
-                document.child_ids = set(new_child_ids)
+                # Update parent's children list
+                if parent_lineage and doc_id not in parent_lineage.children:
+                    logger.debug("Adding %s to parent %s's children list", doc_id, parent_id)
+                    parent_lineage.children.append(doc_id)
+                    parent_lineage.derived_documents.append(doc_id)
+                    parent_lineage.last_modified = datetime.now(UTC)
+                    self.save_lineage(parent_lineage)
+                    logger.debug(
+                        "Updated parent %s - New Children: %s, New Derived Documents: %s",
+                        parent_id,
+                        parent_lineage.children,
+                        parent_lineage.derived_documents,
+                    )
 
-            # Handle error message update
-            if "error_message" in updates:
-                document.error_message = updates["error_message"]
+        # Apply updates
+        for key, value in updates.items():
+            logger.debug("Setting %s = %s for document %s", key, value, doc_id)
+            setattr(lineage, key, value)
 
-            self._save_data()
-            logger.debug("Successfully updated document %s", doc_id)
+        lineage.last_modified = datetime.now(UTC)
+        logger.debug(
+            "Final document state - ID: %s, Parents: %s, Children: %s, Derived From: %s",
+            doc_id,
+            lineage.parents,
+            lineage.children,
+            lineage.derived_from,
+        )
 
-        except (KeyError, ValueError) as e:
-            logger.error("Failed to update document %s: %s", doc_id, str(e))
-            raise
-        except Exception as e:
-            logger.error("Unexpected error updating document %s: %s", doc_id, str(e))
-            raise
-        finally:
-            if self.metrics:
-                self.metrics.end_operation("update_document")
+        self.save_lineage_data()
+        logger.debug("Successfully saved updated lineage for document %s", doc_id)
 
-    def delete_document(self, doc_id: UUID) -> None:
-        """Delete a document.
+    def __len__(self) -> int:
+        """Return the number of documents in storage."""
+        return len(self.lineage_data)
+
+    def delete_lineage(self, doc_id: str) -> None:
+        """
+        Delete document lineage.
 
         Args:
             doc_id: Document ID to delete
 
         Raises:
-            KeyError: If document not found
+            ValueError: If document not found
         """
-        if self.metrics:
-            self.metrics.start_operation("delete_document")
-        try:
-            if doc_id not in self.documents:
-                raise KeyError(f"Document {doc_id} not found")
+        logger.debug(f"Attempting to delete document {doc_id}")
+        if doc_id not in self.lineage_data:
+            logger.error(f"Document {doc_id} not found for deletion")
+            raise ValueError(f"Document {doc_id} not found")
 
-            del self.documents[doc_id]
-            self._save_data()
-        finally:
-            if self.metrics:
-                self.metrics.end_operation("delete_document")
+        del self.lineage_data[doc_id]
+        self.save_lineage_data()
+        logger.debug(f"Successfully deleted document {doc_id}")
 
-    def _load_data(self) -> None:
-        """Load documents from storage."""
-        if self.metrics:
-            self.metrics.start_operation("load_data")
-        try:
-            data_file = self.storage_path / "documents.json"
-            if data_file.exists():
-                data = json.loads(data_file.read_text())
-                for doc_data in data.values():
-                    metadata = DocumentMetadata(
-                        title=doc_data["metadata"]["title"],
-                        doc_type=DocumentType(doc_data["metadata"]["doc_type"]),
-                        created_at=datetime.fromisoformat(doc_data["metadata"]["created_at"]),
-                        updated_at=datetime.fromisoformat(doc_data["metadata"]["updated_at"]),
-                        source_path=doc_data["metadata"].get("source_path"),
-                        mime_type=doc_data["metadata"].get("mime_type"),
-                        encoding=doc_data["metadata"].get("encoding"),
-                        language=doc_data["metadata"].get("language"),
-                        custom_metadata=doc_data["metadata"].get("custom_metadata", {}),
-                    )
-                    document = Document(
-                        metadata=metadata,
-                        id=UUID(doc_data["id"]),
-                        status=DocumentStatus(doc_data["status"]),
-                        parent_id=(
-                            UUID(doc_data["parent_id"]) if doc_data.get("parent_id") else None
-                        ),
-                        child_ids={UUID(child_id) for child_id in doc_data.get("child_ids", [])},
-                        error_message=doc_data.get("error_message"),
-                    )
-                    self.documents[document.id] = cast(T, document)
-        except Exception as e:
-            logger.error(f"Error loading documents: {e}")
-            self.documents = {}
-        finally:
-            if self.metrics:
-                self.metrics.end_operation("load_data")
+    def get_lineages_by_time(
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> dict[str, DocumentLineage]:
+        """
+        Get document lineages within a time range.
 
-    def _save_data(self) -> None:
-        """Save documents to storage."""
-        if self.metrics:
-            self.metrics.start_operation("save_data")
-        try:
-            data = {}
-            for doc_id, document in self.documents.items():
-                data[str(doc_id)] = {
-                    "id": str(document.id),
-                    "metadata": {
-                        "title": document.metadata.title,
-                        "doc_type": document.metadata.doc_type.value,
-                        "created_at": document.metadata.created_at.isoformat(),
-                        "updated_at": document.metadata.updated_at.isoformat(),
-                        "source_path": document.metadata.source_path,
-                        "mime_type": document.metadata.mime_type,
-                        "encoding": document.metadata.encoding,
-                        "language": document.metadata.language,
-                        "custom_metadata": document.metadata.custom_metadata,
-                    },
-                    "status": document.status.value,
-                    "parent_id": str(document.parent_id) if document.parent_id else None,
-                    "child_ids": [str(child_id) for child_id in document.child_ids],
-                    "error_message": document.error_message,
+        Args:
+            start_time: Optional start time filter
+            end_time: Optional end time filter
+
+        Returns:
+            Dictionary of document lineages within the time range
+        """
+        logger.debug(f"Getting lineages between {start_time} and {end_time}")
+        filtered = {}
+        for doc_id, lineage in self.lineage_data.items():
+            if start_time and lineage.created_at < start_time:
+                continue
+            if end_time and lineage.created_at > end_time:
+                continue
+            filtered[doc_id] = lineage
+
+        logger.debug(f"Found {len(filtered)} documents in time range")
+        return filtered
+
+    def get_lineages_by_status(self, status: str) -> dict[str, DocumentLineage]:
+        """
+        Get document lineages by processing status.
+
+        Args:
+            status: Processing status to filter by
+
+        Returns:
+            Dictionary of document lineages with the specified status
+        """
+        logger.debug(f"Getting lineages with status: {status}")
+        filtered = {}
+        for doc_id, lineage in self.lineage_data.items():
+            if not lineage.processing_steps:
+                continue
+            latest_step = lineage.processing_steps[-1]
+            if latest_step.status.value == status:
+                filtered[doc_id] = lineage
+
+        logger.debug(f"Found {len(filtered)} documents with status {status}")
+        return filtered
+
+    def get_lineages_by_type(self, doc_type: str) -> dict[str, DocumentLineage]:
+        """
+        Get document lineages by document type.
+
+        Args:
+            doc_type: Document type to filter by
+
+        Returns:
+            Dictionary of document lineages of the specified type
+        """
+        logger.debug(f"Getting lineages of type: {doc_type}")
+        filtered = {}
+        for doc_id, lineage in self.lineage_data.items():
+            if lineage.metadata.get("type") == doc_type:
+                filtered[doc_id] = lineage
+
+        logger.debug(f"Found {len(filtered)} documents of type {doc_type}")
+        return filtered
+
+    def get_lineages_by_source(self, source: str) -> dict[str, DocumentLineage]:
+        """
+        Get document lineages by source.
+
+        Args:
+            source: Source identifier to filter by
+
+        Returns:
+            Dictionary of document lineages from the specified source
+        """
+        logger.debug(f"Getting lineages from source: {source}")
+        filtered = {}
+        for doc_id, lineage in self.lineage_data.items():
+            if lineage.origin_source == source:
+                filtered[doc_id] = lineage
+
+        logger.debug(f"Found {len(filtered)} documents from source {source}")
+        return filtered
+
+    def get_derived_documents(self, doc_id: str) -> list[str]:
+        """
+        Get IDs of documents derived from the specified document.
+
+        Args:
+            doc_id: Parent document ID
+
+        Returns:
+            List of derived document IDs
+
+        Raises:
+            ValueError: If document not found
+        """
+        logger.debug(f"Getting documents derived from {doc_id}")
+        if doc_id not in self.lineage_data:
+            logger.error(f"Document {doc_id} not found")
+            raise ValueError(f"Document {doc_id} not found")
+
+        derived = self.lineage_data[doc_id].derived_documents
+        logger.debug(f"Found {len(derived)} derived documents")
+        return derived
+
+    def get_parent_documents(self, doc_id: str) -> list[str]:
+        """
+        Get IDs of parent documents for the specified document.
+
+        Args:
+            doc_id: Child document ID
+
+        Returns:
+            List of parent document IDs
+
+        Raises:
+            ValueError: If document not found
+        """
+        logger.debug(f"Getting parent documents for {doc_id}")
+        if doc_id not in self.lineage_data:
+            logger.error(f"Document {doc_id} not found")
+            raise ValueError(f"Document {doc_id} not found")
+
+        parents = []
+        lineage = self.lineage_data[doc_id]
+        if lineage.derived_from:
+            parents.append(lineage.derived_from)
+
+        logger.debug(f"Found {len(parents)} parent documents")
+        return parents
+
+    def get_all_lineages(self) -> dict[str, DocumentLineage]:
+        """
+        Get all document lineages.
+
+        Returns:
+            Dictionary mapping document IDs to their DocumentLineage objects.
+
+        Example:
+            ```python
+            all_lineages = storage.get_all_lineages()
+            for doc_id, lineage in all_lineages.items():
+                print(f"Document {doc_id}: {len(lineage.processing_steps)} steps")
+            ```
+        """
+        return self.get_all_lineage()
+
+    def save_lineage(self, lineage: DocumentLineage) -> None:
+        """
+        Save document lineage.
+
+        Args:
+            lineage: The DocumentLineage object to save
+
+        Example:
+            ```python
+            lineage = DocumentLineage(doc_id="doc123")
+            storage.save_lineage(lineage)
+            ```
+        """
+        self.add_document_lineage(lineage.doc_id, lineage)
+
+    def __iter__(self):
+        """Make the storage iterable over document IDs."""
+        return iter(self.lineage_data)
+
+    def __contains__(self, doc_id: str) -> bool:
+        """Support 'in' operator for document IDs."""
+        return doc_id in self.lineage_data
+
+    def items(self):
+        """Get items (doc_id, lineage) pairs."""
+        return self.lineage_data.items()
+
+    def values(self):
+        """Get all lineage objects."""
+        return self.lineage_data.values()
+
+    def keys(self):
+        """Get all document IDs."""
+        return self.lineage_data.keys()
+
+    def add_metrics(
+        self,
+        doc_id: str,
+        metrics: dict,
+        timestamp: datetime | None = None,
+    ) -> None:
+        """Add performance metrics for a document.
+
+        Args:
+            doc_id: Document ID to update
+            metrics: Dictionary of metrics to add
+            timestamp: Optional timestamp for the metrics
+
+        Raises:
+            ValueError: If document not found
+
+        Example:
+            ```python
+            storage.add_metrics(
+                "doc123",
+                {
+                    "processing_time": 1.5,
+                    "memory_usage": 256,
+                    "success_rate": 0.95
                 }
-            data_file = self.storage_path / "documents.json"
-            data_file.write_text(json.dumps(data, indent=2))
-        except Exception as e:
-            logger.error(f"Error saving documents: {e}")
-            raise
-        finally:
-            if self.metrics:
-                self.metrics.end_operation("save_data")
+            )
+            ```
+        """
+        logger.debug(f"Adding metrics for document {doc_id}")
+        if doc_id not in self.lineage_data:
+            logger.error(f"Document {doc_id} not found")
+            raise ValueError(f"Document {doc_id} not found")
+
+        lineage = self.lineage_data[doc_id]
+        metrics_entry = {
+            "timestamp": (
+                timestamp.isoformat() if timestamp else datetime.now(UTC).isoformat()
+            ),
+            "metrics": metrics,
+        }
+
+        if "performance_metrics" not in lineage.metadata:
+            lineage.metadata["performance_metrics"] = []
+        lineage.metadata["performance_metrics"].append(metrics_entry)
+
+        lineage.last_modified = datetime.now(UTC)
+        self.save_lineage_data()
+        logger.debug(f"Successfully added metrics for document {doc_id}")
+
+    def __getitem__(self, doc_id: str) -> DocumentLineage:
+        """Support dictionary-style access to lineage data."""
+        if doc_id not in self.lineage_data:
+            raise KeyError(f"Document {doc_id} not found")
+        return self.lineage_data[doc_id]
+
+    def __setitem__(self, doc_id: str, lineage: DocumentLineage) -> None:
+        """Support dictionary-style assignment of lineage data."""
+        self.lineage_data[doc_id] = lineage
+        self.save_lineage_data()

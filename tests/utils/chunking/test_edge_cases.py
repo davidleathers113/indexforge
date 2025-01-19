@@ -4,7 +4,6 @@ This module contains tests for complex scenarios and edge cases across all chunk
 strategies, focusing on challenging inputs and boundary conditions.
 """
 
-from typing import Type
 
 import pytest
 
@@ -12,6 +11,7 @@ from src.utils.chunking.strategies.base import ChunkingStrategy, ChunkValidator
 from src.utils.chunking.strategies.char_based import CharacterBasedChunking
 from src.utils.chunking.strategies.token_based import TokenBasedChunking, TokenEncoderFactory
 from src.utils.chunking.strategies.word_based import WordBasedChunking
+
 
 # Test data constants
 UNICODE_TEXT = "Hello 🌟 World! 汉字 αβγ \u0903 \u0904"
@@ -49,7 +49,7 @@ class TestValidator(ChunkValidator):
 class EdgeCaseBase:
     """Base class for edge case testing."""
 
-    strategy_class: Type[ChunkingStrategy] = None
+    strategy_class: type[ChunkingStrategy] = None
 
     @pytest.fixture
     def strategy(self, validator):

@@ -1,19 +1,16 @@
 """Integration tests for service error scenarios and recovery."""
 
 import asyncio
-from typing import Any, Dict, List
 
 import pytest
 
 from src.core.errors import (
     ServiceError,
     ServiceInitializationError,
-    ServiceNotInitializedError,
-    ServiceStateError,
 )
 from src.core.metrics import ServiceMetricsCollector
 from src.core.settings import Settings
-from src.services import RedisService, WeaviateClient
+from src.services import RedisService
 from src.services.factory import ServiceFactory
 
 

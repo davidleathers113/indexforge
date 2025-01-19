@@ -2,7 +2,6 @@
 
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
@@ -31,7 +30,7 @@ def storage(storage_dir) -> LineageStorage:
 
 
 @pytest.fixture
-def sample_metadata() -> Dict:
+def sample_metadata() -> dict:
     """Create sample document metadata."""
     return {
         "type": "pdf",
@@ -43,7 +42,7 @@ def sample_metadata() -> Dict:
 
 
 @pytest.fixture
-def document_chain(storage, sample_metadata) -> List[str]:
+def document_chain(storage, sample_metadata) -> list[str]:
     """Create a chain of related documents."""
     doc_ids = ["doc1", "doc2", "doc3"]
 
@@ -68,7 +67,7 @@ def document_chain(storage, sample_metadata) -> List[str]:
     return doc_ids
 
 
-def test_document_creation_persistence(storage: LineageStorage, sample_metadata: Dict):
+def test_document_creation_persistence(storage: LineageStorage, sample_metadata: dict):
     """Test that documents are properly created and persisted."""
     doc_id = "test_doc"
     add_document(storage, doc_id=doc_id, metadata=sample_metadata)
@@ -82,7 +81,7 @@ def test_document_creation_persistence(storage: LineageStorage, sample_metadata:
     assert lineage.metadata == sample_metadata
 
 
-def test_document_relationships_persistence(storage: LineageStorage, document_chain: List[str]):
+def test_document_relationships_persistence(storage: LineageStorage, document_chain: list[str]):
     """Test that document relationships are properly persisted."""
     # Create new storage instance
     new_storage = LineageStorage(storage.storage_dir)
@@ -98,7 +97,7 @@ def test_document_relationships_persistence(storage: LineageStorage, document_ch
         assert child.derived_from == document_chain[i - 1]
 
 
-def test_derivation_chain_consistency(storage: LineageStorage, document_chain: List[str]):
+def test_derivation_chain_consistency(storage: LineageStorage, document_chain: list[str]):
     """Test consistency of derivation chains across storage instances."""
     # Get chain from original storage
     original_chain = get_derivation_chain(storage, document_chain[-1])
@@ -109,14 +108,14 @@ def test_derivation_chain_consistency(storage: LineageStorage, document_chain: L
 
     # Compare chains
     assert len(original_chain) == len(new_chain)
-    for orig, new in zip(original_chain, new_chain):
+    for orig, new in zip(original_chain, new_chain, strict=False):
         assert orig.doc_id == new.doc_id
         assert orig.metadata == new.metadata
         assert orig.parents == new.parents
         assert orig.children == new.children
 
 
-def test_concurrent_document_operations(storage: LineageStorage, sample_metadata: Dict):
+def test_concurrent_document_operations(storage: LineageStorage, sample_metadata: dict):
     """Test handling of concurrent document operations."""
     doc_id = "concurrent_doc"
     parent_id = "parent_doc"
@@ -137,7 +136,7 @@ def test_concurrent_document_operations(storage: LineageStorage, sample_metadata
     assert parent_id in lineage.parents
 
 
-def test_cross_instance_validation(storage: LineageStorage, document_chain: List[str]):
+def test_cross_instance_validation(storage: LineageStorage, document_chain: list[str]):
     """Test validation of relationships across storage instances."""
     # Create new storage instance
     new_storage = LineageStorage(storage.storage_dir)
@@ -154,7 +153,7 @@ def test_cross_instance_validation(storage: LineageStorage, document_chain: List
     assert not new_errors, "New instance has validation errors"
 
 
-def test_large_document_chain(storage: LineageStorage, sample_metadata: Dict):
+def test_large_document_chain(storage: LineageStorage, sample_metadata: dict):
     """Test handling of large document chains."""
     chain_length = 50
     doc_ids = [f"doc_{i}" for i in range(chain_length)]
@@ -181,7 +180,7 @@ def test_large_document_chain(storage: LineageStorage, sample_metadata: Dict):
     assert [doc.doc_id for doc in reversed(chain)] == doc_ids
 
 
-def test_complex_relationship_graph(storage: LineageStorage, sample_metadata: Dict):
+def test_complex_relationship_graph(storage: LineageStorage, sample_metadata: dict):
     """Test handling of complex document relationship graphs."""
     # Create documents with multiple relationships
     doc_ids = {

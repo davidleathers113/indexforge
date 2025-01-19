@@ -1,13 +1,11 @@
 """Unit tests for tenant-specific source tracking."""
 
-import json
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from src.core.errors import ValidationError
-from src.core.schema import Schema, SchemaStorage
+from src.core.schema import SchemaStorage
 from src.core.tracking.source.config import SourceConfig
 from src.core.tracking.source.tenant import TenantSourceTracker
 

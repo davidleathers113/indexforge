@@ -4,26 +4,24 @@ This module tests interactions between different storage services,
 ensuring they work together correctly in complex scenarios.
 """
 
-from typing import AsyncGenerator, List
+from collections.abc import AsyncGenerator
 from uuid import UUID
 
 import pytest
 from pytest_asyncio import fixture
+from tests.integration.services.builders.test_data import (
+    ChunkBuilder,
+    DocumentBuilder,
+    ReferenceBuilder,
+)
 
-from src.core.models.chunks import Chunk
 from src.core.models.documents import Document
-from src.core.models.references import Reference
 from src.core.settings import Settings
 from src.services.storage import (
     BatchConfig,
     ChunkStorageService,
     DocumentStorageService,
     ReferenceStorageService,
-)
-from tests.integration.services.builders.test_data import (
-    ChunkBuilder,
-    DocumentBuilder,
-    ReferenceBuilder,
 )
 
 
@@ -130,8 +128,8 @@ class TestCrossServiceIntegration:
     ):
         """Test document reference graph creation and traversal."""
         # Create documents
-        docs: List[Document] = []
-        doc_ids: List[UUID] = []
+        docs: list[Document] = []
+        doc_ids: list[UUID] = []
         for i in range(5):
             doc = DocumentBuilder().with_title(f"Doc {i}").with_content(f"Content {i}").build()
             docs.append(doc)

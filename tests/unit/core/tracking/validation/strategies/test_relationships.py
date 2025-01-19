@@ -4,7 +4,6 @@ This module contains tests for the RelationshipValidator class, which validates
 relationships between documents in lineage data.
 """
 
-from typing import List
 
 import pytest
 

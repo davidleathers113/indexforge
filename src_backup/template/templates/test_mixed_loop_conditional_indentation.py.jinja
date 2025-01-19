@@ -1,0 +1,238 @@
+{# Template for testing mixed loop and conditional indentation #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestMixedLoopConditionalIndentation:
+    """Test indentation of mixed loops and conditionals."""
+
+    def test_loop_with_conditional_indentation(self, env):
+        """Test that loops with conditionals maintain proper indentation."""
+        template_str = """\
+def test_function():
+    results = []
+    {%- for item in items %}
+    # Process item {{ item.name }}
+    {%- if item.condition %}
+    value = process_item(
+        name={{ item.name|tojson }},
+        value={{ item.value }},
+        enabled=True
+    )
+    results.append(value)
+    {%- else %}
+    logger.debug("Skipping item %s", {{ item.name|tojson }})
+    {%- endif %}
+    {%- endfor %}
+    return results"""
+
+        context = {
+            "items": [
+                {"name": "first", "condition": True, "value": 1},
+                {"name": "second", "condition": False, "value": 2},
+                {"name": "third", "condition": True, "value": 3},
+            ],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    results = []
+    # Process item first
+    value = process_item(
+        name="first",
+        value=1,
+        enabled=True
+    )
+    results.append(value)
+    # Process item second
+    logger.debug("Skipping item %s", "second")
+    # Process item third
+    value = process_item(
+        name="third",
+        value=3,
+        enabled=True
+    )
+    results.append(value)
+    return results"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_conditional_with_loop_indentation(self, env):
+        """Test that conditionals with loops maintain proper indentation."""
+        template_str = """\
+def test_function():
+    {%- if condition %}
+    results = []
+    {%- for item in items %}
+    # Process item {{ loop.index }}
+    value = calculate(
+        base={{ item.base }},
+        factor={{ item.factor }},
+        {%- if item.extra %}
+        extra={{ item.extra }},
+        {%- endif %}
+    )
+    results.append(value)
+    {%- endfor %}
+    return sum(results)
+    {%- else %}
+    return default_value
+    {%- endif %}"""
+
+        context = {
+            "condition": True,
+            "items": [
+                {"base": 10, "factor": 2, "extra": 1},
+                {"base": 20, "factor": 3},
+                {"base": 30, "factor": 1, "extra": 5},
+            ],
+            "default_value": 0,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    results = []
+    # Process item 1
+    value = calculate(
+        base=10,
+        factor=2,
+        extra=1,
+    )
+    results.append(value)
+    # Process item 2
+    value = calculate(
+        base=20,
+        factor=3,
+    )
+    results.append(value)
+    # Process item 3
+    value = calculate(
+        base=30,
+        factor=1,
+        extra=5,
+    )
+    results.append(value)
+    return sum(results)"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_nested_loop_conditional_indentation(self, env):
+        """Test that nested loops with conditionals maintain proper indentation."""
+        template_str = """\
+def test_function():
+    results = {}
+    {%- for group in groups %}
+    group_results = []
+    {%- for item in group.items %}
+    {%- if item.enabled %}
+    # Process enabled item
+    {%- if item.value > threshold %}
+    value = process_high_value(
+        item={{ item.value }},
+        factor={{ item.factor }}
+    )
+    {%- else %}
+    value = process_low_value(
+        item={{ item.value }},
+        factor={{ item.factor }}
+    )
+    {%- endif %}
+    group_results.append(value)
+    {%- endif %}
+    {%- endfor %}
+    results[{{ group.name|tojson }}] = group_results
+    {%- endfor %}
+    return results"""
+
+        context = {
+            "groups": [
+                {
+                    "name": "high",
+                    "items": [
+                        {"enabled": True, "value": 100, "factor": 2},
+                        {"enabled": False, "value": 90, "factor": 1},
+                    ],
+                },
+                {
+                    "name": "low",
+                    "items": [
+                        {"enabled": True, "value": 40, "factor": 3},
+                        {"enabled": True, "value": 30, "factor": 2},
+                    ],
+                },
+            ],
+            "threshold": 50,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    results = {}
+    group_results = []
+    # Process enabled item
+    value = process_high_value(
+        item=100,
+        factor=2
+    )
+    group_results.append(value)
+    results["high"] = group_results
+    group_results = []
+    # Process enabled item
+    value = process_low_value(
+        item=40,
+        factor=3
+    )
+    group_results.append(value)
+    # Process enabled item
+    value = process_low_value(
+        item=30,
+        factor=2
+    )
+    group_results.append(value)
+    results["low"] = group_results
+    return results"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

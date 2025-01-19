@@ -4,7 +4,6 @@ This module contains tests for the ChunkReferenceValidator class, which validate
 chunk references within document lineage data.
 """
 
-from typing import List
 
 import pytest
 

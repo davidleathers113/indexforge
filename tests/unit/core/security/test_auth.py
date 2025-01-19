@@ -1,13 +1,12 @@
 """Unit tests for authentication functionality."""
 
 import time
-from datetime import datetime, timedelta
 from unittest.mock import patch
 from uuid import UUID
 
 import jwt
-import pytest
 from pydantic import SecretStr
+import pytest
 
 from src.core.security.auth import (
     AuthConfig,

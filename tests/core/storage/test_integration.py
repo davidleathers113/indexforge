@@ -10,16 +10,14 @@ repositories, storage strategies, and metrics collection. Tests include:
 """
 
 import asyncio
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
-from typing import AsyncGenerator
 from uuid import UUID, uuid4
 
-import pytest
 from pydantic import BaseModel
+import pytest
 
-from src.core.models.documents import Document
 from src.core.storage.metrics.collector import MetricsCollector
-from src.core.storage.metrics.models import OperationMetrics
 from src.core.storage.repositories.documents import DocumentRepository
 from src.core.storage.repositories.lineage import LineageRepository
 from src.core.storage.strategies.memory_storage import MemoryStorage
@@ -139,7 +137,7 @@ async def test_concurrent_repository_access(document_repo):
 
     # Concurrent gets
     stored_docs = await asyncio.gather(*[document_repo.get(doc.id) for doc in docs])
-    assert all(a == b for a, b in zip(stored_docs, docs))
+    assert all(a == b for a, b in zip(stored_docs, docs, strict=False))
 
     # Concurrent deletes
     await asyncio.gather(*[document_repo.delete(doc.id) for doc in docs])

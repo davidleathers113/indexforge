@@ -4,29 +4,30 @@ This module contains integration tests focusing on system behavior under load
 and network partition scenarios, ensuring reliability and performance under stress.
 """
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from unittest.mock import Mock, patch
 
 import pytest
+import weaviate
 from requests.exceptions import ConnectionError, ReadTimeout
 
-from src.api.repositories.weaviate.client import WeaviateClient
 from src.api.repositories.weaviate.exceptions import (
     NetworkPartitionError,
     OverloadError,
     ResourceExhaustionError,
 )
 
-
 # Test data constants
 TEST_CONFIG = {
     "url": "http://localhost:8080",
-    "api_key": "test-api-key",
-    "timeout": 300,
-    "retry_count": 3,
-    "max_connections": 10,
+    "auth_credentials": weaviate.auth.AuthApiKey(api_key="test-api-key"),
+    "additional_config": weaviate.config.AdditionalConfig(
+        timeout_config=weaviate.config.Timeout(timeout_ms=300000),
+        connection_params=weaviate.config.ConnectionParams(max_pool_size=10),
+    ),
+    "additional_headers": None,
 }
 
 
@@ -43,7 +44,7 @@ def mock_client():
 def mock_collection():
     """Setup mock collection with configurable response delays."""
     collection = Mock()
-    collection.batch.add_objects.return_value = {"status": "success"}
+    collection.data.insert_many.return_value = {"status": "success"}
     return collection
 
 
@@ -56,23 +57,24 @@ def test_connection_pool_exhaustion(mock_client, mock_collection):
     Then: Should handle connection exhaustion gracefully
     """
     mock_client.collections.get.return_value = mock_collection
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     # Simulate connection pool usage
     def make_request():
         try:
-            return collection.batch.add_objects([{"id": "test"}])
+            return collection.data.insert_many([{"id": "test"}])
         except ResourceExhaustionError as e:
             return e
 
-    with ThreadPoolExecutor(max_workers=TEST_CONFIG["max_connections"] * 2) as executor:
-        futures = [executor.submit(make_request) for _ in range(TEST_CONFIG["max_connections"] * 2)]
+    max_pool_size = TEST_CONFIG["additional_config"].connection_params.max_pool_size
+    with ThreadPoolExecutor(max_workers=max_pool_size * 2) as executor:
+        futures = [executor.submit(make_request) for _ in range(max_pool_size * 2)]
         results = [f.result() for f in as_completed(futures)]
 
     # Verify some requests were rejected due to pool exhaustion
     assert any(isinstance(r, ResourceExhaustionError) for r in results)
-    assert mock_collection.batch.add_objects.call_count <= TEST_CONFIG["max_connections"]
+    assert mock_collection.data.insert_many.call_count <= max_pool_size
 
 
 def test_gradual_performance_degradation(mock_client, mock_collection):
@@ -84,7 +86,7 @@ def test_gradual_performance_degradation(mock_client, mock_collection):
     Then: Should maintain stability and handle degradation gracefully
     """
     mock_client.collections.get.return_value = mock_collection
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     response_times = []
@@ -94,7 +96,7 @@ def test_gradual_performance_degradation(mock_client, mock_collection):
     for batch_size in [10, 50, 100, 200, 500]:
         start_time = time.time()
         try:
-            collection.batch.add_objects([{"id": str(i)} for i in range(batch_size)])
+            collection.data.insert_many([{"id": str(i)} for i in range(batch_size)])
             response_times.append(time.time() - start_time)
             error_counts.append(0)
         except OverloadError:
@@ -122,17 +124,17 @@ def test_network_partition_recovery(mock_client, mock_collection):
         ConnectionError("Still partitioned"),
         {"status": "success"},  # Partition healed
     ]
-    mock_collection.batch.add_objects.side_effect = partition_errors
+    mock_collection.data.insert_many.side_effect = partition_errors
 
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     # Attempt operations during partition
     with pytest.raises(NetworkPartitionError):
-        collection.batch.add_objects([{"id": "1"}])
+        collection.data.insert_many([{"id": "1"}])
 
     # Verify recovery after partition heals
-    result = collection.batch.add_objects([{"id": "2"}])
+    result = collection.data.insert_many([{"id": "2"}])
     assert result["status"] == "success"
 
 
@@ -145,7 +147,7 @@ def test_partial_network_failures(mock_client, mock_collection):
     Then: Should handle partial failures and maintain data consistency
     """
     mock_client.collections.get.return_value = mock_collection
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     # Simulate intermittent failures
@@ -154,12 +156,11 @@ def test_partial_network_failures(mock_client, mock_collection):
             raise ConnectionError("Intermittent failure")
         return {"status": "success"}
 
-    mock_collection.batch.add_objects.side_effect = intermittent_failure
+    mock_collection.data.insert_many.side_effect = intermittent_failure
 
     with ThreadPoolExecutor(max_workers=3) as executor:
         futures = [
-            executor.submit(lambda: collection.batch.add_objects([{"id": str(i)}]))
-            for i in range(3)
+            executor.submit(lambda: collection.data.insert_many([{"id": str(i)}])) for i in range(3)
         ]
         results = [f.result() for f in as_completed(futures)]
 
@@ -178,7 +179,7 @@ def test_load_induced_timeout_handling(mock_client, mock_collection):
     Then: Should handle timeouts gracefully and maintain system stability
     """
     mock_client.collections.get.return_value = mock_collection
-    client = WeaviateClient(**TEST_CONFIG)
+    client = weaviate.Client(**TEST_CONFIG)
     collection = client.collections.get("test_collection")
 
     # Simulate load-induced timeouts
@@ -187,13 +188,12 @@ def test_load_induced_timeout_handling(mock_client, mock_collection):
             raise ReadTimeout("Operation timed out")
         return {"status": "success"}
 
-    mock_collection.batch.add_objects.side_effect = delayed_response
+    mock_collection.data.insert_many.side_effect = delayed_response
 
     results = []
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = [
-            executor.submit(lambda: collection.batch.add_objects([{"id": str(i)}]))
-            for i in range(4)
+            executor.submit(lambda: collection.data.insert_many([{"id": str(i)}])) for i in range(4)
         ]
         for future in as_completed(futures):
             try:

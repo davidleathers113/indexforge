@@ -1,11 +1,10 @@
 """Performance tests for service operations."""
 
 import asyncio
-import time
 from statistics import mean, stdev
-from typing import Any, Dict, List
+import time
+from typing import Any
 
-import numpy as np
 import pytest
 
 from src.core.settings import Settings
@@ -53,9 +52,9 @@ async def weaviate_service(settings: Settings) -> WeaviateClient:
 class TestServicePerformance:
     """Performance tests for service operations."""
 
-    async def measure_operation_time(self, operation, iterations: int = 100) -> Dict[str, float]:
+    async def measure_operation_time(self, operation, iterations: int = 100) -> dict[str, float]:
         """Measure operation time statistics."""
-        times: List[float] = []
+        times: list[float] = []
         for _ in range(iterations):
             start = time.perf_counter()
             await operation()
@@ -76,7 +75,7 @@ class TestServicePerformance:
         redis_service: RedisService,
         performance_metrics_path,
         performance_thresholds: PerformanceThresholds,
-        performance_baseline: Dict[str, Any],
+        performance_baseline: dict[str, Any],
     ):
         """Test Redis operation latency against thresholds and baseline."""
         metrics = PerformanceMetrics("redis_operations", performance_metrics_path)
@@ -130,7 +129,7 @@ class TestServicePerformance:
         weaviate_service: WeaviateClient,
         performance_metrics_path,
         performance_thresholds: PerformanceThresholds,
-        performance_baseline: Dict[str, Any],
+        performance_baseline: dict[str, Any],
     ):
         """Test Weaviate vector search performance."""
         metrics = PerformanceMetrics("weaviate_vector_search", performance_metrics_path)

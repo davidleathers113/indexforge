@@ -1,9 +1,9 @@
 """Repository for performance metrics persistence."""
 
-import json
 from datetime import datetime
+import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class MetricsRepository:
@@ -18,7 +18,7 @@ class MetricsRepository:
         self.base_path = base_path
         self.base_path.mkdir(parents=True, exist_ok=True)
 
-    def load_metrics(self, operation_name: str) -> List[Dict[str, Any]]:
+    def load_metrics(self, operation_name: str) -> list[dict[str, Any]]:
         """Load historical metrics for an operation.
 
         Args:
@@ -38,7 +38,7 @@ class MetricsRepository:
 
         return metrics
 
-    def save_metrics(self, metrics: Dict[str, Any], operation_name: str) -> None:
+    def save_metrics(self, metrics: dict[str, Any], operation_name: str) -> None:
         """Save metrics for an operation.
 
         Args:
@@ -52,7 +52,7 @@ class MetricsRepository:
         metrics_file = self.base_path / f"{operation_name}_metrics_{timestamp}.json"
         metrics_file.write_text(json.dumps(metrics, indent=2))
 
-    def save_analysis(self, analysis: Dict[str, Any], operation_name: str) -> None:
+    def save_analysis(self, analysis: dict[str, Any], operation_name: str) -> None:
         """Save analysis results.
 
         Args:
@@ -66,7 +66,7 @@ class MetricsRepository:
         analysis_file = self.base_path / f"{operation_name}_analysis_{timestamp}.json"
         analysis_file.write_text(json.dumps(analysis, indent=2))
 
-    def get_latest_metrics(self, operation_name: str) -> Optional[Dict[str, Any]]:
+    def get_latest_metrics(self, operation_name: str) -> dict[str, Any] | None:
         """Get the most recent metrics for an operation.
 
         Args:
@@ -80,7 +80,7 @@ class MetricsRepository:
 
     def get_metrics_in_range(
         self, operation_name: str, start_time: datetime, end_time: datetime
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get metrics within a time range.
 
         Args:

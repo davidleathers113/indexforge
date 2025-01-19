@@ -1,6 +1,5 @@
 """Unit tests for source configuration."""
 
-import pytest
 
 from src.core.tracking.source.config import SourceConfig
 

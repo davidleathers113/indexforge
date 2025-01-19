@@ -1,0 +1,231 @@
+{# Template for testing multiline assertion indentation #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestMultilineAssertionIndentation:
+    """Test indentation of multiline assertions."""
+
+    def test_multiline_assert_equal_indentation(self, env):
+        """Test that multiline assert equal statements maintain proper indentation."""
+        template_str = """\
+def test_function():
+    result = process_data()
+    assert result == {
+        "key1": {{ expected.key1 }},
+        "key2": [
+            {{ expected.key2[0] }},
+            {{ expected.key2[1] }},
+            {{ expected.key2[2] }},
+        ],
+        "key3": {
+            "nested1": {{ expected.key3.nested1 }},
+            "nested2": {{ expected.key3.nested2 }},
+        }
+    }, "Result does not match expected structure"
+    return result"""
+
+        context = {
+            "expected": {
+                "key1": "value1",
+                "key2": [1, 2, 3],
+                "key3": {
+                    "nested1": "nested_value1",
+                    "nested2": "nested_value2",
+                },
+            },
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    result = process_data()
+    assert result == {
+        "key1": "value1",
+        "key2": [
+            1,
+            2,
+            3,
+        ],
+        "key3": {
+            "nested1": "nested_value1",
+            "nested2": "nested_value2",
+        }
+    }, "Result does not match expected structure"
+    return result"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_multiline_assert_in_indentation(self, env):
+        """Test that multiline assert in statements maintain proper indentation."""
+        template_str = """\
+def test_function():
+    result = get_complex_result()
+    assert (
+        {
+            "id": {{ item.id }},
+            "name": {{ item.name|tojson }},
+            "properties": {
+                "type": {{ item.properties.type|tojson }},
+                "value": {{ item.properties.value }},
+            }
+        }
+        in result
+    ), (
+        f"Expected item not found in result:\\n"
+        f"Item: {expected_item}\\n"
+        f"Result: {result}"
+    )"""
+
+        context = {
+            "item": {
+                "id": 123,
+                "name": "test_item",
+                "properties": {
+                    "type": "test_type",
+                    "value": 42,
+                },
+            },
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    result = get_complex_result()
+    assert (
+        {
+            "id": 123,
+            "name": "test_item",
+            "properties": {
+                "type": "test_type",
+                "value": 42,
+            }
+        }
+        in result
+    ), (
+        f"Expected item not found in result:\\n"
+        f"Item: {expected_item}\\n"
+        f"Result: {result}"
+    )"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+
+    def test_multiline_assert_called_with_indentation(self, env):
+        """Test that multiline assert called with statements maintain proper indentation."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup with context -%}
+def test_function():
+    {{ setup("mock_function") | indent(4) }}
+
+    result = process_with_mock(mock_function)
+
+    mock_function.assert_called_with(
+        first_arg=[
+            {
+                "id": {{ items[0].id }},
+                "value": {{ items[0].value }},
+            },
+            {
+                "id": {{ items[1].id }},
+                "value": {{ items[1].value }},
+            },
+        ],
+        second_arg={
+            "config": {
+                "enabled": {{ config.enabled }},
+                "mode": {{ config.mode|tojson }},
+                "options": [
+                    {{ config.options[0]|tojson }},
+                    {{ config.options[1]|tojson }},
+                ],
+            }
+        },
+        timeout={{ timeout }}
+    )"""
+
+        context = {
+            "items": [
+                {"id": 1, "value": 10},
+                {"id": 2, "value": 20},
+            ],
+            "config": {
+                "enabled": True,
+                "mode": "test",
+                "options": ["opt1", "opt2"],
+            },
+            "timeout": 30,
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    mock_function = mocker.Mock()
+
+    result = process_with_mock(mock_function)
+
+    mock_function.assert_called_with(
+        first_arg=[
+            {
+                "id": 1,
+                "value": 10,
+            },
+            {
+                "id": 2,
+                "value": 20,
+            },
+        ],
+        second_arg={
+            "config": {
+                "enabled": True,
+                "mode": "test",
+                "options": [
+                    "opt1",
+                    "opt2",
+                ],
+            }
+        },
+        timeout=30
+    )"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail(f"Generated code is not valid Python: {e}")
+{%- endblock %}

@@ -15,7 +15,8 @@ from src.core.settings import Settings
 from src.services.storage.key_rotation import KeyRotationHandler
 from src.services.storage.secure_storage import SecureStorageWrapper
 
-from .test_secure_storage import TestDocument, mock_storage
+from .test_secure_storage import TestDocument
+
 
 logger = logging.getLogger(__name__)
 

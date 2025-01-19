@@ -1,23 +1,23 @@
 """Performance tests for Word processor functionality."""
 
 import logging
-import time
 from pathlib import Path
-from typing import Dict, List
+import time
 
-import pytest
 from _pytest.logging import LogCaptureFixture
+import pytest
 
 from src.core.processors.word import WordProcessor
 
 from .test_utils import PERFORMANCE_CONFIGS
 
+
 logger = logging.getLogger(__name__)
 
 
 def generate_performance_content(
-    config: Dict[str, int]
-) -> tuple[List[str], List[str], List[List[str]]]:
+    config: dict[str, int]
+) -> tuple[list[str], list[str], list[list[str]]]:
     """Generate test content based on performance configuration.
 
     Args:

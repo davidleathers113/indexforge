@@ -1,8 +1,7 @@
 """Unit tests for Redis-based schema cache implementation."""
 
 import json
-from typing import AsyncGenerator
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

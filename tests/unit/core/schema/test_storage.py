@@ -1,14 +1,12 @@
 """Unit tests for schema storage implementation."""
 
 import json
-from datetime import datetime
-from pathlib import Path
 
 import pytest
 
 from src.core.schema.base import SchemaType, SchemaVersion
 from src.core.schema.schema import FieldDefinition, Schema
-from src.core.schema.storage import SchemaMetadata, SchemaStorage
+from src.core.schema.storage import SchemaStorage
 
 
 @pytest.fixture

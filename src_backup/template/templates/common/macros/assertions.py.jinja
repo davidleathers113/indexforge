@@ -1,0 +1,90 @@
+{# Common macros for test assertions and verifications #}
+
+{%- macro verify_result(actual, expected, msg=None) -%}
+    assert {{ actual }} == {{ expected }}{% if msg %}, {{ msg }}{% endif %}
+{%- endmacro %}
+
+{%- macro verify_mock_calls(mock_name, calls, ordered=True) -%}
+    {{ mock_name }}.assert_has_calls([
+        {%- for call in calls %}
+        {{ call }},
+        {%- endfor %}
+    ], any_order={% if not ordered %}True{% else %}False{% endif %})
+{%- endmacro %}
+
+{%- macro verify_retry_behavior(mock_name, config) -%}
+    {%- set attempt_count = config.get('attempt_count', 2) %}
+    assert {{ mock_name }}.call_count == {{ attempt_count }}, (
+        f"Expected {{ attempt_count }} retry attempts, "
+        f"got {{{ mock_name }}.call_count}"
+    )
+{%- endmacro %}
+
+{%- macro verify_cache_call(mock_name, config) -%}
+    {%- set method = config.get('method', 'get') %}
+    {%- set args = config.get('args', []) %}
+    {{ mock_name }}.{{ method }}.assert_called_with(
+        {%- for arg in args %}
+        {{ arg }},
+        {%- endfor %}
+    )
+{%- endmacro %}
+
+{%- macro verify_serialization_calls(mock_name, calls) -%}
+    {%- for call in calls %}
+    {%- set method = call.get('method', 'dumps') %}
+    {%- set args = call.get('args', []) %}
+    {%- set kwargs = call.get('kwargs', {}) %}
+    {{ mock_name }}.{{ method }}.assert_called_with(
+        {%- for arg in args %}
+        {{ arg }},
+        {%- endfor %}
+        {%- for key, value in kwargs.items() %}
+        {{ key }}={{ value }},
+        {%- endfor %}
+    )
+    {%- endfor %}
+{%- endmacro %}
+
+{%- macro verify_single_log(mock_name, level, message, call_number=-1) -%}
+    assert any(
+        record.levelno == logging.{{ level }} and
+        {{ message|tojson }} in record.message
+        for record in caplog.records
+    ), (
+        "Expected message not found: %s\nLog contents: %s" % ({{ message|tojson }}, caplog.text)
+    )
+{%- endmacro %}
+
+{%- macro verify_exception(exc_type, message=None) -%}
+    with pytest.raises({{ exc_type }}){% if message %} as exc_info{% endif %}:
+        yield
+    {%- if message %}
+    assert str(exc_info.value) == {{ message|tojson }}
+    {%- endif %}
+{%- endmacro %}
+
+{%- macro verify_multiple_conditions(conditions) -%}
+    assert all(
+        {%- for condition in conditions %}
+        {{ condition }}{% if not loop.last %} and{% endif %}
+        {%- endfor %}
+    )
+{%- endmacro %}
+
+{%- macro verify_any_condition(conditions) -%}
+    assert any(
+        {%- for condition in conditions %}
+        {{ condition }}{% if not loop.last %} or{% endif %}
+        {%- endfor %}
+    )
+{%- endmacro %}
+
+{%- macro verify_sequence_equality(actual, expected, msg=None) -%}
+    assert len({{ actual }}) == len({{ expected }}), "Sequence lengths do not match"
+    for idx, (a, e) in enumerate(zip({{ actual }}, {{ expected }})):
+        assert a == e, f"Mismatch at index {idx}: {a} != {e}"
+    {%- if msg %}
+    , {{ msg }}
+    {%- endif %}
+{%- endmacro %}

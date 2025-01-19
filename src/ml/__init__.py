@@ -9,23 +9,19 @@ This package provides ML-related functionality including:
 
 from typing import TYPE_CHECKING
 
-from .embeddings import (
+from .embeddings import EmbeddingGenerator
+from .processing import TextProcessor
+from .processing.models.chunks import ProcessedChunk
+from .search import SemanticSearch
+from .service import (
     EMBEDDING_AVAILABLE,
-    EmbeddingGenerator,
     ServiceInitializationError,
     ServiceNotInitializedError,
     ServiceState,
 )
-from .processing import TextProcessor
-from .search import SemanticSearch
-
 
 if TYPE_CHECKING:
-    import numpy as np
-    import numpy.typing as npt
-    from sentence_transformers import SentenceTransformer
-
-    from src.core.models.chunks import Chunk, ProcessedChunk
+    from src.core.models.chunks import Chunk
     from src.core.settings import Settings
 
 __all__ = [
@@ -33,6 +29,7 @@ __all__ = [
     "EmbeddingGenerator",
     "TextProcessor",
     "SemanticSearch",
+    "ProcessedChunk",
     # Service states and errors
     "ServiceState",
     "ServiceInitializationError",

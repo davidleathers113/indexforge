@@ -1,30 +1,35 @@
-"""Base settings module."""
+"""Settings module."""
 
-import os
-from typing import Any, Dict
+from functools import lru_cache
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from .api import APISettings
+from .base import BaseAppSettings
+from .database import DatabaseSettings
+from .monitoring import MonitoringSettings
+from .performance import PerformanceSettings
+from .security import SecuritySettings
+from .weaviate import WeaviateSettings
 
 
-class BaseAppSettings(BaseSettings):
-    """Base settings class with common configuration."""
+class Settings(BaseAppSettings):
+    """Main settings class that composes all settings modules."""
 
-    model_config = SettingsConfigDict(
-        case_sensitive=True,
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+    api: APISettings = APISettings()
+    database: DatabaseSettings = DatabaseSettings()
+    monitoring: MonitoringSettings = MonitoringSettings()
+    performance: PerformanceSettings = PerformanceSettings()
+    security: SecuritySettings = SecuritySettings()
+    weaviate: WeaviateSettings = WeaviateSettings()
 
-    @classmethod
-    def _is_test_environment(cls) -> bool:
-        """Check if running in test environment."""
-        return os.getenv("ENVIRONMENT", "").lower() in ("test", "testing")
 
-    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        """Override dict to include nested settings."""
-        base_dict = super().dict(*args, **kwargs)
-        for key, value in base_dict.items():
-            if isinstance(value, BaseSettings):
-                base_dict[key] = value.dict(*args, **kwargs)
-        return base_dict
+@lru_cache
+def get_settings() -> Settings:
+    """Get cached settings instance.
+
+    Returns:
+        Settings: Cached settings instance
+    """
+    return Settings()
+
+
+__all__ = ["Settings", "get_settings"]

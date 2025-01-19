@@ -1,8 +1,13 @@
 """Chunk model definitions for text processing."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Any
 from uuid import UUID, uuid4
+
+import numpy as np
+from numpy.typing import NDArray
 
 from .base import ProcessingContext, ProcessingMetadata
 
@@ -49,6 +54,7 @@ class ProcessedChunk:
         named_entities: Named entity recognition results
         sentiment_score: Sentiment analysis score
         topic_id: Topic identification result
+        embedding: Vector embedding of content
         processing_metadata: Metadata about the processing
     """
 
@@ -59,6 +65,7 @@ class ProcessedChunk:
     named_entities: list[dict[str, Any]] = field(default_factory=list)
     sentiment_score: float = 0.0
     topic_id: str | None = None
+    embedding: NDArray[np.float32] | None = None
     processing_metadata: ProcessingMetadata = field(default_factory=ProcessingMetadata)
 
     def __post_init__(self) -> None:
@@ -71,6 +78,8 @@ class ProcessedChunk:
             raise TypeError("Sentiment score must be numeric")
         if self.topic_id is not None and not isinstance(self.topic_id, str):
             raise TypeError("Topic ID must be a string or None")
+        if self.embedding is not None and not isinstance(self.embedding, np.ndarray):
+            raise TypeError("Embedding must be a numpy array or None")
 
 
 @dataclass

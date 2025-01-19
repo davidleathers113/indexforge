@@ -1,0 +1,281 @@
+{# Template for testing try-except block indentation #}
+{% extends "base_template.py.jinja" %}
+
+{%- block imports %}
+{{ super() }}
+from src.template.environment import create_environment
+{%- endblock %}
+
+{%- block test_class %}
+class TestTryExceptIndentation:
+    """Test indentation of try-except blocks."""
+
+    def test_basic_try_except_indentation(self, env):
+        """Test that basic try-except blocks maintain proper indentation."""
+        template_str = """\
+def test_function():
+    try:
+        result = process_data(
+            value={{ input_value }},
+            mode={{ mode|tojson }}
+        )
+    except ValueError as e:
+        logger.error("Processing failed: %s", e)
+        raise
+    else:
+        assert result == {{ expected_result }}
+    finally:
+        cleanup_resources()"""
+
+        context = {
+            "input_value": 42,
+            "mode": "test",
+            "expected_result": "success",
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    try:
+        result = process_data(
+            value=42,
+            mode="test"
+        )
+    except ValueError as e:
+        logger.error("Processing failed: %s", e)
+        raise
+    else:
+        assert result == "success"
+    finally:
+        cleanup_resources()"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+
+    def test_nested_try_except_indentation(self, env):
+        """Test that nested try-except blocks maintain proper indentation."""
+        template_str = """\
+def test_function():
+    try:
+        # Outer try block
+        outer_result = outer_process(
+            value={{ outer_value }}
+        )
+        try:
+            # Inner try block
+            inner_result = inner_process(
+                outer_result,
+                factor={{ inner_factor }}
+            )
+        except ValueError as e:
+            logger.warning(
+                "Inner processing failed: %s",
+                e
+            )
+            inner_result = {{ inner_default }}
+        else:
+            assert inner_result == {{ expected_inner }}
+    except Exception as e:
+        logger.error(
+            "Outer processing failed: %s",
+            e
+        )
+        raise
+    else:
+        assert outer_result == {{ expected_outer }}
+    finally:
+        cleanup_all_resources()"""
+
+        context = {
+            "outer_value": 10,
+            "inner_factor": 2,
+            "inner_default": 0,
+            "expected_inner": 20,
+            "expected_outer": "success",
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    try:
+        # Outer try block
+        outer_result = outer_process(
+            value=10
+        )
+        try:
+            # Inner try block
+            inner_result = inner_process(
+                outer_result,
+                factor=2
+            )
+        except ValueError as e:
+            logger.warning(
+                "Inner processing failed: %s",
+                e
+            )
+            inner_result = 0
+        else:
+            assert inner_result == 20
+    except Exception as e:
+        logger.error(
+            "Outer processing failed: %s",
+            e
+        )
+        raise
+    else:
+        assert outer_result == "success"
+    finally:
+        cleanup_all_resources()"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+
+    def test_try_except_with_complex_handling(self, env):
+        """Test that try-except blocks with complex error handling maintain proper indentation."""
+        template_str = """\
+{%- from 'common/macros/mocks.py.jinja' import setup with context -%}
+def test_function():
+    {{ setup("error_handler") | indent(4) }}
+
+    try:
+        result = process_complex_data(
+            {%- for item in items %}
+            {{ item.name }}={{ item.value }},
+            {%- endfor %}
+        )
+    except ValueError as e:
+        error_handler.handle_value_error(
+            error=e,
+            context={
+                "items": [
+                    {%- for item in items %}
+                    {
+                        "name": {{ item.name|tojson }},
+                        "value": {{ item.value }},
+                    },
+                    {%- endfor %}
+                ],
+                "timestamp": "{{ timestamp }}",
+            }
+        )
+        raise
+    except TypeError as e:
+        error_handler.handle_type_error(
+            error=e,
+            items=[
+                {%- for item in items %}
+                {{ item.value }},
+                {%- endfor %}
+            ]
+        )
+        return {{ default_result }}
+    else:
+        for expected in [
+            {%- for expected in expected_values %}
+            {{ expected }},
+            {%- endfor %}
+        ]:
+            assert expected in result
+    finally:
+        error_handler.cleanup()"""
+
+        context = {
+            "items": [
+                {"name": "first", "value": 1},
+                {"name": "second", "value": "test"},
+                {"name": "third", "value": 3.14},
+            ],
+            "timestamp": "2024-01-01T00:00:00",
+            "default_result": "default",
+            "expected_values": [1, 2, 3],
+        }
+
+        result = env.from_string(template_str).render(**context)
+        logger.debug("Generated code:\n%s", result)
+
+        expected = """\
+def test_function():
+    error_handler = mocker.Mock()
+
+    try:
+        result = process_complex_data(
+            first=1,
+            second="test",
+            third=3.14,
+        )
+    except ValueError as e:
+        error_handler.handle_value_error(
+            error=e,
+            context={
+                "items": [
+                    {
+                        "name": "first",
+                        "value": 1,
+                    },
+                    {
+                        "name": "second",
+                        "value": "test",
+                    },
+                    {
+                        "name": "third",
+                        "value": 3.14,
+                    },
+                ],
+                "timestamp": "2024-01-01T00:00:00",
+            }
+        )
+        raise
+    except TypeError as e:
+        error_handler.handle_type_error(
+            error=e,
+            items=[
+                1,
+                "test",
+                3.14,
+            ]
+        )
+        return "default"
+    else:
+        for expected in [
+            1,
+            2,
+            3,
+        ]:
+            assert expected in result
+    finally:
+        error_handler.cleanup()"""
+
+        # Normalize newlines
+        result = result.replace("\r\n", "\n")
+        expected = expected.replace("\r\n", "\n")
+
+        assert result == expected
+
+        # Verify the code is valid Python
+        try:
+            compile(result, "<string>", "exec")
+        except SyntaxError as e:
+            pytest.fail("Generated code is not valid Python: %s" % e)
+{%- endblock %}

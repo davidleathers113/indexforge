@@ -4,8 +4,7 @@ This module contains tests for the CompositeValidator class, which combines mult
 validation strategies to perform comprehensive validation of document lineage data.
 """
 
-from typing import List
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 
 import pytest
 
@@ -20,12 +19,12 @@ from src.core.tracking.validation.strategies.relationships import RelationshipVa
 class MockStrategy(ValidationStrategy):
     """Mock validation strategy for testing."""
 
-    def __init__(self, errors: List[str] = None) -> None:
+    def __init__(self, errors: list[str] = None) -> None:
         """Initialize with predefined errors to return."""
         self.errors = errors or []
         self.validate_called = False
 
-    def validate(self, lineage: DocumentLineage) -> List[str]:
+    def validate(self, lineage: DocumentLineage) -> list[str]:
         """Return predefined errors and mark as called."""
         self.validate_called = True
         return self.errors
