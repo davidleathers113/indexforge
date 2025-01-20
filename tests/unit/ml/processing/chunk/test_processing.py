@@ -1,4 +1,17 @@
-"""Tests for chunk processing functionality."""
+"""Tests for chunk processing functionality.
+
+Note: This test file is deprecated and will be removed in Phase 4 (Cleanup and Testing).
+The functionality tested here has been migrated to the new service implementation,
+with more comprehensive test coverage in tests/ml/processing/service/.
+
+Key test coverage has been moved to:
+- test_state.py: Service lifecycle and state management
+- test_validation.py: Input validation and constraints
+- test_recovery.py: Error handling and graceful degradation
+
+This file is maintained temporarily to ensure backward compatibility
+during the migration period.
+"""
 
 from unittest.mock import Mock
 

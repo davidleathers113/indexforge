@@ -4,10 +4,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.core import Chunk
 from src.core.settings import Settings
 from src.ml.embeddings.config import GeneratorConfig, ValidatorConfig
-from src.ml.embeddings.service import EmbeddingService
+from src.services.ml.entities import Chunk
+from src.services.ml.implementations import EmbeddingParameters, EmbeddingService
+from tests.ml.embeddings.builders import ChunkBuilder
+from tests.ml.embeddings.fixtures import EmbeddingServiceFactory
 
 
 @pytest.fixture
@@ -32,13 +34,12 @@ def settings(generator_config: GeneratorConfig) -> Settings:
 
 
 @pytest.fixture
-async def embedding_service(settings: Settings) -> EmbeddingService:
-    """Provide test embedding service.
-
-    This fixture creates and initializes an EmbeddingService instance
-    for testing, cleaning up after the test completes.
+async def embedding_service() -> EmbeddingService:
     """
-    service = EmbeddingService(settings)
+    This fixture creates and initializes an EmbeddingService instance
+    for testing purposes.
+    """
+    service = EmbeddingServiceFactory.default()
     await service.initialize()
     yield service
     await service.cleanup()
@@ -47,12 +48,15 @@ async def embedding_service(settings: Settings) -> EmbeddingService:
 @pytest.fixture
 def valid_chunk() -> Chunk:
     """Provide a valid test chunk."""
-    return Chunk(
-        id="test-chunk", content="This is a valid test chunk with sufficient content.", metadata={}
+    return (
+        ChunkBuilder()
+        .with_content("This is a valid test chunk with sufficient content.")
+        .with_metadata({})
+        .build()
     )
 
 
 @pytest.fixture
 def invalid_chunk() -> Chunk:
     """Provide an invalid test chunk."""
-    return Chunk(id="invalid-chunk", content="", metadata={})  # Empty content
+    return ChunkBuilder().with_content("").with_metadata({}).build()  # Empty content
