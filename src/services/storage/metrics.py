@@ -1,13 +1,20 @@
-"""Storage metrics service implementation."""
+"""Storage metrics service implementation.
 
+This module provides the implementation of storage metrics collection
+and reporting functionality.
+"""
 
-from src.core.interfaces.storage import StorageMetrics
 from src.core.metrics import ServiceMetricsCollector
+from src.core.types.storage import StorageMetrics
 from src.services.base import BaseService
 
 
 class StorageMetricsService(StorageMetrics, BaseService):
-    """Implementation of storage metrics collection."""
+    """Storage metrics service implementation.
+
+    This service provides metrics collection and reporting for storage
+    operations, tracking performance and usage patterns.
+    """
 
     def __init__(self) -> None:
         """Initialize storage metrics service."""

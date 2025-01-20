@@ -1,16 +1,13 @@
 """ML service state management.
 
-This module provides state management functionality for ML services,
-including state tracking, validation, and transition management.
+This module provides state management functionality for ML services.
 """
-
-from __future__ import annotations
 
 import logging
 from enum import Enum, auto
 from typing import Dict, Set
 
-from src.core.errors import ServiceStateError
+from src.core.types.service import ServiceStateError
 
 logger = logging.getLogger(__name__)
 

@@ -1,19 +1,19 @@
 """Document storage service implementation.
 
-This module provides a concrete implementation of the document storage interface
-with support for batch operations, metrics collection, and memory management.
+This module provides the implementation of document storage operations,
+including metrics collection and error handling.
 """
 
 from typing import TypeVar
 from uuid import UUID, uuid4
 
-from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
+from src.core.interfaces.metrics import MetricsProvider
 from src.core.interfaces.storage import DocumentStorage
 from src.core.models.documents import Document, DocumentMetadata, DocumentType
 from src.core.settings import Settings
+from src.core.types.storage import StorageMetrics
 
 from .base import BaseStorageService, BatchConfig, BatchResult
-
 
 T = TypeVar("T", bound=Document)
 

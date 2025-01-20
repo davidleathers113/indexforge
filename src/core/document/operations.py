@@ -1,14 +1,16 @@
-"""Document operations service.
+"""Document operations module.
 
-This module provides document lifecycle management functionality through a service interface.
+This module provides functionality for document operations,
+including processing, validation, and transformation.
 """
 
 from uuid import UUID, uuid4
 
-from src.core.base import BaseService, ServiceState, ServiceStateError
+from src.core.base import BaseService
 from src.core.models import Document, DocumentMetadata, DocumentStatus, DocumentType, ProcessingStep
 from src.core.models.document_operations import DocumentOperationMetadata, OperationMetadata
 from src.core.storage.strategies.json_storage import JsonStorageStrategy
+from src.core.types.service import ServiceState, ServiceStateError
 
 
 class DocumentOperationError(Exception):

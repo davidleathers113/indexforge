@@ -1,225 +1,195 @@
-# ML Service Architecture Documentation
+# ML Services Architecture
 
-## Directory Structure Overview
+## Overview
 
-The ML service is organized into several key directories and modules that handle different aspects of machine learning service functionality. This documentation reflects the current state of the codebase as of version 1.0.0.
+This document describes the architecture of the ML services layer, which provides a robust foundation for machine learning operations with emphasis on performance, resource management, and reliability.
 
-### Root Directory (`src/services/ml/`)
+## Directory Structure
 
-- `__init__.py`: Package initialization and public exports
-- `errors.py`: Custom error definitions for ML services, including standardized error codes and recovery mechanisms
-- `service.py`: Generic base service class with type-safe interfaces and common functionality
-- `state.py`: Service state machine implementation with lifecycle tracking
+```plaintext
+src/services/ml/
+├── implementations/           # Service implementations
+│   ├── embedding.py          # Embedding service
+│   ├── processing.py         # Processing service
+│   ├── factories.py          # Service factories
+│   └── lifecycle.py          # Service lifecycle management
+├── monitoring/               # Performance monitoring
+│   ├── metrics.py            # Metrics collection
+│   ├── profiler.py           # Operation profiling
+│   └── instrumentation.py    # Performance instrumentation
+├── optimization/             # Resource optimization
+│   ├── batching.py          # Dynamic batch sizing
+│   └── resources.py         # Resource management
+├── validation/              # Validation framework
+│   ├── strategies.py        # Validation strategies
+│   ├── parameters.py        # Validation parameters
+│   └── validators.py        # Service validators
+├── errors.py                # Error definitions
+└── state.py                 # State management
+```
 
-### Implementations (`src/services/ml/implementations/`)
-
-Core service implementations and supporting components:
-
-- `__init__.py`: Exports service implementations with version compatibility
-- `embedding.py`: Async vector embedding service with validation integration
-- `factories.py`: Type-safe factory pattern implementation with dependency injection
-- `lifecycle.py`: Service lifecycle management with resource tracking
-- `processing.py`: Async text processing service with error recovery
-
-### Validation (`src/services/ml/validation/`)
-
-Validation framework and service-specific validators:
-
-- `__init__.py`: Exports validation components and type definitions
-- `base.py`: Defines `Validator` protocol and `ValidationStrategy` base class with generic type support
-- `embedding.py`: Embedding-specific validation rules and constraints
-- `manager.py`: `ValidationManager` implementation for chunk and batch validation
-- `parameters.py`: Defines `ValidationParameters` and `BatchValidationParameters`
-- `processing.py`: Processing-specific validation rules and constraints
-- `strategies.py`: Implements concrete validation strategies:
-  - `ContentValidationStrategy`: Text content validation
-  - `BatchValidationStrategy`: Batch operation validation
-  - `MetadataValidationStrategy`: Metadata structure validation
-  - `ChunkValidationStrategy`: Composite chunk validation
-- `validators.py`: Factory functions for creating preconfigured validators
-
-The validation framework is built around these key concepts:
-
-1. **Core Abstractions** (`base.py`)
-
-   - `Validator[T]` protocol for type-safe validation
-   - Generic `ValidationStrategy[T, P]` base class
-   - `CompositeValidator` for combining multiple validators
-
-2. **Validation Strategies** (`strategies.py`)
-
-   - Content validation with length and word count checks
-   - Batch size and memory constraints
-   - Required and optional metadata field validation
-   - Composite chunk validation combining multiple strategies
-
-3. **Validation Management** (`manager.py`)
-
-   - Centralized validation coordination
-   - Individual and batch chunk validation
-   - Error aggregation and reporting
-   - Context-aware validation support
-
-4. **Parameter Management** (`parameters.py`)
-
-   - Validation constraints configuration
-   - Batch processing parameters
-   - Type-safe parameter definitions
-
-5. **Service-Specific Validation**
-   - Embedding validation rules (`embedding.py`)
-   - Processing validation rules (`processing.py`)
-   - Customized validator creation (`validators.py`)
-
-This framework provides a robust, type-safe, and extensible validation system with clear separation of concerns and comprehensive error handling.
-
-## Component Details
-
-### Core Components
-
-1. **Service Base (`service.py`)**
-
-   - Generic base service interface with type parameters
-   - Async operation support with proper error handling
-   - Comprehensive service configuration and setup
-   - Integration points for monitoring and metrics
-
-2. **State Management (`state.py`)**
-
-   - State machine implementation with validation
-   - Comprehensive state transition tracking
-   - Resource allocation/deallocation management
-   - Error state handling and recovery
-
-3. **Error Handling (`errors.py`)**
-   - Standardized error codes and messages
-   - Hierarchical error classification
-   - Error recovery mechanisms
-   - Structured logging integration
-   - Context preservation for debugging
+## Core Components
 
 ### Service Implementations
 
-1. **Embedding Service (`implementations/embedding.py`)**
+- **Embedding Service**: Handles text embedding operations with resource-aware batch processing
+- **Processing Service**: Manages text processing with dynamic validation
+- **Service Factories**: Creates and configures service instances
+- **Lifecycle Management**: Handles service initialization and state transitions
 
-   - Asynchronous vector embedding generation
-   - Integrated validation framework
-   - Efficient batch processing with memory management
-   - Error recovery and retry mechanisms
-   - Performance monitoring hooks
+### Monitoring System
 
-2. **Processing Service (`implementations/processing.py`)**
+- **Metrics Collection**: Tracks operation metrics and resource usage
+- **Performance Profiling**: Detailed profiling of operations
+- **Instrumentation**: Integrates monitoring into service operations
 
-   - Asynchronous text processing operations
-   - Content transformation with validation
-   - Adaptive batch processing support
-   - Error handling with recovery strategies
-   - Resource usage optimization
+### Resource Optimization
 
-3. **Service Lifecycle (`implementations/lifecycle.py`)**
-
-   - Controlled service initialization
-   - Resource tracking and management
-   - Graceful shutdown coordination
-   - State consistency enforcement
-   - Health check implementation
-
-4. **Model Factories (`implementations/factories.py`)**
-   - Type-safe model instantiation
-   - Dependency injection support
-   - Resource optimization strategies
-   - Model-specific factory implementations
-   - Configuration validation
+- **Dynamic Batching**: Adjusts batch sizes based on resource availability
+- **Resource Management**: Monitors and manages compute resources
 
 ### Validation Framework
 
-1. **Validation Manager (`validation/manager.py`)**
-
-   - Strategy orchestration with error handling
-   - Composite validation execution
-   - Result aggregation and reporting
-   - Performance optimization
-   - Extensible strategy registration
-
-2. **Parameters (`validation/parameters.py`)**
-
-   - Type-validated parameter definitions
-   - Inheritance hierarchy for specialization
-   - Default configurations
-   - Runtime parameter validation
-   - Configuration schema enforcement
-
-3. **Strategies (`validation/strategies.py`)**
-
-   - Content validation with customization
-   - Memory-aware batch validation
-   - Metadata schema validation
-   - Chunk size and format validation
-   - Custom strategy extension points
-
-4. **Service Validators (`validation/validators.py`)**
-   - Service-specific factory functions
-   - Preset validation configurations
-   - Custom validator composition
-   - Performance-optimized validation
-   - Error reporting customization
+- **Validation Strategies**: Implements validation patterns
+- **Parameter Management**: Handles validation configuration
+- **Service Validators**: Service-specific validation logic
 
 ## Key Features
 
-1. **Modular Design**
+1. **Resource Awareness**
 
-   - Clear separation of concerns
-   - Pluggable components with interfaces
-   - Extensible architecture patterns
-   - Version compatibility management
-   - Integration flexibility
-
-2. **Robust Validation**
-
-   - Multi-level validation strategies
-   - Type-safe parameter validation
-   - Comprehensive error handling
-   - Custom validation extension
-   - Performance optimization
-
-3. **Lifecycle Management**
-
-   - Controlled initialization sequence
-   - Resource tracking and cleanup
-   - State consistency enforcement
-   - Health monitoring integration
-   - Graceful shutdown handling
-
-4. **Batch Processing**
-   - Memory usage monitoring
+   - Dynamic resource monitoring
    - Adaptive batch sizing
-   - Error recovery in batch operations
-   - Performance optimization
-   - Resource utilization control
+   - Memory usage optimization
+   - GPU utilization tracking
 
-## Error Handling
+2. **Performance Monitoring**
 
-1. **Error Classification**
+   - Operation profiling
+   - Resource usage tracking
+   - Performance alerts
+   - Metrics collection
 
-   - Standardized error codes
-   - Hierarchical error types
-   - Context preservation
-   - Recovery suggestions
-   - Debugging information
+3. **Validation**
 
-2. **Recovery Mechanisms**
+   - Input validation
+   - Resource validation
+   - State validation
+   - Batch validation
 
-   - Automatic retry strategies
-   - Fallback mechanisms
-   - State recovery
-   - Resource cleanup
-   - Error reporting
-
-3. **Logging and Monitoring**
-   - Structured logging
+4. **Error Handling**
+   - Structured error types
+   - Detailed error context
+   - Recovery mechanisms
    - Error tracking
-   - Performance metrics
-   - Resource usage monitoring
-   - Health status reporting
 
-This architecture provides a robust foundation for ML services with comprehensive validation, efficient resource management, and reliable error handling. The modular design ensures maintainability and extensibility as requirements evolve.
+## Usage Examples
+
+### Service Initialization
+
+```python
+from src.services.ml.implementations.factories import ServiceFactory
+from src.core.settings import Settings
+
+settings = Settings()
+service = ServiceFactory.create_embedding_service(settings)
+```
+
+### Operation Instrumentation
+
+```python
+from src.services.ml.monitoring.instrumentation import PerformanceInstrumentor
+
+async with service.instrument("embed_text") as instrumentor:
+    result = await service.embed_text("example")
+```
+
+### Resource Management
+
+```python
+from src.services.ml.optimization.resources import ResourceManager
+
+resource_manager = ResourceManager(settings)
+with resource_manager.monitor():
+    result = await service.process_batch(items)
+```
+
+## Best Practices
+
+1. **Resource Management**
+
+   - Always use resource monitoring for large operations
+   - Configure appropriate memory limits
+   - Handle resource exhaustion gracefully
+
+2. **Performance Monitoring**
+
+   - Instrument critical operations
+   - Set appropriate alert thresholds
+   - Monitor batch processing performance
+
+3. **Error Handling**
+
+   - Use specific error types
+   - Include context in error messages
+   - Implement proper recovery mechanisms
+
+4. **Validation**
+   - Validate inputs early
+   - Use appropriate validation strategies
+   - Include resource validation
+
+## Dependencies
+
+- **Core Dependencies**
+
+  - torch
+  - transformers
+  - psutil
+  - pydantic
+
+- **Optional Dependencies**
+  - cuda-toolkit (for GPU support)
+  - tensorboard (for metrics visualization)
+
+## Configuration
+
+Services can be configured through:
+
+1. Environment variables
+2. Configuration files
+3. Programmatic settings
+
+Key configuration options:
+
+- Memory limits
+- Batch sizes
+- Device selection
+- Alert thresholds
+
+## Testing
+
+The test suite covers:
+
+1. Unit tests for all components
+2. Integration tests for service interactions
+3. Performance tests
+4. Resource management tests
+
+## Maintenance
+
+Regular maintenance tasks:
+
+1. Monitor resource usage patterns
+2. Review performance metrics
+3. Update model dependencies
+4. Optimize batch sizes
+
+## Future Improvements
+
+Planned enhancements:
+
+1. Enhanced GPU memory management
+2. Distributed processing support
+3. Advanced caching strategies
+4. Extended metrics collection

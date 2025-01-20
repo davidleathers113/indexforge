@@ -82,29 +82,65 @@
   - [x] Add ServiceInitializationError
   - [x] Add ServiceNotInitializedError
   - [x] Add feature flags
-- [ ] Resolve service-related imports
-  - [ ] Fix circular dependencies
-  - [ ] Update import paths
-  - [ ] Verify type hints
-- [ ] Implement service initialization
-  - [ ] Add async initialization
-  - [ ] Add health checks
-  - [ ] Add metrics collection
+- [x] Resolve service-related imports
+  - [x] Fix circular dependencies
+  - [x] Update import paths
+  - [x] Verify type hints
+- [x] Implement service initialization
+  - [x] Add async initialization
+  - [x] Add health checks
+  - [x] Add metrics collection
 
 ### Break Circular Dependencies
 
-- [ ] Implement dependency injection for core services
-  - [ ] Create ServiceProvider interface
-  - [ ] Define service factory protocols
-  - [ ] Update service initialization
-- [ ] Extract shared types to core/types
-  - [ ] Move common types from models
-  - [ ] Update import references
+- [🔄] Implement dependency injection for core services
+
+  - [x] Create ServiceProvider interface
+  - [x] Define service factory protocols
+  - [x] Update service initialization
+  - [🔄] Implement security service interfaces
+    - [x] Create security_interfaces.py
+    - [x] Move shared types to security_common.py
+    - [🔄] Update encryption/key storage services
+      - [x] Create encryption service protocols
+      - [x] Implement encryption service interface
+      - [x] Update key storage implementation
+      - [x] Add key storage tests
+      - [x] Add security provider tests
+      - [x] Update service registration
+      - [x] Fix EmbeddingGenerator import error
+
+- [🔄] Extract shared types to core/types
+
+  - [🔄] Move common types from models
+  - [🔄] Update import references
   - [ ] Verify type consistency
-- [ ] Reorganize model relationships
-  - [ ] Break document/chunk circular dependency
+  - [ ] Create ML service interfaces
+    - [ ] Define embedding service protocols
+    - [ ] Move vector operations to dedicated module
+    - [ ] Update cross-reference dependencies
+
+  See `types_migration_checklist.md` for detailed implementation plan.
+
+- [🔄] Reorganize model relationships
+
+  - [🔄] Break document/chunk circular dependency
   - [ ] Break lineage/tracking circular dependency
   - [ ] Update reference management
+  - [🔄] Break security module circular dependency
+    - [x] Create interface-based coupling
+    - [x] Extract shared security types
+    - [x] Refactor encryption service
+    - [x] Refactor key storage service
+    - [ ] Add security service tests
+    - [ ] Update service registration
+
+- [🔄] Clean up import organization
+  - [🔄] Remove unused imports in test files
+  - [x] Clean up encryption service imports
+  - [x] Clean up key storage imports
+  - [ ] Fix ML service implementation imports
+  - [ ] Verify import order consistency
 
 ### Core Model Cleanup
 

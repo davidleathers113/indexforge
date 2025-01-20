@@ -16,9 +16,9 @@ from uuid import UUID
 import pytest
 
 from src.core.models.documents import Document
-from src.core.storage.strategies.base import StorageStrategy
 from src.core.storage.strategies.json_storage import JsonStorage
 from src.core.storage.strategies.memory_storage import MemoryStorage
+from src.core.types.storage import StorageStrategy
 
 
 @pytest.fixture

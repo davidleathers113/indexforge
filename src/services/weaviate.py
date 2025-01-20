@@ -22,7 +22,6 @@ from src.services.base import (
     ServiceStateError,
 )
 
-
 if TYPE_CHECKING:
     from src.core.settings import Settings
 

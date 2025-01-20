@@ -15,7 +15,7 @@ from .strategies import ChunkValidationStrategy
 logger = logging.getLogger(__name__)
 
 
-class ValidationManager:
+class CompositeValidator:
     """Manages validation operations for services."""
 
     def __init__(

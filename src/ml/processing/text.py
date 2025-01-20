@@ -2,7 +2,6 @@
 
 from typing import TYPE_CHECKING, Any
 
-
 try:
     import nltk
     from nltk.tokenize import sent_tokenize
@@ -11,10 +10,10 @@ try:
 except ImportError:
     NLTK_AVAILABLE = False
 
-from .base import BaseProcessor
-from .errors import ServiceInitializationError
-from .types import ServiceState
+from src.core.types.processing import ProcessingError
+from src.core.types.service import ServiceState
 
+from .base import BaseProcessor
 
 if TYPE_CHECKING:
     from src.core.settings import Settings
@@ -50,26 +49,23 @@ class TextProcessor(BaseProcessor[list[str]]):
         the sentence tokenizer.
 
         Raises:
-            ServiceInitializationError: If initialization fails
+            ProcessingError: If initialization fails
         """
         self._transition_state(ServiceState.INITIALIZING)
         try:
             if not NLTK_AVAILABLE:
-                raise ServiceInitializationError(
+                raise ProcessingError(
                     "NLTK is required for text processing",
                     service_name=self.__class__.__name__,
-                    missing_dependencies=["nltk"],
                 )
 
             # Download required NLTK data
             try:
                 nltk.download("punkt", quiet=True)
-            except Exception as e:
-                raise ServiceInitializationError(
+            except Exception:
+                raise ProcessingError(
                     "Failed to download NLTK data",
-                    cause=e,
                     service_name=self.__class__.__name__,
-                    missing_dependencies=["nltk_data"],
                 )
 
             # Initialize tokenizer
@@ -82,10 +78,9 @@ class TextProcessor(BaseProcessor[list[str]]):
 
         except Exception as e:
             self._transition_state(ServiceState.ERROR)
-            if not isinstance(e, ServiceInitializationError):
-                raise ServiceInitializationError(
+            if not isinstance(e, ProcessingError):
+                raise ProcessingError(
                     f"Failed to initialize text processor: {e}",
-                    cause=e,
                     service_name=self.__class__.__name__,
                 )
             raise
@@ -96,7 +91,7 @@ class TextProcessor(BaseProcessor[list[str]]):
         This method sets up the sentence tokenization strategy.
 
         Raises:
-            ServiceInitializationError: If strategy initialization fails
+            ProcessingError: If strategy initialization fails
         """
         try:
 
@@ -107,10 +102,9 @@ class TextProcessor(BaseProcessor[list[str]]):
                     return sent_tokenize(content)
 
             self.add_strategy(SentenceTokenizer())
-        except Exception as e:
-            raise ServiceInitializationError(
+        except Exception:
+            raise ProcessingError(
                 "Failed to initialize sentence tokenizer",
-                cause=e,
                 service_name=self.__class__.__name__,
             )
 
@@ -128,7 +122,7 @@ class TextProcessor(BaseProcessor[list[str]]):
             List of sentences
 
         Raises:
-            ServiceStateError: If processor is not initialized
+            ProcessingStateError: If processor is not initialized
             ValueError: If text is invalid
             TypeError: If text is not a string
         """
@@ -170,7 +164,7 @@ class TextProcessor(BaseProcessor[list[str]]):
             List of sentence lists
 
         Raises:
-            ServiceStateError: If processor is not initialized
+            ProcessingStateError: If processor is not initialized
             ValueError: If any text is invalid
             TypeError: If any text is not a string
         """

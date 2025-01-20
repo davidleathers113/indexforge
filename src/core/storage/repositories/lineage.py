@@ -16,18 +16,16 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
     from uuid import UUID
 
 from src.core.models.lineage import DocumentLineage
-from src.core.storage.strategies.base import DataNotFoundError, StorageError
 from src.core.storage.strategies.json_storage import JsonStorage
+from src.core.types.storage import DataNotFoundError, StorageError
 
 from .base import BaseRepository, DocumentExistsError, DocumentNotFoundError, Repository
-
 
 logger = logging.getLogger(__name__)
 

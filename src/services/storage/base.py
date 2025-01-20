@@ -1,14 +1,14 @@
-"""Base storage service implementation.
+"""Base storage service module.
 
-This module provides the base class for storage services with integrated
-metrics collection and common functionality.
+This module provides the base implementation for storage services,
+including metrics collection and error handling.
 """
 
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
-
+from src.core.interfaces.metrics import MetricsProvider
+from src.core.types.storage import StorageMetrics
 
 T = TypeVar("T")
 

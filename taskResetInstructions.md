@@ -195,177 +195,205 @@
 4. Follow error handling patterns
 5. Add performance tests for new features
 
-# ML Service Layer Validation Framework Implementation
+# ML Service Layer Refactoring - Development Context
 
 ## Task Overview & Current Status
 
-### Core Problem/Feature
+### Core Problem
 
-- Implementing a robust validation framework for the ML service layer
-- Migrating existing validation logic to use the new framework
-- Ensuring consistent validation behavior across different services
+- Refactoring ML service layer to improve modularity and reduce circular dependencies
+- Implementing consistent patterns across service implementations
+- Separating concerns between core functionality and ML-specific components
 
-### Current Implementation Status
+### Current Status
 
-- Base validation framework implemented
-- Core validation patterns and utilities established
-- Embedding service validation migrated
-- Processing validation patterns defined
-- Parameter validation and error handling enhanced
+- Completed Phase 1 (Foundation) and most of Phase 2 (Service Migration)
+- Currently in Phase 3 (Validation and Optimization)
+- Successfully implemented:
+  - Base service components
+  - Validation framework
+  - Resource management
+  - Performance monitoring
+  - Metrics collection
+  - State management
 
 ### Key Architectural Decisions
 
-1. **Layered Validation Approach**
+1. **Service Layer Structure**
 
-   - Base validation patterns in `core/validation`
-   - Service-specific validation in `services/ml/validation`
-   - Implementation-specific validation in service classes
+   - Separate implementations directory for concrete services
+   - Shared validation framework
+   - Resource-aware service management
+   - Metrics-driven optimization
 
-2. **Validation Strategy Pattern**
+2. **Component Organization**
 
-   - Abstract `ValidationStrategy` base class
-   - Concrete validators for specific use cases
-   - Composite pattern for combining validators
+   ```
+   src/services/ml/
+   ├── implementations/      # Concrete service implementations
+   ├── validation/          # Validation framework
+   ├── monitoring/          # Performance and metrics
+   └── optimization/        # Resource management
+   ```
 
-3. **Error Handling**
-   - Hierarchical error types
-   - Detailed error messages with context
-   - Structured error reporting
+3. **Design Patterns**
+   - Factory pattern for service creation
+   - Strategy pattern for validation
+   - Observer pattern for metrics
+   - State pattern for lifecycle management
 
 ### Critical Constraints
 
-- Must maintain backward compatibility
-- Validation must be configurable via settings
-- Performance impact must be minimal
-- Thread-safe validation required
+- Must maintain backward compatibility during migration
+- Performance overhead must be minimal
+- Resource usage must be carefully managed
+- All operations must be async-compatible
 
 ## Codebase Navigation
 
-### Key Files (by importance)
+### Key Files (By Importance)
 
-1. `src/core/validation/base.py`
+1. `src/services/ml/implementations/embedding.py`
 
-   - Core validation interfaces and base classes
-   - Defines `ValidationStrategy`, `Validator`, `ValidationError`
-   - Implements `CompositeValidator`
+   - Primary embedding service implementation
+   - Integrates validation and resource management
+   - Recent modifications: Added instrumentation support
 
-2. `src/core/validation/strategies.py`
+2. `src/services/ml/validation/manager.py`
 
-   - Common validation strategies
-   - Implements `ContentValidator`, `BatchValidator`, `MetadataValidator`
-   - Defines validation parameter classes
+   - Centralized validation management
+   - Handles validation strategy composition
+   - Recent additions: Resource-aware validation
 
-3. `src/services/ml/validation/embedding.py`
+3. `src/services/ml/monitoring/metrics.py`
 
-   - Embedding-specific validation
-   - Implements `EmbeddingValidator`
-   - Defines `EmbeddingValidationParams`
+   - Metrics collection and aggregation
+   - Performance tracking
+   - New implementation with comprehensive metrics
 
-4. `src/services/ml/implementations/embedding.py`
+4. `src/services/ml/optimization/resources.py`
 
-   - Embedding service implementation
-   - Uses new validation framework
-   - Enhanced error handling and logging
+   - Resource management and optimization
+   - Memory and GPU management
+   - Recently added: Dynamic resource allocation
 
-5. `src/core/validation/utils.py`
-   - Shared validation utilities
-   - Common validation functions
-   - Type checking and constraint validation
+5. `src/services/ml/implementations/factories.py`
+   - Service creation and initialization
+   - Dependency injection handling
+   - Planned: Enhanced error handling
 
 ### Dependencies
 
-- `sentence_transformers` for embedding generation
-- `numpy` for array operations
-- Core settings and models from `src/core`
+- PyTorch for ML operations
+- sentence-transformers for embeddings
+- psutil for resource monitoring
+- pydantic for validation
+- pytest for testing framework
 
 ## Technical Context
 
 ### Technical Assumptions
 
-1. Settings are loaded before service initialization
-2. Validation parameters are immutable during service lifetime
-3. Chunk text is UTF-8 encoded
-4. Model loading happens after parameter validation
+1. Services are initialized asynchronously
+2. Resource limits are configurable
+3. Validation can be composed
+4. Metrics collection has minimal overhead
+
+### External Services
+
+- GPU compute (optional)
+- Metrics storage (planned)
+- Model registry (planned)
 
 ### Performance Considerations
 
-- Validation occurs before expensive operations
-- Batch validation optimized for memory usage
-- Lazy validator initialization
-- Caching of validation results when possible
+1. Batch processing optimization
+2. Memory management for large operations
+3. Concurrent operation handling
+4. Resource-aware scaling
 
-### Security Considerations
+### Security Requirements
 
-- Input sanitization through validation
-- Memory limits on batch operations
-- Device restrictions (cpu/cuda only)
-- Metadata field restrictions
+1. Input validation for all operations
+2. Resource limit enforcement
+3. Error handling for all operations
+4. Secure model loading
 
 ## Development Progress
 
 ### Last Completed Tasks
 
-1. Implemented base validation framework
-2. Created shared validation utilities
-3. Migrated embedding service validation
-4. Enhanced error handling and logging
-5. Added parameter validation
+1. Implemented performance benchmarks
+2. Added resource-aware validation
+3. Created metrics collection system
+4. Implemented state transition verification
 
 ### Immediate Next Steps
 
-1. Migrate processing service validation
-2. Add comprehensive test coverage
-3. Document validation patterns
-4. Create validation strategy examples
+1. Resolve service-related imports
+
+   - Fix circular dependencies
+   - Update import paths
+   - Verify type hints
+
+2. Implement service initialization
+
+   - Add async initialization
+   - Add health checks
+   - Add metrics collection
+
+3. Break circular dependencies
+   - Implement dependency injection
+   - Extract shared types
+   - Reorganize model relationships
 
 ### Known Issues
 
-1. Validator initialization timing could be improved
-2. Some error messages could be more specific
-3. Need more extensive validation for metadata
+1. Linter error in batch processing test (unused 'results' variable)
+2. Some circular dependencies in service layer
+3. Incomplete metrics storage integration
+4. Missing health check implementation
 
 ### Failed Approaches
 
-- Early validator initialization (caused dependency issues)
-- Static validation rules (too inflexible)
-- Global validation registry (complicated testing)
+1. Attempted synchronous service initialization
+2. Tried global resource management
+3. Experimented with shared state management
 
 ## Developer Notes
 
 ### Codebase Insights
 
-- Validation is hierarchical: core → service → implementation
-- Error handling follows similar pattern to validation
-- Settings influence validation behavior
-- Service state affects validation availability
+1. Service initialization is more complex than apparent
+2. Resource management needs careful error handling
+3. Validation composition provides great flexibility
+4. Metrics collection is very lightweight
 
 ### Temporary Solutions
 
-- Basic metadata validation (needs enhancement)
-- Simple device validation (could be more sophisticated)
-- Default validation parameters (should be configurable)
+1. Using in-memory metrics storage
+2. Basic resource limit checks
+3. Simple validation strategies
 
 ### Areas Needing Attention
 
-1. **Validation Testing**
+1. Error handling in concurrent operations
+2. Resource cleanup in failure cases
+3. Validation strategy composition
+4. Service state recovery
 
-   - Edge cases
-   - Performance impact
-   - Error scenarios
+### Best Practices
 
-2. **Documentation**
+1. Always use async/await for service operations
+2. Implement proper resource cleanup
+3. Add comprehensive metrics
+4. Test edge cases thoroughly
+5. Document all assumptions
 
-   - Validation patterns
-   - Configuration options
-   - Error handling
+### Testing Requirements
 
-3. **Error Handling**
-
-   - More specific error types
-   - Better error context
-   - Validation error aggregation
-
-4. **Performance**
-   - Batch validation optimization
-   - Validation result caching
-   - Memory usage monitoring
+1. Unit tests for all components
+2. Integration tests for service interactions
+3. Performance benchmarks
+4. State transition verification
+5. Resource management verification

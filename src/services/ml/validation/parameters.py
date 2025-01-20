@@ -1,54 +1,62 @@
-"""Parameter definitions for ML services.
+"""Parameter types for ML service validation.
 
-This module provides parameter classes for configuring ML services and validation.
+This module defines parameter types used across ML services.
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import List
+
+
+@dataclass
+class BaseParameters:
+    """Base parameters for all ML services."""
+
+    min_text_length: int = 1
+    max_text_length: int = 1000000
+    min_words: int = 1
+    required_metadata_fields: List[str] = None
+    optional_metadata_fields: List[str] = None
 
 
 @dataclass
 class ValidationParameters:
-    """Base validation parameters."""
+    """Parameters for validation operations."""
 
-    min_text_length: int = 10
+    min_text_length: int = 1
     max_text_length: int = 1000000
-    min_words: int = 3
-    required_metadata_fields: Optional[set[str]] = None
-    optional_metadata_fields: Optional[set[str]] = None
+    min_words: int = 1
+    required_metadata_fields: List[str] = None
+    optional_metadata_fields: List[str] = None
 
 
 @dataclass
 class BatchValidationParameters:
     """Parameters for batch validation."""
 
-    max_batch_size: int = 1000
-    max_memory_mb: int = 1024
+    max_batch_size: int = 100
+    max_memory_mb: float = 1000.0
 
 
 @dataclass
-class ServiceParameters:
-    """Base parameters for ML services."""
+class ServiceParameters(BaseParameters):
+    """Parameters for ML service configuration."""
 
-    model_name: str
     batch_size: int = 32
-    validation: ValidationParameters = ValidationParameters()
-    batch: BatchValidationParameters = BatchValidationParameters()
+    max_memory_mb: float = 1000.0
+    device: str = "cpu"
 
 
 @dataclass
 class ProcessingParameters(ServiceParameters):
-    """Parameters for text processing service."""
+    """Parameters for text processing services."""
 
-    enable_ner: bool = True
-    enable_sentiment: bool = True
-    enable_topics: bool = True
+    model_name: str = "en_core_web_sm"
+    disable_components: List[str] = None
 
 
 @dataclass
 class EmbeddingParameters(ServiceParameters):
-    """Parameters for embedding service."""
+    """Parameters for embedding services."""
 
-    device: str = "cpu"
+    model_name: str = "all-MiniLM-L6-v2"
     normalize_embeddings: bool = True
-    pooling_strategy: str = "mean"

@@ -3,11 +3,12 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-from src.core import BaseService, ServiceStateError
 from src.core.models.documents import DocumentStatus, ProcessingStep
+from src.core.types.processing import ProcessingStateError
+from src.core.types.service import ServiceState
+from src.services.base import BaseService
 
-from .models import ProcessingStrategy, ServiceNotInitializedError, ServiceState
-
+from .models import ProcessingStrategy, ServiceNotInitializedError
 
 if TYPE_CHECKING:
     from src.core.settings import Settings
@@ -65,14 +66,16 @@ class BaseProcessor(BaseService, Generic[StrategyResult], ABC):
 
         Raises:
             ValueError: If strategy is None
-            ServiceStateError: If processor is not in CREATED state
+            ProcessingStateError: If processor is not in CREATED state
         """
         if strategy is None:
             raise ValueError("Strategy cannot be None")
 
         if self._state != ServiceState.CREATED:
-            raise ServiceStateError(
-                f"Cannot add strategy in {self._state} state",
+            raise ProcessingStateError(
+                message=f"Cannot add strategy in {self._state} state",
+                current_state=self._state,
+                expected_states={ServiceState.CREATED},
                 service_name=self.__class__.__name__,
             )
 
@@ -85,7 +88,7 @@ class BaseProcessor(BaseService, Generic[StrategyResult], ABC):
             new_state: State to transition to
 
         Raises:
-            ServiceStateError: If transition is invalid
+            ProcessingStateError: If transition is invalid
         """
         valid_transitions = {
             ServiceState.CREATED: {ServiceState.INITIALIZING, ServiceState.ERROR},
@@ -97,8 +100,10 @@ class BaseProcessor(BaseService, Generic[StrategyResult], ABC):
         }
 
         if new_state not in valid_transitions.get(self._state, set()):
-            raise ServiceStateError(
-                f"Invalid state transition from {self._state} to {new_state}",
+            raise ProcessingStateError(
+                message=f"Invalid state transition from {self._state} to {new_state}",
+                current_state=self._state,
+                expected_states=valid_transitions[self._state],
                 service_name=self.__class__.__name__,
             )
 
@@ -109,7 +114,7 @@ class BaseProcessor(BaseService, Generic[StrategyResult], ABC):
 
         Raises:
             ServiceNotInitializedError: If processor is not initialized
-            ServiceStateError: If processor is in an invalid state
+            ProcessingStateError: If processor is in an invalid state
         """
         if self._state != ServiceState.RUNNING:
             if self._state == ServiceState.CREATED:
@@ -119,8 +124,11 @@ class BaseProcessor(BaseService, Generic[StrategyResult], ABC):
                     current_state=self._state.value,
                     required_state=ServiceState.RUNNING.value,
                 )
-            raise ServiceStateError(
-                f"Processor in invalid state: {self._state.value}. Required state: {ServiceState.RUNNING.value}"
+            raise ProcessingStateError(
+                message=f"Processor in invalid state: {self._state.value}. Required state: {ServiceState.RUNNING.value}",
+                current_state=self._state,
+                expected_states={ServiceState.RUNNING},
+                service_name=self.__class__.__name__,
             )
 
     @abstractmethod

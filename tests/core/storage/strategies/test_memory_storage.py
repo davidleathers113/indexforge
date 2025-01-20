@@ -1,14 +1,14 @@
 """Tests for memory storage strategy."""
 
-from datetime import UTC, datetime
 import threading
+from datetime import UTC, datetime
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
 import pytest
+from pydantic import BaseModel, Field
 
-from src.core.storage.strategies.base import DataCorruptionError, DataNotFoundError, StorageError
 from src.core.storage.strategies.memory_storage import MemoryStorage
+from src.core.types.storage import DataCorruptionError, DataNotFoundError, StorageError
 
 
 class TestModel(BaseModel):

@@ -5,9 +5,11 @@ using transformer models.
 """
 
 from .factory import EmbeddingGeneratorFactory
+from .generator import EmbeddingGenerator
 from .service import EmbeddingService
 
 __all__ = [
     "EmbeddingService",
     "EmbeddingGeneratorFactory",
+    "EmbeddingGenerator",
 ]

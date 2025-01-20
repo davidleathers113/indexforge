@@ -1,10 +1,13 @@
-"""Base service definitions for external integrations."""
+"""Base service module.
+
+This module provides base service functionality and exports common service types.
+"""
 
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any
 
-from src.core.errors import (
+from src.core.types.service import (
     ServiceError,
     ServiceInitializationError,
     ServiceNotInitializedError,

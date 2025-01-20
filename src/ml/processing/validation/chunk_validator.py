@@ -1,6 +1,6 @@
 """Validation utilities for processing chunks."""
 
-
+from src.core.types.processing import ChunkValidator as ChunkValidatorProtocol
 from src.ml.processing.models.chunks import Chunk
 from src.ml.processing.validation.validators import (
     BatchValidator,
@@ -11,7 +11,7 @@ from src.ml.processing.validation.validators import (
 )
 
 
-class ChunkValidator:
+class ChunkValidator(ChunkValidatorProtocol):
     """Validates chunks before processing.
 
     This class provides validation utilities for ensuring chunks
@@ -52,12 +52,11 @@ class ChunkValidator:
             .build()
         )
 
-    def validate(self, chunk: Chunk, metadata: dict | None = None) -> list[str]:
+    def validate_chunk(self, chunk: Chunk) -> list[str]:
         """Validate a chunk before processing.
 
         Args:
             chunk: Chunk to validate
-            metadata: Optional metadata to include in validation context
 
         Returns:
             List of validation error messages, empty if valid
@@ -68,38 +67,31 @@ class ChunkValidator:
         if not isinstance(chunk, Chunk):
             raise TypeError("Input must be a Chunk instance")
 
-        return self._validator.validate(chunk, metadata)
+        return self._validator.validate(chunk, None)
 
-    def validate_batch(
-        self, chunks: list[Chunk], metadata: dict | None = None
-    ) -> list[tuple[int, list[str]]]:
+    def validate_chunks(self, chunks: list[Chunk]) -> list[str]:
         """Validate a batch of chunks.
 
         Args:
             chunks: List of chunks to validate
-            metadata: Optional metadata to include in validation context
 
         Returns:
-            List of tuples containing (chunk_index, error_messages)
+            List of validation error messages, empty if all valid
 
         Raises:
             TypeError: If chunks is not a list or contains invalid types
-            ValidationError: If batch size exceeds maximum
+            ValueError: If batch size exceeds maximum
         """
         if not isinstance(chunks, list):
             raise TypeError("Input must be a list of Chunk instances")
 
-        validation_results = []
+        all_errors = []
         for i, chunk in enumerate(chunks):
             try:
-                # Add batch context to metadata
-                batch_metadata = metadata.copy() if metadata else {}
-                batch_metadata["batch"] = chunks
-
-                errors = self.validate(chunk, batch_metadata)
+                errors = self.validate_chunk(chunk)
                 if errors:
-                    validation_results.append((i, errors))
+                    all_errors.extend([f"Chunk {i}: {error}" for error in errors])
             except TypeError as e:
-                validation_results.append((i, [str(e)]))
+                all_errors.append(f"Chunk {i}: {str(e)}")
 
-        return validation_results
+        return all_errors

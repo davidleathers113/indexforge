@@ -7,314 +7,103 @@ This module provides encryption functionality including:
 - Encrypted data persistence
 """
 
-import base64
-from datetime import datetime, timedelta
-from enum import Enum
 import os
-from uuid import UUID, uuid4
+from typing import Optional
+from uuid import uuid4
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import aead
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from pydantic import BaseModel, SecretStr
 
-from src.core.errors import SecurityError
-from src.core.security.key_storage import FileKeyStorage, KeyStorageConfig
+from src.core.types.security import (
+    DEFAULT_KEY_EXPIRY_DAYS,
+    MINIMUM_KEY_LENGTH,
+    EncryptionError,
+    KeyNotFoundError,
+    KeyRotationError,
+)
 
-
-class EncryptionError(SecurityError):
-    """Base class for encryption errors."""
-
-
-class KeyGenerationError(EncryptionError):
-    """Raised when key generation fails."""
-
-    def __init__(self, message: str = "Failed to generate encryption key"):
-        super().__init__(message)
-
-
-class EncryptionKeyNotFoundError(EncryptionError):
-    """Raised when encryption key is not found."""
-
-    def __init__(self, message: str = "Encryption key not found"):
-        super().__init__(message)
-
-
-class DecryptionError(EncryptionError):
-    """Raised when decryption fails."""
-
-    def __init__(self, message: str = "Failed to decrypt data"):
-        super().__init__(message)
-
-
-class KeyStatus(str, Enum):
-    """Status of encryption keys."""
-
-    ACTIVE = "active"  # Currently used for encryption
-    ENABLED = "enabled"  # Can be used for decryption
-    DISABLED = "disabled"  # Cannot be used, pending deletion
-    DELETED = "deleted"  # Marked for secure deletion
-
-
-class EncryptionKey(BaseModel):
-    """Encryption key with metadata."""
-
-    id: UUID
-    key_data: SecretStr
-    created_at: datetime
-    expires_at: datetime | None
-    status: KeyStatus = KeyStatus.ACTIVE
-    version: int
-    key_type: str = "AES256-GCM"
-
-
-class EncryptedData(BaseModel):
-    """Container for encrypted data."""
-
-    key_id: UUID
-    nonce: bytes
-    ciphertext: bytes
-    tag: bytes
-    version: int
-    created_at: datetime
+from .interfaces import EncryptionProtocol, KeyStorageProtocol, SecurityServiceBase
 
 
 class EncryptionConfig(BaseModel):
     """Configuration for encryption service."""
 
     master_key: SecretStr
-    key_rotation_days: int = 30
-    min_key_retention_days: int = 90
+    key_rotation_days: int = DEFAULT_KEY_EXPIRY_DAYS
     pbkdf2_iterations: int = 100000
-    storage: KeyStorageConfig | None = None
 
 
-class EncryptionManager:
-    """Manages encryption operations and key lifecycle."""
+class EncryptionService(SecurityServiceBase, EncryptionProtocol):
+    """Implementation of the encryption service."""
 
-    def __init__(self, config: EncryptionConfig):
-        """Initialize encryption manager.
-
-        Args:
-            config: Encryption configuration
-        """
+    def __init__(self, config: EncryptionConfig, key_storage: KeyStorageProtocol):
+        """Initialize the encryption service."""
+        super().__init__(key_storage)
         self.config = config
-        self._keys: dict[UUID, EncryptionKey] = {}
-        self._active_key: UUID | None = None
-        self._key_version = 0
-        self._storage: FileKeyStorage | None = None
+        self._master_key = self._derive_key(
+            config.master_key.get_secret_value().encode(), os.urandom(16)
+        )
 
-        # Initialize storage if configured
-        if self.config.storage:
-            self._storage = FileKeyStorage(self.config.storage)
+    def _derive_key(self, master_key: bytes, salt: bytes) -> bytes:
+        """Derive an encryption key from the master key."""
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=self.config.pbkdf2_iterations,
+        )
+        return kdf.derive(master_key)
 
-    async def _init_storage(self) -> None:
-        """Initialize key storage and load existing keys."""
-        if not self._storage:
-            return
-
-        # Load existing keys
-        stored_keys = await self._storage.load_keys()
-        self._keys.update(stored_keys)
-
-        # Find active key and highest version
-        for key in stored_keys.values():
-            if key.status == KeyStatus.ACTIVE:
-                self._active_key = key.id
-            self._key_version = max(self._key_version, key.version)
-
-    def _derive_key(self, master_key: str, salt: bytes) -> bytes:
-        """Derive encryption key from master key.
-
-        Args:
-            master_key: Master key to derive from
-            salt: Salt for key derivation
-
-        Returns:
-            Derived key bytes
-
-        Raises:
-            KeyGenerationError: If key derivation fails
-        """
+    async def encrypt(self, data: bytes, key_id: Optional[str] = None) -> tuple[bytes, str]:
+        """Encrypt data using the specified or a new key."""
         try:
-            kdf = PBKDF2HMAC(
-                algorithm=hashes.SHA256(),
-                length=32,  # 256 bits for AES-256
-                salt=salt,
-                iterations=self.config.pbkdf2_iterations,
-            )
-            return kdf.derive(master_key.encode())
+            if key_id is None:
+                key_data = os.urandom(MINIMUM_KEY_LENGTH)
+                key_id = str(uuid4())
+                await self.key_storage.store_key(key_id, key_data)
+            else:
+                key_data = await self.key_storage.retrieve_key(key_id)
+
+            cipher = aead.AESGCM(key_data)
+            nonce = os.urandom(12)
+            encrypted = cipher.encrypt(nonce, data, None)
+            return encrypted, key_id
         except Exception as e:
-            raise KeyGenerationError(f"Key derivation failed: {e!s}")
+            raise EncryptionError(
+                message=f"Encryption failed: {str(e)}",
+                operation="encrypt",
+                reason=str(e),
+            ) from e
 
-    async def create_key(self) -> EncryptionKey:
-        """Create new encryption key.
-
-        Returns:
-            Created encryption key
-
-        Raises:
-            KeyGenerationError: If key generation fails
-        """
+    async def decrypt(self, encrypted_data: bytes, key_id: str) -> bytes:
+        """Decrypt data using the specified key."""
         try:
-            # Generate salt and derive key
-            salt = os.urandom(16)
-            key_bytes = self._derive_key(
-                self.config.master_key.get_secret_value(),
-                salt,
-            )
-
-            # Create key with metadata
-            self._key_version += 1
-            key = EncryptionKey(
-                id=uuid4(),
-                key_data=SecretStr(base64.b64encode(key_bytes).decode()),
-                created_at=datetime.utcnow(),
-                expires_at=datetime.utcnow() + timedelta(days=self.config.key_rotation_days),
-                version=self._key_version,
-            )
-
-            # Store key in memory
-            self._keys[key.id] = key
-            self._active_key = key.id
-
-            # Store key persistently if storage configured
-            if self._storage:
-                await self._storage.store_key(key)
-
-            return key
+            key_data = await self.key_storage.retrieve_key(key_id)
+            cipher = aead.AESGCM(key_data)
+            nonce = encrypted_data[:12]
+            ciphertext = encrypted_data[12:]
+            return cipher.decrypt(nonce, ciphertext, None)
+        except KeyNotFoundError:
+            raise KeyNotFoundError(key_id=key_id)
         except Exception as e:
-            raise KeyGenerationError(f"Failed to create key: {e!s}")
+            raise EncryptionError(
+                message=f"Decryption failed: {str(e)}",
+                operation="decrypt",
+                reason=str(e),
+            ) from e
 
-    async def rotate_keys(self) -> None:
-        """Rotate encryption keys.
-
-        Creates new active key and updates status of old keys.
-        """
-        # Create new active key
-        new_key = await self.create_key()
-
-        # Update status of old keys
-        now = datetime.utcnow()
-        retention_limit = now - timedelta(days=self.config.min_key_retention_days)
-
-        for key in self._keys.values():
-            if key.id == new_key.id:
-                continue
-
-            old_status = key.status
-            if key.status == KeyStatus.ACTIVE:
-                key.status = KeyStatus.ENABLED
-            elif key.status == KeyStatus.ENABLED and key.created_at < retention_limit:
-                key.status = KeyStatus.DISABLED
-            elif key.status == KeyStatus.DISABLED and key.created_at < retention_limit:
-                key.status = KeyStatus.DELETED
-
-            # Update key status in storage if changed
-            if self._storage and old_status != key.status:
-                await self._storage.update_key_status(key.id, key.status)
-
-            # Delete key if marked for deletion
-            if key.status == KeyStatus.DELETED and self._storage:
-                await self._storage.delete_key(key.id)
-                del self._keys[key.id]
-
-    async def get_key(self, key_id: UUID) -> EncryptionKey:
-        """Get encryption key by ID.
-
-        Args:
-            key_id: ID of key to get
-
-        Returns:
-            Encryption key
-
-        Raises:
-            EncryptionKeyNotFoundError: If key not found
-        """
-        key = self._keys.get(key_id)
-        if not key or key.status == KeyStatus.DELETED:
-            raise EncryptionKeyNotFoundError(f"Key {key_id} not found or deleted")
-        return key
-
-    async def encrypt(self, data: bytes) -> EncryptedData:
-        """Encrypt data using active key.
-
-        Args:
-            data: Data to encrypt
-
-        Returns:
-            Encrypted data container
-
-        Raises:
-            EncryptionError: If encryption fails
-        """
-        if not self._active_key:
-            await self.create_key()
-
+    async def rotate_encryption(
+        self, data: bytes, old_key_id: str, new_key_id: str
+    ) -> tuple[bytes, str]:
+        """Re-encrypt data using a new key."""
         try:
-            key = await self.get_key(self._active_key)
-            key_bytes = base64.b64decode(key.key_data.get_secret_value())
-
-            # Generate nonce
-            nonce = os.urandom(12)  # 96 bits for GCM
-
-            # Create cipher
-            cipher = aead.AESGCM(key_bytes)
-
-            # Encrypt data
-            ciphertext = cipher.encrypt(
-                nonce,
-                data,
-                None,  # No associated data
-            )
-
-            # Split ciphertext and tag
-            tag = ciphertext[-16:]  # Last 16 bytes
-            ciphertext = ciphertext[:-16]  # Everything except last 16 bytes
-
-            return EncryptedData(
-                key_id=key.id,
-                nonce=nonce,
-                ciphertext=ciphertext,
-                tag=tag,
-                version=key.version,
-                created_at=datetime.utcnow(),
-            )
+            decrypted = await self.decrypt(data, old_key_id)
+            return await self.encrypt(decrypted, new_key_id)
         except Exception as e:
-            raise EncryptionError(f"Encryption failed: {e!s}")
-
-    async def decrypt(self, encrypted_data: EncryptedData) -> bytes:
-        """Decrypt encrypted data.
-
-        Args:
-            encrypted_data: Encrypted data container
-
-        Returns:
-            Decrypted data
-
-        Raises:
-            DecryptionError: If decryption fails
-        """
-        try:
-            key = await self.get_key(encrypted_data.key_id)
-            if key.status == KeyStatus.DISABLED:
-                raise DecryptionError("Key is disabled")
-
-            key_bytes = base64.b64decode(key.key_data.get_secret_value())
-
-            # Create cipher
-            cipher = aead.AESGCM(key_bytes)
-
-            # Combine ciphertext and tag
-            ciphertext_with_tag = encrypted_data.ciphertext + encrypted_data.tag
-
-            # Decrypt data
-            return cipher.decrypt(
-                encrypted_data.nonce,
-                ciphertext_with_tag,
-                None,  # No associated data
-            )
-        except EncryptionKeyNotFoundError:
-            raise DecryptionError("Decryption key not found")
-        except Exception as e:
-            raise DecryptionError(f"Decryption failed: {e!s}")
+            raise KeyRotationError(
+                message=f"Key rotation failed: {str(e)}",
+                key_id=old_key_id,
+                reason=str(e),
+            ) from e

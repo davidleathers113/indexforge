@@ -1,4 +1,4 @@
-"""Tests for document operations service."""
+"""Tests for document operations."""
 
 from datetime import datetime
 from uuid import uuid4
@@ -6,13 +6,14 @@ from uuid import uuid4
 import pytest
 from pytest_mock import MockerFixture
 
-from src.core.base import ServiceState
-from src.core.document.models import Document, DocumentMetadata
 from src.core.document.operations import (
     DocumentNotFoundError,
+    DocumentOperations,
     DocumentOperationsService,
     ServiceStateError,
 )
+from src.core.models import Document, DocumentStatus, DocumentType
+from src.core.types.service import ServiceState
 
 
 @pytest.fixture

@@ -1,12 +1,13 @@
 """Unit tests for key storage functionality."""
 
+import os
+import uuid
 from datetime import datetime
-from uuid import uuid4
 
-from pydantic import SecretStr
 import pytest
+from pydantic import SecretStr
 
-from src.core.security.encryption import EncryptionKey, KeyStatus
+from src.core.security.common import MINIMUM_KEY_LENGTH
 from src.core.security.key_storage import FileKeyStorage, KeyStorageConfig, KeyStorageError
 
 
@@ -35,16 +36,15 @@ def key_storage(storage_config):
 
 
 @pytest.fixture
-def test_key():
-    """Create test encryption key."""
-    return EncryptionKey(
-        id=uuid4(),
-        key_data=SecretStr("test-key-data"),
-        created_at=datetime.utcnow(),
-        expires_at=None,
-        status=KeyStatus.ACTIVE,
-        version=1,
-    )
+def test_key_data():
+    """Create test key data."""
+    return os.urandom(MINIMUM_KEY_LENGTH)
+
+
+@pytest.fixture
+def test_key_id():
+    """Create test key ID."""
+    return str(uuid.uuid4())
 
 
 @pytest.mark.asyncio
@@ -62,34 +62,30 @@ async def test_directory_creation(storage_config, temp_dir):
 
 
 @pytest.mark.asyncio
-async def test_key_storage_and_retrieval(key_storage, test_key):
+async def test_key_storage_and_retrieval(key_storage, test_key_data, test_key_id):
     """Test storing and retrieving keys."""
     # Store key
-    await key_storage.store_key(test_key)
+    await key_storage.store_key(test_key_id, test_key_data)
 
-    # Load keys
-    keys = await key_storage.load_keys()
-    assert test_key.id in keys
-
-    loaded_key = keys[test_key.id]
-    assert loaded_key.id == test_key.id
-    assert loaded_key.key_data == test_key.key_data
-    assert loaded_key.status == test_key.status
-    assert loaded_key.version == test_key.version
+    # Retrieve key
+    retrieved_key_data = await key_storage.retrieve_key(test_key_id)
+    assert retrieved_key_data == test_key_data
 
 
 @pytest.mark.asyncio
-async def test_key_backup(key_storage, test_key):
+async def test_key_backup(key_storage, test_key_id):
     """Test key backup functionality."""
-    # Store key multiple times
-    await key_storage.store_key(test_key)
-    test_key.version = 2
-    await key_storage.store_key(test_key)
-    test_key.version = 3
-    await key_storage.store_key(test_key)
+    # Store key multiple times with different data
+    key_data_1 = os.urandom(MINIMUM_KEY_LENGTH)
+    key_data_2 = os.urandom(MINIMUM_KEY_LENGTH)
+    key_data_3 = os.urandom(MINIMUM_KEY_LENGTH)
+
+    await key_storage.store_key(test_key_id, key_data_1)
+    await key_storage.store_key(test_key_id, key_data_2)
+    await key_storage.store_key(test_key_id, key_data_3)
 
     # Check backup files
-    backup_files = list(key_storage.config.backup_dir.glob(f"{test_key.id}_*.key"))
+    backup_files = list(key_storage.config.backup_dir.glob(f"{test_key_id}_*.key"))
     assert len(backup_files) == key_storage.config.max_backup_count
 
     # Verify oldest backup was removed (max_backup_count = 2)
@@ -101,51 +97,57 @@ async def test_key_backup(key_storage, test_key):
 
 
 @pytest.mark.asyncio
-async def test_key_status_update(key_storage, test_key):
-    """Test updating key status."""
-    # Store key
-    await key_storage.store_key(test_key)
+async def test_key_rotation(key_storage, test_key_id, test_key_data):
+    """Test key rotation functionality."""
+    # Store initial key
+    await key_storage.store_key(test_key_id, test_key_data)
 
-    # Update status
-    new_status = KeyStatus.DISABLED
-    await key_storage.update_key_status(test_key.id, new_status)
+    # Rotate key
+    new_key_data = await key_storage.rotate_key(test_key_id)
 
-    # Verify status was updated
-    keys = await key_storage.load_keys()
-    assert keys[test_key.id].status == new_status
+    # Verify new key is different
+    assert new_key_data != test_key_data
+    assert len(new_key_data) >= MINIMUM_KEY_LENGTH
+
+    # Verify retrieved key matches new key
+    retrieved_key_data = await key_storage.retrieve_key(test_key_id)
+    assert retrieved_key_data == new_key_data
+
+    # Verify backup was created
+    backup_files = list(key_storage.config.backup_dir.glob(f"{test_key_id}_*.key"))
+    assert len(backup_files) == 1
 
 
 @pytest.mark.asyncio
-async def test_key_deletion(key_storage, test_key):
+async def test_key_deletion(key_storage, test_key_id, test_key_data):
     """Test secure key deletion."""
     # Store key
-    await key_storage.store_key(test_key)
+    await key_storage.store_key(test_key_id, test_key_data)
 
-    # Create backup
-    test_key.version = 2
-    await key_storage.store_key(test_key)
+    # Create backup by storing again
+    await key_storage.store_key(test_key_id, os.urandom(MINIMUM_KEY_LENGTH))
 
     # Delete key
-    await key_storage.delete_key(test_key.id)
+    await key_storage.delete_key(test_key_id)
 
     # Verify key file is deleted
-    key_path = key_storage._get_key_path(test_key.id)
+    key_path = key_storage._get_key_path(test_key_id)
     assert not key_path.exists()
 
     # Verify backup files are deleted
-    backup_files = list(key_storage.config.backup_dir.glob(f"{test_key.id}_*.key"))
+    backup_files = list(key_storage.config.backup_dir.glob(f"{test_key_id}_*.key"))
     assert len(backup_files) == 0
 
 
 @pytest.mark.asyncio
-async def test_atomic_writes(storage_config, test_key):
+async def test_atomic_writes(storage_config, test_key_id, test_key_data):
     """Test atomic write functionality."""
     # Enable atomic writes
     storage_config.enable_atomic_writes = True
     storage = FileKeyStorage(storage_config)
 
     # Store key
-    await storage.store_key(test_key)
+    await storage.store_key(test_key_id, test_key_data)
 
     # Verify no temporary files remain
     temp_files = list(storage_config.storage_dir.glob("*.tmp"))
@@ -153,28 +155,37 @@ async def test_atomic_writes(storage_config, test_key):
 
 
 @pytest.mark.asyncio
-async def test_error_handling(key_storage):
+async def test_error_handling(key_storage, test_key_id):
     """Test error handling."""
-    # Test updating non-existent key
+    # Test retrieving non-existent key
     with pytest.raises(KeyStorageError, match="Key .* not found"):
-        await key_storage.update_key_status(uuid4(), KeyStatus.DISABLED)
+        await key_storage.retrieve_key(test_key_id)
 
     # Test deleting non-existent key
     with pytest.raises(KeyStorageError, match="Key .* not found"):
-        await key_storage.delete_key(uuid4())
+        await key_storage.delete_key(test_key_id)
+
+    # Test storing invalid key data
+    with pytest.raises(
+        KeyStorageError, match=f"Key data must be at least {MINIMUM_KEY_LENGTH} bytes"
+    ):
+        await key_storage.store_key(test_key_id, b"too short")
 
 
 @pytest.mark.asyncio
-async def test_key_loading_with_invalid_files(key_storage, test_key):
-    """Test loading keys with invalid files present."""
-    # Store valid key
-    await key_storage.store_key(test_key)
+async def test_key_storage_encryption(key_storage, test_key_id, test_key_data):
+    """Test that stored keys are properly encrypted."""
+    # Store key
+    await key_storage.store_key(test_key_id, test_key_data)
 
-    # Create invalid key file
-    invalid_path = key_storage.config.storage_dir / "invalid.key"
-    invalid_path.write_bytes(b"invalid data")
+    # Read raw file contents
+    key_path = key_storage._get_key_path(test_key_id)
+    encrypted_data = key_path.read_bytes()
 
-    # Should load valid key and skip invalid
-    keys = await key_storage.load_keys()
-    assert len(keys) == 1
-    assert test_key.id in keys
+    # Verify data is encrypted (not matching original)
+    assert encrypted_data != test_key_data
+    assert len(encrypted_data) > len(test_key_data)  # Encrypted data should be longer due to IV/tag
+
+    # Verify we can still retrieve and decrypt
+    retrieved_data = await key_storage.retrieve_key(test_key_id)
+    assert retrieved_data == test_key_data

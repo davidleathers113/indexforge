@@ -12,7 +12,7 @@ Key Features:
 
 from __future__ import annotations
 
-from src.core.storage.strategies.base import StorageError
+from src.core.types.storage import StorageError
 
 
 class MemoryStorageError(StorageError):

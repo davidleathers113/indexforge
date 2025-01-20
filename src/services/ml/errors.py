@@ -1,12 +1,11 @@
 """ML service error types.
 
-This module provides a consolidated set of error types for ML services,
-ensuring consistent error handling and reporting across implementations.
+This module defines error types specific to ML service operations.
 """
 
 from typing import Any, Optional
 
-from src.core.errors import ServiceError
+from src.core.types.service import ServiceError
 
 
 class MLServiceError(ServiceError):
@@ -52,7 +51,7 @@ class ModelLoadError(MLServiceError):
             "model_path": model_path,
             "cause": str(cause) if cause else None,
         }
-        super().__init__(message, service_name, details)
+        super().__init__(message=message, service_name=service_name, details=details)
         self.__cause__ = cause
 
 
@@ -73,7 +72,7 @@ class InvalidParametersError(MLServiceError):
             parameter_errors: Dict mapping parameter names to error messages
         """
         details = {"parameter_errors": parameter_errors or {}}
-        super().__init__(message, service_name, details)
+        super().__init__(message=message, service_name=service_name, details=details)
 
 
 class ProcessingError(MLServiceError):
@@ -98,7 +97,7 @@ class ProcessingError(MLServiceError):
             "input_details": input_details or {},
             "cause": str(cause) if cause else None,
         }
-        super().__init__(message, service_name, details)
+        super().__init__(message=message, service_name=service_name, details=details)
         self.__cause__ = cause
 
 
@@ -124,4 +123,35 @@ class ResourceExhaustedError(MLServiceError):
             "resource_limits": resource_limits or {},
             "current_usage": current_usage or {},
         }
-        super().__init__(message, service_name, details)
+        super().__init__(message=message, service_name=service_name, details=details)
+
+
+class ServiceNotInitializedError(MLServiceError):
+    """Raised when attempting to use an uninitialized service."""
+
+
+class ResourceError(MLServiceError):
+    """Raised when resource constraints are violated."""
+
+
+class ValidationError(MLServiceError):
+    """Raised when validation fails."""
+
+
+class CompositeValidationError(ValidationError):
+    """Raised when multiple validations fail."""
+
+    def __init__(self, errors: list[ValidationError]):
+        """Initialize with multiple validation errors.
+
+        Args:
+            errors: List of validation errors
+        """
+        super().__init__("Multiple validation errors occurred")
+        self.errors = errors
+
+
+class InstrumentationError(MLServiceError):
+    """Error raised when performance instrumentation fails."""
+
+    pass

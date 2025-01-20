@@ -4,13 +4,13 @@ This package provides concrete implementations of the core storage interfaces
 for document, chunk, and reference storage operations.
 """
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from src.core.errors import ServiceInitializationError
-from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
+from src.core.interfaces.metrics import MetricsProvider
+from src.core.types.storage import StorageMetrics
 
 from .base import BaseStorageService, BatchConfig
-
 
 if TYPE_CHECKING:
     from src.core.interfaces.storage import ChunkStorage, DocumentStorage, ReferenceStorage

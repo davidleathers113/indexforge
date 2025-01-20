@@ -7,21 +7,16 @@ This module provides secure storage functionality for encryption keys including:
 - Key backup and recovery
 """
 
-from datetime import datetime
 import os
+from datetime import datetime
 from pathlib import Path
-from typing import Protocol
-from uuid import UUID
 
 from cryptography.fernet import Fernet
 from pydantic import BaseModel, SecretStr
 
-from src.core.errors import SecurityError
-from src.core.security.encryption import EncryptionKey, KeyStatus
+from src.core.types.security import MINIMUM_KEY_LENGTH, SecurityError
 
-
-class KeyStorageError(SecurityError):
-    """Base class for key storage errors."""
+from .interfaces import KeyStorageProtocol
 
 
 class KeyStorageConfig(BaseModel):
@@ -34,27 +29,7 @@ class KeyStorageConfig(BaseModel):
     enable_atomic_writes: bool = True
 
 
-class KeyStorageProtocol(Protocol):
-    """Protocol defining key storage interface."""
-
-    async def store_key(self, key: EncryptionKey) -> None:
-        """Store encryption key securely."""
-        ...
-
-    async def load_keys(self) -> dict[UUID, EncryptionKey]:
-        """Load all stored encryption keys."""
-        ...
-
-    async def update_key_status(self, key_id: UUID, status: KeyStatus) -> None:
-        """Update status of stored key."""
-        ...
-
-    async def delete_key(self, key_id: UUID) -> None:
-        """Securely delete key from storage."""
-        ...
-
-
-class FileKeyStorage:
+class FileKeyStorage(KeyStorageProtocol):
     """File-based secure key storage implementation."""
 
     def __init__(self, config: KeyStorageConfig):
@@ -73,28 +48,25 @@ class FileKeyStorage:
         if self.config.backup_dir:
             self.config.backup_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
 
-    def _get_key_path(self, key_id: UUID) -> Path:
+    def _get_key_path(self, key_id: str) -> Path:
         """Get path for key file."""
         return self.config.storage_dir / f"{key_id}.key"
 
-    def _get_backup_path(self, key_id: UUID, timestamp: datetime) -> Path:
+    def _get_backup_path(self, key_id: str, timestamp: datetime) -> Path:
         """Get path for key backup file."""
         if not self.config.backup_dir:
-            raise KeyStorageError("Backup directory not configured")
+            raise SecurityError("Backup directory not configured")
         return self.config.backup_dir / f"{key_id}_{timestamp.isoformat()}.key"
 
-    async def _write_key_file(self, path: Path, key: EncryptionKey) -> None:
+    async def _write_key_file(self, path: Path, key_data: bytes) -> None:
         """Write key to file securely.
 
         Args:
             path: Path to write key to
-            key: Key to write
+            key_data: Key data to write
         """
-        # Serialize key data
-        key_data = key.json()
-
-        # Encrypt serialized data
-        encrypted_data = self._fernet.encrypt(key_data.encode())
+        # Encrypt key data
+        encrypted_data = self._fernet.encrypt(key_data)
 
         if self.config.enable_atomic_writes:
             # Write to temporary file first
@@ -106,91 +78,77 @@ class FileKeyStorage:
             # Direct write
             path.write_bytes(encrypted_data)
 
-    async def _read_key_file(self, path: Path) -> EncryptionKey:
+    async def _read_key_file(self, path: Path) -> bytes:
         """Read key from file securely.
 
         Args:
             path: Path to read key from
 
         Returns:
-            Decrypted encryption key
+            Decrypted key data
         """
         # Read encrypted data
         encrypted_data = path.read_bytes()
 
         # Decrypt data
-        key_data = self._fernet.decrypt(encrypted_data)
+        return self._fernet.decrypt(encrypted_data)
 
-        # Deserialize key
-        return EncryptionKey.parse_raw(key_data)
-
-    async def store_key(self, key: EncryptionKey) -> None:
+    async def store_key(self, key_id: str, key_data: bytes) -> None:
         """Store encryption key securely.
 
         Args:
-            key: Key to store
+            key_id: ID of key to store
+            key_data: Key data to store
         """
-        key_path = self._get_key_path(key.id)
+        if len(key_data) < MINIMUM_KEY_LENGTH:
+            raise SecurityError(f"Key data must be at least {MINIMUM_KEY_LENGTH} bytes")
+
+        key_path = self._get_key_path(key_id)
 
         # Create backup if key exists
         if key_path.exists() and self.config.backup_dir:
-            backup_path = self._get_backup_path(key.id, datetime.utcnow())
-            await self._write_key_file(backup_path, key)
+            backup_path = self._get_backup_path(key_id, datetime.utcnow())
+            await self._write_key_file(backup_path, key_data)
 
             # Remove old backups if exceeding max count
-            backups = sorted(self.config.backup_dir.glob(f"{key.id}_*.key"))
+            backups = sorted(self.config.backup_dir.glob(f"{key_id}_*.key"))
             while len(backups) > self.config.max_backup_count:
                 backups[0].unlink()
                 backups = backups[1:]
 
         # Store key
-        await self._write_key_file(key_path, key)
+        await self._write_key_file(key_path, key_data)
 
-    async def load_keys(self) -> dict[UUID, EncryptionKey]:
-        """Load all stored encryption keys.
-
-        Returns:
-            Dictionary mapping key IDs to encryption keys
-        """
-        keys = {}
-        for key_file in self.config.storage_dir.glob("*.key"):
-            try:
-                key = await self._read_key_file(key_file)
-                keys[key.id] = key
-            except Exception as e:
-                # Log error but continue loading other keys
-                print(f"Error loading key {key_file}: {e}")
-        return keys
-
-    async def update_key_status(self, key_id: UUID, status: KeyStatus) -> None:
-        """Update status of stored key.
+    async def retrieve_key(self, key_id: str) -> bytes:
+        """Retrieve encryption key.
 
         Args:
-            key_id: ID of key to update
-            status: New key status
+            key_id: ID of key to retrieve
+
+        Returns:
+            Key data
+
+        Raises:
+            SecurityError: If key not found
         """
         key_path = self._get_key_path(key_id)
         if not key_path.exists():
-            raise KeyStorageError(f"Key {key_id} not found")
+            raise SecurityError(f"Key {key_id} not found")
 
-        # Read existing key
-        key = await self._read_key_file(key_path)
+        return await self._read_key_file(key_path)
 
-        # Update status
-        key.status = status
-
-        # Store updated key
-        await self.store_key(key)
-
-    async def delete_key(self, key_id: UUID) -> None:
+    async def delete_key(self, key_id: str) -> None:
         """Securely delete key from storage.
 
         Args:
             key_id: ID of key to delete
+
+        Raises:
+            SecurityError: If key not found
         """
         key_path = self._get_key_path(key_id)
         if not key_path.exists():
-            raise KeyStorageError(f"Key {key_id} not found")
+            raise SecurityError(f"Key {key_id} not found")
 
         # Securely overwrite file before deletion
         with open(key_path, "wb") as f:
@@ -206,3 +164,23 @@ class FileKeyStorage:
         if self.config.backup_dir:
             for backup in self.config.backup_dir.glob(f"{key_id}_*.key"):
                 backup.unlink()
+
+    async def rotate_key(self, key_id: str) -> bytes:
+        """Rotate encryption key.
+
+        Args:
+            key_id: ID of key to rotate
+
+        Returns:
+            New key data
+
+        Raises:
+            SecurityError: If key not found
+        """
+        # Generate new key
+        new_key_data = os.urandom(MINIMUM_KEY_LENGTH)
+
+        # Store new key (this will automatically create a backup of the old key)
+        await self.store_key(key_id, new_key_data)
+
+        return new_key_data

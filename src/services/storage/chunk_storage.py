@@ -1,19 +1,19 @@
 """Chunk storage service implementation.
 
-This module provides a concrete implementation of the chunk storage interface
-with support for batch operations, metrics collection, and memory management.
+This module provides the implementation of chunk storage operations,
+including metrics collection and error handling.
 """
 
 from typing import TypeVar
 from uuid import UUID, uuid4
 
-from src.core.interfaces.metrics import MetricsProvider, StorageMetrics
+from src.core.interfaces.metrics import MetricsProvider
 from src.core.interfaces.storage import ChunkStorage
 from src.core.models.chunks import Chunk, ChunkMetadata
 from src.core.settings import Settings
+from src.core.types.storage import StorageMetrics
 
 from .base import BaseStorageService, BatchConfig, BatchResult
-
 
 C = TypeVar("C", bound=Chunk)
 

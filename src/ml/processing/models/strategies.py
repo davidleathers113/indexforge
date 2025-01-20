@@ -1,15 +1,16 @@
 """Strategy model definitions for text processing."""
 
 from dataclasses import dataclass, field
-from typing import Any, Protocol, TypeVar
+from typing import Any, TypeVar
+
+from src.core.types.processing import ProcessingStrategy as ProcessingStrategyProtocol
 
 from .base import ProcessingMetadata
-
 
 T = TypeVar("T")
 
 
-class ProcessingStrategy(Protocol[T]):
+class ProcessingStrategy(ProcessingStrategyProtocol[T]):
     """Protocol defining the interface for processing strategies.
 
     All processing strategies must implement this interface to ensure
